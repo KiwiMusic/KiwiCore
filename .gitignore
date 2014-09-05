@@ -19,3 +19,12 @@
 *.exe
 *.out
 *.app
+
+# XCode & Mac
+xcuserdata/
+xcshareddata/
+*.build/
+*.gcda
+*.mode1V3
+*.pbxuser
+.DS_Store
