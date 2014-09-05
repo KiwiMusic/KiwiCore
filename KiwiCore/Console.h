@@ -56,7 +56,7 @@ namespace Kiwi
          @param object  The object sender.
          @param message The message in the string format.
          */
-        virtual void post(shared_ptr<const Console> console, const shared_ptr<const Object> object, string message) const noexcept{};
+        virtual void post(shared_ptr<const Console> console, const shared_ptr<const Object> object, string message) {};
         
         //! Receive the warning messages.
         /** The function is called by the console when a warning has been post.
@@ -64,7 +64,7 @@ namespace Kiwi
          @param object  The object sender.
          @param message The warning in the string format.
          */
-        virtual void warning(shared_ptr<const Console> console, const shared_ptr<const Object> object, string message) const noexcept{};
+        virtual void warning(shared_ptr<const Console> console, const shared_ptr<const Object> object, string message) {};
         
         //! Receive the error messages.
         /** The function is called by the console when a error has been post.
@@ -72,7 +72,7 @@ namespace Kiwi
          @param object  The object sender.
          @param message The error in the string format.
          */
-        virtual void error(shared_ptr<const Console> console, const shared_ptr<const Object> object, string message) const noexcept{};
+        virtual void error(shared_ptr<const Console> console, const shared_ptr<const Object> object, string message) {};
     };
     
     // ================================================================================ //
