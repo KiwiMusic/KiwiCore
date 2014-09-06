@@ -44,11 +44,11 @@ namespace Kiwi
         double          m_augend;
         double          m_addend;
     public:
-        KIWI_BOX_INIT(Plus, "+");
+        Plus(shared_ptr<Instance> kiwi);
+        ~Plus();
         
-        shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements) const override;
-        
-        shared_ptr<Object> create(shared_ptr<Tag> name, vector<Element>& elements);
+        static shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements);
+    
         static void receiveBang(shared_ptr<Plus> plus);
         static void receiveLong(shared_ptr<Plus> plus, long value);
         static void receiveDouble(shared_ptr<Plus> plus, double value);

@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 PierreGuillot. All rights reserved.
 //
 
-
 #include "../Kiwi.h"
 #include <time.h>
 

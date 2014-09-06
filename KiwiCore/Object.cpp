@@ -140,7 +140,9 @@ namespace Kiwi
     
     void Object::removeMethod(const shared_ptr<Tag> name) noexcept
     {
-        if(name == m_tag_bang)
+        if(name == m_tag_create)
+            m_method_create = {T_NOTHING, nullptr};
+        else if(name == m_tag_bang)
             m_method_bang = nullptr;
         else if(name == m_tag_long)
             m_method_long = nullptr;
@@ -165,6 +167,8 @@ namespace Kiwi
     
     bool Object::hasMethod(const shared_ptr<Tag> name) const
     {
+        if(name == m_tag_create)
+            return m_method_create.m_method != nullptr;
         if(name == m_tag_bang)
             return m_method_bang != nullptr;
         else if(name == m_tag_long)
@@ -193,7 +197,9 @@ namespace Kiwi
     
     Method Object::getMethod(const shared_ptr<Tag> name) const
     {
-        if(name == m_tag_bang)
+        if(name == m_tag_create)
+            return (Method)m_method_create.m_method;
+        else if(name == m_tag_bang)
             return (Method)m_method_bang;
         else if(name == m_tag_long)
             return (Method)m_method_long;
@@ -224,6 +230,8 @@ namespace Kiwi
     int Object::getNumberOfMethods() const noexcept
     {
         int size = 0;
+        if(m_method_create.m_method != nullptr)
+            ++size;
         if(m_method_bang != nullptr)
             ++size;
         if(m_method_long != nullptr)
@@ -241,7 +249,9 @@ namespace Kiwi
     
     Type Object::getMethodType(const shared_ptr<Tag> name) const
     {
-        if(name == m_tag_bang)
+        if(name == m_tag_create)
+            return m_method_create.m_type;
+        else if(name == m_tag_bang)
             return T_NOTHING;
         else if(name == m_tag_long)
             return T_LONG;
@@ -836,20 +846,20 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Object> Object::allocObject(string name) const
+    shared_ptr<Object> Object::createObject(shared_ptr<Tag> name, vector<Element>& elements) const
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
-            return kiwi->allocObject(name);
+            return kiwi->createObject(name, elements);
         else
             return nullptr;
     }
     
-    shared_ptr<Object> Object::createObject(string name) const
+    shared_ptr<Object> Object::createObject(string name, vector<Element>& elements) const
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
-            return kiwi->createObject(name);
+            return kiwi->createObject(name, elements);
         else
             return nullptr;
     }

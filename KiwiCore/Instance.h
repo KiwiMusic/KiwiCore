@@ -55,10 +55,8 @@ namespace Kiwi
         
         void init();
         
-        shared_ptr<Object> allocObject(string name);
-        shared_ptr<Object> allocObject(shared_ptr<Tag> name);
-        shared_ptr<Object> createObject(string name);
-        shared_ptr<Object> createObject(shared_ptr<Tag> name);
+        shared_ptr<Object> createObject(string name, vector<Element>& elements);
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element>& elements);
         shared_ptr<Dico>   createDico();
         
         shared_ptr<Page> createPage(string file = string(""), string directory = string(""));

@@ -35,11 +35,6 @@ namespace Kiwi
         addMethod("write", T_OPAQUE, (Method)dowrite);
     }
     
-    shared_ptr<Object> Dico::create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements) const
-    {
-        return make_shared<Dico>(kiwi);
-    }
-    
     Dico::~Dico()
     {
         clear();

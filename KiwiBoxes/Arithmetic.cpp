@@ -28,103 +28,81 @@ namespace Kiwi
 {
     // ================================================================================ //
     //                                      PLUS                                        //
-    // ================================================================================ //    
-
-    shared_ptr<Object> Plus::create(shared_ptr<Tag> name, vector<Element>& elements)
+    // ================================================================================ //
+    
+    Plus::Plus(shared_ptr<Instance> kiwi) : Box(kiwi, kiwi->createTag("+"))
     {
-        shared_ptr<Plus> plus =  static_pointer_cast<Plus>(allocObject("+"));
-        
-        plus->addMethod("bang",     T_NOTHING,  (Method)receiveBang);
-        plus->addMethod("long",     T_LONG,     (Method)receiveLong);
-        plus->addMethod("double",   T_DOUBLE,   (Method)receiveDouble);
-        
-        plus->m_augend = 0;
-        plus->m_addend = 0;
-        plus->m_double = false;
-        if(elements.size())
-        {
-            plus->m_double = elements[0].isDouble();
-            plus->m_addend = (double)elements[0];
-        }
-        
-        plus->addInlet("bang", "long", "double");
-        plus->addInlet("long", "double");
-        if(plus->m_double)
-            plus->addOutlet("double");
-        else
-            plus->addOutlet("long");
-        
-        plus->setInletAttributes(0, "Augend", InletPolarity::Hot);
-        plus->setInletAttributes(1, "Addend", InletPolarity::Cold);
-        plus->setOutletDescription(0, "Sum");
-        
-        return shared_ptr<Object>(static_pointer_cast<Box>(plus));
+        addMethod("create",   T_ELEMENTS, (Method)create);
+        addMethod("bang",     T_NOTHING,  (Method)receiveBang);
+        addMethod("long",     T_LONG,     (Method)receiveLong);
+        addMethod("double",   T_DOUBLE,   (Method)receiveDouble);
     }
     
-    shared_ptr<Object> Plus::create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, vector<Element>& elements) const
+    Plus::~Plus()
     {
-        shared_ptr<Plus> plus =  static_pointer_cast<Plus>(allocObject("+"));
         
-        plus->addMethod("bang",     T_NOTHING,  (Method)receiveBang);
-        plus->addMethod("long",     T_LONG,     (Method)receiveLong);
-        plus->addMethod("double",   T_DOUBLE,   (Method)receiveDouble);
-        
-        plus->m_augend = 0;
-        plus->m_addend = 0;
-        plus->m_double = false;
-        if(elements.size())
-        {
-            plus->m_double = elements[0].isDouble();
-            plus->m_addend = (double)elements[0];
-        }
-        
-        plus->addInlet("bang", "long", "double");
-        plus->addInlet("long", "double");
-        if(plus->m_double)
-            plus->addOutlet("double");
-        else
-            plus->addOutlet("long");
-        
-        plus->setInletAttributes(0, "Augend", InletPolarity::Hot);
-        plus->setInletAttributes(1, "Addend", InletPolarity::Cold);
-        plus->setOutletDescription(0, "Sum");
-        
-        return shared_ptr<Object>(static_pointer_cast<Box>(plus));
     }
     
-    void Plus::receiveBang(shared_ptr<Plus> plus)
+    shared_ptr<Object> Plus::create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, vector<Element>& elements)
+    {
+        shared_ptr<Plus> x =  make_shared<Plus>(kiwi);
+        
+        x->m_augend = 0;
+        x->m_addend = 0;
+        x->m_double = false;
+        if(elements.size())
+        {
+            x->m_double = elements[0].isDouble();
+            x->m_addend = (double)elements[0];
+        }
+        
+        x->addInlet("bang", "long", "double");
+        x->addInlet("long", "double");
+        if(x->m_double)
+            x->addOutlet("double");
+        else
+            x->addOutlet("long");
+        
+        x->setInletAttributes(0, "Augend", InletPolarity::Hot);
+        x->setInletAttributes(1, "Addend", InletPolarity::Cold);
+        x->setOutletDescription(0, "Sum");
+        
+        return shared_ptr<Object>(static_pointer_cast<Box>(x));
+    }
+    
+    void Plus::receiveBang(shared_ptr<Plus> x)
     {
 #ifdef DEBUG
-        string message = to_string(plus->m_augend) + string(" ") + to_string(plus->m_addend) + string(" = ") + to_string(plus->m_augend + plus->m_addend);
+        string message = to_string(x->m_augend) + string(" ") + to_string(x->m_addend) + string(" = ") + to_string(x->m_augend + x->m_addend);
         
-        plus->postObject(message);
+        x->postObject(message);
 #endif
-        if(plus->m_double)
-            plus->sendDouble(0, plus->m_augend + plus->m_addend);
+        if(x->m_double)
+            x->sendDouble(0, x->m_augend + x->m_addend);
         else
-            plus->sendLong(0, plus->m_augend +plus-> m_addend);
+            x->sendLong(0, x->m_augend +x-> m_addend);
     }
     
-    void Plus::receiveLong(shared_ptr<Plus> plus, long value)
+    void Plus::receiveLong(shared_ptr<Plus> x, long value)
     {
-        if(plus->getProxy() == 0)
+        if(x->getProxy() == 0)
         {
-            plus->m_augend = value;
-            plus->receiveBang(plus);
+            x->m_augend = value;
+            x->receiveBang(x);
         }
         else
-            plus->m_addend = value;
+            x->m_addend = value;
     }
     
-    void Plus::receiveDouble(shared_ptr<Plus> plus, double value)
+    void Plus::receiveDouble(shared_ptr<Plus> x, double value)
     {
-        if(plus->getProxy() == 0)
+        if(x->getProxy() == 0)
         {
-            plus->m_augend = value;
-            plus->receiveBang(plus);
+            x->m_augend = value;
+            x->receiveBang(x);
         }
         else
-            plus->m_addend = value;
+            x->m_addend = value;
     }
     
     // ================================================================================ //

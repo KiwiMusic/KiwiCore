@@ -30,6 +30,7 @@
 #include "Console.h"
 
 // Stack limit should warning then pass and stop at +1 to let the whole stack overflow chain visisble
+// Rajouter call pour create ???
 
 namespace Kiwi
 {
@@ -48,6 +49,7 @@ namespace Kiwi
     typedef void (*MethodGarbage)(shared_ptr<Object>, const shared_ptr<Tag> tag, vector<Element>& elements);
     typedef void (*MethodDsp)(shared_ptr<Box>, shared_ptr<DspNode> node);
     typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
+    typedef shared_ptr<Object> (*MethodCreate)(shared_ptr<Instance>, shared_ptr<Tag> name, ...);
     
     // ================================================================================ //
     //                                      OBJECT                                      //
@@ -109,8 +111,6 @@ namespace Kiwi
         /** Free the methods.
          */
         virtual ~Object();
-        
-        virtual shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements) const = 0;
         
         //! Retrieve the name of the object.
         /** The function retrieves the name of the object as a tag.
@@ -327,17 +327,17 @@ namespace Kiwi
          */
         shared_ptr<Tag> createTag(string name) const;
         
-        //! Object allocation.
+        //! Object factory.
         /** This function uses the instance specific object factory to create an object.
          @param     The name of the tag to retrieve.
          */
-        shared_ptr<Object> allocObject(string name) const;
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element>& elements) const;
         
         //! Object factory.
         /** This function uses the instance specific object factory to create an object.
          @param     The name of the tag to retrieve.
          */
-        shared_ptr<Object> createObject(string name) const;
+        shared_ptr<Object> createObject(string name, vector<Element>& elements) const;
         
         //! Dico factory.
         /** This function uses the instance specific object factory to create a dico.

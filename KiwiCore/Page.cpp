@@ -34,12 +34,6 @@ namespace Kiwi
         m_dsp_context = make_shared<DspContext>();
     }
     
-    shared_ptr<Object> Page::create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements) const
-    {
-        return make_shared<Page>(kiwi, "", "");
-        
-    }
-    
     Page::~Page()
     {
         m_connections.clear();
@@ -48,7 +42,7 @@ namespace Kiwi
 
     shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> &elements)
     {
-        shared_ptr<Object> object = createObject(name->name());
+        shared_ptr<Object> object = createObject(name, elements);
         if(object->isBox())
         {
             shared_ptr<Box> box = static_pointer_cast<Box>(object);

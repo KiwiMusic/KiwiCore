@@ -42,11 +42,9 @@ namespace Kiwi
         friend class ArithmeticTilde;
         sample          m_addend;
     public:
-        //KIWI_BOX_INIT(PlusTilde, "+~");
-        
         PlusTilde(shared_ptr<Instance> kiwi);
-        shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements) const override;
         
+        static shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements);
         static void receiveLong(shared_ptr<PlusTilde> plus, long value);
         static void receiveDouble(shared_ptr<PlusTilde> plus, double value);
         static void dsp(shared_ptr<PlusTilde> plus, shared_ptr<DspNode> node);

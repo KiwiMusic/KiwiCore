@@ -62,44 +62,61 @@ namespace Kiwi
         }
     }
     
-    shared_ptr<Object> Instance::allocObject(string name)
+    shared_ptr<Object> Instance::createObject(string name, vector<Element>& elements)
     {
-        return allocObject(createTag(name));
+        return createObject(createTag(name), elements);
     }
     
-    shared_ptr<Object> Instance::allocObject(shared_ptr<Tag> name)
+    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, vector<Element>& elements)
     {
         shared_ptr<Object> object;
         map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);
         if(it != m_prototypes.end())
         {
-            vector<Element> element;
-            return object;
+            shared_ptr<Tag> cteTag = createTag("create");
+            MethodCreate create = (MethodCreate)it->second->getMethod(cteTag);
+            if(create)
+            {
+                if(it->second->getMethodType(cteTag) == T_NOTHING)
+                {
+                    if(elements.size() == 0)
+                    {
+                        return create(enable_shared_from_this<Instance>::shared_from_this(), name);
+                    }
+                    else
+                    {
+                        error("This object doesn't support creation args ect...");
+                    }
+                }
+            
+                if(elements.size() == 0)
+                {
+                    if(it->second->getMethodType(cteTag) == T_NOTHING)
+                    {
+                        return create(enable_shared_from_this<Instance>::shared_from_this(), name);
+                    }
+                }
+                if(elements.size() == 1)
+                {
+                    if(it->second->getMethodType(cteTag) == T_LONG && (elements[0].isLong() || elements[0].isDouble()))
+                    {
+                       return create(enable_shared_from_this<Instance>::shared_from_this(), name, (long)elements[0]);
+                    }
+                    else if(it->second->getMethodType(cteTag) == T_DOUBLE && (elements[0].isDouble() || elements[0].isLong()))
+                    {
+                        return create(enable_shared_from_this<Instance>::shared_from_this(), name, (double)elements[0]);
+                    }
+                    else if(it->second->getMethodType(cteTag) == T_TAG && elements[0].isTag())
+                    {
+                        //return create(enable_shared_from_this<Instance>::shared_from_this(), name, (shared_ptr<Tag>)(elements[0]));
+                    }
+                        
+                       
+                }
+                return create(enable_shared_from_this<Instance>::shared_from_this(), name, &elements);
+            }
         }
-        else
-        {
-            return object;
-        }
-    }
-    
-    shared_ptr<Object> Instance::createObject(string name)
-    {
-        return createObject(createTag(name));
-    }
-    
-    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name)
-    {
-        shared_ptr<Object> object;
-        map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);
-        if(it != m_prototypes.end())
-        {
-            vector<Element> element;
-            return it->second->create(enable_shared_from_this<Instance>::shared_from_this(), name, element);
-        }
-        else
-        {
-            return object;
-        }
+        return object;
     }
     
     shared_ptr<Dico> Instance::createDico()

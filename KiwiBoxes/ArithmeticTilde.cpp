@@ -32,44 +32,44 @@ namespace Kiwi
     
     PlusTilde::PlusTilde(shared_ptr<Instance> kiwi) : Box(kiwi, kiwi->createTag("+~"))
     {
-        addMethod("create", T_ELEMENTS, (Method)nullptr);
+        addMethod("create", T_ELEMENTS, (Method)create);
         addMethod("long",   T_LONG,     (Method)receiveLong);
         addMethod("double", T_DOUBLE,   (Method)receiveDouble);
         addMethod("dsp",    T_OPAQUE,   (Method)dsp);
     };
     
-    shared_ptr<Object> PlusTilde::create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, vector<Element>& elements) const
+    shared_ptr<Object> PlusTilde::create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements)
     {
-        shared_ptr<PlusTilde> plus = make_shared<PlusTilde>(kiwi);
+        shared_ptr<PlusTilde> x = make_shared<PlusTilde>(kiwi);
         
-        plus->m_addend = 0;
+        x->m_addend = 0;
         if(elements.size())
-            plus->m_addend = (double)elements[0];
+            x->m_addend = (double)elements[0];
         
-        plus->addInlet("signal");
-        plus->addInlet("signal", "long", "double");
-        plus->addOutlet("signal");
+        x->addInlet("signal");
+        x->addInlet("signal", "long", "double");
+        x->addOutlet("signal");
         
-        plus->setInletAttributes(0, "Augend", InletPolarity::Hot);
-        plus->setInletAttributes(1, "Addend", InletPolarity::Hot);
-        plus->setOutletDescription(0, "Sum");
+        x->setInletAttributes(0, "Augend", InletPolarity::Hot);
+        x->setInletAttributes(1, "Addend", InletPolarity::Hot);
+        x->setOutletDescription(0, "Sum");
         
-        return shared_ptr<Box>(static_pointer_cast<Box>(plus));
+        return shared_ptr<Box>(static_pointer_cast<Box>(x));
     }
     
-    void PlusTilde::receiveLong(shared_ptr<PlusTilde> plus, long value)
+    void PlusTilde::receiveLong(shared_ptr<PlusTilde> x, long value)
     {
-        if(plus->getProxy() == 1)
-            plus->m_addend = value;
+        if(x->getProxy() == 1)
+            x->m_addend = value;
     }
     
-    void PlusTilde::receiveDouble(shared_ptr<PlusTilde> plus, double value)
+    void PlusTilde::receiveDouble(shared_ptr<PlusTilde> x, double value)
     {
-        if(plus->getProxy() == 1)
-            plus->m_addend = value;
+        if(x->getProxy() == 1)
+            x->m_addend = value;
     }
     
-    void PlusTilde::dsp(shared_ptr<PlusTilde> plus, shared_ptr<DspNode> node)
+    void PlusTilde::dsp(shared_ptr<PlusTilde> x, shared_ptr<DspNode> node)
     {
         if(node->isOutputConnected(0))
         {
@@ -93,24 +93,24 @@ namespace Kiwi
         }
     }
     
-    void PlusTilde::processBoth(shared_ptr<PlusTilde> plus, long nins, sample const** ins, long nouts, sample** outs, long vectorsize)
+    void PlusTilde::processBoth(shared_ptr<PlusTilde> x, long nins, sample const** ins, long nouts, sample** outs, long vectorsize)
     {
         signalAddSignal(ins[1], outs[0], vectorsize);
     }
     
-    void PlusTilde::processLeft(shared_ptr<PlusTilde> plus, long nins, sample  const** ins, long nouts, sample** outs, long vectorsize)
+    void PlusTilde::processLeft(shared_ptr<PlusTilde> x, long nins, sample  const** ins, long nouts, sample** outs, long vectorsize)
     {
-        signalAddScalar(plus->m_addend, outs[0], vectorsize);
+        signalAddScalar(x->m_addend, outs[0], vectorsize);
     }
     
-    void PlusTilde::processRight(shared_ptr<PlusTilde> plus, long nins, sample const** ins, long nouts, sample** outs, long vectorsize)
+    void PlusTilde::processRight(shared_ptr<PlusTilde> x, long nins, sample const** ins, long nouts, sample** outs, long vectorsize)
     {
         signalCopy(ins[1], outs[0], vectorsize);
     }
     
-    void PlusTilde::processNone(shared_ptr<PlusTilde> plus, long nins, sample const** ins, long nouts, sample** outs, long vectorsize)
+    void PlusTilde::processNone(shared_ptr<PlusTilde> x, long nins, sample const** ins, long nouts, sample** outs, long vectorsize)
     {
-        signalFill(plus->m_addend, outs[0], vectorsize);
+        signalFill(x->m_addend, outs[0], vectorsize);
     }
     
     // ================================================================================ //

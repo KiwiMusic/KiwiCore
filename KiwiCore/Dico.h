@@ -53,12 +53,7 @@ namespace Kiwi
         //! Constructor.
         /** Create a new dictionary.
          */
-        Dico(shared_ptr<Instance> kiwi);
-        
-        //! Constructor.
-        /** Create a new dictionary.
-         */
-        shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements) const override;
+        Dico(shared_ptr<Instance> kiwi);;
         
         //! Destructor.
         /** Free the dictionary.

@@ -62,8 +62,6 @@ namespace Kiwi
          */
         Page(shared_ptr<Instance> kiwi, string file, string directory);
         
-        shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements) const override;
-        
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
          */
