@@ -95,6 +95,18 @@ namespace Kiwi
             }
         }
     }
+    
+    string Element::getString() const noexcept
+    {
+        if(isLong())
+            return to_string(m_val.m_long);
+        else if(isDouble())
+            return to_string(m_val.m_double);
+        else if(isTag())
+            return m_val.m_tag->name();
+        else
+            return m_val.m_object->getName()->name();
+    }
 }
 
 

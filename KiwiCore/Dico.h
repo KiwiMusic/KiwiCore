@@ -48,6 +48,13 @@ namespace Kiwi
         vector<Element>                         m_elements; ///< The elements
         
         static void dowrite(shared_ptr<Dico> dico, ofstream* file, int indent);
+        
+        size_t          getKey(string& line, string& key);
+        size_t          getType(string& line, size_t pos, Type& type);
+        long            getLong(string& line, size_t pos);
+        double          getDouble(string& line, size_t pos);
+        shared_ptr<Tag> getTag(string& line, size_t pos);
+        
     public:
         
         //! Constructor.
@@ -300,6 +307,11 @@ namespace Kiwi
          @param file The file.
          */
         void read(ifstream& file, string& line);
+        
+        //! Post the content of the dico.
+        /** The posts the content of the dico.
+         */
+        void post(string text = string(""));
     };
 }
 

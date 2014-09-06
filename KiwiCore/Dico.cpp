@@ -364,7 +364,7 @@ namespace Kiwi
         kfile.close();
     }
     
-    size_t getKey(string& line, string& key)
+    size_t Dico::getKey(string& line, string& key)
     {
         size_t pos1, pos2;
         pos1 = line.find('"');
@@ -381,7 +381,7 @@ namespace Kiwi
         return string::npos;
     }
     
-    size_t getType(string& line, size_t pos, Type& type)
+    size_t Dico::getType(string& line, size_t pos, Type& type)
     {
         size_t pos1, pos2;
         pos1 = line.find(':', pos);
@@ -428,6 +428,32 @@ namespace Kiwi
         return string::npos;
     }
     
+    long Dico::getLong(string& line, size_t pos)
+    {
+        return atol(line.c_str()+pos);
+    }
+    
+    double Dico::getDouble(string& line, size_t pos)
+    {
+        return atof(line.c_str()+pos);
+    }
+    
+    shared_ptr<Tag> Dico::getTag(string& line, size_t pos)
+    {
+        
+        size_t next = line.find('"', pos+1);
+        if(next != string::npos)
+        {
+            string text;
+            text.assign(line, pos, next-pos);
+            return createTag(text);
+        }
+        else
+        {
+            return createTag(&line[pos]);
+        }
+    }
+    
     void Dico::read(ifstream& kfile, string& line)
     {
         string strname;
@@ -442,38 +468,63 @@ namespace Kiwi
                 size_t pos = getKey(line, strname);
                 if(pos != string::npos)
                 {
-                    cout << "key : " << strname << " ";
                     pos = getType(line, pos, type);
                     if(pos != string::npos)
                     {
                         if(type == T_OBJECT)
                         {
-                            cout << "Object";
-                            read(kfile, line);
+                            cout << "Object\n";
+                            //read(kfile, line);
                         }
                         else if(type == T_ELEMENTS)
                         {
-                            cout << "Elements";
+                            pos += 2;
+                            size_t pos3;
+                            vector<Element> elements;
+                            
+                            pos3 = pos;
+                            while(pos < line.size())
+                            {
+                                pos3 = line.find(',', pos);
+                                if(pos3 == string::npos)
+                                    pos3 = line.size();
+                                
+                                size_t pos4 = line.find('"', pos);
+                                if(pos4 != string::npos && pos4 < pos3)
+                                {
+                                    elements.push_back(getTag(line, pos));
+                                }
+                                else
+                                {
+                                    pos4 = line.find('.', pos);
+                                    if(pos4 != string::npos && pos4 < pos3)
+                                    {
+                                        elements.push_back(getDouble(line, pos));
+                                    }
+                                    else
+                                    {
+                                        elements.push_back(getLong(line, pos));
+                                    }
+                                }
+
+                                pos = pos3+1;
+                            }
+                            set(createTag(strname), elements);
+
                         }
                         else if(type == T_LONG)
                         {
-                            cout << "Long : " << atol(line.c_str()+pos);
+                            set(createTag(strname), getLong(line, pos));
                         }
                         else if(type == T_DOUBLE)
                         {
-                            cout << "Double : " << atof(line.c_str()+pos);
+                            set(createTag(strname), getDouble(line, pos));
                         }
                         else if(type == T_TAG)
                         {
-                            if(!line.compare(line.size()-1, 1, ","))
-                                line.pop_back();
-                            if(!line.compare(line.size()-1, 1, "\""))
-                                line.pop_back();
-                                
-                            cout << "Tag : " << &line[pos];
+                            set(createTag(strname), getTag(line, pos));
                         }
                     }
-                    cout << "\n";
                 }
             }
         }
@@ -495,6 +546,35 @@ namespace Kiwi
         read(kfile, line);
         
         kfile.close();
+    }
+    
+    void Dico::post(string text)
+    {
+        if(m_elements.size())
+        {
+            if(m_elements.size() == 1)
+                text += m_elements[0].getString() + ",";
+            else
+            {
+                text += "[ ";
+                for(int i = 0; i < m_elements.size() - 1; i++)
+                {
+                    text += m_elements[i].getString();
+                    text += ", ";
+                }
+                text += m_elements[m_elements.size() - 1].getString();
+                text += " ],";
+            }
+            Object::post(text);
+        }
+        else if(m_entries.size())
+        {
+            for(map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = m_entries.begin(); it != m_entries.end(); ++it)
+            {
+                string text = it->first->name() + " : ";
+                it->second->post(text);
+            }
+        }
     }
 }
 

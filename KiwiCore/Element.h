@@ -93,6 +93,12 @@ namespace Kiwi
          */
         void write(ofstream* file, int indent = 0);
         
+        //! Retrieve the element as a string.
+        /** The function retrieves the element as a string.
+         @return The long, double, tag or object as a string.
+         */
+        string getString() const noexcept;
+        
         //! Retrieve the type of an element.
         /** The function retrieves the type of an element, you should always check the type of the element before to retrieve the value.
          @return    The type of the element as a type.

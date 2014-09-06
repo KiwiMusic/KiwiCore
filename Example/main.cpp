@@ -92,6 +92,7 @@ int main (int argc, char* argv[])
         
         dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
         dico1->read("zaza.kiwi", "/Users/Pierre/Desktop");
+        dico1->post();
     }
     return 0;
 }
