@@ -43,8 +43,8 @@ namespace Kiwi
             return true;
         else
         {
-            string message = string("The attribute ") + name->name() + string(" doesn't exists !");
-            errorObject(message);
+            string message = getName()->name() + string(" : The attribute ") + name->name() + string(" doesn't exists !");
+            error(message);
             return false;
         }
     }
@@ -55,8 +55,8 @@ namespace Kiwi
             return true;
         else
         {
-            string message = string("The attribute used isn't valid !");
-            errorObject(message);
+            string message = getName()->name() + string(" : The attribute used isn't valid !");
+            error(message);
             return false;
         }
     }
@@ -65,8 +65,8 @@ namespace Kiwi
     {
         if(m_attributes.find(name) != m_attributes.end())
         {
-            string message = string("The attribute ") + name->name() + string(" already exists !");
-            errorObject(message);
+            string message = getName()->name() + string(" : The attribute ") + name->name() + string(" already exists !");
+            error(message);
             return;
         }
         

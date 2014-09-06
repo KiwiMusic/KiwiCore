@@ -30,7 +30,6 @@
 #include "Console.h"
 
 // Stack limit should warning then pass and stop at +1 to let the whole stack overflow chain visisble
-// Rajouter call pour create ???
 
 namespace Kiwi
 {

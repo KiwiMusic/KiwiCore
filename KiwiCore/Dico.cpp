@@ -213,6 +213,9 @@ namespace Kiwi
     
     void Dico::set(shared_ptr<Tag> key, vector<Element>& elements)
     {
+        if(elements.size() == 0)
+            return;
+        
         shared_ptr<Dico> dico = createDico();
         for(int i = 0; i < elements.size(); i++)
         {
@@ -285,6 +288,9 @@ namespace Kiwi
     
     void Dico::append(shared_ptr<Tag> key, vector<Element>& elements)
     {
+        if(elements.size() == 0)
+            return;
+        
         shared_ptr<Dico> dico = get(key);
         if(dico)
         {
@@ -358,10 +364,126 @@ namespace Kiwi
         kfile.close();
     }
     
+    size_t getKey(string& line, string& key)
+    {
+        size_t pos1, pos2;
+        pos1 = line.find('"');
+        if(pos1 != string::npos)
+        {
+            pos1++;
+            pos2 = line.find('"', pos1);
+            if(pos2 != string::npos)
+            {
+                key.assign(line, pos1, pos2-pos1);
+                return pos2;
+            }
+        }
+        return string::npos;
+    }
+    
+    size_t getType(string& line, size_t pos, Type& type)
+    {
+        size_t pos1, pos2;
+        pos1 = line.find(':', pos);
+        if(pos1 != string::npos)
+        {
+            pos1++;
+            if(pos1 < line.size())
+            {
+                pos2 = line.find('{', pos1);
+                if(pos2 != string::npos)
+                {
+                    type = T_OBJECT;
+                    return pos2;
+                }
+                pos2 = line.find('[', pos1);
+                if(pos2 != string::npos)
+                {
+                    type = T_ELEMENTS;
+                    return pos2;
+                }
+                pos2 = line.find_first_not_of(' ', pos1);
+                if(pos2 != string::npos)
+                {
+                    size_t pos3 = line.find('"', pos2);
+                    if(pos3 != string::npos)
+                    {
+                        type = T_TAG;
+                        return pos3+1;
+                    }
+                    else if(line.find('.', pos2) != string::npos)
+                    {
+                        type = T_DOUBLE;
+                        return pos2;
+                    }
+                    else
+                    {
+                        type = T_LONG;
+                        return pos2;
+                    }
+                }
+            }
+        }
+        type = T_NOTHING;
+        return string::npos;
+    }
+    
+    void Dico::read(ifstream& kfile, string& line)
+    {
+        string strname;
+        shared_ptr<Tag> name;
+        Type type;
+        if(kfile.is_open())
+        {
+            clear();
+            getline(kfile, line);
+            while(getline(kfile, line))
+            {
+                size_t pos = getKey(line, strname);
+                if(pos != string::npos)
+                {
+                    cout << "key : " << strname << " ";
+                    pos = getType(line, pos, type);
+                    if(pos != string::npos)
+                    {
+                        if(type == T_OBJECT)
+                        {
+                            cout << "Object";
+                            read(kfile, line);
+                        }
+                        else if(type == T_ELEMENTS)
+                        {
+                            cout << "Elements";
+                        }
+                        else if(type == T_LONG)
+                        {
+                            cout << "Long : " << atol(line.c_str()+pos);
+                        }
+                        else if(type == T_DOUBLE)
+                        {
+                            cout << "Double : " << atof(line.c_str()+pos);
+                        }
+                        else if(type == T_TAG)
+                        {
+                            if(!line.compare(line.size()-1, 1, ","))
+                                line.pop_back();
+                            if(!line.compare(line.size()-1, 1, "\""))
+                                line.pop_back();
+                                
+                            cout << "Tag : " << &line[pos];
+                        }
+                    }
+                    cout << "\n";
+                }
+            }
+        }
+    }
+    
     void Dico::read(string file, string directory)
     {
         ifstream kfile;
         string line;
+        
         if(!file.size())
             return;
         
@@ -370,17 +492,7 @@ namespace Kiwi
         else
             kfile.open(file);
         
-        if(kfile.is_open())
-        {
-            clear();
-            while(getline(kfile, line))
-            {
-                for(int i = 0; i < line.length(); i++)
-                {
-                    ;
-                }
-            }
-        }
+        read(kfile, line);
         
         kfile.close();
     }

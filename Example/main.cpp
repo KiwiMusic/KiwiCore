@@ -91,6 +91,7 @@ int main (int argc, char* argv[])
         dico1->append(kiwi->createTag("value4"), dico2);
         
         dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
+        dico1->read("zaza.kiwi", "/Users/Pierre/Desktop");
     }
     return 0;
 }

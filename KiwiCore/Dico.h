@@ -294,6 +294,12 @@ namespace Kiwi
          @param directory The name of the directory.
          */
         void read(string file, string directory = "");
+        
+        //! Read a dico from a text file.
+        /** The function reads a dico from a text file.
+         @param file The file.
+         */
+        void read(ifstream& file, string& line);
     };
 }
 
