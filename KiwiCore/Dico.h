@@ -304,7 +304,13 @@ namespace Kiwi
          @param file The name of the file.
          @param directory The name of the directory.
          */
-        void read(string file, string directory = "");
+        void read(string name, string directory = "");
+        
+        //! Write the dico in the Json format.
+        /** The function writes he dico in the Json format.
+         @param file The Json file.
+         */
+        void read(Json& file);
         
         //! Read a dico from a text file.
         /** The function reads a dico from a text file.

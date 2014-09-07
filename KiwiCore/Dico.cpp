@@ -335,18 +335,19 @@ namespace Kiwi
             pos1++;
             if(pos1 < line.size())
             {
-                pos2 = line.find('{', pos1);
-                if(pos2 != string::npos)
-                {
-                    type = T_OBJECT;
-                    return pos2;
-                }
                 pos2 = line.find('[', pos1);
                 if(pos2 != string::npos)
                 {
                     type = T_ELEMENTS;
                     return pos2;
                 }
+                pos2 = line.find('{', pos1);
+                if(pos2 != string::npos)
+                {
+                    type = T_OBJECT;
+                    return pos2;
+                }
+                
                 pos2 = line.find_first_not_of(' ', pos1);
                 if(pos2 != string::npos)
                 {
@@ -385,7 +386,6 @@ namespace Kiwi
     
     shared_ptr<Tag> Dico::getTag(string& line, size_t pos)
     {
-        
         size_t next = line.find('"', pos+1);
         if(next != string::npos)
         {
@@ -407,7 +407,6 @@ namespace Kiwi
         if(kfile.is_open())
         {
             clear();
-            getline(kfile, line);
             while(getline(kfile, line))
             {
                 size_t pos = getKey(line, strname);
@@ -418,8 +417,14 @@ namespace Kiwi
                     {
                         if(type == T_OBJECT)
                         {
-                            //cout << "Object\n";
-                            //read(kfile, line);
+                            shared_ptr<Dico> dico = createDico();
+                            dico->read(kfile, line);
+                            if (dico->has(createTag("name")))
+                            {
+                                ;
+                            }
+                            else
+                                set(createTag(strname), dico);
                         }
                         else if(type == T_ELEMENTS)
                         {
@@ -434,23 +439,34 @@ namespace Kiwi
                                 if(pos3 == string::npos)
                                     pos3 = line.size();
                                 
-                                size_t pos4 = line.find('"', pos);
+                                size_t pos4 = line.find('{', pos);
                                 if(pos4 != string::npos && pos4 < pos3)
                                 {
-                                    elements.push_back(getTag(line, pos));
+                                    shared_ptr<Dico> dico = createDico();
+                                    dico->read(kfile, line);
+                                    elements.push_back(static_pointer_cast<Object>(dico));
                                 }
                                 else
                                 {
-                                    pos4 = line.find('.', pos);
+                                    pos4 = line.find('"', pos);
                                     if(pos4 != string::npos && pos4 < pos3)
                                     {
-                                        elements.push_back(getDouble(line, pos));
+                                        elements.push_back(getTag(line, pos));
                                     }
                                     else
                                     {
-                                        elements.push_back(getLong(line, pos));
+                                        pos4 = line.find('.', pos);
+                                        if(pos4 != string::npos && pos4 < pos3)
+                                        {
+                                            elements.push_back(getDouble(line, pos));
+                                        }
+                                        else
+                                        {
+                                            elements.push_back(getLong(line, pos));
+                                        }
                                     }
                                 }
+                                
 
                                 pos = pos3+1;
                             }
@@ -479,7 +495,6 @@ namespace Kiwi
     {
         ifstream kfile;
         string line;
-        
         if(!file.size())
             return;
         
@@ -488,9 +503,18 @@ namespace Kiwi
         else
             kfile.open(file);
         
-        read(kfile, line);
+        if(kfile.is_open())
+        {
+            string text;
+            read(kfile, line);
+        }
         
         kfile.close();
+    }
+    
+    void Dico::read(Json& file)
+    {
+        ;
     }
     
     Json Dico::createJson()
@@ -503,26 +527,26 @@ namespace Kiwi
     
     void Dico::post()
     {
-        Object::post((string)createJson());
+        Object::post(createJson().getString());
     }
     
-    void Dico::write(string file, string directory)
+    void Dico::write(string name, string directory)
     {
-        ofstream kfile;
-        if(!file.size())
+        ofstream file;
+        if(!name.size())
             return;
         
         if(directory.size())
-            kfile.open(directory + string("/") + file);
+            file.open(directory + string("/") + name);
         else
-            kfile.open(file);
+            file.open(name);
         
-        if(kfile.is_open())
+        if(file.is_open())
         {
-            kfile << (string)createJson();
+            file << createJson().getString();
         }
         
-        kfile.close();
+        file.close();
     }
     
     void Dico::write(Json& file)

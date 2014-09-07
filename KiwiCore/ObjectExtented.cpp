@@ -292,18 +292,6 @@ namespace Kiwi
             m_current_attribute->second.getValues(elements);
         }
     }
-    
-    void ObjectExtented::writeJSON(void *nope)
-    {
-        for(map<shared_ptr<Tag>, Attribute>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
-            ;//it->second.write(nope);
-    };
-    
-    ObjectExtented::operator string() const noexcept
-    {
-        // TO DO
-        return "{\n    \" name \" : " + (string)*getName() + ",\n},";
-    }
 }
 
 

@@ -264,11 +264,6 @@ namespace Kiwi
          */
         void setAttributeDefaultValues(const vector<Element>& elements);
         
-        //! Create a string that discribes the extented object.
-        /** The function creates a string in the JSON format that describe the extented object.
-         @return The extented object in the the string format.
-         */
-        virtual operator string() const noexcept;
     public:
         
         //! Constructor.
@@ -307,8 +302,11 @@ namespace Kiwi
          */
         void getAttributeValues(const shared_ptr<Tag> name, vector<Element>& elements);
         
-        void writeJSON(void *nope);
-        void readJSON(void *nope);
+        //! Write the object in the Json format.
+        /** The function writes the object in the Json format.
+         @param file The json to write.
+         */
+        //virtual void write(Json& file);
     };
     
     class ObjectExtentedListener
