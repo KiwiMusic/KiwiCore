@@ -74,22 +74,33 @@ int main (int argc, char* argv[])
         sDico dico1 = kiwi->createDico();
         sDico dico2 = kiwi->createDico();
         sDico dico3 = kiwi->createDico();
+        sDico dico4 = kiwi->createDico();
+        
         vector<Element> elements;
         elements.push_back(9);
         elements.push_back(8);
         elements.push_back(7);
+        
+        dico4->append(kiwi->createTag("value1"), 1.2);
+        dico4->append(kiwi->createTag("value2"), 1);
+        dico4->append(kiwi->createTag("value3"), kiwi->createTag("zaza"));
         
         dico1->append(kiwi->createTag("value1"), 1.2);
         dico1->append(kiwi->createTag("value2"), 1);
         dico1->append(kiwi->createTag("value3"), kiwi->createTag("zaza"));
         
         dico2->append(kiwi->createTag("va"), elements);
-        dico2->append(kiwi->createTag("vb"), elements);
+        dico2->append(kiwi->createTag("vb"), 1.6666);
+        elements.push_back(static_pointer_cast<Object>(dico4));
+        elements.push_back(10);
         dico2->append(kiwi->createTag("vc"), elements);
+        elements.pop_back();
+        elements.pop_back();
         dico3->append(kiwi->createTag("aa"), elements);
         dico2->append(kiwi->createTag("vd"), dico3);
         dico1->append(kiwi->createTag("value4"), dico2);
-        
+        dico1->post();
+        kiwi->post("---------");
         dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
         dico1->read("zaza.kiwi", "/Users/Pierre/Desktop");
         dico1->post();

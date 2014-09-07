@@ -37,6 +37,7 @@ namespace Kiwi
     class DspNode;
     class Box;
     class Dico;
+    class Json;
     
     typedef void (*Method)(shared_ptr<Object>, ...);
     typedef void (*MethodNothing)(shared_ptr<Object>);
@@ -128,6 +129,12 @@ namespace Kiwi
         {
             return false;
         }
+        
+        //! Write the object in the Json format.
+        /** The function writes the object in the Json format.
+         @param file The json to write.
+         */
+        virtual void write(Json& file);
         
         //! Retrieve the number of methods.
         /** The function retrieves the number of methods. It takes into account the default methods bang, long, double, tag, object, elements and garbage, the standard methods and the opaque methods.

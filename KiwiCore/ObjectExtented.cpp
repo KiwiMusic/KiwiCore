@@ -43,7 +43,7 @@ namespace Kiwi
             return true;
         else
         {
-            string message = getName()->name() + string(" : The attribute ") + name->name() + string(" doesn't exists !");
+            string message = (string)*getName() + string(" : The attribute ") + (string)*name + string(" doesn't exists !");
             error(message);
             return false;
         }
@@ -55,7 +55,7 @@ namespace Kiwi
             return true;
         else
         {
-            string message = getName()->name() + string(" : The attribute used isn't valid !");
+            string message = (string)*getName() + string(" : The attribute used isn't valid !");
             error(message);
             return false;
         }
@@ -65,7 +65,7 @@ namespace Kiwi
     {
         if(m_attributes.find(name) != m_attributes.end())
         {
-            string message = getName()->name() + string(" : The attribute ") + name->name() + string(" already exists !");
+            string message = (string)*getName() + string(" : The attribute ") + (string)*name + string(" already exists !");
             error(message);
             return;
         }
@@ -298,6 +298,12 @@ namespace Kiwi
         for(map<shared_ptr<Tag>, Attribute>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
             ;//it->second.write(nope);
     };
+    
+    ObjectExtented::operator string() const noexcept
+    {
+        // TO DO
+        return "{\n    \" name \" : " + (string)*getName() + ",\n},";
+    }
 }
 
 

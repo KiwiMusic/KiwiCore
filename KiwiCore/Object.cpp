@@ -72,7 +72,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("You defined a wrong type for the ") + name->name() + string( "method ! \n This type has been replaced with elements.");
+                string message = string("You defined a wrong type for the ") + (string)*name + string( "method ! \n This type has been replaced with elements.");
                 warningObject(message);
                 m_method_create = {T_ELEMENTS, method};
             }
@@ -125,7 +125,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("You defined a wrong type for the ") + name->name() + string( "method ! \n This type has been replaced with elements.");
+                string message = string("You defined a wrong type for the ") + (string)*name + string( "method ! \n This type has been replaced with elements.");
                 warningObject(message);
                 m_method_standard[name] = {T_ELEMENTS, method};
             }
@@ -304,7 +304,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -319,7 +319,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ") + name->name() + string(" received nothing !");
+                    string message = string("Wrong arguments for the method ") + (string)*name + string(" received nothing !");
                     warningObject(message);
                 }
             }
@@ -331,7 +331,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -364,7 +364,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -383,7 +383,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -405,7 +405,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ name->name() + string(" received long !");
+                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received long !");
                     warningObject(message);
                 }
             }
@@ -418,7 +418,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -451,7 +451,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -470,7 +470,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -492,7 +492,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ name->name() + string(" received double !");
+                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received double !");
                     warningObject(message);
                 }
             }
@@ -505,7 +505,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -536,7 +536,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -558,7 +558,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ name->name() + string(" received tag !");
+                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received tag !");
                     warningObject(message);
                 }
             }
@@ -571,7 +571,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -602,7 +602,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -624,7 +624,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ name->name() + string(" received tag !");
+                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received tag !");
                     warningObject(message);
                 }
             }
@@ -637,7 +637,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -665,7 +665,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -720,7 +720,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ name->name() + string(" received elements !");
+                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received elements !");
                     warningObject(message);
                 }
             }
@@ -730,7 +730,7 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + name->name();
+                string message = string("Don't have such method : ") + (string)*name;
                 warningObject(message);
             }
         }
@@ -783,7 +783,7 @@ namespace Kiwi
         }
         else
         {
-            string message = string("Don't have such method : ") + name->name();
+            string message = string("Don't have such method : ") + (string)*name;
             warningObject(message);
         }
         
@@ -913,6 +913,12 @@ namespace Kiwi
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
             return kiwi->error(shared_from_this(), message);
+    }
+    
+    void Object::write(Json& file)
+    {
+        file.newKey(createTag("name"));
+        file.add(getName());
     }
 }
 

@@ -31,6 +31,7 @@
 namespace Kiwi
 {
     class Object;
+    class Instance;
     
     typedef enum
     {
@@ -85,19 +86,6 @@ namespace Kiwi
         /** Doesn't perform anything.
          */
         ~Element() noexcept;
-        
-        //! Write the element in a file.
-        /** The function writes the element in the text format in a file.
-         @param file The file to write in.
-         @param indent The indentation of the element.
-         */
-        void write(ofstream* file, int indent = 0);
-        
-        //! Retrieve the element as a string.
-        /** The function retrieves the element as a string.
-         @return The long, double, tag or object as a string.
-         */
-        string getString() const noexcept;
         
         //! Retrieve the type of an element.
         /** The function retrieves the type of an element, you should always check the type of the element before to retrieve the value.
@@ -262,7 +250,6 @@ namespace Kiwi
             return *this;
         }
     };
-    
 }
 
 

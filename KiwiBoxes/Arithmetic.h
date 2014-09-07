@@ -39,6 +39,7 @@ namespace Kiwi
     class Plus : public Box
     {
     private:
+        typedef shared_ptr<Plus> This;
         friend class Arithmetic;
         bool            m_double;
         double          m_augend;
@@ -47,11 +48,11 @@ namespace Kiwi
         Plus(shared_ptr<Instance> kiwi);
         ~Plus();
         
-        static shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements);
+        static shared_ptr<Object> create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, Elements& elements);
     
-        static void receiveBang(shared_ptr<Plus> plus);
-        static void receiveLong(shared_ptr<Plus> plus, long value);
-        static void receiveDouble(shared_ptr<Plus> plus, double value);
+        static void receiveBang(This x);
+        static void receiveLong(This x, long value);
+        static void receiveDouble(This x, double value);
     };
     
     // ================================================================================ //

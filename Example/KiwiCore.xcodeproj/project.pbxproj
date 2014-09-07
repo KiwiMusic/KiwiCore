@@ -83,6 +83,7 @@
 		8F73C7D719B9DB110041C577 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
 		8F73C7D819B9DB110041C577 /* Tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tools.h; sourceTree = "<group>"; };
 		8F96739219B9C7D100C8EE72 /* KiwiCore */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KiwiCore; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F9ABFC119BC499F001C85AC /* Json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Json.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +166,7 @@
 				8F73C7D619B9DB110041C577 /* Tag.cpp */,
 				8F73C7D719B9DB110041C577 /* Tag.h */,
 				8F73C7D819B9DB110041C577 /* Tools.h */,
+				8F9ABFC119BC499F001C85AC /* Json.h */,
 			);
 			name = KiwiCore;
 			path = ../KiwiCore;

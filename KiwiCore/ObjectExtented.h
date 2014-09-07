@@ -264,6 +264,11 @@ namespace Kiwi
          */
         void setAttributeDefaultValues(const vector<Element>& elements);
         
+        //! Create a string that discribes the extented object.
+        /** The function creates a string in the JSON format that describe the extented object.
+         @return The extented object in the the string format.
+         */
+        virtual operator string() const noexcept;
     public:
         
         //! Constructor.

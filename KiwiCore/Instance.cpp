@@ -53,7 +53,7 @@ namespace Kiwi
         map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(object->getName());
         if(it != m_prototypes.end())
         {
-            string message = string("The object prototype ") + (object->getName())->name() + string(" already exist !");
+            string message = string("The object prototype ") + (string)*object->getName() + string(" already exist !");
             error(message);
         }
         else

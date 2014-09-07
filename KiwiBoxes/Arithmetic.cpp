@@ -43,9 +43,9 @@ namespace Kiwi
         
     }
     
-    shared_ptr<Object> Plus::create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, vector<Element>& elements)
+    shared_ptr<Object> Plus::create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, Elements& elements)
     {
-        shared_ptr<Plus> x =  make_shared<Plus>(kiwi);
+        This x =  make_shared<Plus>(kiwi);
         
         x->m_augend = 0;
         x->m_addend = 0;
@@ -70,7 +70,7 @@ namespace Kiwi
         return shared_ptr<Object>(static_pointer_cast<Box>(x));
     }
     
-    void Plus::receiveBang(shared_ptr<Plus> x)
+    void Plus::receiveBang(This x)
     {
 #ifdef DEBUG
         string message = to_string(x->m_augend) + string(" ") + to_string(x->m_addend) + string(" = ") + to_string(x->m_augend + x->m_addend);
@@ -83,7 +83,7 @@ namespace Kiwi
             x->sendLong(0, x->m_augend +x-> m_addend);
     }
     
-    void Plus::receiveLong(shared_ptr<Plus> x, long value)
+    void Plus::receiveLong(This x, long value)
     {
         if(x->getProxy() == 0)
         {
@@ -94,7 +94,7 @@ namespace Kiwi
             x->m_addend = value;
     }
     
-    void Plus::receiveDouble(shared_ptr<Plus> x, double value)
+    void Plus::receiveDouble(This x, double value)
     {
         if(x->getProxy() == 0)
         {

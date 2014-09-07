@@ -23,6 +23,7 @@
 
 #include "Element.h"
 #include "Object.h"
+#include "Instance.h"
 
 namespace Kiwi
 {
@@ -77,35 +78,6 @@ namespace Kiwi
     Element::~Element() noexcept
     {
         ;
-    }
-    
-    void Element::write(ofstream* file, int indent)
-    {
-        if(m_type == T_LONG)
-            (*file) << m_val.m_long;
-        else if(m_type == T_DOUBLE)
-            (*file) << m_val.m_double;
-        else if(m_type == T_TAG)
-            (*file) << "\"" << m_val.m_tag->name() << "\"";
-        else if(m_val.m_object)
-        {
-            if(m_val.m_object->hasMethod("write"))
-            {
-                m_val.m_object->callMethodOpaque("write", 2, file, indent);
-            }
-        }
-    }
-    
-    string Element::getString() const noexcept
-    {
-        if(isLong())
-            return to_string(m_val.m_long);
-        else if(isDouble())
-            return to_string(m_val.m_double);
-        else if(isTag())
-            return m_val.m_tag->name();
-        else
-            return m_val.m_object->getName()->name();
     }
 }
 

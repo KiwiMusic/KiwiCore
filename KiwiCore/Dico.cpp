@@ -23,6 +23,7 @@
 
 #include "Dico.h"
 #include "Instance.h"
+#include "Json.h"
 
 namespace Kiwi
 {
@@ -32,7 +33,7 @@ namespace Kiwi
     
     Dico::Dico(shared_ptr<Instance> kiwi) : Object(kiwi, kiwi->createTag("dico"))
     {
-        addMethod("write", T_OPAQUE, (Method)dowrite);
+        ;
     }
     
     Dico::~Dico()
@@ -308,62 +309,6 @@ namespace Kiwi
             set(key, elements);
     }
     
-    void Dico::dowrite(shared_ptr<Dico> dico, ofstream* file, int ind)
-    {
-        if(dico->m_entries.size())
-        {
-            (*file) << "{\n";
-            for(map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = dico->m_entries.begin(); it != dico->m_entries.end(); ++it)
-            {
-                for(int i = 0; i < ind+1; i++)
-                    (*file) << "    ";
-                
-                (*file) << "\"" << it->first->name() << "\" : ";
-                it->second->dowrite((it->second), file, ind+1);
-                (*file) << ",\n";
-            }
-            
-            for(int i = 0; i < ind; i++)
-                (*file) << "    ";
-            
-            (*file) << "}";
-        }
-        else if(dico->m_elements.size() == 1)
-        {
-            dico->m_elements[0].write(file, ind);
-        }
-        else if(dico->m_elements.size() > 1)
-        {
-            (*file) << "[ ";
-            for(int i = 0; i < dico->m_elements.size() - 1; i++)
-            {
-                dico->m_elements[i].write(file, ind);
-                (*file) << ", ";
-            }
-            dico->m_elements[dico->m_elements.size() - 1].write(file);
-            (*file) << " ]";
-        }
-    }
-    
-    void Dico::write(string file, string directory)
-    {
-        ofstream kfile;
-        if(!file.size())
-            return;
-        
-        if(directory.size())
-            kfile.open(directory + string("/") + file);
-        else
-            kfile.open(file);
-        
-        if(kfile.is_open())
-        {
-            dowrite(static_pointer_cast<Dico>(shared_from_this()), &kfile, 0);
-        }
-        
-        kfile.close();
-    }
-    
     size_t Dico::getKey(string& line, string& key)
     {
         size_t pos1, pos2;
@@ -473,7 +418,7 @@ namespace Kiwi
                     {
                         if(type == T_OBJECT)
                         {
-                            cout << "Object\n";
+                            //cout << "Object\n";
                             //read(kfile, line);
                         }
                         else if(type == T_ELEMENTS)
@@ -548,31 +493,50 @@ namespace Kiwi
         kfile.close();
     }
     
-    void Dico::post(string text)
+    Json Dico::createJson()
+    {
+        Json file;
+        write(file);
+        file.close();
+        return file;
+    }
+    
+    void Dico::post()
+    {
+        Object::post((string)createJson());
+    }
+    
+    void Dico::write(string file, string directory)
+    {
+        ofstream kfile;
+        if(!file.size())
+            return;
+        
+        if(directory.size())
+            kfile.open(directory + string("/") + file);
+        else
+            kfile.open(file);
+        
+        if(kfile.is_open())
+        {
+            kfile << (string)createJson();
+        }
+        
+        kfile.close();
+    }
+    
+    void Dico::write(Json& file)
     {
         if(m_elements.size())
         {
-            if(m_elements.size() == 1)
-                text += m_elements[0].getString() + ",";
-            else
-            {
-                text += "[ ";
-                for(int i = 0; i < m_elements.size() - 1; i++)
-                {
-                    text += m_elements[i].getString();
-                    text += ", ";
-                }
-                text += m_elements[m_elements.size() - 1].getString();
-                text += " ],";
-            }
-            Object::post(text);
+            file.add(m_elements);
         }
         else if(m_entries.size())
         {
             for(map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = m_entries.begin(); it != m_entries.end(); ++it)
             {
-                string text = it->first->name() + " : ";
-                it->second->post(text);
+                file.newKey(it->first);
+                it->second->write(file);
             }
         }
     }

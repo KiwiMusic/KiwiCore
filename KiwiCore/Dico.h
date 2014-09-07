@@ -28,6 +28,7 @@
 #include "Tag.h"
 #include "Element.h"
 #include "Object.h"
+#include "Json.h"
 
 namespace Kiwi
 {
@@ -47,14 +48,11 @@ namespace Kiwi
         map<shared_ptr<Tag>, shared_ptr<Dico>>  m_entries;  ///< The entries
         vector<Element>                         m_elements; ///< The elements
         
-        static void dowrite(shared_ptr<Dico> dico, ofstream* file, int indent);
-        
         size_t          getKey(string& line, string& key);
         size_t          getType(string& line, size_t pos, Type& type);
         long            getLong(string& line, size_t pos);
         double          getDouble(string& line, size_t pos);
         shared_ptr<Tag> getTag(string& line, size_t pos);
-        
     public:
         
         //! Constructor.
@@ -295,6 +293,12 @@ namespace Kiwi
          */
         void write(string file, string directory = "");
         
+        //! Write the dico in the Json format.
+        /** The function writes he dico in the Json format.
+         @param file The Json file.
+         */
+        void write(Json& file) override;
+        
         //! Read a dico from a text file.
         /** The function reads a dico from a text file.
          @param file The name of the file.
@@ -311,7 +315,9 @@ namespace Kiwi
         //! Post the content of the dico.
         /** The posts the content of the dico.
          */
-        void post(string text = string(""));
+        void post();
+        
+        Json createJson();
     };
 }
 

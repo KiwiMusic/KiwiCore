@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      TAG                                         //
     // ================================================================================ //
     
-    Tag::Tag(string name) : m_name(name)
+    Tag::Tag(string const& name) : m_name(name)
     {
         
     }

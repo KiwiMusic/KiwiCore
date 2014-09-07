@@ -86,7 +86,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        Tag(string name);
+        Tag(string const& name);
         
         //! The destructor.
         /** You should never use this method except if you really know what you do.
@@ -97,7 +97,7 @@ namespace Kiwi
         /** The function retrieves the unique name of the tag.
          @return The name of the tag in the std::string format.
          */
-        inline string name() const noexcept
+        inline operator string() const noexcept
         {
             return m_name;
         }

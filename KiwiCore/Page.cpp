@@ -51,7 +51,7 @@ namespace Kiwi
         }
         else
         {
-            error(string("The object \"" + name->name() + "\" isn't patchable !"));
+            error(string("The object " + (string)*name + " isn't patchable !"));
             return shared_ptr<Box>();
         }
     }
