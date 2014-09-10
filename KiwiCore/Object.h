@@ -134,7 +134,7 @@ namespace Kiwi
         /** The function writes the object in the Json format.
          @param file The json to write.
          */
-        virtual void write(Json& file);
+        virtual void write(shared_ptr<Json> file);
         
         //! Retrieve the number of methods.
         /** The function retrieves the number of methods. It takes into account the default methods bang, long, double, tag, object, elements and garbage, the standard methods and the opaque methods.
@@ -349,6 +349,11 @@ namespace Kiwi
         /** This function uses the instance specific object factory to create a dico.
          */
         shared_ptr<Dico> createDico() const;
+        
+        //! Json factory.
+        /** This function uses the instance specific object factory to create a json.
+         */
+        shared_ptr<Json> createJson() const;
         
         //! Post a standard message.
         /** The function post a message via the instance specific console.

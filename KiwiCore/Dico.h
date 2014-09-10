@@ -48,17 +48,12 @@ namespace Kiwi
         map<shared_ptr<Tag>, shared_ptr<Dico>>  m_entries;  ///< The entries
         vector<Element>                         m_elements; ///< The elements
         
-        size_t          getKey(string& line, string& key);
-        size_t          getType(string& line, size_t pos, Type& type);
-        long            getLong(string& line, size_t pos);
-        double          getDouble(string& line, size_t pos);
-        shared_ptr<Tag> getTag(string& line, size_t pos);
     public:
         
         //! Constructor.
         /** Create a new dictionary.
          */
-        Dico(shared_ptr<Instance> kiwi);;
+        Dico(shared_ptr<Instance> kiwi);
         
         //! Destructor.
         /** Free the dictionary.
@@ -69,6 +64,12 @@ namespace Kiwi
         /** The function clears the dico.
          */
         void clear();
+        
+        //! Retrieve the keys of the entries from a dico.
+        /** The function retrieves the keys of the entries from a dico.
+         @param elements The vector of elements that will owns the key of the entries.
+         */
+        void getKeys(vector<Element>& elements);
         
         //! Check if an entry exists.
         /** This function checks if an entry exists.
@@ -228,7 +229,7 @@ namespace Kiwi
          @param key The name of the entry.
          @param elements The vector of elements.
          */
-        void set(shared_ptr<Tag> key, vector<Element>& elements);
+        void set(shared_ptr<Tag> key, vector<Element> const& elements);
         
         //! Append a int value to an entry.
         /** The function adds a new entry with a int value or append an int value to an old entry.
@@ -284,46 +285,26 @@ namespace Kiwi
          @param key The name of the entry.
          @param elements The vector of elements.
          */
-        void append(shared_ptr<Tag> key, vector<Element>& elements);
+        void append(shared_ptr<Tag> key, vector<Element> const& elements);
         
         //! Write the dico in a text file.
         /** The function writes the dico in a text file.
          @param file The name of the file.
          @param directory The name of the directory.
          */
-        void write(string file, string directory = "");
-        
-        //! Write the dico in the Json format.
-        /** The function writes he dico in the Json format.
-         @param file The Json file.
-         */
-        void write(Json& file) override;
+        void write(string filename, string directoryname = "");
         
         //! Read a dico from a text file.
         /** The function reads a dico from a text file.
-         @param file The name of the file.
-         @param directory The name of the directory.
+         @param filename        The name of the file.
+         @param directoryname   The name of the directory.
          */
-        void read(string name, string directory = "");
-        
-        //! Write the dico in the Json format.
-        /** The function writes he dico in the Json format.
-         @param file The Json file.
-         */
-        void read(Json& file);
-        
-        //! Read a dico from a text file.
-        /** The function reads a dico from a text file.
-         @param file The file.
-         */
-        void read(ifstream& file, string& line);
+        void read(string filename, string directoryname = "");
         
         //! Post the content of the dico.
         /** The posts the content of the dico.
          */
         void post();
-        
-        Json createJson();
     };
 }
 

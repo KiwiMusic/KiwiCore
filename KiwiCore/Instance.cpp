@@ -124,6 +124,11 @@ namespace Kiwi
         return make_shared<Dico>(enable_shared_from_this<Instance>::shared_from_this());
     }
     
+    shared_ptr<Json> Instance::createJson()
+    {
+        return make_shared<Json>(enable_shared_from_this<Instance>::shared_from_this());
+    }
+    
     shared_ptr<Page> Instance::createPage(string file, string directory)
     {
         if(file.empty())

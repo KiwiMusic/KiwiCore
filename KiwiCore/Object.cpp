@@ -873,6 +873,15 @@ namespace Kiwi
             return nullptr;
     }
     
+    shared_ptr<Json> Object::createJson() const
+    {
+        shared_ptr<Instance> kiwi = m_kiwi.lock();
+        if(kiwi)
+            return kiwi->createJson();
+        else
+            return nullptr;
+    }
+    
     void Object::post(string message) const noexcept
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
@@ -915,10 +924,9 @@ namespace Kiwi
             return kiwi->error(shared_from_this(), message);
     }
     
-    void Object::write(Json& file)
+    void Object::write(shared_ptr<Json> file)
     {
-        file.newKey(createTag("name"));
-        file.add(getName());
+        ;
     }
 }
 

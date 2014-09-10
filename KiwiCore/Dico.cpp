@@ -47,6 +47,13 @@ namespace Kiwi
         m_elements.clear();
     }
     
+    void Dico::getKeys(vector<Element>& elements)
+    {
+        elements.clear();
+        for(map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = m_entries.begin(); it != m_entries.end(); ++it)
+            elements.push_back(it->first);
+    }
+    
     shared_ptr<Dico> Dico::get(shared_ptr<Tag> key)
     {
         map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = m_entries.find(key);
@@ -212,7 +219,7 @@ namespace Kiwi
         m_entries[key] = dico;
     }
     
-    void Dico::set(shared_ptr<Tag> key, vector<Element>& elements)
+    void Dico::set(shared_ptr<Tag> key, vector<Element> const& elements)
     {
         if(elements.size() == 0)
             return;
@@ -287,7 +294,7 @@ namespace Kiwi
             set(key, object);
     }
     
-    void Dico::append(shared_ptr<Tag> key, vector<Element>& elements)
+    void Dico::append(shared_ptr<Tag> key, vector<Element> const& elements)
     {
         if(elements.size() == 0)
             return;
@@ -309,260 +316,19 @@ namespace Kiwi
             set(key, elements);
     }
     
-    size_t Dico::getKey(string& line, string& key)
+    void Dico::write(string filename, string directoryname)
     {
-        size_t pos1, pos2;
-        pos1 = line.find('"');
-        if(pos1 != string::npos)
-        {
-            pos1++;
-            pos2 = line.find('"', pos1);
-            if(pos2 != string::npos)
-            {
-                key.assign(line, pos1, pos2-pos1);
-                return pos2;
-            }
-        }
-        return string::npos;
+        createJson()->write(static_pointer_cast<Dico>(shared_from_this()), filename, directoryname);
     }
     
-    size_t Dico::getType(string& line, size_t pos, Type& type)
+    void Dico::read(string filename, string directoryname)
     {
-        size_t pos1, pos2;
-        pos1 = line.find(':', pos);
-        if(pos1 != string::npos)
-        {
-            pos1++;
-            if(pos1 < line.size())
-            {
-                pos2 = line.find('[', pos1);
-                if(pos2 != string::npos)
-                {
-                    type = T_ELEMENTS;
-                    return pos2;
-                }
-                pos2 = line.find('{', pos1);
-                if(pos2 != string::npos)
-                {
-                    type = T_OBJECT;
-                    return pos2;
-                }
-                
-                pos2 = line.find_first_not_of(' ', pos1);
-                if(pos2 != string::npos)
-                {
-                    size_t pos3 = line.find('"', pos2);
-                    if(pos3 != string::npos)
-                    {
-                        type = T_TAG;
-                        return pos3+1;
-                    }
-                    else if(line.find('.', pos2) != string::npos)
-                    {
-                        type = T_DOUBLE;
-                        return pos2;
-                    }
-                    else
-                    {
-                        type = T_LONG;
-                        return pos2;
-                    }
-                }
-            }
-        }
-        type = T_NOTHING;
-        return string::npos;
-    }
-    
-    long Dico::getLong(string& line, size_t pos)
-    {
-        return atol(line.c_str()+pos);
-    }
-    
-    double Dico::getDouble(string& line, size_t pos)
-    {
-        return atof(line.c_str()+pos);
-    }
-    
-    shared_ptr<Tag> Dico::getTag(string& line, size_t pos)
-    {
-        size_t next = line.find('"', pos+1);
-        if(next != string::npos)
-        {
-            string text;
-            text.assign(line, pos, next-pos);
-            return createTag(text);
-        }
-        else
-        {
-            return createTag(&line[pos]);
-        }
-    }
-    
-    void Dico::read(ifstream& kfile, string& line)
-    {
-        string strname;
-        shared_ptr<Tag> name;
-        Type type;
-        if(kfile.is_open())
-        {
-            clear();
-            while(getline(kfile, line))
-            {
-                size_t pos = getKey(line, strname);
-                if(pos != string::npos)
-                {
-                    pos = getType(line, pos, type);
-                    if(pos != string::npos)
-                    {
-                        if(type == T_OBJECT)
-                        {
-                            shared_ptr<Dico> dico = createDico();
-                            dico->read(kfile, line);
-                            if (dico->has(createTag("name")))
-                            {
-                                ;
-                            }
-                            else
-                                set(createTag(strname), dico);
-                        }
-                        else if(type == T_ELEMENTS)
-                        {
-                            pos += 2;
-                            size_t pos3;
-                            vector<Element> elements;
-                            
-                            pos3 = pos;
-                            while(pos < line.size())
-                            {
-                                pos3 = line.find(',', pos);
-                                if(pos3 == string::npos)
-                                    pos3 = line.size();
-                                
-                                size_t pos4 = line.find('{', pos);
-                                if(pos4 != string::npos && pos4 < pos3)
-                                {
-                                    shared_ptr<Dico> dico = createDico();
-                                    dico->read(kfile, line);
-                                    elements.push_back(static_pointer_cast<Object>(dico));
-                                }
-                                else
-                                {
-                                    pos4 = line.find('"', pos);
-                                    if(pos4 != string::npos && pos4 < pos3)
-                                    {
-                                        elements.push_back(getTag(line, pos));
-                                    }
-                                    else
-                                    {
-                                        pos4 = line.find('.', pos);
-                                        if(pos4 != string::npos && pos4 < pos3)
-                                        {
-                                            elements.push_back(getDouble(line, pos));
-                                        }
-                                        else
-                                        {
-                                            elements.push_back(getLong(line, pos));
-                                        }
-                                    }
-                                }
-                                
-
-                                pos = pos3+1;
-                            }
-                            set(createTag(strname), elements);
-
-                        }
-                        else if(type == T_LONG)
-                        {
-                            set(createTag(strname), getLong(line, pos));
-                        }
-                        else if(type == T_DOUBLE)
-                        {
-                            set(createTag(strname), getDouble(line, pos));
-                        }
-                        else if(type == T_TAG)
-                        {
-                            set(createTag(strname), getTag(line, pos));
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    void Dico::read(string file, string directory)
-    {
-        ifstream kfile;
-        string line;
-        if(!file.size())
-            return;
-        
-        if(directory.size())
-            kfile.open(directory + "/" + file);
-        else
-            kfile.open(file);
-        
-        if(kfile.is_open())
-        {
-            string text;
-            read(kfile, line);
-        }
-        
-        kfile.close();
-    }
-    
-    void Dico::read(Json& file)
-    {
-        ;
-    }
-    
-    Json Dico::createJson()
-    {
-        Json file;
-        write(file);
-        file.close();
-        return file;
+        createJson()->read(static_pointer_cast<Dico>(shared_from_this()), filename, directoryname);
     }
     
     void Dico::post()
     {
-        Object::post(createJson().getString());
-    }
-    
-    void Dico::write(string name, string directory)
-    {
-        ofstream file;
-        if(!name.size())
-            return;
-        
-        if(directory.size())
-            file.open(directory + string("/") + name);
-        else
-            file.open(name);
-        
-        if(file.is_open())
-        {
-            file << createJson().getString();
-        }
-        
-        file.close();
-    }
-    
-    void Dico::write(Json& file)
-    {
-        if(m_elements.size())
-        {
-            file.add(m_elements);
-        }
-        else if(m_entries.size())
-        {
-            for(map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = m_entries.begin(); it != m_entries.end(); ++it)
-            {
-                file.newKey(it->first);
-                it->second->write(file);
-            }
-        }
+        createJson()->post(static_pointer_cast<Dico>(shared_from_this()));
     }
 }
 

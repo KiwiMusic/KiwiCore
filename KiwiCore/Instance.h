@@ -29,6 +29,8 @@
 #include "Element.h"
 #include "Console.h"
 #include "Object.h"
+#include "Dico.h"
+#include "Json.h"
 #include "ObjectExtented.h"
 #include "Iolet.h"
 #include "Box.h"
@@ -58,6 +60,7 @@ namespace Kiwi
         shared_ptr<Object> createObject(string name, vector<Element>& elements);
         shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element>& elements);
         shared_ptr<Dico>   createDico();
+        shared_ptr<Json>   createJson();
         
         shared_ptr<Page> createPage(string file = string(""), string directory = string(""));
         void closePage(shared_ptr<Page> page);
