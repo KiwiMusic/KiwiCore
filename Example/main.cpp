@@ -81,14 +81,14 @@ int main (int argc, char* argv[])
         elements.push_back(8);
         elements.push_back(7);
         dico3->append(kiwi->createTag("aa"), elements);
-        dico3->append(kiwi->createTag("bb"), kiwi->createTag("zozo"));
+        dico3->append(kiwi->createTag("bb"), "zozo");
         
         dico2->append(kiwi->createTag("vd"), dico3);
         dico2->append(kiwi->createTag("va"), elements);
         dico2->append(kiwi->createTag("vb"), 1.6666);
         dico2->append(kiwi->createTag("vc"), elements);
         
-        dico1->append(kiwi->createTag("value1"), kiwi->createTag("zaza"));
+        dico1->append(kiwi->createTag("value1"), "zaza");
         dico1->append(kiwi->createTag("value2"), 1.2);
         dico1->append(kiwi->createTag("value3"), 1);
         dico1->append(kiwi->createTag("value4"), dico2);

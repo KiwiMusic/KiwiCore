@@ -44,8 +44,7 @@ namespace Kiwi
     class Dico : public Object
     {
     private:
-        map<shared_ptr<Tag>, shared_ptr<Dico>>  m_entries;
-        vector<Element>                         m_elements;
+        map<const shared_ptr<Tag>, vector<Element> >  m_entries;
         
     public:
         
@@ -76,13 +75,6 @@ namespace Kiwi
          @return True if the entry exists otherwise it returns false.
          */
         bool has(shared_ptr<Tag> key);
-        
-        //! Retrieve the entry from a dico.
-        /** The function retrieves the entry from a dico.
-         @param key The name of the entry.
-         @return The entry if it exists.
-         */
-        shared_ptr<Dico> get(shared_ptr<Tag> key);
         
         //! Clear the entry of a dico.
         /** The function clears the entry of a dico.
@@ -132,13 +124,6 @@ namespace Kiwi
          */
         bool isElements(shared_ptr<Tag> key);
         
-        //! Check if an entry is of type entries.
-        /** The function checks if an entry is of type entries.
-         @param key The name of the entry.
-         @return    True if the entry is a vector of entries.
-         */
-        bool isEntries(shared_ptr<Tag> key);
-        
         //! Retrieve the long value from a dico.
         /** The function retrieves the long value from a dico.
          @param key The name of the entry.
@@ -172,7 +157,7 @@ namespace Kiwi
          @param key The name of the entry.
          @param elements The elements from a dico or empty element list if the type isn't a vector of elements.
          */
-        const vector<Element>& getElements(shared_ptr<Tag> key);
+        void getElements(shared_ptr<Tag> key, vector<Element>& elements);
         
         //! Add a new entry with a int value.
         /** The function adds a new entry or replace an old entry with a int value.
@@ -222,6 +207,13 @@ namespace Kiwi
          @param object The object.
          */
         void set(shared_ptr<Tag> key, shared_ptr<Object> object);
+        
+        //! Add a new entry with an elements.
+        /** The function adds a new entry or replace an old entry with an elements.
+         @param key The name of the entry.
+         @param element The element.
+         */
+        void set(shared_ptr<Tag> key, Element element);
         
         //! Add a new entry with a vector of elements.
         /** The function adds a new entry or replace an old entry with a vector of elements.
@@ -278,7 +270,14 @@ namespace Kiwi
          @param object The object.
          */
         void append(shared_ptr<Tag> key, shared_ptr<Object> object);
-        
+
+        //! Append an element to an entry.
+        /** The function adds a new entry with an element or append an element to an old entry.
+         @param key The name of the entry.
+         @param element The element.
+         */
+        void append(shared_ptr<Tag> key, Element element);
+
         //! Append a vector of elements to an entry.
         /** The function adds a new entry with a vector of elements or append a vector of elements to an old entry.
          @param key The name of the entry.

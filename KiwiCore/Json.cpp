@@ -78,7 +78,8 @@ namespace Kiwi
                 }
                 else
                 {
-                    vector<Element> elements2 = dico->getElements(key);
+                    vector<Element> elements2;
+                    dico->getElements(key, elements2);
                     text.append("[ ");
                     for(int i = 0; i < elements2.size(); i++)
                     {
@@ -170,7 +171,8 @@ namespace Kiwi
                 }
                 else
                 {
-                    vector<Element> elements2 = dico->getElements(key);
+                    vector<Element> elements2;
+                    dico->getElements(key, elements2);
                     m_file << "[ ";
                     for(int i = 0; i < elements2.size(); i++)
                     {
