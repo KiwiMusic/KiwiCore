@@ -60,7 +60,7 @@ namespace Kiwi
         shared_ptr<Object> createObject(string name, vector<Element>& elements);
         shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element>& elements);
         shared_ptr<Connection> createConnection(shared_ptr<Box> from, int oulet, shared_ptr<Box> to, int inlet);
-        shared_ptr<Dico> createDico();
+        shared_ptr<Dictionary> createDico();
         shared_ptr<Json> createJson();
         
         

@@ -33,7 +33,7 @@ namespace Kiwi
     class Object;
     class ObjectExtented;
     class Box;
-    class Dico;
+    class Dictionary;
     
     class Instance;
     
@@ -74,22 +74,74 @@ namespace Kiwi
     public:
         
         //! Constructor.
-        /** Set up the element with a zero long value or with a defined value : int, long, float, double, tag or object.
+        /** The function allocates the element with a zero long value.
          */
         Element() noexcept;
+        
+        //! Constructor with an int value.
+        /** The function allocates the element with a long value from a casted int value.
+         */
         Element(int value) noexcept;
+        
+        //! Constructor with a long value.
+        /** The function allocates the element with a long value.
+         */
         Element(long value) noexcept;
+        
+        //! Constructor with a float value.
+        /** The function allocates the element with a double value from a casted float value.
+         */
         Element(float value) noexcept;
+        
+        //! Constructor with a double value.
+        /** The function allocates the element with a double value.
+         */
         Element(double value) noexcept;
+        
+        //! Constructor with a tag.
+        /** The function allocates the element with a tag.
+         */
         Element(shared_ptr<Tag> tag) noexcept;
+        
+        //! Constructor with a weak object.
+        /** The function allocates the element with a locked weak object.
+         */
         Element(weak_ptr<Object> object) noexcept;
+        
+        //! Constructor with an object.
+        /** The function allocates the element with an object.
+         */
         Element(shared_ptr<Object> object) noexcept;
+        
+        //! Constructor with a weak extented object.
+        /** The function allocates the element with a locked weak extented object.
+         */
         Element(weak_ptr<ObjectExtented> object) noexcept;
+        
+        //! Constructor with an extented object.
+        /** The function allocates the element with an extented object.
+         */
         Element(shared_ptr<ObjectExtented> object) noexcept;
+        
+        //! Constructor with a weak box.
+        /** The function allocates the element with a locked weak box.
+         */
         Element(weak_ptr<Box> object) noexcept;
+        
+        //! Constructor with a box.
+        /** The function allocates the element with a box.
+         */
         Element(shared_ptr<Box> object) noexcept;
-        Element(weak_ptr<Dico> object) noexcept;
-        Element(shared_ptr<Dico> object) noexcept;
+        
+        //! Constructor with a weak dico.
+        /** The function allocates the element with a locked weak dico.
+         */
+        Element(weak_ptr<Dictionary> object) noexcept;
+        
+        //! Constructor with a dico.
+        /** The function allocates the element with a dico.
+         */
+        Element(shared_ptr<Dictionary> object) noexcept;
         
         //! Destructor.
         /** Doesn't perform anything.
@@ -141,123 +193,181 @@ namespace Kiwi
             return m_type == T_OBJECT;
         }
         
-        inline operator int() const noexcept
-        {
-            if(isLong())
-                return (int)m_val.m_long;
-            else if(isDouble())
-                return (int)m_val.m_double;
-            else
-                return 0;
-        }
+        //! Cast an element to an int.
+        /** The function casts an element to an int.
+         @return An int value if the element is a digit otherwise 0.
+         */
+        operator int() const noexcept;
         
-        inline operator long() const noexcept
-        {
-            if(isLong())
-                return m_val.m_long;
-            else if(isDouble())
-                return (long)m_val.m_double;
-            else
-                return 0;
-        }
+        //! Cast an element to a long.
+        /** The function casts an element to a long.
+         @return A long value if the element is a digit otherwise 0.
+         */
+        operator long() const noexcept;
 
-        inline operator float() const noexcept
-        {
-            if(isDouble())
-                return (float)m_val.m_double;
-            else if(isLong())
-                return (float)m_val.m_long;
-            else
-                return 0;
-        }
+        //! Cast an element to a float.
+        /** The function casts an element to a float.
+         @return A float value if the element is a digit otherwise 0.
+         */
+        operator float() const noexcept;
         
-        inline operator double() const noexcept
-        {
-            if(isDouble())
-                return m_val.m_double;
-            else if(isLong())
-                return (double)m_val.m_long;
-            else
-                return 0;
-        }
+        //! Cast an element to a double.
+        /** The function casts an element to a double.
+         @return A double value if the element is a digit otherwise 0.
+         */
+        operator double() const noexcept;
         
-        inline operator shared_ptr<Tag>() const noexcept
-        {
-            return m_val.m_tag;
-        }
+        //! Cast an element to a tag.
+        /** The function casts an element to a tag.
+         @return A tag if the element is a tag otherwise a nullptr.
+         */
+        operator shared_ptr<Tag>() const noexcept;
         
-        inline operator weak_ptr<Object>() const noexcept
-        {
-            return m_val.m_object;
-        }
+        //! Cast an element to a weak object.
+        /** The function casts an element to a weak object.
+         @return A weak object if the element is an object otherwise a nullptr.
+         */
+        operator weak_ptr<Object>() const noexcept;
         
-        inline operator shared_ptr<Object>() const noexcept
-        {
-            return m_val.m_object;
-        }
+        //! Cast an element to an object.
+        /** The function casts an element to a weak object.
+         @return An object if the element is an object otherwise a nullptr.
+         */
+        operator shared_ptr<Object>() const noexcept;
         
-        inline Element& operator=(const Element& other) noexcept
-        {
-            m_type = other.m_type;
-            if(m_type == T_LONG)
-                m_val.m_long = other.m_val.m_long;
-            else if(m_type == T_DOUBLE)
-                m_val.m_double = other.m_val.m_double;
-            else if(m_type == T_TAG)
-                m_val.m_tag = other.m_val.m_tag;
-            else
-                m_val.m_object = other.m_val.m_object;
-            return *this;
-        }
+        //! Cast an element to a weak extented object.
+        /** The function casts an element to a weak extented object.
+         @return A weak extented object if the element is an object otherwise a nullptr.
+         */
+        operator weak_ptr<ObjectExtented>() const noexcept;
         
-        inline Element& operator=(int value) noexcept
-        {
-            m_type = T_LONG;
-            m_val.m_long = value;
-            return *this;
-        }
+        //! Cast an element to an extented object.
+        /** The function casts an element to an extented object.
+         @return An extented object if the element is an object otherwise a nullptr.
+         */
+        operator shared_ptr<ObjectExtented>() const noexcept;
         
-        inline Element& operator=(long value) noexcept
-        {
-            m_type = T_LONG;
-            m_val.m_long = value;
-            return *this;
-        }
+        //! Cast an element to a weak box.
+        /** The function casts an element to a weak box.
+         @return A weak box if the element is an object otherwise a nullptr.
+         */
+        operator weak_ptr<Box>() const noexcept;
         
-        inline Element& operator=(float value) noexcept
-        {
-            m_type  = T_DOUBLE;
-            m_val.m_double= value;
-            return *this;
-        }
+        //! Cast an element to a box.
+        /** The function casts an element to a box.
+         @return A box if the element is an object otherwise a nullptr.
+         */
+        operator shared_ptr<Box>() const noexcept;
         
-        inline Element& operator=(double value) noexcept
-        {
-            m_type  = T_DOUBLE;
-            m_val.m_double= value;
-            return *this;
-        }
+        //! Cast an element to a weak dico.
+        /** The function casts an element to a weak dico.
+         @return A weak dico if the element is an object otherwise a nullptr.
+         */
+        operator weak_ptr<Dictionary>() const noexcept;
         
-        inline Element& operator=(shared_ptr<Tag> tag) noexcept
-        {
-            m_type  = T_TAG;
-            m_val.m_tag= tag;
-            return *this;
-        }
+        //! Cast an element to a dico.
+        /** The function casts an element to a dico.
+         @return A dico if the element is an object otherwise a nullptr.
+         */
+        operator shared_ptr<Dictionary>() const noexcept;
         
-        inline Element& operator=(weak_ptr<Object> object) noexcept
-        {
-            m_type  = T_TAG;
-            m_val.m_object= object.lock();
-            return *this;
-        }
+        //! Set up the element with another element.
+        /** The function sets up the element with another element.
+         */
+        Element& operator=(const Element& other) noexcept;
         
-        inline Element& operator=(shared_ptr<Object> object) noexcept
-        {
-            m_type  = T_TAG;
-            m_val.m_object= object;
-            return *this;
-        }
+        //! Set up the element with a int value.
+        /** The function sets up the element with a long value from a casted int value.
+         */
+        Element& operator=(int value) noexcept;
+        
+        //! Set up the element with a long value.
+        /** The function sets up the element with a long value.
+         */
+        Element& operator=(long value) noexcept;
+        
+        //! Set up the element with a float value.
+        /** The function sets up the element with a double value from a casted float value.
+         */
+        Element& operator=(float value) noexcept;
+        
+        //! Set up the element with a double value.
+        /** The function sets up the element with a double value.
+         */
+        Element& operator=(double value) noexcept;
+        
+        //! Set up the element with a tag.
+        /** The function sets up the element with a tag.
+         */
+        Element& operator=(shared_ptr<Tag> tag) noexcept;
+        
+        //! Set up the element with a weak object.
+        /** The function sets up the element with a weak object.
+         */
+        Element& operator=(weak_ptr<Object> object) noexcept;
+        
+        //! Set up the element with an object.
+        /** The function sets up the element with an object.
+         */
+        Element& operator=(shared_ptr<Object> object) noexcept;
+        
+        //! Set up the element with a weak extented object.
+        /** The function sets up the element with a weak extented object.
+         */
+        Element& operator=(weak_ptr<ObjectExtented> object) noexcept;
+        
+        //! Set up the element with an extented object.
+        /** The function sets up the element with an extented object.
+         */
+        Element& operator=(shared_ptr<ObjectExtented> object) noexcept;
+        
+        //! Set up the element with a weak box.
+        /** The function sets up the element with a weak box.
+         */
+        Element& operator=(weak_ptr<Box> object) noexcept;
+        
+        //! Set up the element with a box.
+        /** The function sets up the element with a box.
+         */
+        Element& operator=(shared_ptr<Box> object) noexcept;
+        
+        //! Set up the element with a weak dico.
+        /** The function sets up the element with a weak dico.
+         */
+        Element& operator=(weak_ptr<Dictionary> object) noexcept;
+        
+        //! Set up the element with a dico.
+        /** The function sets up the element with a dico.
+         */
+        Element& operator=(shared_ptr<Dictionary> object) noexcept;
+        
+        bool operator==(const Element& other) const noexcept;
+        
+        bool operator==(const int value) const noexcept;
+        
+        bool operator==(const long value) const noexcept;
+        
+        bool operator==(const float value) const noexcept;
+        
+        bool operator==(const double value) const noexcept;
+        
+        bool operator==(shared_ptr<Tag> tag) const noexcept;
+        
+        bool operator==(weak_ptr<Object> object) const noexcept;
+        
+        bool operator==(shared_ptr<Object> object) const noexcept;
+        
+        bool operator==(weak_ptr<ObjectExtented> object) const noexcept;
+        
+        bool operator==(shared_ptr<ObjectExtented> object) const noexcept;
+        
+        bool operator==(weak_ptr<Box> object) const noexcept;
+        
+        bool operator==(shared_ptr<Box> object) const noexcept;
+        
+        bool operator==(weak_ptr<Dictionary> object) const noexcept;
+        
+        bool operator==(shared_ptr<Dictionary> object) const noexcept;
     };
 }
 

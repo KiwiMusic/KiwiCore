@@ -41,7 +41,7 @@ namespace Kiwi
     /**
      The dico is just a map container that allows to manages vector of elements with tags. The dico can be used to parse JSON files.
      */
-    class Dico : public Object
+    class Dictionary : public Object
     {
     private:
         map<const shared_ptr<Tag>, vector<Element>>  m_entries;
@@ -51,12 +51,12 @@ namespace Kiwi
         //! Constructor.
         /** Create a new dictionary.
          */
-        Dico(shared_ptr<Instance> kiwi);
+        Dictionary(shared_ptr<Instance> kiwi);
         
         //! Destructor.
         /** Free the dictionary.
          */
-        ~Dico();
+        ~Dictionary();
         
         //! Clear the dico.
         /** The function clears the dico.

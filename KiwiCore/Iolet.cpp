@@ -321,7 +321,7 @@ namespace Kiwi
         return m_inlet;
     }
     
-    void Connection::write(shared_ptr<Dico> dico)
+    void Connection::write(shared_ptr<Dictionary> dico)
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)

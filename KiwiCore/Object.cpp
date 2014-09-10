@@ -901,7 +901,7 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Dico> Object::createDico() const
+    shared_ptr<Dictionary> Object::createDico() const
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
@@ -961,7 +961,7 @@ namespace Kiwi
             return kiwi->error(shared_from_this(), message);
     }
     
-    void Object::write(shared_ptr<Dico> dico)
+    void Object::write(shared_ptr<Dictionary> dico)
     {
         /*
         if(hasMethod(createTag("write")))

@@ -124,9 +124,9 @@ namespace Kiwi
         return make_shared<Connection>(enable_shared_from_this<Instance>::shared_from_this(), from, oulet, to, inlet);
     }
     
-    shared_ptr<Dico> Instance::createDico()
+    shared_ptr<Dictionary> Instance::createDico()
     {
-        return make_shared<Dico>(enable_shared_from_this<Instance>::shared_from_this());
+        return make_shared<Dictionary>(enable_shared_from_this<Instance>::shared_from_this());
     }
     
     shared_ptr<Json> Instance::createJson()

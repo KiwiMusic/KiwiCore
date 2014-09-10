@@ -285,12 +285,12 @@ namespace Kiwi
             doClip();
         }
         
-        void write(shared_ptr<Dico> dico)
+        void write(shared_ptr<Dictionary> dico)
         {
             dico->set(m_name, 0.01);
         }
         
-        void read(shared_ptr<Dico> dico)
+        void read(shared_ptr<Dictionary> dico)
         {
             
         }

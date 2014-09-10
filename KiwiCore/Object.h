@@ -36,7 +36,7 @@ namespace Kiwi
     class Instance;
     class DspNode;
     class Box;
-    class Dico;
+    class Dictionary;
     class Json;
     class Connection;
     
@@ -142,7 +142,7 @@ namespace Kiwi
         /** The function writes the object in a dico.
          @param dico The dico.
          */
-        virtual void write(shared_ptr<Dico> dico);
+        virtual void write(shared_ptr<Dictionary> dico);
         
         //! Retrieve the number of methods.
         /** The function retrieves the number of methods. It takes into account the default methods bang, long, double, tag, object, elements and garbage, the standard methods and the opaque methods.
@@ -359,10 +359,10 @@ namespace Kiwi
          */
         shared_ptr<Connection> createConnection(shared_ptr<Box> from, int outlet, shared_ptr<Box> to, int inlet) const;
         
-        //! Dico factory.
+        //! Dictionary factory.
         /** This function uses the instance specific dico factory to create a dico.
          */
-        shared_ptr<Dico> createDico() const;
+        shared_ptr<Dictionary> createDico() const;
         
         //! Json factory.
         /** This function uses the instance specific dico factory to create a json.

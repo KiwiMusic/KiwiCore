@@ -315,7 +315,7 @@ namespace Kiwi
         /** The function writes the connection in a dico.
          @param dico The dico.
          */
-        void write(shared_ptr<Dico> dico);
+        void write(shared_ptr<Dictionary> dico);
         
         inline bool operator==(const Connection& other) noexcept
         {

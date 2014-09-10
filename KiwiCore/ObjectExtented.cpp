@@ -41,7 +41,7 @@ namespace Kiwi
         m_listeners.clear();
     };
     
-    void ObjectExtented::write(shared_ptr<Dico> dico)
+    void ObjectExtented::write(shared_ptr<Dictionary> dico)
     {
         for(map<shared_ptr<Tag>, Attribute>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
         {

@@ -31,39 +31,39 @@ namespace Kiwi
     //                                      DICO                                        //
     // ================================================================================ //
     
-    Dico::Dico(shared_ptr<Instance> kiwi) : Object(kiwi, "dico")
+    Dictionary::Dictionary(shared_ptr<Instance> kiwi) : Object(kiwi, "dico")
     {
         ;
     }
     
-    Dico::~Dico()
+    Dictionary::~Dictionary()
     {
         clear();
     }
     
-    void Dico::clear() noexcept
+    void Dictionary::clear() noexcept
     {
         m_entries.clear();
     }
     
-    void Dico::clear(shared_ptr<Tag> key) noexcept
+    void Dictionary::clear(shared_ptr<Tag> key) noexcept
     {
         m_entries.erase(key);
     }
     
-    void Dico::keys(vector<Element>& elements) const noexcept
+    void Dictionary::keys(vector<Element>& elements) const noexcept
     {
         elements.clear();
         for(map<const shared_ptr<Tag>, vector<Element>>::const_iterator it = m_entries.begin(); it != m_entries.end(); ++it)
             elements.push_back(it->first);
     }
     
-    bool Dico::has(shared_ptr<Tag> key) const noexcept
+    bool Dictionary::has(shared_ptr<Tag> key) const noexcept
     {
         return m_entries.find(key) != m_entries.end();
     }
     
-    Type Dico::type(shared_ptr<Tag> key) const noexcept
+    Type Dictionary::type(shared_ptr<Tag> key) const noexcept
     {
         map<const shared_ptr<Tag>, vector<Element> >::const_iterator it = m_entries.find(key);
         if(it != m_entries.end())
@@ -82,7 +82,7 @@ namespace Kiwi
             return T_NOTHING;
     }
     
-    Element Dico::get(shared_ptr<Tag> key) const noexcept
+    Element Dictionary::get(shared_ptr<Tag> key) const noexcept
     {
         map<const shared_ptr<Tag>, vector<Element> >::const_iterator it = m_entries.find(key);
         if(it != m_entries.end())
@@ -96,7 +96,7 @@ namespace Kiwi
         return 0;
     }
     
-    void Dico::get(shared_ptr<Tag> key, vector<Element>& elements) const noexcept
+    void Dictionary::get(shared_ptr<Tag> key, vector<Element>& elements) const noexcept
     {
         map<const shared_ptr<Tag>, vector<Element> >::const_iterator it = m_entries.find(key);
         if(it != m_entries.end())
@@ -105,21 +105,21 @@ namespace Kiwi
         }
     }
     
-    void Dico::set(shared_ptr<Tag> key, Element const element) noexcept
+    void Dictionary::set(shared_ptr<Tag> key, Element const element) noexcept
     {
         vector<Element> elements;
         elements.push_back(element);
         m_entries[key] = elements;
     }
     
-    void Dico::set(shared_ptr<Tag> key, vector<Element> const& elements) noexcept
+    void Dictionary::set(shared_ptr<Tag> key, vector<Element> const& elements) noexcept
     {
         if(elements.size() == 0)
             return;
         m_entries[key] = elements;
     }
 
-    void Dico::append(shared_ptr<Tag> key, Element const element) noexcept
+    void Dictionary::append(shared_ptr<Tag> key, Element const element) noexcept
     {
         map<const shared_ptr<Tag>, vector<Element> >::iterator it = m_entries.find(key);
         if(it != m_entries.end())
@@ -128,7 +128,7 @@ namespace Kiwi
             set(key, element);
     }
     
-    void Dico::append(shared_ptr<Tag> key, vector<Element> const& elements) noexcept
+    void Dictionary::append(shared_ptr<Tag> key, vector<Element> const& elements) noexcept
     {
         map<const shared_ptr<Tag>, vector<Element> >::iterator it = m_entries.find(key);
         if(it != m_entries.end())
@@ -142,19 +142,19 @@ namespace Kiwi
             set(key, elements);
     }
     
-    void Dico::write(string filename, string directoryname)
+    void Dictionary::write(string filename, string directoryname)
     {
-        createJson()->write(static_pointer_cast<Dico>(shared_from_this()), filename, directoryname);
+        createJson()->write(static_pointer_cast<Dictionary>(shared_from_this()), filename, directoryname);
     }
     
-    void Dico::read(string filename, string directoryname)
+    void Dictionary::read(string filename, string directoryname)
     {
-        createJson()->read(static_pointer_cast<Dico>(shared_from_this()), filename, directoryname);
+        createJson()->read(static_pointer_cast<Dictionary>(shared_from_this()), filename, directoryname);
     }
     
-    void Dico::post()
+    void Dictionary::post()
     {
-        createJson()->post(static_pointer_cast<Dico>(shared_from_this()));
+        createJson()->post(static_pointer_cast<Dictionary>(shared_from_this()));
     }
 }
 

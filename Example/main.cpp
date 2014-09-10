@@ -56,21 +56,17 @@ int main (int argc, char* argv[])
         }
         kiwi->post("---------");
         
-        sDico dico1 = kiwi->createDico();
-        sDico dico2 = kiwi->createDico();
-        sDico dico3 = kiwi->createDico();
+        Dico dico1 = kiwi->createDico();
+        Dico dico2 = kiwi->createDico();
+        Dico dico3 = kiwi->createDico();
         
-        vector<Element> elements;
-        elements.push_back(9);
-        elements.push_back(8);
-        elements.push_back(7);
-        dico3->append(kiwi->createTag("aa"), elements);
+        dico3->append(kiwi->createTag("aa"), {9, 8, 7});
         dico3->append(kiwi->createTag("bb"), kiwi->createTag("zozo"));
         
         dico2->append(kiwi->createTag("vd"), dico3);
-        dico2->append(kiwi->createTag("va"), elements);
+        dico2->append(kiwi->createTag("va"), {3, 8, 1});
         dico2->append(kiwi->createTag("vb"), 1.6666);
-        dico2->append(kiwi->createTag("vc"), elements);
+        dico2->append(kiwi->createTag("vc"), {12, 9, 3});
         
         dico1->append(kiwi->createTag("value1"), kiwi->createTag("zaza"));
         dico1->append(kiwi->createTag("value2"), 1.2);

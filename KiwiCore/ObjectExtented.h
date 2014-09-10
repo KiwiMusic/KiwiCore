@@ -333,7 +333,7 @@ namespace Kiwi
         /** The function writes the object in a dico.
          @param dico The dico.
          */
-        virtual void write(shared_ptr<Dico> dico) override;
+        virtual void write(shared_ptr<Dictionary> dico) override;
     };
     
     class ObjectExtentedListener
