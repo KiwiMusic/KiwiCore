@@ -107,6 +107,13 @@ namespace Kiwi
          */
         Object(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name);
         
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
+        Object(shared_ptr<Instance> kiwi, const string name);
+        
         //! Descrutor.
         /** Free the methods.
          */

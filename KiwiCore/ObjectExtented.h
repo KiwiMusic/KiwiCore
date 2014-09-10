@@ -268,11 +268,17 @@ namespace Kiwi
         
         //! Constructor.
         /** Set up the default pointers and tags.
-         @param tagger  A pointer to a tag manager.
-         @param console A pointer to a console.
+         @param kiwi    A pointer to the instance.
          @param name    A name for the object.
          */
         ObjectExtented(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name);
+        
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
+        ObjectExtented(shared_ptr<Instance> kiwi, const string name);
         
         //! Descrutor.
         /** Free the methods.

@@ -129,7 +129,9 @@ namespace Kiwi
         if(m_file.is_open())
         {
             m_file.clear();
+            m_file << "{\n";
             dowrite(dico);
+            m_file << "}";
         }
         
         m_file.close();
@@ -141,7 +143,6 @@ namespace Kiwi
         dico->getKeys(elements);
         if(elements.size())
         {
-            m_file << "{\n";
             for(int i = 0; i < elements.size(); i++)
             {
                 shared_ptr<Tag> key = (shared_ptr<Tag>)elements[i];
@@ -163,7 +164,9 @@ namespace Kiwi
                 }
                 else if(type == T_OBJECT)
                 {
+                    m_file << "{\n";
                     dowrite(static_pointer_cast<Dico>(dico->getObject(key)), line  + "    ");
+                    m_file << line << "    }\n";
                 }
                 else
                 {
@@ -172,13 +175,23 @@ namespace Kiwi
                     for(int i = 0; i < elements2.size(); i++)
                     {
                         if(elements2[i].isLong())
+                        {
                             m_file << to_string((long)elements2[i]);
+                        }
                         else if(elements2[i].isDouble())
+                        {
                             m_file << to_string((double)elements2[i]);
+                        }
                         else if(elements2[i].isTag())
+                        {
                             m_file << "\"" << (string)*((shared_ptr<Tag>)elements2[i]) << "\"";
+                        }
                         else
+                        {
+                            m_file << "{\n";
                             dowrite(static_pointer_cast<Dico>((shared_ptr<Object>)elements2[i]), line  + "    ");
+                            m_file << line  << "    }";
+                        }
                         
                         if(i < elements2.size() - 1)
                             m_file << ", ";
@@ -188,7 +201,6 @@ namespace Kiwi
                     m_file << ",\n";
                 }
             }
-            m_file << line << "}\n";
         }
     }
     

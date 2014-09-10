@@ -92,7 +92,7 @@ namespace Kiwi
                 return T_ELEMENTS;
             }
             else
-                return T_ENTRIES;
+                return T_OBJECT;
         }
         else
             return T_NOTHING;
@@ -121,11 +121,6 @@ namespace Kiwi
     bool Dico::isElements(shared_ptr<Tag> key)
     {
         return type(key) == T_ELEMENTS;
-    }
-    
-    bool Dico::isEntries(shared_ptr<Tag> key)
-    {
-        return type(key) == T_ENTRIES;
     }
     
     long Dico::getLong(shared_ptr<Tag> key)

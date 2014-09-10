@@ -23,17 +23,17 @@ int main (int argc, char* argv[])
         {
             vector<Element> elements;
             elements.push_back(1);
-            shared_ptr<Box> obj1 = page->createBox(kiwi->createTag("+~"), elements);
+            shared_ptr<Box> obj1 = page->createBox("+~", elements);
             elements[0] = 1;
-            shared_ptr<Box> obj2 = page->createBox(kiwi->createTag("+~"), elements);
+            shared_ptr<Box> obj2 = page->createBox("+~", elements);
             elements[0] = 1.;
-            shared_ptr<Box> obj3 = page->createBox(kiwi->createTag("+~"), elements);
+            shared_ptr<Box> obj3 = page->createBox("+~", elements);
             elements[0] = 1.;
-            shared_ptr<Box> obj4 = page->createBox(kiwi->createTag("+~"), elements);
+            shared_ptr<Box> obj4 = page->createBox("+~", elements);
             elements[0] = 1.;
-            shared_ptr<Box> obj5 = page->createBox(kiwi->createTag("+~"), elements);
+            shared_ptr<Box> obj5 = page->createBox("+~", elements);
             elements[0] = 1.;
-            shared_ptr<Box> obj6 = page->createBox(kiwi->createTag("+~"), elements);
+            shared_ptr<Box> obj6 = page->createBox("+~", elements);
             
             string message = string("connect obj1 to obj2: ");
             message += to_string(page->connect(obj1, 0, obj2, 0));

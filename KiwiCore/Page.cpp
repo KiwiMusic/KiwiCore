@@ -56,6 +56,11 @@ namespace Kiwi
         }
     }
     
+    shared_ptr<Box> Page::createBox(string name, vector<Element> &elements)
+    {
+        return createBox(createTag(name), elements);
+    }
+    
     void Page::freeBox(shared_ptr<Box> box)
     {
         if(m_boxes.find(box) != m_boxes.end())

@@ -56,6 +56,34 @@ namespace Kiwi
         ;
     }
     
+    Object::Object(shared_ptr<Instance> kiwi, const string name) :
+    m_kiwi(kiwi),
+    m_name(kiwi->createTag(name)),
+    m_stack_count(0),
+    
+    m_method_create({T_NOTHING, nullptr}),
+    m_method_bang(nullptr),
+    m_method_long(nullptr),
+    m_method_double(nullptr),
+    m_method_tag(nullptr),
+    m_method_object(nullptr),
+    m_method_elements(nullptr),
+    m_method_garbage(nullptr),
+    
+    m_tag_bang(kiwi->createTag("bang")),
+    m_tag_long(kiwi->createTag("long")),
+    m_tag_double(kiwi->createTag("double")),
+    m_tag_tag(kiwi->createTag("tag")),
+    m_tag_object(kiwi->createTag("object")),
+    m_tag_elements(kiwi->createTag("elements")),
+    m_tag_garbage(kiwi->createTag("garbage")),
+    m_tag_signal(kiwi->createTag("signal")),
+    m_tag_empty(kiwi->createTag("")),
+    m_tag_create(kiwi->createTag("create"))
+    {
+        
+    }
+    
     Object::~Object()
     {
         m_method_standard.clear();

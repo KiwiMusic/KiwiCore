@@ -39,19 +39,20 @@ namespace Kiwi
     class PlusTilde : public Box
     {
     private:
+        typedef shared_ptr<PlusTilde> This;
         friend class ArithmeticTilde;
         sample          m_addend;
     public:
         PlusTilde(shared_ptr<Instance> kiwi);
         
         static shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements);
-        static void receiveLong(shared_ptr<PlusTilde> plus, long value);
-        static void receiveDouble(shared_ptr<PlusTilde> plus, double value);
-        static void dsp(shared_ptr<PlusTilde> plus, shared_ptr<DspNode> node);
-        static void processBoth(shared_ptr<PlusTilde> plus, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
-        static void processLeft(shared_ptr<PlusTilde> plus, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
-        static void processRight(shared_ptr<PlusTilde> plus, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
-        static void processNone(shared_ptr<PlusTilde> plus, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
+        static void receiveLong(This, long value);
+        static void receiveDouble(This x, double value);
+        static void dsp(This x, shared_ptr<DspNode> node);
+        static void processBoth(This x, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
+        static void processLeft(This x, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
+        static void processRight(This x, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
+        static void processNone(This x, long nins, sample const** ins, long nouts, sample** outs, long vectorsize);
     };
     
     // ================================================================================ //

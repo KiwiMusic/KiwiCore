@@ -43,6 +43,22 @@ namespace Kiwi
         createAttribute(createTag("justification"), T_TAG, 1);
     }
     
+    Box::Box(shared_ptr<Instance> kiwi, const string name) : ObjectExtented(kiwi, name), m_last_inlet(0)
+    {
+        createAttribute(createTag("position"), T_LONG, 2);
+        setAttributeAppearance(createTag("Position"), createTag("list"), createTag("Appearance"));
+        setAttributeBehavior(false, true, true);
+        
+        createAttribute(createTag("size"), T_LONG, 2);
+        setAttributeAppearance(createTag("Size"), createTag("list"), createTag("Appearance"));
+        setAttributeBehavior(false, true, true);
+        
+        createAttribute(createTag("fontname"), T_TAG, 1);
+        createAttribute(createTag("fontsize"), T_LONG, 1);
+        createAttribute(createTag("fontstyle"), T_LONG, 1);
+        createAttribute(createTag("justification"), T_TAG, 1);
+    }
+    
     Box::~Box()
     {
         m_outlets.clear();

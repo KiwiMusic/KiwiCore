@@ -30,6 +30,11 @@ namespace Kiwi
         m_current_attribute = m_attributes.end();
     }
     
+    ObjectExtented::ObjectExtented(shared_ptr<Instance> kiwi, const string name) : Object(kiwi, name)
+    {
+        m_current_attribute = m_attributes.end();
+    }
+    
     ObjectExtented::~ObjectExtented()
     {
         m_attributes.clear();

@@ -257,7 +257,25 @@ namespace Kiwi
             Hot  = 1
         };
         
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
         Box(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name);
+        
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
+        Box(shared_ptr<Instance> kiwi, const string name);
+        
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
         virtual ~Box();
         
         //! Retrieve the type of the object.

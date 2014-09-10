@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      PLUS                                        //
     // ================================================================================ //
     
-    Plus::Plus(shared_ptr<Instance> kiwi) : Box(kiwi, kiwi->createTag("+"))
+    Plus::Plus(shared_ptr<Instance> kiwi) : Box(kiwi, "+")
     {
         addMethod("create",   T_ELEMENTS, (Method)create);
         addMethod("bang",     T_NOTHING,  (Method)receiveBang);
@@ -67,7 +67,7 @@ namespace Kiwi
         x->setInletAttributes(1, "Addend", InletPolarity::Cold);
         x->setOutletDescription(0, "Sum");
         
-        return shared_ptr<Object>(static_pointer_cast<Box>(x));
+        return static_pointer_cast<Object>(x);
     }
     
     void Plus::receiveBang(This x)

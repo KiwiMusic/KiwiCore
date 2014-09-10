@@ -45,7 +45,7 @@ namespace Kiwi
     {
     private:
         map<shared_ptr<Tag>, shared_ptr<Dico>>  m_entries;
-        vector<Element>                        m_elements;
+        vector<Element>                         m_elements;
         
     public:
         
