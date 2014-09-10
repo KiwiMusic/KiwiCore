@@ -31,6 +31,10 @@
 namespace Kiwi
 {
     class Object;
+    class ObjectExtented;
+    class Box;
+    class Dico;
+    
     class Instance;
     
     typedef enum
@@ -80,6 +84,12 @@ namespace Kiwi
         Element(shared_ptr<Tag> tag) noexcept;
         Element(weak_ptr<Object> object) noexcept;
         Element(shared_ptr<Object> object) noexcept;
+        Element(weak_ptr<ObjectExtented> object) noexcept;
+        Element(shared_ptr<ObjectExtented> object) noexcept;
+        Element(weak_ptr<Box> object) noexcept;
+        Element(shared_ptr<Box> object) noexcept;
+        Element(weak_ptr<Dico> object) noexcept;
+        Element(shared_ptr<Dico> object) noexcept;
         
         //! Destructor.
         /** Doesn't perform anything.

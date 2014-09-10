@@ -119,6 +119,11 @@ namespace Kiwi
         return object;
     }
     
+    shared_ptr<Connection> Instance::createConnection(shared_ptr<Box> from, int oulet, shared_ptr<Box> to, int inlet)
+    {
+        return make_shared<Connection>(enable_shared_from_this<Instance>::shared_from_this(), from, oulet, to, inlet);
+    }
+    
     shared_ptr<Dico> Instance::createDico()
     {
         return make_shared<Dico>(enable_shared_from_this<Instance>::shared_from_this());

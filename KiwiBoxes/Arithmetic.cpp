@@ -72,11 +72,6 @@ namespace Kiwi
     
     void Plus::receiveBang(This x)
     {
-#ifdef DEBUG
-        string message = to_string(x->m_augend) + string(" ") + to_string(x->m_addend) + string(" = ") + to_string(x->m_augend + x->m_addend);
-        
-        x->postObject(message);
-#endif
         if(x->m_double)
             x->sendDouble(0, x->m_augend + x->m_addend);
         else

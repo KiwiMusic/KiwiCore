@@ -23,6 +23,7 @@
 
 #include "Iolet.h"
 #include "Box.h"
+#include "Instance.h"
 
 namespace Kiwi
 {
@@ -280,7 +281,8 @@ namespace Kiwi
     //                                      CONNECTION                                  //
     // ================================================================================ //
     
-    Connection::Connection(const shared_ptr<Box> from, int outlet, const shared_ptr<Box> to, int inlet) :
+    Connection::Connection(const shared_ptr<Instance> kiwi, const shared_ptr<Box> from, int outlet, const shared_ptr<Box> to, int inlet) :
+    m_kiwi(kiwi),
     m_from(from),
     m_outlet(outlet),
     m_to(to),
@@ -317,6 +319,40 @@ namespace Kiwi
     int Connection::getInletIndex()
     {
         return m_inlet;
+    }
+    
+    void Connection::write(shared_ptr<Dico> dico)
+    {
+        shared_ptr<Instance> kiwi = m_kiwi.lock();
+        if(kiwi)
+        {
+            shared_ptr<Box> box;
+            if((box = m_from.lock()))
+            {
+                shared_ptr<Tag> tag = (shared_ptr<Tag>)box->getAttributeValue(kiwi->createTag("id"));
+                if(tag)
+                    dico->set(kiwi->createTag("from"), tag);
+                else
+                    dico->set(kiwi->createTag("from"), kiwi->createTag("id-0"));
+            }
+            else
+                dico->set(kiwi->createTag("from"), kiwi->createTag("id-0"));
+            
+            if((box = m_to.lock()))
+            {
+                shared_ptr<Tag> tag = (shared_ptr<Tag>)box->getAttributeValue(kiwi->createTag("id"));
+                if(tag)
+                    dico->set(kiwi->createTag("to"), tag);
+                else
+                    dico->set(kiwi->createTag("to"), kiwi->createTag("id-0"));
+            }
+            else
+                dico->set(kiwi->createTag("to"), kiwi->createTag("id-0"));
+            
+            dico->set(kiwi->createTag("outlet"), m_outlet);
+            dico->set(kiwi->createTag("inlet"), m_inlet);
+        }
+        
     }
 }
 

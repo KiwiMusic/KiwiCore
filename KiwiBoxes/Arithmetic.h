@@ -45,11 +45,10 @@ namespace Kiwi
         double          m_augend;
         double          m_addend;
     public:
-        Plus(shared_ptr<Instance> kiwi);
+        Plus(sInstance kiwi);
         ~Plus();
         
-        static shared_ptr<Object> create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, Elements& elements);
-    
+        static sObject create(sInstance kiwi, sTag name, Elements& elements);
         static void receiveBang(This x);
         static void receiveLong(This x, long value);
         static void receiveDouble(This x, double value);

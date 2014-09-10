@@ -291,12 +291,41 @@ namespace Kiwi
         }
     }
     
+    void ObjectExtented::setAttributeDefaultValue(const shared_ptr<Tag> name, Element value)
+    {
+        if(getAttribute(name))
+        {
+            vector<Element> elements;
+            elements.push_back(value);
+            m_current_attribute->second.setDefaultValues(elements);
+        }
+    }
+    
+    void ObjectExtented::setAttributeDefaultValue(Element value)
+    {
+        if(currentAttributeValid())
+        {
+            vector<Element> elements;
+            elements.push_back(value);
+            m_current_attribute->second.setDefaultValues(elements);
+        }
+    }
+
     void ObjectExtented::setAttributeValues(const shared_ptr<Tag> name, const vector<Element>& elements)
     {
         if(getAttribute(name))
         {
             m_current_attribute->second.setValues(elements);
         }
+    }
+    
+    Element ObjectExtented::getAttributeValue(const shared_ptr<Tag> name)
+    {
+        if(getAttribute(name))
+        {
+            return m_current_attribute->second.getValue();
+        }
+        return 0;
     }
     
     void ObjectExtented::getAttributeValues(const shared_ptr<Tag> name, vector<Element>& elements)

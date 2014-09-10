@@ -264,6 +264,20 @@ namespace Kiwi
          */
         void setAttributeDefaultValues(const vector<Element>& elements);
         
+        //! Set the attribute's default long value.
+        /** The function sets the attribute's default long value.
+         @param name    The name of the attribute.
+         @param value   The default long value.
+         */
+        void setAttributeDefaultValue(const shared_ptr<Tag> name, Element element);
+        
+        //! Set the attribute's default value.
+        /** The function sets the attribute's default value.
+         @param name    The name of the attribute.
+         @param value   The default value.
+         */
+        void setAttributeDefaultValue(Element element);
+        
     public:
         
         //! Constructor.
@@ -307,6 +321,13 @@ namespace Kiwi
          @param elements    A vector of value to write the attribute's values.
          */
         void getAttributeValues(const shared_ptr<Tag> name, vector<Element>& elements);
+        
+        //! Get the value of an attribute.
+        /** The function retrieves the values of an attribute.
+         @param name        The name of the attribute.
+         @return The value of the attribute as an element.
+         */
+        Element getAttributeValue(const shared_ptr<Tag> name);
         
         //! Write the object in a dico.
         /** The function writes the object in a dico.

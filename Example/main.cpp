@@ -35,28 +35,12 @@ int main (int argc, char* argv[])
             elements[0] = 1.;
             shared_ptr<Box> obj6 = page->createBox("+~", elements);
             
-            string message = string("connect obj1 to obj2: ");
-            message += to_string(page->connect(obj1, 0, obj2, 0));
-            kiwi->post(message);
-            
-            message = string("connect obj2 to obj3: ");
-            message += to_string(page->connect(obj2, 0, obj3, 0));
-            kiwi->post(message);
-            
-            message = string("connect obj3 to obj4: ");
-            message += to_string(page->connect(obj3, 0, obj4, 0));
-            kiwi->post(message);
-            
-            message = string("connect obj4 to obj5: ");
-            message += to_string(page->connect(obj4, 0, obj5, 0));
-            kiwi->post(message);
-            
-            message = string("connect obj5 to obj6: ");
-            message += to_string(page->connect(obj5, 0, obj6, 0));
-            kiwi->post(message);
-            
-            kiwi->post("---------");
-            
+            page->connect(obj1, 0, obj2, 0);
+            page->connect(obj2, 0, obj3, 0);
+            page->connect(obj3, 0, obj4, 0);
+            page->connect(obj4, 0, obj5, 0);
+            page->connect(obj5, 0, obj6, 0);
+
             kiwi->startDsp(44100., 2048);
             t = clock();
             
@@ -81,14 +65,14 @@ int main (int argc, char* argv[])
         elements.push_back(8);
         elements.push_back(7);
         dico3->append(kiwi->createTag("aa"), elements);
-        dico3->append(kiwi->createTag("bb"), "zozo");
+        dico3->append(kiwi->createTag("bb"), kiwi->createTag("zozo"));
         
         dico2->append(kiwi->createTag("vd"), dico3);
         dico2->append(kiwi->createTag("va"), elements);
         dico2->append(kiwi->createTag("vb"), 1.6666);
         dico2->append(kiwi->createTag("vc"), elements);
         
-        dico1->append(kiwi->createTag("value1"), "zaza");
+        dico1->append(kiwi->createTag("value1"), kiwi->createTag("zaza"));
         dico1->append(kiwi->createTag("value2"), 1.2);
         dico1->append(kiwi->createTag("value3"), 1);
         dico1->append(kiwi->createTag("value4"), dico2);

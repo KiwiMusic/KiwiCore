@@ -30,7 +30,7 @@ namespace Kiwi
     //                                          JSON                                    //
     // ================================================================================ //
     
-    Json::Json(shared_ptr<Instance> kiwi) : Object(kiwi, kiwi->createTag("json"))
+    Json::Json(shared_ptr<Instance> kiwi) : Object(kiwi, "json")
     {
         ;
     };
@@ -49,37 +49,35 @@ namespace Kiwi
     void Json::dopost(shared_ptr<Dico> dico, string& text, string line)
     {
         vector<Element> elements;
-        dico->getKeys(elements);
+        dico->keys(elements);
         if(elements.size())
         {
             text.append("{\n");
             for(int i = 0; i < elements.size(); i++)
             {
                 shared_ptr<Tag> key = (shared_ptr<Tag>)elements[i];
-                Type type = dico->type(key);
-                
                 text.append(line + "    \"" + (string)*key + "\" : ");
                 
-                if(type == T_LONG)
+                if(dico->isLong(key))
                 {
-                    text.append(to_string(dico->getLong(key)) + ",\n");
+                    text.append(to_string((long)dico->get(key)) + ",\n");
                 }
-                else if(type == T_DOUBLE)
+                else if(dico->isDouble(key))
                 {
-                    text.append(to_string(dico->getDouble(key)) + ",\n");
+                    text.append(to_string((double)dico->get(key)) + ",\n");
                 }
-                else if(type == T_TAG)
+                else if(dico->isTag(key))
                 {
-                    text.append("\"" + (string)*dico->getTag(key) + "\",\n");
+                    text.append("\"" + (string)*((shared_ptr<Tag>)dico->get(key)) + "\",\n");
                 }
-                else if(type == T_OBJECT)
+                else if(dico->isObject(key))
                 {
-                    dopost(static_pointer_cast<Dico>(dico->getObject(key)), text, line  + "    ");
+                    dopost(static_pointer_cast<Dico>((shared_ptr<Object>)dico->get(key)), text, line  + "    ");
                 }
                 else
                 {
                     vector<Element> elements2;
-                    dico->getElements(key, elements2);
+                    dico->get(key, elements2);
                     text.append("[ ");
                     for(int i = 0; i < elements2.size(); i++)
                     {
@@ -141,7 +139,7 @@ namespace Kiwi
     void Json::dowrite(shared_ptr<Dico> dico, string line)
     {
         vector<Element> elements;
-        dico->getKeys(elements);
+        dico->keys(elements);
         if(elements.size())
         {
             for(int i = 0; i < elements.size(); i++)
@@ -153,26 +151,26 @@ namespace Kiwi
                 
                 if(type == T_LONG)
                 {
-                    m_file << to_string(dico->getLong(key)) << ",\n";
+                    m_file << to_string((long)dico->get(key)) << ",\n";
                 }
                 else if(type == T_DOUBLE)
                 {
-                    m_file << to_string(dico->getDouble(key)) << ",\n";
+                    m_file << to_string((double)dico->get(key)) << ",\n";
                 }
                 else if(type == T_TAG)
                 {
-                    m_file << "\"" << (string)*dico->getTag(key) << "\",\n";
+                    m_file << "\"" << (string)*((shared_ptr<Tag>)dico->get(key)) << "\",\n";
                 }
                 else if(type == T_OBJECT)
                 {
                     m_file << "{\n";
-                    dowrite(static_pointer_cast<Dico>(dico->getObject(key)), line  + "    ");
+                    dowrite(static_pointer_cast<Dico>((shared_ptr<Object>)dico->get(key)), line  + "    ");
                     m_file << line << "    }\n";
                 }
                 else
                 {
                     vector<Element> elements2;
-                    dico->getElements(key, elements2);
+                    dico->get(key, elements2);
                     m_file << "[ ";
                     for(int i = 0; i < elements2.size(); i++)
                     {

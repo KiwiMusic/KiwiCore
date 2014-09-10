@@ -277,6 +277,7 @@ namespace Kiwi
     class Connection
     {
     private:
+        const weak_ptr<Instance> m_kiwi;
         const weak_ptr<Box> m_from;
         const int           m_outlet;
         const weak_ptr<Box> m_to;
@@ -287,7 +288,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you're doing.
          */
-        Connection(const shared_ptr<Box> from, int outlet, const shared_ptr<Box> to, int inlet);
+        Connection(const shared_ptr<Instance> kiwi, const shared_ptr<Box> from, int outlet, const shared_ptr<Box> to, int inlet);
         
         //! The destructor.
         /** You should never use this method except if you really know what you're doing.
@@ -303,7 +304,18 @@ namespace Kiwi
         shared_ptr<Box> getFrom();
         int getOutletIndex();
         shared_ptr<Box> getTo();
+        
+        //! Retrieve the index of inlet.
+        /** The function retrieves the index of inlet.
+         @return The index of inlet.
+         */
         int getInletIndex();
+        
+        //! Write the connection in a dico.
+        /** The function writes the connection in a dico.
+         @param dico The dico.
+         */
+        void write(shared_ptr<Dico> dico);
         
         inline bool operator==(const Connection& other) noexcept
         {
@@ -324,7 +336,6 @@ namespace Kiwi
             else
                 return this->m_from.lock() == other.m_from.lock() && this->m_outlet == other.m_outlet && this->m_to.lock() == other.m_to.lock() && this->m_inlet == other.m_inlet;
         }
-        
     };
 }
 

@@ -38,6 +38,7 @@ namespace Kiwi
     class Box;
     class Dico;
     class Json;
+    class Connection;
     
     typedef void (*Method)(shared_ptr<Object>, ...);
     typedef void (*MethodNothing)(shared_ptr<Object>);
@@ -57,7 +58,7 @@ namespace Kiwi
     
     //! The object manages dynamic methods.
     /**
-     Most of the kiwi boxes inherites from the object to manage the methods. Please look at the implementation of the boxes to understand how to define the prototype of the methods and to see how to add and remove them. You can also have a look on the method prototypes above. Note that we consider three kind of methods the standard and defaults ones that got a type nothing, long, double, tag, object, element and garbage (garbage type is only for the garbage method) and the opaque ones that can have whatever you want as parameters. Standard and default methods are mostly used by inlets and outlets to pass datas to objects (but it's not an strict rule) while opaque methods are used internally for everything else.
+     Most of the kiwi classes inherites from the object to manage the methods. Please look at the implementation of the boxes to understand how to define the prototype of the methods and to see how to add and remove them. You can also have a look on the method prototypes above. Note that we consider three kind of methods the standard and defaults ones that got a type nothing, long, double, tag, object, element and garbage (garbage type is only for the garbage method) and the opaque ones that can have whatever you want as parameters. Standard and default methods are mostly used by inlets and outlets to pass datas to objects (but it's not an strict rule) while opaque methods are used internally for everything else.
      @see Box
      */
     class Object : public enable_shared_from_this<Object>
@@ -352,13 +353,19 @@ namespace Kiwi
          */
         shared_ptr<Object> createObject(string name, vector<Element>& elements) const;
         
+        //! Connection factory.
+        /** This function uses the instance specific connection factory to create an connection.
+         @param     The name of the tag to retrieve.
+         */
+        shared_ptr<Connection> createConnection(shared_ptr<Box> from, int outlet, shared_ptr<Box> to, int inlet) const;
+        
         //! Dico factory.
-        /** This function uses the instance specific object factory to create a dico.
+        /** This function uses the instance specific dico factory to create a dico.
          */
         shared_ptr<Dico> createDico() const;
         
         //! Json factory.
-        /** This function uses the instance specific object factory to create a json.
+        /** This function uses the instance specific dico factory to create a json.
          */
         shared_ptr<Json> createJson() const;
         

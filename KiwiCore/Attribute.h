@@ -265,6 +265,14 @@ namespace Kiwi
                 elements[i] = m_elements[i];
         }
         
+        Element getValue() noexcept
+        {
+            if(m_elements.size())
+                return m_elements[0];
+            else
+                return 0;
+        }
+        
         void setValues(const vector<Element>& elements) // Perhaps we could just copy and avoid checking ?
         {
             for(int i = 0; i < m_elements.size(); i++)

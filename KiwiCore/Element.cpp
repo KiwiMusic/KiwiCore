@@ -79,6 +79,42 @@ namespace Kiwi
         m_val.m_object = object;
     }
     
+    Element::Element(weak_ptr<ObjectExtented> object) noexcept
+    {
+        m_type = T_OBJECT;
+        m_val.m_object = static_pointer_cast<Object>(object.lock());
+    }
+    
+    Element::Element(shared_ptr<ObjectExtented> object) noexcept
+    {
+        m_type = T_OBJECT;
+        m_val.m_object = static_pointer_cast<Object>(object);
+    }
+    
+    Element::Element(weak_ptr<Box> object) noexcept
+    {
+        m_type = T_OBJECT;
+        m_val.m_object = static_pointer_cast<Object>(object.lock());
+    }
+    
+    Element::Element(shared_ptr<Box> object) noexcept
+    {
+        m_type = T_OBJECT;
+        m_val.m_object = static_pointer_cast<Object>(object);
+    }
+    
+    Element::Element(weak_ptr<Dico> object) noexcept
+    {
+        m_type = T_OBJECT;
+        m_val.m_object = static_pointer_cast<Object>(object.lock());
+    }
+    
+    Element::Element(shared_ptr<Dico> object) noexcept
+    {
+        m_type = T_OBJECT;
+        m_val.m_object = static_pointer_cast<Object>(object);
+    }
+    
     Element::~Element() noexcept
     {
         ;
