@@ -157,15 +157,16 @@ namespace Kiwi
     
     void Page::write()
     {
-        /*
-        Dico main;
-        Dico dico;
-        shared_ptr<Tag> box = createTag("box");
+        shared_ptr<Dico> main = createDico();
+        vector<Element> boxes;
         for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
-            dico.append(box, (*it)->name());
+            shared_ptr<Dico> box = createDico();
+            (*it)->write(box);
+            boxes.push_back(static_pointer_cast<Object>(box));
         }
-         */
+        main->set(createTag("boxes"), boxes);
+        main->write(m_file, m_directory);
     }
 }
 

@@ -19,7 +19,7 @@ int main (int argc, char* argv[])
     {
         kiwi->init();
         kiwi->post("---------");
-        shared_ptr<Page> page = kiwi->createPage("zaza.kiwi", "/Users/Pierre/Desktop");
+        shared_ptr<Page> page = kiwi->createPage("test.kiwi", "/Users/Pierre/Desktop");
         {
             vector<Element> elements;
             elements.push_back(1);
@@ -68,6 +68,7 @@ int main (int argc, char* argv[])
             cout << t << " clicks (" << tt << "seconds).\n";
             
             kiwi->stopDsp();
+            page->write();
         }
         kiwi->post("---------");
         
@@ -92,11 +93,13 @@ int main (int argc, char* argv[])
         dico1->append(kiwi->createTag("value3"), 1);
         dico1->append(kiwi->createTag("value4"), dico2);
         
-        dico1->post();
+        //dico1->post();
         kiwi->post("---------");
         dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
+         
         dico1->read("zaza.kiwi", "/Users/Pierre/Desktop");
-        dico1->post();
+        //dico1->post();
+                                          
     }
     return 0;
 }

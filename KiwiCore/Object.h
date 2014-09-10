@@ -130,11 +130,11 @@ namespace Kiwi
             return false;
         }
         
-        //! Write the object in the Json format.
-        /** The function writes the object in the Json format.
-         @param file The json to write.
+        //! Write the object in a dico.
+        /** The function writes the object in a dico.
+         @param dico The dico.
          */
-        virtual void write(shared_ptr<Json> file);
+        virtual void write(shared_ptr<Dico> dico);
         
         //! Retrieve the number of methods.
         /** The function retrieves the number of methods. It takes into account the default methods bang, long, double, tag, object, elements and garbage, the standard methods and the opaque methods.

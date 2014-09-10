@@ -924,9 +924,13 @@ namespace Kiwi
             return kiwi->error(shared_from_this(), message);
     }
     
-    void Object::write(shared_ptr<Json> file)
+    void Object::write(shared_ptr<Dico> dico)
     {
-        ;
+        /*
+        if(hasMethod(createTag("write")))
+            callMethodOpaque(createTag("write"), 1, dico);
+         */
+        dico->set(createTag("name"), getName());
     }
 }
 

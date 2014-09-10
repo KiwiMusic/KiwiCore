@@ -36,6 +36,15 @@ namespace Kiwi
         m_listeners.clear();
     };
     
+    void ObjectExtented::write(shared_ptr<Dico> dico)
+    {
+        for(map<shared_ptr<Tag>, Attribute>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+        {
+            it->second.write(dico);
+        }
+        Object::write(dico);
+    }
+    
     bool ObjectExtented::getAttribute(const shared_ptr<Tag> name)
     {
         m_current_attribute = m_attributes.find(name);

@@ -279,7 +279,7 @@ namespace Kiwi
         
         void write(shared_ptr<Dico> dico)
         {
-            
+            dico->set(m_name, 0.01);
         }
         
         void read(shared_ptr<Dico> dico)

@@ -41,64 +41,66 @@ namespace Kiwi
     
     void Json::post(shared_ptr<Dico> dico)
     {
-        dopost(dico);
+        string text;
+        dopost(dico, text);
+        Object::post(text);
     }
     
-    void Json::dopost(shared_ptr<Dico> dico, string line)
+    void Json::dopost(shared_ptr<Dico> dico, string& text, string line)
     {
         vector<Element> elements;
         dico->getKeys(elements);
         if(elements.size())
         {
-            Object::post("{\n");
+            text.append("{\n");
             for(int i = 0; i < elements.size(); i++)
             {
                 shared_ptr<Tag> key = (shared_ptr<Tag>)elements[i];
                 Type type = dico->type(key);
                 
-                Object::post(line + "    \"" + (string)*key + "\" : ");
+                text.append(line + "    \"" + (string)*key + "\" : ");
                 
                 if(type == T_LONG)
                 {
-                    Object::post(to_string(dico->getLong(key)) + ",\n");
+                    text.append(to_string(dico->getLong(key)) + ",\n");
                 }
                 else if(type == T_DOUBLE)
                 {
-                    Object::post(to_string(dico->getDouble(key)) + ",\n");
+                    text.append(to_string(dico->getDouble(key)) + ",\n");
                 }
                 else if(type == T_TAG)
                 {
-                    Object::post("\"" + (string)*dico->getTag(key) + "\",\n");
+                    text.append("\"" + (string)*dico->getTag(key) + "\",\n");
                 }
                 else if(type == T_OBJECT)
                 {
-                    dopost(static_pointer_cast<Dico>(dico->getObject(key)), line  + "    ");
+                    dopost(static_pointer_cast<Dico>(dico->getObject(key)), text, line  + "    ");
                 }
                 else
                 {
                     vector<Element> elements2 = dico->getElements(key);
-                    Object::post("[ ");
+                    text.append("[ ");
                     for(int i = 0; i < elements2.size(); i++)
                     {
                         if(elements2[i].isLong())
-                            Object::post(to_string((long)elements2[i]));
+                            text.append(to_string((long)elements2[i]));
                         else if(elements2[i].isDouble())
-                            Object::post(to_string((double)elements2[i]));
+                            text.append(to_string((double)elements2[i]));
                         else if(elements2[i].isTag())
-                            Object::post("\"" + (string)*((shared_ptr<Tag>)elements2[i]) + "\"");
+                            text.append("\"" + (string)*((shared_ptr<Tag>)elements2[i]) + "\"");
                         else
-                            dopost(static_pointer_cast<Dico>((shared_ptr<Object>)elements2[i]), line  + "    ");
+                            dopost(static_pointer_cast<Dico>((shared_ptr<Object>)elements2[i]), text, line  + "    ");
                         
                         if(i < elements2.size() - 1)
-                            Object::post(", ");
+                            text.append(", ");
                         else
-                            Object::post(" ]");
+                            text.append(" ]");
                     }
-                    Object::post(",\n");
+                    text.append(",\n");
                 }
             }
-            Object::post(line);
-            Object::post("}\n");
+            text.append(line);
+            text.append("}\n");
         }
     }
 

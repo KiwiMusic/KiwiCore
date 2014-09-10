@@ -302,11 +302,11 @@ namespace Kiwi
          */
         void getAttributeValues(const shared_ptr<Tag> name, vector<Element>& elements);
         
-        //! Write the object in the Json format.
-        /** The function writes the object in the Json format.
-         @param file The json to write.
+        //! Write the object in a dico.
+        /** The function writes the object in a dico.
+         @param dico The dico.
          */
-        //virtual void write(Json& file);
+        virtual void write(shared_ptr<Dico> dico) override;
     };
     
     class ObjectExtentedListener

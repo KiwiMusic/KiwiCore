@@ -44,9 +44,8 @@ namespace Kiwi
     class Dico : public Object
     {
     private:
-        
-        map<shared_ptr<Tag>, shared_ptr<Dico>>  m_entries;  ///< The entries
-        vector<Element>                         m_elements; ///< The elements
+        map<shared_ptr<Tag>, shared_ptr<Dico>>  m_entries;
+        vector<Element>                        m_elements;
         
     public:
         

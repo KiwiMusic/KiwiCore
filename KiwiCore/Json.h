@@ -46,7 +46,7 @@ namespace Kiwi
         
         void doread(shared_ptr<Dico> dico, string line = "");
         void dowrite(shared_ptr<Dico> dico, string line = "");
-        void dopost(shared_ptr<Dico> dico, string line = "");
+        void dopost(shared_ptr<Dico> dico, string& text, string line = "");
         
     public:
         //! Constructor.

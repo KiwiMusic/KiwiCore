@@ -44,7 +44,6 @@ namespace Kiwi
     void Dico::clear()
     {
         m_entries.clear();
-        m_elements.clear();
     }
     
     void Dico::getKeys(vector<Element>& elements)
