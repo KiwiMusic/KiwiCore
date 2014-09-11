@@ -31,9 +31,8 @@
 namespace Kiwi
 {
     class Object;
-    class ObjectExtented;
     class Box;
-    class Dictionary;
+    class Dico;
     
     typedef enum
     {
@@ -55,7 +54,7 @@ namespace Kiwi
     
     //! The element holds variables of different kinds.
     /**
-     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and an object but can receives an int, a long, a float, a double, an object (weak or not), an extented object (weak or not), a box (weak or not) or a dico an object (weak or not).
+     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and an object but can receives an int, a long, a float, a double, an object (weak or not), a box (weak or not) or a dico (weak or not).
      */
     class Element
     {
@@ -112,16 +111,6 @@ namespace Kiwi
          */
         Element(shared_ptr<Object> object) noexcept;
         
-        //! Constructor with a weak extented object.
-        /** The function allocates the element with a locked weak extented object.
-         */
-        Element(weak_ptr<ObjectExtented> object) noexcept;
-        
-        //! Constructor with an extented object.
-        /** The function allocates the element with an extented object.
-         */
-        Element(shared_ptr<ObjectExtented> object) noexcept;
-        
         //! Constructor with a weak box.
         /** The function allocates the element with a locked weak box.
          */
@@ -135,12 +124,12 @@ namespace Kiwi
         //! Constructor with a weak dico.
         /** The function allocates the element with a locked weak dico.
          */
-        Element(weak_ptr<Dictionary> object) noexcept;
+        Element(weak_ptr<Dico> object) noexcept;
         
         //! Constructor with a dico.
         /** The function allocates the element with a dico.
          */
-        Element(shared_ptr<Dictionary> object) noexcept;
+        Element(shared_ptr<Dico> object) noexcept;
         
         //! Destructor.
         /** Doesn't perform anything.
@@ -234,18 +223,6 @@ namespace Kiwi
          */
         operator shared_ptr<Object>() const noexcept;
         
-        //! Cast the element to a weak extented object.
-        /** The function casts the element to a weak extented object.
-         @return A weak extented object if the element is an object otherwise a nullptr.
-         */
-        operator weak_ptr<ObjectExtented>() const noexcept;
-        
-        //! Cast the element to an extented object.
-        /** The function casts the element to an extented object.
-         @return An extented object if the element is an object otherwise a nullptr.
-         */
-        operator shared_ptr<ObjectExtented>() const noexcept;
-        
         //! Cast the element to a weak box.
         /** The function casts the element to a weak box.
          @return A weak box if the element is an object otherwise a nullptr.
@@ -262,13 +239,13 @@ namespace Kiwi
         /** The function casts the element to a weak dico.
          @return A weak dico if the element is an object otherwise a nullptr.
          */
-        operator weak_ptr<Dictionary>() const noexcept;
+        operator weak_ptr<Dico>() const noexcept;
         
         //! Cast the element to a dico.
         /** The function casts the element to a dico.
          @return A dico if the element is an object otherwise a nullptr.
          */
-        operator shared_ptr<Dictionary>() const noexcept;
+        operator shared_ptr<Dico>() const noexcept;
         
         //! Set up the element with another element.
         /** The function sets up the element with another element.
@@ -326,20 +303,6 @@ namespace Kiwi
          */
         Element& operator=(shared_ptr<Object> object) noexcept;
         
-        //! Set up the element with a weak extented object.
-        /** The function sets up the element with a weak extented object.
-         @param object   The weak extented object.
-         @return An element.
-         */
-        Element& operator=(weak_ptr<ObjectExtented> object) noexcept;
-        
-        //! Set up the element with an extented object.
-        /** The function sets up the element with an extented object.
-         @param object   The extented object.
-         @return An element.
-         */
-        Element& operator=(shared_ptr<ObjectExtented> object) noexcept;
-        
         //! Set up the element with a weak box.
         /** The function sets up the element with a weak box.
          @param object   The weak box.
@@ -359,14 +322,14 @@ namespace Kiwi
          @param object   The weak dico.
          @return An element.
          */
-        Element& operator=(weak_ptr<Dictionary> object) noexcept;
+        Element& operator=(weak_ptr<Dico> object) noexcept;
         
         //! Set up the element with a dico.
         /** The function sets up the element with a dico.
          @param object   The dico.
          @return An element.
          */
-        Element& operator=(shared_ptr<Dictionary> object) noexcept;
+        Element& operator=(shared_ptr<Dico> object) noexcept;
         
         //! Compare the element with another.
         /** The function compares the element with another.
@@ -424,20 +387,6 @@ namespace Kiwi
          */
         bool operator==(shared_ptr<Object> object) const noexcept;
         
-        //! Compare the element with a weak extented object.
-        /** The function compares the element with a locked weak extented object.
-         @param object   The weak extented object.
-         @return true if the element hold the locked weak extented object otherwise false.
-         */
-        bool operator==(weak_ptr<ObjectExtented> object) const noexcept;
-        
-        //! Compare the element with an extented object.
-        /** The function compares the element with an weak extented object.
-         @param object   The extented object.
-         @return true if the element hold the extented object otherwise false.
-         */
-        bool operator==(shared_ptr<ObjectExtented> object) const noexcept;
-        
         //! Compare the element with a weak box.
         /** The function compares the element with a locked weak box.
          @param object   The weak box.
@@ -457,14 +406,14 @@ namespace Kiwi
          @param object   The weak box.
          @return true if the element hold the locked weak dico otherwise false.
          */
-        bool operator==(weak_ptr<Dictionary> object) const noexcept;
+        bool operator==(weak_ptr<Dico> object) const noexcept;
         
         //! Compare the element with a dico.
         /** The function compares the element with a dico.
          @param object   The dico.
          @return true if the element hold the dico otherwise false.
          */
-        bool operator==(shared_ptr<Dictionary> object) const noexcept;
+        bool operator==(shared_ptr<Dico> object) const noexcept;
     };
 }
 

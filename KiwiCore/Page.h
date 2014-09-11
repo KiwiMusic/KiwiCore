@@ -29,7 +29,6 @@
 #include "Element.h"
 #include "Console.h"
 #include "Object.h"
-#include "ObjectExtented.h"
 #include "Box.h"
 
 // Later figure out if we use connection pointer or not
@@ -46,7 +45,7 @@ namespace Kiwi
     /**
      The page is the counterpart of the max patcher or the pd canvas.
      */
-    class Page : public ObjectExtented, public ObjectExtentedListener
+    class Page : public Object, public ObjectListener
     {
     private:
         string                      m_file;

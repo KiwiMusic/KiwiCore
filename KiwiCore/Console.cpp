@@ -63,7 +63,7 @@ namespace Kiwi
     void Console::post(const shared_ptr<const Object> object, string message) const noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << (string)*object->getName() << " : " << message << "\n";
+        cerr << (string)*object->name() << " : " << message << "\n";
 #endif
         set<weak_ptr<ConsoleListener>>::iterator it = m_listeners.begin();
         while(it != m_listeners.end())
@@ -91,7 +91,7 @@ namespace Kiwi
     void Console::warning(const shared_ptr<const Object> object, string message) const noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << (string)*object->getName() << " : " << message << "\n";
+        cerr << (string)*object->name() << " : " << message << "\n";
 #endif
         set<weak_ptr<ConsoleListener>>::iterator it = m_listeners.begin();
         while(it != m_listeners.end())
@@ -119,7 +119,7 @@ namespace Kiwi
     void Console::error(const shared_ptr<const Object> object, string message) const noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << (string)*object->getName() << " : " << message << "\n";
+        cerr << (string)*object->name() << " : " << message << "\n";
 #endif
         set<weak_ptr<ConsoleListener>>::iterator it = m_listeners.begin();
         while(it != m_listeners.end())

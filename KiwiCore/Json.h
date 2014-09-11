@@ -44,9 +44,9 @@ namespace Kiwi
     private:
         fstream         m_file;
         
-        void doread(shared_ptr<Dictionary> dico, string line = "");
-        void dowrite(shared_ptr<Dictionary> dico, string line = "");
-        void dopost(shared_ptr<Dictionary> dico, string& text, string line = "");
+        void doread(shared_ptr<Dico> dico, string line = "");
+        void dowrite(shared_ptr<Dico> dico, string line = "");
+        void dopost(shared_ptr<Dico> dico, string& text, string line = "");
         
     public:
         //! Constructor.
@@ -65,7 +65,7 @@ namespace Kiwi
         /** The function parses a dico to a JSON file and posts it.
          @param dico            The dico.
          */
-        void post(shared_ptr<Dictionary> dico);
+        void post(shared_ptr<Dico> dico);
         
         //! Read a JSON file and fill a dico.
         /** The function parses a JSON file to a dico.
@@ -73,7 +73,7 @@ namespace Kiwi
          @param filename        The name of the file.
          @param filedirectory   The name of the directory.
          */
-        void read(shared_ptr<Dictionary> dico, string filename, string directoryname = "");
+        void read(shared_ptr<Dico> dico, string filename, string directoryname = "");
         
         //! Write a JSON file from dico.
         /** The function parses a dico to a JSON file.
@@ -81,7 +81,7 @@ namespace Kiwi
          @param filename        The name of the file.
          @param filedirectory   The name of the directory.
          */
-        void write(shared_ptr<Dictionary> dico, string filename, string directoryname = "");
+        void write(shared_ptr<Dico> dico, string filename, string directoryname = "");
     };
 }
 #endif

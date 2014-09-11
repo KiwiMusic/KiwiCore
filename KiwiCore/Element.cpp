@@ -79,18 +79,6 @@ namespace Kiwi
         m_val.m_object = object;
     }
     
-    Element::Element(weak_ptr<ObjectExtented> object) noexcept
-    {
-        m_type = T_OBJECT;
-        m_val.m_object = static_pointer_cast<Object>(object.lock());
-    }
-    
-    Element::Element(shared_ptr<ObjectExtented> object) noexcept
-    {
-        m_type = T_OBJECT;
-        m_val.m_object = static_pointer_cast<Object>(object);
-    }
-    
     Element::Element(weak_ptr<Box> object) noexcept
     {
         m_type = T_OBJECT;
@@ -103,13 +91,13 @@ namespace Kiwi
         m_val.m_object = static_pointer_cast<Object>(object);
     }
     
-    Element::Element(weak_ptr<Dictionary> object) noexcept
+    Element::Element(weak_ptr<Dico> object) noexcept
     {
         m_type = T_OBJECT;
         m_val.m_object = static_pointer_cast<Object>(object.lock());
     }
     
-    Element::Element(shared_ptr<Dictionary> object) noexcept
+    Element::Element(shared_ptr<Dico> object) noexcept
     {
         m_type = T_OBJECT;
         m_val.m_object = static_pointer_cast<Object>(object);
@@ -183,13 +171,6 @@ namespace Kiwi
         return *this;
     }
     
-    Element& Element::operator=(shared_ptr<ObjectExtented> object) noexcept
-    {
-        m_type  = T_TAG;
-        m_val.m_object= static_pointer_cast<Object>(object);
-        return *this;
-    }
-    
     Element& Element::operator=(weak_ptr<Box> object) noexcept
     {
         m_type  = T_TAG;
@@ -204,14 +185,14 @@ namespace Kiwi
         return *this;
     }
     
-    Element& Element::operator=(weak_ptr<Dictionary> object) noexcept
+    Element& Element::operator=(weak_ptr<Dico> object) noexcept
     {
         m_type  = T_TAG;
         m_val.m_object= static_pointer_cast<Object>(object.lock());
         return *this;
     }
     
-    Element& Element::operator=(shared_ptr<Dictionary> object) noexcept
+    Element& Element::operator=(shared_ptr<Dico> object) noexcept
     {
         m_type  = T_TAG;
         m_val.m_object= static_pointer_cast<Object>(object);
@@ -289,16 +270,6 @@ namespace Kiwi
         return m_val.m_object;
     }
     
-    Element::operator weak_ptr<ObjectExtented>() const noexcept
-    {
-        return static_pointer_cast<ObjectExtented>(m_val.m_object);
-    }
-    
-    Element::operator shared_ptr<ObjectExtented>() const noexcept
-    {
-        return static_pointer_cast<ObjectExtented>(m_val.m_object);
-    }
-    
     Element::operator weak_ptr<Box>() const noexcept
     {
         return static_pointer_cast<Box>(m_val.m_object);
@@ -309,14 +280,14 @@ namespace Kiwi
         return static_pointer_cast<Box>(m_val.m_object);
     }
     
-    Element::operator weak_ptr<Dictionary>() const noexcept
+    Element::operator weak_ptr<Dico>() const noexcept
     {
-        return static_pointer_cast<Dictionary>(m_val.m_object);
+        return static_pointer_cast<Dico>(m_val.m_object);
     }
     
-    Element::operator shared_ptr<Dictionary>() const noexcept
+    Element::operator shared_ptr<Dico>() const noexcept
     {
-        return static_pointer_cast<Dictionary>(m_val.m_object);
+        return static_pointer_cast<Dico>(m_val.m_object);
     }
     
     bool Element::operator==(const int value) const noexcept
@@ -354,16 +325,6 @@ namespace Kiwi
         return m_type == T_OBJECT && m_val.m_object == object;
     }
     
-    bool Element::operator==(weak_ptr<ObjectExtented> object) const noexcept
-    {
-        return m_type == T_OBJECT && m_val.m_object == static_pointer_cast<Object>(object.lock());
-    }
-    
-    bool Element::operator==(shared_ptr<ObjectExtented> object) const noexcept
-    {
-        return m_type == T_OBJECT && m_val.m_object == static_pointer_cast<Object>(object);
-    }
-    
     bool Element::operator==(weak_ptr<Box> object) const noexcept
     {
         return m_type == T_OBJECT && m_val.m_object == static_pointer_cast<Object>(object.lock());
@@ -374,12 +335,12 @@ namespace Kiwi
         return m_type == T_OBJECT && m_val.m_object == static_pointer_cast<Object>(object);
     }
     
-    bool Element::operator==(weak_ptr<Dictionary> object) const noexcept
+    bool Element::operator==(weak_ptr<Dico> object) const noexcept
     {
         return m_type == T_OBJECT && m_val.m_object == static_pointer_cast<Object>(object.lock());
     }
     
-    bool Element::operator==(shared_ptr<Dictionary> object) const noexcept
+    bool Element::operator==(shared_ptr<Dico> object) const noexcept
     {
         return m_type == T_OBJECT && m_val.m_object == static_pointer_cast<Object>(object);
     }

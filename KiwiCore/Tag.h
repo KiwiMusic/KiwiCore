@@ -63,7 +63,7 @@ namespace Kiwi
          @param     The name of the tag to retrieve.
          @return    The tag that match with the name.
          */
-        shared_ptr<Tag> createTag(string name);
+        shared_ptr<Tag> createTag(string const& name) noexcept;
     };
     
     // ================================================================================ //
@@ -86,16 +86,16 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        Tag(string const& name);
+        Tag(string const& name) noexcept;
         
         //! The destructor.
         /** You should never use this method except if you really know what you do.
          */
         ~Tag();
         
-        //! Retrieve the name of the tag.
-        /** The function retrieves the unique name of the tag.
-         @return The name of the tag in the std::string format.
+        //! Retrieve the string of the tag.
+        /** The function retrieves the unique string of the tag.
+         @return The string of the tag.
          */
         inline operator string() const noexcept
         {
@@ -116,7 +116,7 @@ namespace Kiwi
          @param index   The position of the object in the binding list from 0 to the number of objects in the binding list -1.
          @return        The pointer of the binded objects or NULL is the index is less than 0 or greater or equal to the number of objects in the binding list.
          */
-        inline weak_ptr<Object> operator[](int index) const
+        inline weak_ptr<Object> operator[](int index) const noexcept
         {
             set<weak_ptr<Object>>::iterator it = m_objects.begin();
             while(--index && it != m_objects.end())

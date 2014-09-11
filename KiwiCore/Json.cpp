@@ -39,14 +39,14 @@ namespace Kiwi
     {
     };
     
-    void Json::post(shared_ptr<Dictionary> dico)
+    void Json::post(shared_ptr<Dico> dico)
     {
         string text;
         dopost(dico, text);
         Object::post(text);
     }
     
-    void Json::dopost(shared_ptr<Dictionary> dico, string& text, string line)
+    void Json::dopost(shared_ptr<Dico> dico, string& text, string line)
     {
         vector<Element> elements;
         dico->keys(elements);
@@ -72,7 +72,7 @@ namespace Kiwi
                 }
                 else if(dico->isObject(key))
                 {
-                    dopost((shared_ptr<Dictionary>)dico->get(key), text, line  + "    ");
+                    dopost((shared_ptr<Dico>)dico->get(key), text, line  + "    ");
                 }
                 else
                 {
@@ -88,7 +88,7 @@ namespace Kiwi
                         else if(elements2[i].isTag())
                             text.append("\"" + (string)*((shared_ptr<Tag>)elements2[i]) + "\"");
                         else
-                            dopost((shared_ptr<Dictionary>)elements2[i], text, line  + "    ");
+                            dopost((shared_ptr<Dico>)elements2[i], text, line  + "    ");
                         
                         if(i < elements2.size() - 1)
                             text.append(", ");
@@ -104,7 +104,7 @@ namespace Kiwi
     }
 
     
-    void Json::write(shared_ptr<Dictionary> dico, string filename, string directoryname)
+    void Json::write(shared_ptr<Dico> dico, string filename, string directoryname)
     {
         m_file.close();
         
@@ -136,7 +136,7 @@ namespace Kiwi
         m_file.close();
     }
     
-    void Json::dowrite(shared_ptr<Dictionary> dico, string line)
+    void Json::dowrite(shared_ptr<Dico> dico, string line)
     {
         vector<Element> elements;
         dico->keys(elements);
@@ -159,12 +159,16 @@ namespace Kiwi
                 }
                 else if(type == T_TAG)
                 {
-                    m_file << "\"" << (string)*((shared_ptr<Tag>)dico->get(key)) << "\",\n";
+                    shared_ptr<Tag> tag = (shared_ptr<Tag>)dico->get(key);
+                    if(tag)
+                        m_file << "\"" << (string)*tag << "\",\n";
+                    else
+                        m_file << "\"\",\n";
                 }
                 else if(type == T_OBJECT)
                 {
                     m_file << "{\n";
-                    dowrite((shared_ptr<Dictionary>)dico->get(key), line  + "    ");
+                    dowrite((shared_ptr<Dico>)dico->get(key), line  + "    ");
                     m_file << line << "    }\n";
                 }
                 else
@@ -189,7 +193,7 @@ namespace Kiwi
                         else
                         {
                             m_file << "{\n";
-                            dowrite((shared_ptr<Dictionary>)elements2[i], line  + "    ");
+                            dowrite((shared_ptr<Dico>)elements2[i], line  + "    ");
                             m_file << line  << "    }";
                         }
                         
@@ -204,7 +208,7 @@ namespace Kiwi
         }
     }
     
-    void Json::read(shared_ptr<Dictionary> dico, string filename, string directoryname)
+    void Json::read(shared_ptr<Dico> dico, string filename, string directoryname)
     {
         m_file.close();
         
@@ -234,7 +238,7 @@ namespace Kiwi
         m_file.close();
     }
     
-    void Json::doread(shared_ptr<Dictionary> dico, string line)
+    void Json::doread(shared_ptr<Dico> dico, string line)
     {
         while(getline(m_file, line))
         {
@@ -268,7 +272,7 @@ namespace Kiwi
                     {
                         if(line[pos1] == '{')
                         {
-                            shared_ptr<Dictionary> subdico = createDico();
+                            shared_ptr<Dico> subdico = createDico();
                             doread(subdico);
                             dico->set(key, subdico);
                         }
@@ -280,7 +284,7 @@ namespace Kiwi
                                 pos1 = line.find_first_not_of(' ', ++pos1);
                                 if(line[pos1] == '{')
                                 {
-                                    shared_ptr<Dictionary> subdico = createDico();
+                                    shared_ptr<Dico> subdico = createDico();
                                     doread(subdico);
                                     elements.push_back(subdico);
                                 }

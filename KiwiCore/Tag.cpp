@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      TAG                                         //
     // ================================================================================ //
     
-    Tag::Tag(string const& name) : m_name(name)
+    Tag::Tag(string const& name) noexcept : m_name(name)
     {
         
     }
@@ -64,7 +64,7 @@ namespace Kiwi
         m_tags.clear();
     }
     
-    shared_ptr<Tag> TagFactory::createTag(string name)
+    shared_ptr<Tag> TagFactory::createTag(string const& name) noexcept
     {
         map<string, shared_ptr<Tag>>::const_iterator it = m_tags.find(name);
         if(it != m_tags.end())

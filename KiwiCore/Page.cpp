@@ -27,20 +27,20 @@
 
 namespace Kiwi
 {
-    Page::Page(shared_ptr<Instance> kiwi, string file, string directory) : ObjectExtented(kiwi, "page")
+    Page::Page(shared_ptr<Instance> kiwi, string file, string directory) : Object(kiwi, "page")
     {
         m_file = file;
         m_directory = directory;
         m_dsp_context = make_shared<DspContext>();
         
-        shared_ptr<Dictionary> main = createDico();
+        shared_ptr<Dico> main = createDico();
         main->read(m_file, m_directory);
         if(main->has(createTag("boxes")))
         {
             vector<Element> boxes;
             main->get(createTag("boxes"), boxes);
             for(int i = 0; i < boxes.size(); i++)
-                static_pointer_cast<Dictionary>((shared_ptr<Object>)boxes[i])->post();
+                static_pointer_cast<Dico>((shared_ptr<Object>)boxes[i])->post();
         }
     }
     
@@ -191,13 +191,13 @@ namespace Kiwi
     
     void Page::write()
     {
-        shared_ptr<Dictionary> main = createDico();
+        shared_ptr<Dico> main = createDico();
         vector<Element> elements;
-        ObjectExtented::write(main);
+        Object::write(main);
         
         for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
-            shared_ptr<Dictionary> box = createDico();
+            shared_ptr<Dico> box = createDico();
             (*it)->write(box);
             elements.push_back(static_pointer_cast<Object>(box));
         }
@@ -206,7 +206,7 @@ namespace Kiwi
         elements.clear();
         for(set<shared_ptr<Connection>>::iterator it = m_connections.begin(); it != m_connections.end(); ++it)
         {
-            shared_ptr<Dictionary> connection = createDico();
+            shared_ptr<Dico> connection = createDico();
             (*it)->write(connection);
             elements.push_back(static_pointer_cast<Object>(connection));
         }

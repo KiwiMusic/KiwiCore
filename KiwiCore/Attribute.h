@@ -27,14 +27,10 @@
 #include "Defs.h"
 #include "Tag.h"
 #include "Element.h"
-#include "Object.h"
-#include "Dico.h"
-
 
 namespace Kiwi
 {
-    class ObjectExtented;
-    
+    class Instance;
     // ================================================================================ //
     //                                      ATTRIBUTE                                   //
     // ================================================================================ //
@@ -42,258 +38,158 @@ namespace Kiwi
     //! The attribute holds a set of values of differents kinds and differents sizes....
     /**
      The attribute...
-     @see ObjectExtented
      */
     class Attribute
     {
-        friend class ObjectExtented;
     private:
-        const shared_ptr<Tag>   m_name;     ///< The name of the attribute
-        const Type              m_type;     ///< The type of the attribute
-        int                     m_size;     ///< The size of the attribute
+        const weak_ptr<Instance>    m_kiwi;///< The owner
         
-        shared_ptr<Tag>         m_label;    ///< The label of the attribute
-        shared_ptr<Tag>         m_style;    ///< The style of the attribute
-        shared_ptr<Tag>         m_category; ///< The category of the attribute
+        shared_ptr<Tag>             m_name;     ///< The name of the attribute
         
-        bool                    m_visible;  ///< If the attribute is visible by the user (default true)
-        bool                    m_opaque;   ///< If the attribute can be changed by the user (default false)
-        bool                    m_save;     ///< If the attribute should be saved (default true)
+        shared_ptr<Tag>             m_label;    ///< The label of the attribute
+        shared_ptr<Tag>             m_style;    ///< The style of the attribute
+        shared_ptr<Tag>             m_category; ///< The category of the attribute
         
-        vector<Element>         m_elements; ///< The list of elements
-        vector<Element>         m_default;  ///< The default list of elements
- 
-        bool                    m_minlimits;///< The minimum clipping state if the attribute owns double or long values (default false)
-        bool                    m_maxlimits;///< The maximum clipping state if the attribute owns double or long values (default false)
-        double                  m_minimum;  ///< The minimum value if the attribute owns double or long values
-        double                  m_maximum;  ///< The maximum value if the attribute owns double or long values
+        bool                        m_visible;  ///< If the attribute is visible by the user (default true)
+        bool                        m_opaque;   ///< If the attribute cant be changed by the user (default false)
+        bool                        m_save;     ///< If the attribute should be saved (default true)
         
-        MethodElements          m_setter;   ///< The setter method of the attribute
-        MethodElements          m_getter;   ///< The getter method of the attribute
-        
-        
-        //! Set the size of the attribute.
-        /** The function sets the number elements of the attribute.
-         @param size    The size of the attribute.
-         */
-        void setSize(int size);
-        
-        //! Set the label of the attribute.
-        /** The function sets the label of the attribute.
-         @param label    The label of the attribute.
-         */
-        void setLabel(shared_ptr<Tag> label) noexcept;
-        
-        //! Set the style of the attribute.
-        /** The function sets the style of the attribute.
-         @param style    The style of the attribute.
-         */
-        void setStyle(shared_ptr<Tag> style) noexcept;
-        
-        //! Set the category of the attribute.
-        /** The function sets the category of the attribute.
-         @param category    The category of the attribute.
-         */
-        void setCategory(shared_ptr<Tag> category) noexcept;
-        
-        //! Set the attribute opaque or not to user.
-        /** The function sets the attribute opaque or not to user.
-         @param status      Opaque or not.
-         */
-        void setOpaque(bool opaque) noexcept;
-        
-        //! Set the attribute visible or not by the user.
-        /** The function sets the attribute visible or not to user.
-         @param status      Visible or not.
-         */
-        void setVisible(bool visible) noexcept;
-        
-        //! Set if the the attribute is saved or not with the object.
-        /** The function sets if the attribute is saved or not with the object.
-         @param status      Saved or not.
-         */
-        void setSave(bool save) noexcept;
-        
-        //! Set the attribute minimum value.
-        /** The function sets the attribute's minimum value. If the minimum string owns a digit value then the attribute activates the clipping method otherwise the attribute desactivates the minimum clipping method.
-         @param min         The minimum value as a string.
-         */
-        void setMinimum(const string value);
-        
-        //! Set the attribute maximum value.
-        /** The function sets the attribute's maximum value. If the maximum string owns a digit value then the attribute activates the clipping method otherwise the attribute desactivates the maximum clipping method.
-         @param max         The maximum value as a string.
-         */
-        void setMaximum(const string  value);
-        
-        //! Set the attribute setter method.
-        /** The function sets the attribute's setter method instead of the default ones. If you want to use the default ones pass a null poiner.
-         @param setter      The setter method.
-         */
-        void setSetter(MethodElements method);
-        
-        //! Set the attribute getter method.
-        /** The function sets the attribute's getter method instead of the default ones. If you want to use the default ones pass a null poiner.
-         @param setter      The getter method.
-         */
-        void setGetter(MethodElements method);
-        
-        //! The default setter.
-        /** The function sets the attribute values.
-         @param elements   The values.
-         */
-        void setValuesDefault(const vector<Element>& elements) noexcept
-        {
-            for(int i = 0; i < m_elements.size(); i++)
-            {
-                if(i < elements.size() && elements[i].type() == m_type)
-                {
-                    m_elements[i] = elements[i];
-                }
-            }
-            doClip();
-        }
-        
-        //! The default getter.
-        /** The function retrieves the attribute values.
-         @param elements   The values.
-         */
-        void getValuesDefault(vector<Element>& elements) noexcept
-        {
-            for(int i = 0; i < m_elements.size(); i++)
-                elements[i] = m_elements[i];
-        }
-                
-        //! Set the attribute's default values.
-        /** The function sets the attribute's default values.
-         @param elements    The default values.
-         */
-        void setDefaultValues(const vector<Element>& elements);
-        
-        inline void doClip()
-        {
-            if(m_minlimits && m_maxlimits)
-            {
-                if(m_type == T_LONG)
-                    for(int i = 0; i < m_elements.size(); i++)
-                        m_elements[i] = clip((long)m_elements[i], (long)m_minimum, (long)m_maximum);
-                else if (m_type == T_DOUBLE)
-                    for(int i = 0; i < m_elements.size(); i++)
-                        m_elements[i] = clip((double)m_elements[i], m_minimum, m_maximum);
-            }
-            else if(m_minlimits)
-            {
-                if(m_type == T_LONG)
-                    for(int i = 0; i < m_elements.size(); i++)
-                        m_elements[i] = max((long)m_elements[i], (long)m_minimum);
-                else if (m_type == T_DOUBLE)
-                    for(int i = 0; i < m_elements.size(); i++)
-                        m_elements[i] = max((double)m_elements[i], m_minimum);
-            }
-            else if(m_maxlimits)
-            {
-                if(m_type == T_LONG)
-                    for(int i = 0; i < m_elements.size(); i++)
-                        m_elements[i] = min((long)m_elements[i], (long)m_maximum);
-                else if (m_type == T_DOUBLE)
-                    for(int i = 0; i < m_elements.size(); i++)
-                        m_elements[i] = min((double)m_elements[i], m_maximum);
-            }
-        }
-        
-        Attribute(const shared_ptr<Tag> name, const Type type, int size) : m_name(name), m_type(type), m_size(size)
-        {
-            
-        }
+        vector<Element>             m_values;   ///< The list of elements
         
     public:
         
-        ~Attribute()
-        {
-            m_elements.clear();
-            m_default.clear();
-        }
+        //! Constructor.
+        /** Allocate and initialize the member values.
+         */
+        Attribute(shared_ptr<Instance> kiwi, shared_ptr<Tag> name);
         
-        inline shared_ptr<Tag> name() const noexcept
+        //! Destructor.
+        /** Clear the attribute.
+         */
+        ~Attribute();
+        
+        //! Set the label, the style and the category of the attribute.
+        /** The function sets the label, the style and the category of the attribute.
+         @param label    The label of the attribute.
+         @param style    The style of the attribute.
+         @param category    The category of the attribute.
+         */
+        void appearance(shared_ptr<Tag> label, shared_ptr<Tag> style, shared_ptr<Tag> category) noexcept;
+        
+        //! Set the label, the style and the category of the attribute.
+        /** The function sets the label, the style and the category of the attribute.
+         @param label    The label of the attribute.
+         @param style    The style of the attribute.
+         @param category    The category of the attribute.
+         */
+        void appearance(string const& label, string const& style, string const& category) noexcept;
+        
+        //! Set the attribute opaque, visible and save states.
+        /** The function sets the attribute opaque, visible and save states
+         @param opaque Opaque or not.
+         @param visible Visible or not.
+         @param save Saved or not.
+         */
+        void behavior(bool opaque, bool visible, bool save) noexcept;
+        
+        //! Retrieve the name of the attribute.
+        /** The function retrieves the name of the attribute.
+         @return The name of the attribute.
+         */
+        inline shared_ptr<Tag> name()
         {
             return m_name;
         }
         
-        inline Type type() const noexcept
-        {
-            return m_type;
-        }
-        
-        inline int size() const noexcept
-        {
-            return m_size;
-        }
-        
+        //! Retrieve the attribute label.
+        /** The function retrieves the attribute label.
+         @return The attribute label.
+         */
         inline shared_ptr<Tag> label() const noexcept
         {
             return m_label;
         }
         
+        //! Retrieve the attribute style.
+        /** The function retrieves the attribute style.
+         @return The attribute style.
+         */
         inline shared_ptr<Tag> style() const noexcept
         {
             return m_style;
         }
         
+        //! Retrieve the attribute category.
+        /** The function retrieves the attribute category.
+         @return The attribute category.
+         */
         inline shared_ptr<Tag> category() const noexcept
         {
             return m_category;
         }
         
+        //! Retrieve the attribute visible status.
+        /** The function retrieves the attribute visible status.
+         @return true if the attribute is visible otherwise false.
+         */
         inline bool visible() const noexcept
         {
             return m_visible;
         }
         
+        //! Retrieve the attribute opaque status.
+        /** The function retrieves the attribute opaque status.
+         @return true if the attribute is opaque otherwise false.
+         */
         inline bool opaque() const noexcept
         {
             return m_opaque;
         }
         
+        //! Retrieve the attribute save status.
+        /** The function retrieves the attribute save status
+         @return true if the attribute is saved otherwise false.
+         */
         inline bool save() const noexcept
         {
             return m_save;
         }
         
-        void getValues(vector<Element>& elements) noexcept
-        {
-            for(int i = 0; i < m_elements.size(); i++)
-                elements[i] = m_elements[i];
-        }
+        //! Retrieve the values.
+        /** The function retrieves the values.
+         @param elements The vector of elements to fill.
+         */
+        void get(vector<Element>& elements) const noexcept;
         
-        Element getValue() noexcept
-        {
-            if(m_elements.size())
-                return m_elements[0];
-            else
-                return 0;
-        }
+        //! Retrieve the value.
+        /** The function retrieves the unique or first value.
+         @return The element.
+         */
+        Element get() const noexcept;
         
-        void setValues(const vector<Element>& elements) // Perhaps we could just copy and avoid checking ?
-        {
-            for(int i = 0; i < m_elements.size(); i++)
-            {
-                if(i < elements.size() && elements[i].type() == m_type)
-                {
-                    m_elements[i] = elements[i];
-                }
-            }
-            doClip();
-        }
+        //! Set the value with an element.
+        /** The function sets the value with an element and resize the values to one if necessary.
+         @param element The element.
+         */
+        void set(Element const& element) noexcept;
         
-        void write(shared_ptr<Dictionary> dico)
-        {
-            dico->set(m_name, 0.01);
-        }
+        //! Set the values with a vector of elements.
+        /** The function sets the values with a vector of elements and resize the values if necessary.
+         @param elements The vector of elements.
+         */
+        void set(vector<Element> const& elements) noexcept;
         
-        void read(shared_ptr<Dictionary> dico)
-        {
-            
-        }
+        //! Write the attribute in a dico.
+        /** The function writes the attribute in a dico.
+         @param dico The dico.
+         */
+        void write(shared_ptr<Dico> dico);
+        
+        //! Read the attribute in a dico.
+        /** The function reads the attribute in a dico.
+         @param dico The dico.
+         */
+        void read(shared_ptr<Dico> dico);
     };
 }
 

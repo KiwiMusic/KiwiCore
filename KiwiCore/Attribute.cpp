@@ -22,103 +22,85 @@
 */
 
 #include "Attribute.h"
+#include "Object.h"
+#include "Dico.h"
+#include "Instance.h"
 
 namespace Kiwi
 {
-    void Attribute::setSize(int size)
+    Attribute::Attribute(shared_ptr<Instance> kiwi, shared_ptr<Tag> name) :
+    m_kiwi(kiwi),
+    m_name(name)
     {
-        if(size <= 0)
-            m_elements.clear();
-        else
-            m_elements.resize(size);
-        m_size = (int)m_elements.size();
+        appearance("unknown", "unknown", "unknown");
+        behavior(true, false, true);
     }
     
-    void Attribute::setLabel(shared_ptr<Tag> label) noexcept
+    Attribute::~Attribute()
+    {
+        m_values.clear();
+    }
+    
+    void Attribute::appearance(shared_ptr<Tag> label, shared_ptr<Tag> style, shared_ptr<Tag> category) noexcept
     {
         m_label = label;
-    }
-    
-    void Attribute::setStyle(shared_ptr<Tag> style) noexcept
-    {
         m_style = style;
-    }
-    
-    void Attribute::setCategory(shared_ptr<Tag> category) noexcept
-    {
         m_category = category;
     }
     
-    void Attribute::setOpaque(bool opaque) noexcept
+    void Attribute::appearance(string const& label, string const& style, string const& category) noexcept
+    {
+        shared_ptr<Instance> kiwi = m_kiwi.lock();
+        if(kiwi)
+        {
+            m_label = kiwi->createTag(label);
+            m_style = kiwi->createTag(style);
+            m_category = kiwi->createTag(category);
+        }
+    }
+    
+    void Attribute::behavior(bool opaque, bool visible, bool save) noexcept
     {
         m_opaque = opaque;
-    }
-    
-    void Attribute::setVisible(bool visible) noexcept
-    {
         m_visible = visible;
-    }
-    
-    void Attribute::setSave(bool save) noexcept
-    {
         m_save = save;
     }
     
-    void Attribute::setMinimum(string value)
+    void Attribute::get(vector<Element>& elements) const noexcept
     {
-        if(value.length() && isdigit(value[0]))
-        {
-            m_minimum = atof(value.c_str());
-            m_minlimits = true;
-            if(m_maxlimits && m_minimum > m_maximum)
-            {
-                double temp = m_minimum;
-                m_minimum = m_maximum;
-                m_maximum = temp;
-            }
-            doClip();
-        }
+        for(int i = 0; i < m_values.size(); i++)
+            elements[i] = m_values[i];
+    }
+    
+    Element Attribute::get() const noexcept
+    {
+        if(m_values.size())
+            return m_values[0];
         else
-        {
-            m_minlimits = false;
-        }
+            return 0;
     }
     
-    void Attribute::setMaximum(string  value)
+    void Attribute::set(Element const& element) noexcept
     {
-        if(value.length() && isdigit(value[0]))
-        {
-            m_maximum = atof(value.c_str());
-            m_maxlimits = true;
-            if(m_minlimits && m_minimum > m_maximum)
-            {
-                double temp = m_minimum;
-                m_minimum = m_maximum;
-                m_maximum = temp;
-            }
-            doClip();
-        }
-        else
-        {
-            m_maxlimits = false;
-        }
+        m_values = {element};
     }
     
-    void Attribute::setSetter(MethodElements method)
+    void Attribute::set(vector<Element> const& elements) noexcept
     {
-        m_setter = method;
+        m_values = elements;
     }
     
-    void Attribute::setGetter(MethodElements method)
+    void Attribute::write(shared_ptr<Dico> dico)
     {
-        m_getter = method;
+        dico->set(m_name, m_values);
     }
     
-    void Attribute::setDefaultValues(const vector<Element>& elements)
+    void Attribute::read(shared_ptr<Dico> dico)
     {
-        m_default = elements;
+        vector<Element> elements;
+        dico->get(m_name, elements);
+        set(elements);
     }
-    
 }
 
 

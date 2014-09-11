@@ -27,7 +27,7 @@
 #include "Defs.h"
 #include "Tag.h"
 #include "Element.h"
-#include "Console.h"
+#include "Attribute.h"
 
 // Stack limit should warning then pass and stop at +1 to let the whole stack overflow chain visisble
 
@@ -36,9 +36,10 @@ namespace Kiwi
     class Instance;
     class DspNode;
     class Box;
-    class Dictionary;
+    class Dico;
     class Json;
     class Connection;
+    class ObjectListener;
     
     typedef void (*Method)(shared_ptr<Object>, ...);
     typedef void (*MethodNothing)(shared_ptr<Object>);
@@ -46,10 +47,15 @@ namespace Kiwi
     typedef void (*MethodDouble)(shared_ptr<Object>, double value);
     typedef void (*MethodTag)(shared_ptr<Object>, shared_ptr<Tag> tag);
     typedef void (*MethodObject)(shared_ptr<Object>, shared_ptr<Object> tag);
+    typedef void (*MethodElement)(shared_ptr<Object>, Element& elements);
     typedef void (*MethodElements)(shared_ptr<Object>, vector<Element>& elements);
-    typedef void (*MethodGarbage)(shared_ptr<Object>, const shared_ptr<Tag> tag, vector<Element>& elements);
+    typedef void (*MethodGarbage)(shared_ptr<Object>, shared_ptr<Tag> tag, vector<Element>& elements);
+    
+    
     typedef void (*MethodDsp)(shared_ptr<Box>, shared_ptr<DspNode> node);
     typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
+    typedef void (*MethodWrite)(shared_ptr<Object>, shared_ptr<Dico> dico);
+    
     typedef shared_ptr<Object> (*MethodCreate)(shared_ptr<Instance>, shared_ptr<Tag> name, ...);
     
     // ================================================================================ //
@@ -63,6 +69,8 @@ namespace Kiwi
      */
     class Object : public enable_shared_from_this<Object>
     {
+        friend class Attribute;
+        
     private:
         struct ObjectMethod
         {
@@ -81,13 +89,17 @@ namespace Kiwi
         MethodDouble                                m_method_double;
         MethodTag                                   m_method_tag;
         MethodObject                                m_method_object;
+        MethodElement                               m_method_element;
         MethodElements                              m_method_elements;
         MethodGarbage                               m_method_garbage;
         
         // The standard methods //
-        map<const shared_ptr<Tag>, ObjectMethod>    m_method_standard;
+        map<shared_ptr<Tag>, ObjectMethod>    m_method_standard;
         // The opaque methods //
-        map<const shared_ptr<Tag>, Method>          m_method_opaque;
+        map<shared_ptr<Tag>, Method>          m_method_opaque;
+        
+        map<shared_ptr<Tag>, shared_ptr<Attribute>> m_attributes;
+        set<weak_ptr<ObjectListener>>               m_listeners;
         
     public:
         const shared_ptr<Tag>  m_tag_bang;
@@ -95,6 +107,7 @@ namespace Kiwi
         const shared_ptr<Tag>  m_tag_double;
         const shared_ptr<Tag>  m_tag_tag;
         const shared_ptr<Tag>  m_tag_object;
+        const shared_ptr<Tag>  m_tag_element;
         const shared_ptr<Tag>  m_tag_elements;
         const shared_ptr<Tag>  m_tag_garbage;
         const shared_ptr<Tag>  m_tag_signal;
@@ -106,14 +119,7 @@ namespace Kiwi
          @param kiwi    A pointer to the instance.
          @param name    A name for the object.
          */
-        Object(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name);
-        
-        //! Constructor.
-        /** Set up the default pointers and tags.
-         @param kiwi    A pointer to the instance.
-         @param name    A name for the object.
-         */
-        Object(shared_ptr<Instance> kiwi, const string name);
+        Object(shared_ptr<Instance> kiwi, string const& name);
         
         //! Descrutor.
         /** Free the methods.
@@ -124,7 +130,7 @@ namespace Kiwi
         /** The function retrieves the name of the object as a tag.
          @return The name of the object as a tag.
          */
-        inline shared_ptr<Tag> getName() const noexcept
+        inline shared_ptr<Tag> name() const noexcept
         {
             return m_name;
         }
@@ -133,7 +139,7 @@ namespace Kiwi
         /** The function retrieves the type of the object.
          @return The type of the object.
          */
-        virtual bool isBox() const noexcept
+        virtual inline bool isBox() const noexcept
         {
             return false;
         }
@@ -142,7 +148,7 @@ namespace Kiwi
         /** The function writes the object in a dico.
          @param dico The dico.
          */
-        virtual void write(shared_ptr<Dictionary> dico);
+        virtual void write(shared_ptr<Dico> dico);
         
         //! Retrieve the number of methods.
         /** The function retrieves the number of methods. It takes into account the default methods bang, long, double, tag, object, elements and garbage, the standard methods and the opaque methods.
@@ -155,138 +161,138 @@ namespace Kiwi
          @param name    The name of the method.
          @return        True if the method exist otherwise false.
          */
-        bool hasMethod(const shared_ptr<Tag> name) const;
+        bool hasMethod(shared_ptr<Tag> name) const;
         
         //! Retrieve if a method exists.
         /** The function check the existence of a method. It could be a default method bang, long, double, tag, object, elements or garbage, a standard method or an opaque method.
          @param name    The name of the method.
          @return        True if the method exist otherwise false.
          */
-        bool hasMethod(string name);
+        bool hasMethod(string const& name);
         
         //! Retrieve a method.
         /** The function retrieves a method.
          @param name    The name of the method.
          @return        The adress of the method or null if the method doesn't exist.
          */
-        Method getMethod(const shared_ptr<Tag> name) const;
+        Method getMethod(shared_ptr<Tag> name) const;
         
         //! Retrieve a method.
         /** The function retrieves a method.
          @param name    The name of the method.
          @return        The adress of the method or null if the method doesn't exist.
          */
-        Method getMethod(string name);
+        Method getMethod(string const& name);
         
         //! Retrieve if the type of a method.
         /** The function retrieves the type of a method. For the default and standart methods it will be the nothing, long, double, tag, object, elements or garbage (only for the garbage method) type and for the other it will be the opaque type.
          @param name    The name of the method.
          @return        True if the method exist otherwise false.
          */
-        Type getMethodType(const shared_ptr<Tag> name) const;
+        Type getMethodType(shared_ptr<Tag> name) const;
         
         //! Retrieve if the type of a method.
         /** The function retrieves the type of a method. For the default and standart methods it will be the nothing, long, double, tag, object, elements or garbage (only for the garbage method) type and for the other it will be the opaque type.
          @param name    The of the method.
          @return        True if the method exist otherwise false.
          */
-        Type getMethodType(string name);
+        Type getMethodType(string const& name);
         
         //! Retrieve an object method.
         /** The function retrieves an object method.
          @param name    The name of the method.
          @return        The object method.
          */
-        ObjectMethod getObjectMethod(const shared_ptr<Tag> name) const;
+        ObjectMethod getObjectMethod(shared_ptr<Tag> name) const;
         
         //! Retrieve an object method.
         /** The function retrieves an object method.
          @param name    The name of the method.
          @return        The object method.
          */
-        ObjectMethod getObjectMethod(string name);
+        ObjectMethod getObjectMethod(string const& name);
         
         //! Call a standard method without parameters.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          */
-        void callMethod(const shared_ptr<Tag> name);
+        void callMethod(shared_ptr<Tag> name);
         
         //! Call a standard method without parameters.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          */
-        void callMethod(string name);
+        void callMethod(string const& name);
        
         //! Call a standard method with a long parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param value   A long value to pass.
          */
-        void callMethod(const shared_ptr<Tag> name, long value);
+        void callMethod(shared_ptr<Tag> name, long value);
         
         //! Call a standard method with a long parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param value   A long value to pass.
          */
-        void callMethod(string name, long value);
+        void callMethod(string const& name, long value);
         
         //! Call a standard method with a double parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param value   A double value to pass.
          */
-        void callMethod(const shared_ptr<Tag> name, double value);
+        void callMethod(shared_ptr<Tag> name, double value);
         
         //! Call a standard method with a double parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param value   A double value to pass.
          */
-        void callMethod(string name, double value);
+        void callMethod(string const& name, double value);
         
         //! Call a standard method with a tag parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param tag     A tag to pass.
          */
-        void callMethod(const shared_ptr<Tag> name, shared_ptr<Tag> tag);
+        void callMethod(shared_ptr<Tag> name, shared_ptr<Tag> tag);
         
         //! Call a standard method with a tag parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param tag     A tag to pass.
          */
-        void callMethod(string name, shared_ptr<Tag> tag);
+        void callMethod(string const& name, shared_ptr<Tag> tag);
         
         //! Call a standard method with an object parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param object  An object to pass.
          */
-        void callMethod(const shared_ptr<Tag> name, shared_ptr<Object> object);
+        void callMethod(shared_ptr<Tag> name, shared_ptr<Object> object);
         
         //! Call a standard method with an object parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name    A name that matchs to a method.
          @param object  An object to pass.
          */
-        void callMethod(string name, shared_ptr<Object> object);
+        void callMethod(string const& name, shared_ptr<Object> object);
         
         //! Call a standard method with a list of elements parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name        A name that matchs to a method.
          @param elements    A list of elements to pass.
          */
-        void callMethod(const shared_ptr<Tag> name, vector<Element>& elements);
+        void callMethod(shared_ptr<Tag> name, vector<Element>& elements);
         
         //! Call a standard method with a list of elements parameter.
         /** The function looks for the standard method that matchs with the name and the parameter and send call it or doesn't do anything if the method doesn't exist or if the parameters can't be formatted for the method.
          @param name        A name that matchs to a method.
          @param elements    A list of elements to pass.
          */
-        void callMethod(string name, vector<Element>& elements);
+        void callMethod(string const& name, vector<Element>& elements);
         
         //! Call an opaque method with unformatted parameters.
         /** The function looks for the opaque method that matchs with the name and pass the arguments. Note that you should know what can of parameters the method is expected because we can't know it for you.
@@ -294,7 +300,7 @@ namespace Kiwi
          @param size    The number of parameters (limited to 10).
          @param ...     Some parameters.
          */
-        void callMethodOpaque(const shared_ptr<Tag> name, int size, ...);
+        void callMethodOpaque(shared_ptr<Tag> name, int size, ...);
         
         //! Call an opaque method with unformatted parameters.
         /** The function looks for the opaque method that matchs with the name and pass the arguments. Note that you should know what can of parameters the method is expected because we can't know it for you.
@@ -312,7 +318,7 @@ namespace Kiwi
          @param type    A type that defines the method parameters.
          @param method  A function that matchs the method prototypes depending of the type.
          */
-        void addMethod(const shared_ptr<Tag> name, Type type, Method method);
+        void addMethod(shared_ptr<Tag> name, Type type, Method method);
         
         //! Add a new method method.
         /** The function add a method to the list of methods. Note that the bang, long, double, tag, object, elements and garbage methods should be defined with the good types (you can't have a bang method that receive a double value as parameter for exemple). The standard methods can only have the same types as the default methods except the garbage one (nothing, long, double, tag, object and element types). Look at the class definition to see the prototypes of the default methods. If you want to use other parameters, you should use an opaque type. An opaque type means that the methods won't be used by the inlets the and outlets with a connection in a graphical context but internally (directly from an object to another, for example). You should use the opaque call to use it.
@@ -326,7 +332,7 @@ namespace Kiwi
         /** The function removes a method from the method list.
          @param name    A tag that matchs to a method.
          */
-        void removeMethod(const shared_ptr<Tag> name) noexcept;
+        void removeMethod(shared_ptr<Tag> name) noexcept;
         
         //! Remove a method.
         /** The function removes a method from the method list.
@@ -339,7 +345,7 @@ namespace Kiwi
          @param     The name of the tag to retrieve.
          @return    The tag that match with the name.
          */
-        shared_ptr<Tag> createTag(string name) const;
+        shared_ptr<Tag> createTag(string name) const noexcept;
         
         //! Object factory.
         /** This function uses the instance specific object factory to create an object.
@@ -357,16 +363,48 @@ namespace Kiwi
         
         shared_ptr<Object> createObject(string name, Element const& elements) const;
         
+        shared_ptr<Attribute> createAttribute(shared_ptr<Tag> name);
+        
+        shared_ptr<Attribute> createAttribute(string name);
+        
+        //! Check if an attribute exists.
+        /** The function checks if an attribute exists.
+         @param name    The name of the attribute.
+         @return true if the attribute exists otherwise false.
+         */
+        bool hasAttribute(shared_ptr<Tag> name) const noexcept;
+        
+        //! Check if an attribute exists.
+        /** The function checks if an attribute exists.
+         @param name    The name of the attribute.
+         @return true if the attribute exists otherwise false.
+         */
+        bool hasAttribute(string const& name) const noexcept;
+        
+        //! Retrieve an attribute
+        /** The function retrieves an attribute
+         @param name    The name of the attribute.
+         @return The attribute if the attribute exists otherwise nullptr.
+         */
+        shared_ptr<Attribute> getAttribute(shared_ptr<Tag> name) const noexcept;
+        
+        //! Retrieve an attribute
+        /** The function retrieves an attribute
+         @param name    The name of the attribute.
+         @return The attribute if the attribute exists otherwise nullptr.
+         */
+        shared_ptr<Attribute> getAttribute(string const& name) const noexcept;
+        
         //! Connection factory.
         /** This function uses the instance specific connection factory to create an connection.
          @param     The name of the tag to retrieve.
          */
         shared_ptr<Connection> createConnection(shared_ptr<Box> from, int outlet, shared_ptr<Box> to, int inlet) const;
         
-        //! Dictionary factory.
+        //! Dico factory.
         /** This function uses the instance specific dico factory to create a dico.
          */
-        shared_ptr<Dictionary> createDico() const;
+        shared_ptr<Dico> createDico() const;
         
         //! Json factory.
         /** This function uses the instance specific dico factory to create a json.
@@ -412,6 +450,18 @@ namespace Kiwi
          */
         void    errorObject(string message) const noexcept;
         
+    };
+    
+    class ObjectListener
+    {
+    public:
+        ObjectListener(){};
+        virtual ~ObjectListener(){};
+        
+        //! Receive the notifivation that an attribute has changed.
+        /**
+         */
+        virtual void attributeChanged() const noexcept{};
     };
 }
 

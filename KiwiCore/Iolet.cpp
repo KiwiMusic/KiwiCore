@@ -321,15 +321,16 @@ namespace Kiwi
         return m_inlet;
     }
     
-    void Connection::write(shared_ptr<Dictionary> dico)
+    void Connection::write(shared_ptr<Dico> dico)
     {
+        int i; 
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
         {
             shared_ptr<Box> box;
             if((box = m_from.lock()))
             {
-                shared_ptr<Tag> tag = (shared_ptr<Tag>)box->getAttributeValue(kiwi->createTag("id"));
+                shared_ptr<Tag> tag;// = (shared_ptr<Tag>)box->getAttributeValue(kiwi->createTag("id"));
                 if(tag)
                     dico->set(kiwi->createTag("from"), tag);
                 else
@@ -340,7 +341,7 @@ namespace Kiwi
             
             if((box = m_to.lock()))
             {
-                shared_ptr<Tag> tag = (shared_ptr<Tag>)box->getAttributeValue(kiwi->createTag("id"));
+                shared_ptr<Tag> tag;// = (shared_ptr<Tag>)box->getAttributeValue(kiwi->createTag("id"));
                 if(tag)
                     dico->set(kiwi->createTag("to"), tag);
                 else

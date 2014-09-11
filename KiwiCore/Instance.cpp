@@ -50,15 +50,15 @@ namespace Kiwi
     
     void Instance::addObjectPrototype(unique_ptr<Object> object)
     {
-        map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(object->getName());
+        map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(object->name());
         if(it != m_prototypes.end())
         {
-            string message = string("The object prototype ") + (string)*object->getName() + string(" already exist !");
+            string message = string("The object prototype ") + (string)*object->name() + string(" already exist !");
             error(message);
         }
         else
         {
-            m_prototypes[object->getName()] = move(object);
+            m_prototypes[object->name()] = move(object);
         }
     }
     
@@ -148,9 +148,9 @@ namespace Kiwi
         return make_shared<Connection>(enable_shared_from_this<Instance>::shared_from_this(), from, oulet, to, inlet);
     }
     
-    shared_ptr<Dictionary> Instance::createDico()
+    shared_ptr<Dico> Instance::createDico()
     {
-        return make_shared<Dictionary>(enable_shared_from_this<Instance>::shared_from_this());
+        return make_shared<Dico>(enable_shared_from_this<Instance>::shared_from_this());
     }
     
     shared_ptr<Json> Instance::createJson()

@@ -49,9 +49,9 @@ int main (int argc, char* argv[])
         }
         kiwi->post("---------");
         
-        Dico dico1 = kiwi->createDico();
-        Dico dico2 = kiwi->createDico();
-        Dico dico3 = kiwi->createDico();
+        sDico dico1 = kiwi->createDico();
+        sDico dico2 = kiwi->createDico();
+        sDico dico3 = kiwi->createDico();
         
         dico3->append(kiwi->createTag("aa"), {9, 8, 7});
         dico3->append(kiwi->createTag("bb"), kiwi->createTag("zozo"));
