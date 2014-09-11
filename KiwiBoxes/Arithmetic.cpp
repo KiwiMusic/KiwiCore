@@ -30,9 +30,12 @@ namespace Kiwi
     //                                      PLUS                                        //
     // ================================================================================ //
     
-    Plus::Plus(shared_ptr<Instance> kiwi) : Box(kiwi, kiwi->createTag("+"))
+    Plus::Plus(sInstance kiwi, Element element) : Box(kiwi, "+"),
+    m_double(element.isDouble()),
+    m_augend(0),
+    m_addend(0)
     {
-        addMethod("create",   T_ELEMENTS, (Method)create);
+        addMethod("create",   T_ELEMENT,   (Method)create);
         addMethod("bang",     T_NOTHING,  (Method)receiveBang);
         addMethod("long",     T_LONG,     (Method)receiveLong);
         addMethod("double",   T_DOUBLE,   (Method)receiveDouble);
@@ -43,18 +46,13 @@ namespace Kiwi
         
     }
     
-    shared_ptr<Object> Plus::create(shared_ptr<Instance> kiwi, shared_ptr<Tag> name, vector<Element>& elements)
+    sObject Plus::create(sInstance kiwi, sTag name, Element element)
     {
-        shared_ptr<Plus> x =  make_shared<Plus>(kiwi);
-        
-        x->m_augend = 0;
-        x->m_addend = 0;
-        x->m_double = false;
-        if(elements.size())
-        {
-            x->m_double = elements[0].isDouble();
-            x->m_addend = (double)elements[0];
-        }
+        This x =  make_shared<Plus>(kiwi, element);
+        if(x->m_double)
+            x->m_addend = (double)element;
+        else
+            x->m_addend = (long)element;
         
         x->addInlet("bang", "long", "double");
         x->addInlet("long", "double");
@@ -67,23 +65,18 @@ namespace Kiwi
         x->setInletAttributes(1, "Addend", InletPolarity::Cold);
         x->setOutletDescription(0, "Sum");
         
-        return shared_ptr<Object>(static_pointer_cast<Box>(x));
+        return x;
     }
     
-    void Plus::receiveBang(shared_ptr<Plus> x)
+    void Plus::receiveBang(This x)
     {
-#ifdef DEBUG
-        string message = to_string(x->m_augend) + string(" ") + to_string(x->m_addend) + string(" = ") + to_string(x->m_augend + x->m_addend);
-        
-        x->postObject(message);
-#endif
         if(x->m_double)
             x->sendDouble(0, x->m_augend + x->m_addend);
         else
-            x->sendLong(0, x->m_augend +x-> m_addend);
+            x->sendLong(0, x->m_augend + x-> m_addend);
     }
     
-    void Plus::receiveLong(shared_ptr<Plus> x, long value)
+    void Plus::receiveLong(This x, long value)
     {
         if(x->getProxy() == 0)
         {
@@ -94,7 +87,7 @@ namespace Kiwi
             x->m_addend = value;
     }
     
-    void Plus::receiveDouble(shared_ptr<Plus> x, double value)
+    void Plus::receiveDouble(This x, double value)
     {
         if(x->getProxy() == 0)
         {

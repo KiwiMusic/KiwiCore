@@ -50,24 +50,48 @@ namespace Kiwi
     
     void Instance::addObjectPrototype(unique_ptr<Object> object)
     {
-        map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(object->getName());
+        map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(object->name());
         if(it != m_prototypes.end())
         {
-            string message = string("The object prototype ") + (object->getName())->name() + string(" already exist !");
+            string message = string("The object prototype ") + (string)*object->name() + string(" already exist !");
             error(message);
         }
         else
         {
-            m_prototypes[object->getName()] = move(object);
+            m_prototypes[object->name()] = move(object);
         }
     }
     
-    shared_ptr<Object> Instance::createObject(string name, vector<Element>& elements)
+    shared_ptr<Object> Instance::createObject(string name, vector<Element> const& elements)
     {
         return createObject(createTag(name), elements);
     }
     
-    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, vector<Element>& elements)
+    shared_ptr<Object> Instance::createObject(string name, Element const& element)
+    {
+        vector<Element> elements = {element};
+        return createObject(createTag(name), elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, Element const& element)
+    {
+        vector<Element> elements = {element};
+        return createObject(name, elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(string name)
+    {
+        vector<Element> elements;
+        return createObject(createTag(name), elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name)
+    {
+        vector<Element> elements;
+        return createObject(name, elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, vector<Element> const& elements)
     {
         shared_ptr<Object> object;
         map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);
@@ -119,9 +143,19 @@ namespace Kiwi
         return object;
     }
     
+    shared_ptr<Connection> Instance::createConnection(shared_ptr<Box> from, int oulet, shared_ptr<Box> to, int inlet)
+    {
+        return make_shared<Connection>(enable_shared_from_this<Instance>::shared_from_this(), from, oulet, to, inlet);
+    }
+    
     shared_ptr<Dico> Instance::createDico()
     {
         return make_shared<Dico>(enable_shared_from_this<Instance>::shared_from_this());
+    }
+    
+    shared_ptr<Json> Instance::createJson()
+    {
+        return make_shared<Json>(enable_shared_from_this<Instance>::shared_from_this());
     }
     
     shared_ptr<Page> Instance::createPage(string file, string directory)

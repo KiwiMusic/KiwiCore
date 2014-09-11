@@ -29,7 +29,6 @@
 #include "Element.h"
 #include "Console.h"
 #include "Object.h"
-#include "ObjectExtented.h"
 
 // Add hot and cold inlets and clean the notifications and functions
 
@@ -47,7 +46,7 @@ namespace Kiwi
      The box is a graphical object that aims to be instantiate in a page. It inherites from the object to manage the method and from the attribute manager. The main feature is the managing of inlets and outlets. Note that the box use other methods than the default constructor and destructor to be instantiate in a page, look at the create and delete methods. If you want to create a box's child class you can have a look at the objects implementations like plus or minus.
      @see Object, Inlet, Outlet, BoxUI, BoxDSP, BoxDSPUI.
      */
-    class Box : public ObjectExtented
+    class Box : public Object
     {
     private:
         class Inlet;
@@ -257,14 +256,25 @@ namespace Kiwi
             Hot  = 1
         };
         
-        Box(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name);
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
+        Box(shared_ptr<Instance> kiwi, string const& name);
+        
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
         virtual ~Box();
         
         //! Retrieve the type of the object.
         /** The function retrieves the type of the object.
          @return The type of the object.
          */
-        bool isBox() const noexcept override
+        inline bool isBox() const noexcept override
         {
             return true;
         }

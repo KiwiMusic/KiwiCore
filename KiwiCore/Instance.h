@@ -29,7 +29,8 @@
 #include "Element.h"
 #include "Console.h"
 #include "Object.h"
-#include "ObjectExtented.h"
+#include "Dico.h"
+#include "Json.h"
 #include "Iolet.h"
 #include "Box.h"
 #include "Page.h"
@@ -43,7 +44,7 @@ namespace Kiwi
     class Instance :  public TagFactory, public Console, public enable_shared_from_this<Instance>
     {
     private:
-        friend shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> &elements);
+        //friend shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> &elements);
         
         int                                         m_untitled_pages;
         vector<shared_ptr<Page>>                    m_pages;
@@ -55,9 +56,17 @@ namespace Kiwi
         
         void init();
         
-        shared_ptr<Object> createObject(string name, vector<Element>& elements);
-        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element>& elements);
-        shared_ptr<Dico>   createDico();
+        shared_ptr<Object> createObject(string name, vector<Element> const& elements);
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element> const& elements);
+        shared_ptr<Object> createObject(string name, Element const& element);
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, Element const& element);
+        shared_ptr<Object> createObject(string name);
+        shared_ptr<Object> createObject(shared_ptr<Tag> name);
+        
+        shared_ptr<Connection> createConnection(shared_ptr<Box> from, int oulet, shared_ptr<Box> to, int inlet);
+        shared_ptr<Dico> createDico();
+        shared_ptr<Json> createJson();
+        
         
         shared_ptr<Page> createPage(string file = string(""), string directory = string(""));
         void closePage(shared_ptr<Page> page);

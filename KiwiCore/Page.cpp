@@ -27,11 +27,21 @@
 
 namespace Kiwi
 {
-    Page::Page(shared_ptr<Instance> kiwi, string file, string directory) : ObjectExtented(kiwi, kiwi->createTag("page"))
+    Page::Page(shared_ptr<Instance> kiwi, string file, string directory) : Object(kiwi, "page")
     {
         m_file = file;
         m_directory = directory;
         m_dsp_context = make_shared<DspContext>();
+        
+        shared_ptr<Dico> main = createDico();
+        main->read(m_file, m_directory);
+        if(main->has(createTag("boxes")))
+        {
+            vector<Element> boxes;
+            main->get(createTag("boxes"), boxes);
+            for(int i = 0; i < boxes.size(); i++)
+                static_pointer_cast<Dico>((shared_ptr<Object>)boxes[i])->post();
+        }
     }
     
     Page::~Page()
@@ -40,7 +50,7 @@ namespace Kiwi
         m_boxes.clear();
     }
 
-    shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> &elements)
+    shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> const& elements)
     {
         shared_ptr<Object> object = createObject(name, elements);
         if(object->isBox())
@@ -51,9 +61,35 @@ namespace Kiwi
         }
         else
         {
-            error(string("The object \"" + name->name() + "\" isn't patchable !"));
+            error(string("The object " + (string)*name + " isn't patchable !"));
             return shared_ptr<Box>();
         }
+    }
+    
+    shared_ptr<Box> Page::createBox(string name, vector<Element> const& elements)
+    {
+        return createBox(createTag(name), elements);
+    }
+    
+    shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, Element const& element)
+    {
+        shared_ptr<Object> object = createObject(name, element);
+        if(object->isBox())
+        {
+            shared_ptr<Box> box = static_pointer_cast<Box>(object);
+            m_boxes.insert(box);
+            return box;
+        }
+        else
+        {
+            error(string("The object " + (string)*name + " isn't patchable !"));
+            return shared_ptr<Box>();
+        }
+    }
+    
+    shared_ptr<Box> Page::createBox(string name, Element const& element)
+    {
+        return createBox(createTag(name), element);
     }
     
     void Page::freeBox(shared_ptr<Box> box)
@@ -70,7 +106,7 @@ namespace Kiwi
     {
         if(from != to && m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
         {
-            shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
+            shared_ptr<Connection> connect = createConnection(from, outlet, to, inlet);
             for(set<shared_ptr<Connection>>::const_iterator it = m_connections.begin(); it != m_connections.end(); ++it)
             {
                 if(*(*it) == *connect)
@@ -87,7 +123,7 @@ namespace Kiwi
     {
         if(from != to && m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
         {
-            shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
+            shared_ptr<Connection> connect = createConnection(from, outlet, to, inlet);
             for(set<shared_ptr<Connection>>::const_iterator it = m_connections.begin(); it != m_connections.end(); ++it)
             {
                 if(*(*it) == *connect)
@@ -109,7 +145,7 @@ namespace Kiwi
     {
         if(from != to && m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
         {
-            shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
+            shared_ptr<Connection> connect = createConnection(from, outlet, to, inlet);
             for(set<shared_ptr<Connection>>::const_iterator it = m_connections.begin(); it != m_connections.end(); ++it)
             {
                 if(*(*it) == *connect)
@@ -132,17 +168,15 @@ namespace Kiwi
         
         for(set<shared_ptr<Connection>>::iterator it = m_connections.begin(); it != m_connections.end(); ++it)
             m_dsp_context->addConnection((*it));
+        
         try
         {
             m_dsp_context->compile();
         }
-        
         catch(shared_ptr<Box> box)
         {
             box->errorObject("something appened with me... sniff !");
         }
-        string message = string("Number of processes : ") + to_string(m_dsp_context->getNumberOfProcess());
-        postObject(message);
     }
     
     void Page::tickDsp()
@@ -157,15 +191,28 @@ namespace Kiwi
     
     void Page::write()
     {
-        /*
-        Dico main;
-        Dico dico;
-        shared_ptr<Tag> box = createTag("box");
+        shared_ptr<Dico> main = createDico();
+        vector<Element> elements;
+        Object::write(main);
+        
         for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
-            dico.append(box, (*it)->name());
+            shared_ptr<Dico> box = createDico();
+            (*it)->write(box);
+            elements.push_back(static_pointer_cast<Object>(box));
         }
-         */
+        main->set(createTag("boxes"), elements);
+        
+        elements.clear();
+        for(set<shared_ptr<Connection>>::iterator it = m_connections.begin(); it != m_connections.end(); ++it)
+        {
+            shared_ptr<Dico> connection = createDico();
+            (*it)->write(connection);
+            elements.push_back(static_pointer_cast<Object>(connection));
+        }
+        main->set(createTag("connections"), elements);
+        
+        main->write(m_file, m_directory);
     }
 }
 

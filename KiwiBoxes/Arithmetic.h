@@ -39,19 +39,19 @@ namespace Kiwi
     class Plus : public Box
     {
     private:
+        typedef shared_ptr<Plus> This;
         friend class Arithmetic;
-        bool            m_double;
+        const bool      m_double;
         double          m_augend;
         double          m_addend;
     public:
-        Plus(shared_ptr<Instance> kiwi);
+        Plus(sInstance kiwi, Element elements);
         ~Plus();
         
-        static shared_ptr<Object> create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements);
-    
-        static void receiveBang(shared_ptr<Plus> plus);
-        static void receiveLong(shared_ptr<Plus> plus, long value);
-        static void receiveDouble(shared_ptr<Plus> plus, double value);
+        static sObject create(sInstance kiwi, sTag name, Element element);
+        static void receiveBang(This x);
+        static void receiveLong(This x, long value);
+        static void receiveDouble(This x, double value);
     };
     
     // ================================================================================ //
@@ -223,7 +223,7 @@ namespace Kiwi
     public:
         static void load(shared_ptr<Instance> kiwi)
         {
-            kiwi->addObjectPrototype(unique_ptr<Box>(new Plus(kiwi)));
+            kiwi->addObjectPrototype(unique_ptr<Box>(new Plus(kiwi, 0)));
             /*
             k->addObjectPrototype(unique_ptr<Object>(new Minus(k, string("Minus"), elements)));
             k->addObjectPrototype(unique_ptr<Object>(new Minus(k, string("-"), elements)));

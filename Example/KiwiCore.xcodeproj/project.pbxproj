@@ -22,10 +22,10 @@
 		8F73C7E419B9DB110041C577 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CA19B9DB110041C577 /* Instance.cpp */; };
 		8F73C7E519B9DB110041C577 /* Iolet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CC19B9DB110041C577 /* Iolet.cpp */; };
 		8F73C7E619B9DB110041C577 /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CE19B9DB110041C577 /* Object.cpp */; };
-		8F73C7E719B9DB110041C577 /* ObjectExtented.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D019B9DB110041C577 /* ObjectExtented.cpp */; };
 		8F73C7E819B9DB110041C577 /* Page.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D219B9DB110041C577 /* Page.cpp */; };
 		8F73C7E919B9DB110041C577 /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D419B9DB110041C577 /* Signal.cpp */; };
 		8F73C7EA19B9DB110041C577 /* Tag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D619B9DB110041C577 /* Tag.cpp */; };
+		8F9FCF3419BDA35300EEAC03 /* Json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F9FCF3319BDA35300EEAC03 /* Json.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -73,8 +73,6 @@
 		8F73C7CD19B9DB110041C577 /* Iolet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Iolet.h; sourceTree = "<group>"; };
 		8F73C7CE19B9DB110041C577 /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		8F73C7CF19B9DB110041C577 /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
-		8F73C7D019B9DB110041C577 /* ObjectExtented.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectExtented.cpp; sourceTree = "<group>"; };
-		8F73C7D119B9DB110041C577 /* ObjectExtented.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectExtented.h; sourceTree = "<group>"; };
 		8F73C7D219B9DB110041C577 /* Page.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Page.cpp; sourceTree = "<group>"; };
 		8F73C7D319B9DB110041C577 /* Page.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Page.h; sourceTree = "<group>"; };
 		8F73C7D419B9DB110041C577 /* Signal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Signal.cpp; sourceTree = "<group>"; };
@@ -83,6 +81,8 @@
 		8F73C7D719B9DB110041C577 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
 		8F73C7D819B9DB110041C577 /* Tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tools.h; sourceTree = "<group>"; };
 		8F96739219B9C7D100C8EE72 /* KiwiCore */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KiwiCore; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F9ABFC119BC499F001C85AC /* Json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Json.h; sourceTree = "<group>"; };
+		8F9FCF3319BDA35300EEAC03 /* Json.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Json.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,8 +156,6 @@
 				8F73C7CD19B9DB110041C577 /* Iolet.h */,
 				8F73C7CE19B9DB110041C577 /* Object.cpp */,
 				8F73C7CF19B9DB110041C577 /* Object.h */,
-				8F73C7D019B9DB110041C577 /* ObjectExtented.cpp */,
-				8F73C7D119B9DB110041C577 /* ObjectExtented.h */,
 				8F73C7D219B9DB110041C577 /* Page.cpp */,
 				8F73C7D319B9DB110041C577 /* Page.h */,
 				8F73C7D419B9DB110041C577 /* Signal.cpp */,
@@ -165,6 +163,8 @@
 				8F73C7D619B9DB110041C577 /* Tag.cpp */,
 				8F73C7D719B9DB110041C577 /* Tag.h */,
 				8F73C7D819B9DB110041C577 /* Tools.h */,
+				8F9FCF3319BDA35300EEAC03 /* Json.cpp */,
+				8F9ABFC119BC499F001C85AC /* Json.h */,
 			);
 			name = KiwiCore;
 			path = ../KiwiCore;
@@ -250,7 +250,6 @@
 				8F73C7E319B9DB110041C577 /* Element.cpp in Sources */,
 				8F73C7DF19B9DB110041C577 /* Dico.cpp in Sources */,
 				8F73C7E219B9DB110041C577 /* DspProcess.cpp in Sources */,
-				8F73C7E719B9DB110041C577 /* ObjectExtented.cpp in Sources */,
 				8F73C78219B9C81E0041C577 /* main.cpp in Sources */,
 				8F73C7E619B9DB110041C577 /* Object.cpp in Sources */,
 				8F73C7EA19B9DB110041C577 /* Tag.cpp in Sources */,
@@ -258,6 +257,7 @@
 				8F73C7DB19B9DB110041C577 /* ArithmeticTilde.cpp in Sources */,
 				8F73C7E919B9DB110041C577 /* Signal.cpp in Sources */,
 				8F73C7E019B9DB110041C577 /* DspContext.cpp in Sources */,
+				8F9FCF3419BDA35300EEAC03 /* Json.cpp in Sources */,
 				8F73C7E419B9DB110041C577 /* Instance.cpp in Sources */,
 				8F73C7DC19B9DB110041C577 /* Attribute.cpp in Sources */,
 				8F73C7E519B9DB110041C577 /* Iolet.cpp in Sources */,

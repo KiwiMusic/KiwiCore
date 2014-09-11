@@ -23,6 +23,7 @@
 
 #include "Dico.h"
 #include "Instance.h"
+#include "Json.h"
 
 namespace Kiwi
 {
@@ -30,9 +31,9 @@ namespace Kiwi
     //                                      DICO                                        //
     // ================================================================================ //
     
-    Dico::Dico(shared_ptr<Instance> kiwi) : Object(kiwi, kiwi->createTag("dico"))
+    Dico::Dico(shared_ptr<Instance> kiwi) : Object(kiwi, "dico")
     {
-        addMethod("write", T_OPAQUE, (Method)dowrite);
+        ;
     }
     
     Dico::~Dico()
@@ -40,461 +41,120 @@ namespace Kiwi
         clear();
     }
     
-    void Dico::clear()
+    void Dico::clear() noexcept
     {
         m_entries.clear();
-        m_elements.clear();
     }
     
-    shared_ptr<Dico> Dico::get(shared_ptr<Tag> key)
+    void Dico::clear(shared_ptr<Tag> key) noexcept
     {
-        map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = m_entries.find(key);
-        if(it != m_entries.end())
-        {
-            shared_ptr<Dico> dico = it->second;
-            if(dico)
-            {
-                return dico;
-            }
-        }
-        return nullptr;
+        m_entries.erase(key);
     }
     
-    void Dico::clear(shared_ptr<Tag> key)
+    void Dico::keys(vector<Element>& elements) const noexcept
     {
-        if(m_entries.find(key) != m_entries.end())
-            m_entries.erase(m_entries.find(key));
+        elements.clear();
+        for(map<const shared_ptr<Tag>, vector<Element>>::const_iterator it = m_entries.begin(); it != m_entries.end(); ++it)
+            elements.push_back(it->first);
     }
     
-    bool Dico::has(shared_ptr<Tag> key)
+    bool Dico::has(shared_ptr<Tag> key) const noexcept
     {
         return m_entries.find(key) != m_entries.end();
     }
     
-    Type Dico::type(shared_ptr<Tag> key)
+    Type Dico::type(shared_ptr<Tag> key) const noexcept
     {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
+        map<const shared_ptr<Tag>, vector<Element> >::const_iterator it = m_entries.find(key);
+        if(it != m_entries.end())
         {
-            if(dico->m_elements.size() == 1)
+            vector<Element> elements = it->second;
+            if(elements.size() == 1)
             {
-                return dico->m_elements[0].type();
+                return elements[0].type();
             }
-            else if(dico->m_elements.size() > 1)
+            else
             {
                 return T_ELEMENTS;
             }
-            else
-                return T_ENTRIES;
         }
         else
             return T_NOTHING;
     }
     
-    bool Dico::isLong(shared_ptr<Tag> key)
+    Element Dico::get(shared_ptr<Tag> key) const noexcept
     {
-        return type(key) == T_LONG;
+        map<const shared_ptr<Tag>, vector<Element> >::const_iterator it = m_entries.find(key);
+        if(it != m_entries.end())
+        {
+            vector<Element> elements = it->second;
+            if(elements.size())
+            {
+                return elements[0];
+            }
+        }
+        return 0;
     }
     
-    bool Dico::isDouble(shared_ptr<Tag> key)
+    void Dico::get(shared_ptr<Tag> key, vector<Element>& elements) const noexcept
     {
-        return type(key) == T_DOUBLE;
+        map<const shared_ptr<Tag>, vector<Element> >::const_iterator it = m_entries.find(key);
+        if(it != m_entries.end())
+        {
+            elements = it->second;
+        }
     }
     
-    bool Dico::isTag(shared_ptr<Tag> key)
+    void Dico::set(shared_ptr<Tag> key, Element const& element) noexcept
     {
-        return type(key) == T_TAG;
+        vector<Element> elements;
+        elements.push_back(element);
+        m_entries[key] = elements;
     }
     
-    bool Dico::isObject(shared_ptr<Tag> key)
+    void Dico::set(shared_ptr<Tag> key, vector<Element> const& elements) noexcept
     {
-        return type(key) == T_OBJECT;
-    }
-    
-    bool Dico::isElements(shared_ptr<Tag> key)
-    {
-        return type(key) == T_ELEMENTS;
-    }
-    
-    bool Dico::isEntries(shared_ptr<Tag> key)
-    {
-        return type(key) == T_ENTRIES;
-    }
-    
-    long Dico::getLong(shared_ptr<Tag> key)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            return (long)dico->m_elements[0];
-        else
-            return 0;
-    }
-    
-    double Dico::getDouble(shared_ptr<Tag> key)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            return (double)dico->m_elements[0];
-        else
-            return 0;
-    }
-    
-    shared_ptr<Tag> Dico::getTag(shared_ptr<Tag> key)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            return (shared_ptr<Tag>)dico->m_elements[0];
-        else
-            return nullptr;
-    }
-    
-    shared_ptr<Object> Dico::getObject(shared_ptr<Tag> key)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            return (shared_ptr<Object>)dico->m_elements[0];
-        else
-            return nullptr;
-    }
-    
-    const vector<Element>& Dico::getElements(shared_ptr<Tag> key)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            return dico->m_elements;
-        else
-            return m_elements;
+        if(elements.size() == 0)
+            return;
+        m_entries[key] = elements;
     }
 
-    void Dico::set(shared_ptr<Tag> key, int value)
+    void Dico::append(shared_ptr<Tag> key, Element const& element) noexcept
     {
-        set(key, (long)value);
-    }
-    
-    void Dico::set(shared_ptr<Tag> key, long value)
-    {
-        shared_ptr<Dico> dico = createDico();
-        dico->m_elements.push_back(value);
-        m_entries[key] = dico;
-    }
-    
-    void Dico::set(shared_ptr<Tag> key, float value)
-    {
-        set(key, (double)value);
-    }
-    
-    void Dico::set(shared_ptr<Tag> key, double value)
-    {
-        shared_ptr<Dico> dico = createDico();
-        dico->m_elements.push_back(value);
-        m_entries[key] = dico;
-    }
-    
-    void Dico::set(shared_ptr<Tag> key, string value)
-    {
-        shared_ptr<Dico> dico = createDico();
-        dico->m_elements.push_back(createTag(value));
-        m_entries[key] = dico;
-    }
-    
-    void Dico::set(shared_ptr<Tag> key, shared_ptr<Tag> tag)
-    {
-        shared_ptr<Dico> dico = createDico();
-        dico->m_elements.push_back(tag);
-        m_entries[key] = dico;
-    }
-    
-    void Dico::set(shared_ptr<Tag> key, shared_ptr<Object> object)
-    {
-        shared_ptr<Dico> dico = createDico();
-        dico->m_elements.push_back(object);
-        m_entries[key] = dico;
-    }
-    
-    void Dico::set(shared_ptr<Tag> key, vector<Element>& elements)
-    {
-        if(elements.size() == 0)
-            return;
-        
-        shared_ptr<Dico> dico = createDico();
-        for(int i = 0; i < elements.size(); i++)
-        {
-            if(elements[i].isLong())
-                dico->m_elements.push_back((long)elements[i]);
-            else if(elements[i].isDouble())
-                dico->m_elements.push_back((double)elements[i]);
-            else if(elements[i].isTag())
-                dico->m_elements.push_back((shared_ptr<Tag>)elements[i]);
-            else
-                dico->m_elements.push_back((shared_ptr<Object>)elements[i]);
-        }
-        m_entries[key] = dico;
-    }
-    
-    void Dico::append(shared_ptr<Tag> key, int value)
-    {
-        append(key, (long)value);
-    }
-    
-    void Dico::append(shared_ptr<Tag> key, long value)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            dico->m_elements.push_back(value);
+        map<const shared_ptr<Tag>, vector<Element> >::iterator it = m_entries.find(key);
+        if(it != m_entries.end())
+            it->second.push_back(element);
         else
-            set(key, value);
+            set(key, element);
     }
     
-    void Dico::append(shared_ptr<Tag> key, float value)
+    void Dico::append(shared_ptr<Tag> key, vector<Element> const& elements) noexcept
     {
-        append(key, (double)value);
-    }
-    
-    void Dico::append(shared_ptr<Tag> key, double value)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            dico->m_elements.push_back(value);
-        else
-            set(key, value);
-    }
-    
-    void Dico::append(shared_ptr<Tag> key, string value)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            dico->m_elements.push_back(createTag(value));
-        else
-            set(key, value);
-    }
-    
-    void Dico::append(shared_ptr<Tag> key, shared_ptr<Tag> tag)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            dico->m_elements.push_back(tag);
-        else
-            set(key, tag);
-    }
-    
-    void Dico::append(shared_ptr<Tag> key, shared_ptr<Object> object)
-    {
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
-            dico->m_elements.push_back(object);
-        else
-            set(key, object);
-    }
-    
-    void Dico::append(shared_ptr<Tag> key, vector<Element>& elements)
-    {
-        if(elements.size() == 0)
-            return;
-        
-        shared_ptr<Dico> dico = get(key);
-        if(dico)
+        map<const shared_ptr<Tag>, vector<Element> >::iterator it = m_entries.find(key);
+        if(it != m_entries.end())
         {
             for(int i = 0; i < elements.size(); i++)
             {
-                if(elements[i].isLong())
-                    dico->m_elements.push_back((long)elements[i]);
-                else if(elements[i].isDouble())
-                    dico->m_elements.push_back((double)elements[i]);
-                else if(elements[i].isTag())
-                    dico->m_elements.push_back((shared_ptr<Tag>)elements[i]);
+                it->second.push_back(elements[i]);
             }
         }
         else
             set(key, elements);
     }
     
-    void Dico::dowrite(shared_ptr<Dico> dico, ofstream* file, int ind)
+    void Dico::write(string filename, string directoryname)
     {
-        if(dico->m_entries.size())
-        {
-            (*file) << "{\n";
-            for(map<shared_ptr<Tag>, shared_ptr<Dico>>::iterator it = dico->m_entries.begin(); it != dico->m_entries.end(); ++it)
-            {
-                for(int i = 0; i < ind+1; i++)
-                    (*file) << "    ";
-                
-                (*file) << "\"" << it->first->name() << "\" : ";
-                it->second->dowrite((it->second), file, ind+1);
-                (*file) << ",\n";
-            }
-            
-            for(int i = 0; i < ind; i++)
-                (*file) << "    ";
-            
-            (*file) << "}";
-        }
-        else if(dico->m_elements.size() == 1)
-        {
-            dico->m_elements[0].write(file, ind);
-        }
-        else if(dico->m_elements.size() > 1)
-        {
-            (*file) << "[ ";
-            for(int i = 0; i < dico->m_elements.size() - 1; i++)
-            {
-                dico->m_elements[i].write(file, ind);
-                (*file) << ", ";
-            }
-            dico->m_elements[dico->m_elements.size() - 1].write(file);
-            (*file) << " ]";
-        }
+        createJson()->write(static_pointer_cast<Dico>(shared_from_this()), filename, directoryname);
     }
     
-    void Dico::write(string file, string directory)
+    void Dico::read(string filename, string directoryname)
     {
-        ofstream kfile;
-        if(!file.size())
-            return;
-        
-        if(directory.size())
-            kfile.open(directory + string("/") + file);
-        else
-            kfile.open(file);
-        
-        if(kfile.is_open())
-        {
-            dowrite(static_pointer_cast<Dico>(shared_from_this()), &kfile, 0);
-        }
-        
-        kfile.close();
+        createJson()->read(static_pointer_cast<Dico>(shared_from_this()), filename, directoryname);
     }
     
-    size_t getKey(string& line, string& key)
+    void Dico::post()
     {
-        size_t pos1, pos2;
-        pos1 = line.find('"');
-        if(pos1 != string::npos)
-        {
-            pos1++;
-            pos2 = line.find('"', pos1);
-            if(pos2 != string::npos)
-            {
-                key.assign(line, pos1, pos2-pos1);
-                return pos2;
-            }
-        }
-        return string::npos;
-    }
-    
-    size_t getType(string& line, size_t pos, Type& type)
-    {
-        size_t pos1, pos2;
-        pos1 = line.find(':', pos);
-        if(pos1 != string::npos)
-        {
-            pos1++;
-            if(pos1 < line.size())
-            {
-                pos2 = line.find('{', pos1);
-                if(pos2 != string::npos)
-                {
-                    type = T_OBJECT;
-                    return pos2;
-                }
-                pos2 = line.find('[', pos1);
-                if(pos2 != string::npos)
-                {
-                    type = T_ELEMENTS;
-                    return pos2;
-                }
-                pos2 = line.find_first_not_of(' ', pos1);
-                if(pos2 != string::npos)
-                {
-                    size_t pos3 = line.find('"', pos2);
-                    if(pos3 != string::npos)
-                    {
-                        type = T_TAG;
-                        return pos3+1;
-                    }
-                    else if(line.find('.', pos2) != string::npos)
-                    {
-                        type = T_DOUBLE;
-                        return pos2;
-                    }
-                    else
-                    {
-                        type = T_LONG;
-                        return pos2;
-                    }
-                }
-            }
-        }
-        type = T_NOTHING;
-        return string::npos;
-    }
-    
-    void Dico::read(ifstream& kfile, string& line)
-    {
-        string strname;
-        shared_ptr<Tag> name;
-        Type type;
-        if(kfile.is_open())
-        {
-            clear();
-            getline(kfile, line);
-            while(getline(kfile, line))
-            {
-                size_t pos = getKey(line, strname);
-                if(pos != string::npos)
-                {
-                    cout << "key : " << strname << " ";
-                    pos = getType(line, pos, type);
-                    if(pos != string::npos)
-                    {
-                        if(type == T_OBJECT)
-                        {
-                            cout << "Object";
-                            read(kfile, line);
-                        }
-                        else if(type == T_ELEMENTS)
-                        {
-                            cout << "Elements";
-                        }
-                        else if(type == T_LONG)
-                        {
-                            cout << "Long : " << atol(line.c_str()+pos);
-                        }
-                        else if(type == T_DOUBLE)
-                        {
-                            cout << "Double : " << atof(line.c_str()+pos);
-                        }
-                        else if(type == T_TAG)
-                        {
-                            if(!line.compare(line.size()-1, 1, ","))
-                                line.pop_back();
-                            if(!line.compare(line.size()-1, 1, "\""))
-                                line.pop_back();
-                                
-                            cout << "Tag : " << &line[pos];
-                        }
-                    }
-                    cout << "\n";
-                }
-            }
-        }
-    }
-    
-    void Dico::read(string file, string directory)
-    {
-        ifstream kfile;
-        string line;
-        
-        if(!file.size())
-            return;
-        
-        if(directory.size())
-            kfile.open(directory + "/" + file);
-        else
-            kfile.open(file);
-        
-        read(kfile, line);
-        
-        kfile.close();
+        createJson()->post(static_pointer_cast<Dico>(shared_from_this()));
     }
 }
 

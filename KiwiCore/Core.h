@@ -35,14 +35,11 @@
 
 namespace Kiwi
 {
-    typedef shared_ptr<Instance>sInstance;
-    typedef shared_ptr<Object>  sObject;
-    typedef shared_ptr<Tag>     sTag;
-    typedef shared_ptr<Dico>    sDico;
-    
-     #define KIWI_BOX_INIT(klass, klass_name) \
-     klass(shared_ptr<Instance> instance) : Box( instance, instance->createTag( string( klass_name ) ) ) { ; }; \
-     ~klass() { ; }
+    typedef shared_ptr<Instance>    sInstance;
+    typedef shared_ptr<Object>      sObject;
+    typedef shared_ptr<Tag>         sTag;
+    typedef shared_ptr<Dico>        sDico;
+    typedef vector<Element>         Elements;
 };
 
 

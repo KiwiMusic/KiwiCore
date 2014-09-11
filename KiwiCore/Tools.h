@@ -29,6 +29,8 @@
 namespace Kiwi
 {
     class Box;
+    class Object;
+    class Element;
     
     template <typename Type> Type clip(const Type& n, const Type& lower, const Type& upper)
     {

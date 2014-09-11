@@ -26,21 +26,34 @@
 #include "Page.h"
 
 namespace Kiwi
-{
-    Box::Box(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name) : ObjectExtented(kiwi, name), m_last_inlet(0)
+{    
+    Box::Box(shared_ptr<Instance> kiwi, string const& name) : Object(kiwi, name), m_last_inlet(0)
     {
-        createAttribute(createTag("position"), T_LONG, 2);
-        setAttributeAppearance(createTag("Position"), createTag("list"), createTag("Appearance"));
-        setAttributeBehavior(false, true, true);
+        shared_ptr<Attribute> attr;
+        attr = createAttribute("position");
+        attr->appearance("Position", "list", "Appearance");
+        attr->behavior(false, true, true);
+        attr->set({0., 0.});
         
-        createAttribute(createTag("size"), T_LONG, 2);
-        setAttributeAppearance(createTag("Size"), createTag("list"), createTag("Appearance"));
-        setAttributeBehavior(false, true, true);
+        attr = createAttribute("fontname");
+        attr->appearance("Fontname", "Text", "Appearance");
+        attr->behavior(false, true, true);
+        attr->set(createTag("Arial"));
         
-        createAttribute(createTag("fontname"), T_TAG, 1);
-        createAttribute(createTag("fontsize"), T_LONG, 1);
-        createAttribute(createTag("fontstyle"), T_LONG, 1);
-        createAttribute(createTag("justification"), T_TAG, 1);
+        attr = createAttribute("fontsize");
+        attr->appearance("Fontsize", "number", "Appearance");
+        attr->behavior(false, true, true);
+        attr->set(12);
+        
+        attr = createAttribute("fontstyle");
+        attr->appearance("Fontstyle", "Text", "Appearance");
+        attr->behavior(false, true, true);
+        attr->set(createTag("Regular"));
+        
+        attr = createAttribute("justification");
+        attr->appearance("Justification", "Text", "Appearance");
+        attr->behavior(false, true, true);
+        attr->set(createTag("Left"));
     }
     
     Box::~Box()
