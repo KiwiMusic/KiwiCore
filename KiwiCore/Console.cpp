@@ -55,7 +55,7 @@ namespace Kiwi
         while(it != m_listeners.end())
         {
             shared_ptr<ConsoleListener> to = (*it).lock();
-            to->post(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
+            to->post(nullptr, shared_ptr<Kiwi::Object>(), message);
             ++it;
         }
     }
@@ -83,7 +83,7 @@ namespace Kiwi
         while(it != m_listeners.end())
         {
             shared_ptr<ConsoleListener> to = (*it).lock();
-            to->warning(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
+            to->warning(nullptr, shared_ptr<Kiwi::Object>(), message);
             ++it;
         }
     }
@@ -111,7 +111,7 @@ namespace Kiwi
         while(it != m_listeners.end())
         {
             shared_ptr<ConsoleListener> to = (*it).lock();
-            to->error(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
+            to->error(nullptr, shared_ptr<Kiwi::Object>(), message);
             ++it;
         }
     }
