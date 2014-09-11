@@ -21,19 +21,12 @@ int main (int argc, char* argv[])
         kiwi->post("---------");
         shared_ptr<Page> page = kiwi->createPage("test.kiwi", "/Users/Pierre/Desktop");
         {
-            vector<Element> elements;
-            elements.push_back(1);
-            shared_ptr<Box> obj1 = page->createBox("+~", elements);
-            elements[0] = 1;
-            shared_ptr<Box> obj2 = page->createBox("+~", elements);
-            elements[0] = 1.;
-            shared_ptr<Box> obj3 = page->createBox("+~", elements);
-            elements[0] = 1.;
-            shared_ptr<Box> obj4 = page->createBox("+~", elements);
-            elements[0] = 1.;
-            shared_ptr<Box> obj5 = page->createBox("+~", elements);
-            elements[0] = 1.;
-            shared_ptr<Box> obj6 = page->createBox("+~", elements);
+            shared_ptr<Box> obj1 = page->createBox("+~", 1);
+            shared_ptr<Box> obj2 = page->createBox("+~", 1);
+            shared_ptr<Box> obj3 = page->createBox("+~", 1);
+            shared_ptr<Box> obj4 = page->createBox("+~", 1);
+            shared_ptr<Box> obj5 = page->createBox("+~", 1);
+            shared_ptr<Box> obj6 = page->createBox("+~", 1);
             
             page->connect(obj1, 0, obj2, 0);
             page->connect(obj2, 0, obj3, 0);
@@ -66,14 +59,14 @@ int main (int argc, char* argv[])
         dico2->append(kiwi->createTag("vd"), dico3);
         dico2->append(kiwi->createTag("va"), {3, 8, 1});
         dico2->append(kiwi->createTag("vb"), 1.6666);
-        dico2->append(kiwi->createTag("vc"), {12, 9, 3});
+        dico2->append(kiwi->createTag("vc"), {12, 9, 3, kiwi->createTag("nona"), 11});
         
         dico1->append(kiwi->createTag("value1"), kiwi->createTag("zaza"));
         dico1->append(kiwi->createTag("value2"), 1.2);
         dico1->append(kiwi->createTag("value3"), 1);
         dico1->append(kiwi->createTag("value4"), dico2);
         
-        //dico1->post();
+        dico1->post();
         kiwi->post("---------");
         dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
          

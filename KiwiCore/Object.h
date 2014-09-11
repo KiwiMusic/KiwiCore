@@ -345,13 +345,17 @@ namespace Kiwi
         /** This function uses the instance specific object factory to create an object.
          @param     The name of the tag to retrieve.
          */
-        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element>& elements) const;
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element> const& elements) const;
         
         //! Object factory.
         /** This function uses the instance specific object factory to create an object.
          @param     The name of the tag to retrieve.
          */
-        shared_ptr<Object> createObject(string name, vector<Element>& elements) const;
+        shared_ptr<Object> createObject(string name, vector<Element> const& elements) const;
+        
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, Element const& elements) const;
+        
+        shared_ptr<Object> createObject(string name, Element const& elements) const;
         
         //! Connection factory.
         /** This function uses the instance specific connection factory to create an connection.

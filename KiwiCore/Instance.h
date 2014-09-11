@@ -45,7 +45,7 @@ namespace Kiwi
     class Instance :  public TagFactory, public Console, public enable_shared_from_this<Instance>
     {
     private:
-        friend shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> &elements);
+        //friend shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> &elements);
         
         int                                         m_untitled_pages;
         vector<shared_ptr<Page>>                    m_pages;
@@ -57,8 +57,12 @@ namespace Kiwi
         
         void init();
         
-        shared_ptr<Object> createObject(string name, vector<Element>& elements);
-        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element>& elements);
+        shared_ptr<Object> createObject(string name, vector<Element> const& elements);
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element> const& elements);
+        shared_ptr<Object> createObject(string name, Element const& element);
+        shared_ptr<Object> createObject(shared_ptr<Tag> name, Element const& element);
+        shared_ptr<Object> createObject(string name);
+        shared_ptr<Object> createObject(shared_ptr<Tag> name);
         shared_ptr<Connection> createConnection(shared_ptr<Box> from, int oulet, shared_ptr<Box> to, int inlet);
         shared_ptr<Dictionary> createDico();
         shared_ptr<Json> createJson();

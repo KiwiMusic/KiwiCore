@@ -134,28 +134,28 @@ namespace Kiwi
             return *this;
     }
     
-    Element& Element::operator=(int value) noexcept
+    Element& Element::operator=(const int value) noexcept
     {
         m_type = T_LONG;
         m_val.m_long = value;
         return *this;
     }
     
-    Element& Element::operator=(long value) noexcept
+    Element& Element::operator=(const long value) noexcept
     {
         m_type = T_LONG;
         m_val.m_long = value;
         return *this;
     }
     
-    Element& Element::operator=(float value) noexcept
+    Element& Element::operator=(const float value) noexcept
     {
         m_type  = T_DOUBLE;
         m_val.m_double= value;
         return *this;
     }
     
-    Element& Element::operator=(double value) noexcept
+    Element& Element::operator=(const double value) noexcept
     {
         m_type  = T_DOUBLE;
         m_val.m_double= value;

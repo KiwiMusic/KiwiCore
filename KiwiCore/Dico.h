@@ -158,7 +158,7 @@ namespace Kiwi
          @param key The name of the entry.
          @param element The element.
          */
-        void set(shared_ptr<Tag> key, Element const element) noexcept;
+        void set(shared_ptr<Tag> key, Element const& element) noexcept;
         
         //! Add a new entry with a vector of elements.
         /** The function adds a new entry or replace an old entry with a vector of elements.
@@ -172,7 +172,7 @@ namespace Kiwi
          @param key The name of the entry.
          @param element The element.
          */
-        void append(shared_ptr<Tag> key, Element const element) noexcept;
+        void append(shared_ptr<Tag> key, Element const& element) noexcept;
 
         //! Append a vector of elements to an entry.
         /** The function adds a new entry with a vector of elements or append a vector of elements to an old entry.

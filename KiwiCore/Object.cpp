@@ -874,7 +874,7 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Object> Object::createObject(shared_ptr<Tag> name, vector<Element>& elements) const
+    shared_ptr<Object> Object::createObject(shared_ptr<Tag> name, vector<Element> const& elements) const
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
@@ -883,11 +883,29 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Object> Object::createObject(string name, vector<Element>& elements) const
+    shared_ptr<Object> Object::createObject(string name, vector<Element> const& elements) const
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
             return kiwi->createObject(name, elements);
+        else
+            return nullptr;
+    }
+    
+    shared_ptr<Object> Object::createObject(shared_ptr<Tag> name, Element const& element) const
+    {
+        shared_ptr<Instance> kiwi = m_kiwi.lock();
+        if(kiwi)
+            return kiwi->createObject(name, element);
+        else
+            return nullptr;
+    }
+    
+    shared_ptr<Object> Object::createObject(string name, Element const& element) const
+    {
+        shared_ptr<Instance> kiwi = m_kiwi.lock();
+        if(kiwi)
+            return kiwi->createObject(name, element);
         else
             return nullptr;
     }

@@ -62,12 +62,36 @@ namespace Kiwi
         }
     }
     
-    shared_ptr<Object> Instance::createObject(string name, vector<Element>& elements)
+    shared_ptr<Object> Instance::createObject(string name, vector<Element> const& elements)
     {
         return createObject(createTag(name), elements);
     }
     
-    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, vector<Element>& elements)
+    shared_ptr<Object> Instance::createObject(string name, Element const& element)
+    {
+        vector<Element> elements = {element};
+        return createObject(createTag(name), elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, Element const& element)
+    {
+        vector<Element> elements = {element};
+        return createObject(name, elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(string name)
+    {
+        vector<Element> elements;
+        return createObject(createTag(name), elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name)
+    {
+        vector<Element> elements;
+        return createObject(name, elements);
+    }
+    
+    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, vector<Element> const& elements)
     {
         shared_ptr<Object> object;
         map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);

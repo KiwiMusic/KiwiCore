@@ -75,7 +75,7 @@ namespace Kiwi
          @param elements    A vector of elements.
          @return A pointer to the box.
          */
-        shared_ptr<Box> createBox(shared_ptr<Tag> name, vector<Element> &elements);
+        shared_ptr<Box> createBox(shared_ptr<Tag> name, vector<Element> const& elements);
         
         //! Create a box.
         /** The function instantiates a box in the page.
@@ -83,8 +83,24 @@ namespace Kiwi
          @param elements    A vector of elements.
          @return A pointer to the box.
          */
-        shared_ptr<Box> createBox(string name, vector<Element> &elements);
+        shared_ptr<Box> createBox(string name, vector<Element> const& elements);
+
+        //! Create a box.
+        /** The function instantiates a box in the page.
+         @param name        The name of the box.
+         @param element     An element.
+         @return A pointer to the box.
+         */
+        shared_ptr<Box> createBox(shared_ptr<Tag> name, Element const& element);
         
+        //! Create a box.
+        /** The function instantiates a box in the page.
+         @param name        The name of the box.
+         @param element     An element.
+         @return A pointer to the box.
+         */
+        shared_ptr<Box> createBox(string name, Element const& element);
+
         //! Free a box.
         /** The function removes a box from the page.
          @param box        The pointer to the box.

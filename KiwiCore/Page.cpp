@@ -50,7 +50,7 @@ namespace Kiwi
         m_boxes.clear();
     }
 
-    shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> &elements)
+    shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> const& elements)
     {
         shared_ptr<Object> object = createObject(name, elements);
         if(object->isBox())
@@ -66,9 +66,30 @@ namespace Kiwi
         }
     }
     
-    shared_ptr<Box> Page::createBox(string name, vector<Element> &elements)
+    shared_ptr<Box> Page::createBox(string name, vector<Element> const& elements)
     {
         return createBox(createTag(name), elements);
+    }
+    
+    shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, Element const& element)
+    {
+        shared_ptr<Object> object = createObject(name, element);
+        if(object->isBox())
+        {
+            shared_ptr<Box> box = static_pointer_cast<Box>(object);
+            m_boxes.insert(box);
+            return box;
+        }
+        else
+        {
+            error(string("The object " + (string)*name + " isn't patchable !"));
+            return shared_ptr<Box>();
+        }
+    }
+    
+    shared_ptr<Box> Page::createBox(string name, Element const& element)
+    {
+        return createBox(createTag(name), element);
     }
     
     void Page::freeBox(shared_ptr<Box> box)

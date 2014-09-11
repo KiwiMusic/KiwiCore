@@ -105,7 +105,7 @@ namespace Kiwi
         }
     }
     
-    void Dictionary::set(shared_ptr<Tag> key, Element const element) noexcept
+    void Dictionary::set(shared_ptr<Tag> key, Element const& element) noexcept
     {
         vector<Element> elements;
         elements.push_back(element);
@@ -119,7 +119,7 @@ namespace Kiwi
         m_entries[key] = elements;
     }
 
-    void Dictionary::append(shared_ptr<Tag> key, Element const element) noexcept
+    void Dictionary::append(shared_ptr<Tag> key, Element const& element) noexcept
     {
         map<const shared_ptr<Tag>, vector<Element> >::iterator it = m_entries.find(key);
         if(it != m_entries.end())
