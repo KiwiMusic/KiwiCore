@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_DSP_CONTEXT__
 #define __DEF_KIWI_DSP_CONTEXT__
 
-#include "../KiwiCore/Defs.h"
+#include "../KiwiBase/Defs.h"
 #include "DspNode.h"
 
 // Later make a specific error class for DSP

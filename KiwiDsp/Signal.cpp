@@ -22,9 +22,6 @@
 */
 
 #include "Signal.h"
-#include "DspNode.h"
-#include "../KiwiCore/Page.h"
-#include "../KiwiCore/Iolet.h"
 
 namespace Kiwi
 {

@@ -22,7 +22,9 @@
 */
 
 #include "Box.h"
-#include "Iolet.h"
+#include "Inlet.h"
+#include "Outlet.h"
+#include "Connection.h"
 #include "Page.h"
 
 namespace Kiwi

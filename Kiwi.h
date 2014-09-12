@@ -25,7 +25,7 @@
 #define __DEF_KIWI_LIB__
 
 
-#include "KiwiCore/Core.h"
+#include "KiwiBase/Core.h"
 #include "KiwiBoxes/Arithmetic.h"
 #include "KiwiBoxes/ArithmeticTilde.h"
 

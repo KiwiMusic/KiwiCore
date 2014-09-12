@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_ARITHMETIC_TILDE__
 #define __DEF_KIWI_ARITHMETIC_TILDE__
 
-#include "../KiwiCore/Core.h"
+#include "../KiwiBase/Core.h"
 
 namespace Kiwi
 {

@@ -1,6 +1,6 @@
 //
 //  main.cpp
-//  KiwiCore
+//  KiwiBase
 //
 //  Created by Guillot Pierre on 05/09/2014.
 //  Copyright (c) 2014 PierreGuillot. All rights reserved.
@@ -53,26 +53,23 @@ int main (int argc, char* argv[])
         sDico dico2 = kiwi->createDico();
         sDico dico3 = kiwi->createDico();
         
-        dico3->append(kiwi->createTag("aa"), {9, 8, 7});
-        dico3->append(kiwi->createTag("bb"), kiwi->createTag("zozo"));
+        dico3->append("aa", {9, 8, 7});
+        dico3->append("bb", kiwi->createTag("zozo"));
         
-        dico2->append(kiwi->createTag("vd"), dico3);
-        dico2->append(kiwi->createTag("va"), {3, 8, 1});
-        dico2->append(kiwi->createTag("vb"), 1.6666);
-        dico2->append(kiwi->createTag("vc"), {12, 9, 3, kiwi->createTag("nona"), 11});
+        dico2->append("vd", dico3);
+        dico2->append("va", {3, 8, 1});
+        dico2->append("vb", 1.6666);
+        dico2->append("vc", {12, 9, 3, kiwi->createTag("nona"), 11});
         
-        dico1->append(kiwi->createTag("value1"), kiwi->createTag("zaza"));
-        dico1->append(kiwi->createTag("value2"), 1.2);
-        dico1->append(kiwi->createTag("value3"), 1);
-        dico1->append(kiwi->createTag("value4"), dico2);
+        dico1->append("value1", kiwi->createTag("zaza"));
+        dico1->append("value2", 1.2);
+        dico1->append("value3", 1);
+        dico1->append("value4", dico2);
         
-        //dico1->post();
         kiwi->post("---------");
         dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
-         
         dico1->read("zaza.kiwi", "/Users/Pierre/Desktop");
-        //dico1->post();
-                                          
+        dico1->post();
     }
     return 0;
 }

@@ -1072,15 +1072,6 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Connection> Object::createConnection(shared_ptr<Box> from, int oulet, shared_ptr<Box> to, int inlet) const
-    {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createConnection(from, oulet, to, inlet);
-        else
-            return nullptr;
-    }
-    
     shared_ptr<Dico> Object::createDico() const
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();

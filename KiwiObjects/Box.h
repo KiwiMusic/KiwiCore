@@ -50,7 +50,6 @@ namespace Kiwi
     private:
         class Inlet;
         class Outlet;
-        friend class Inlet;
         friend class Page;
         
         weak_ptr<Page>              m_page;
@@ -86,6 +85,11 @@ namespace Kiwi
          @param inlet       The inlet index.
          */
         static void disconnect(shared_ptr<Box> from, int outlet, shared_ptr<Box> to, int inlet);
+        
+        void setPage(shared_ptr<Page> page)
+        {
+            m_page = page;
+        }
     protected:
         
         //! Retrieve the index of the inlet that received the message.

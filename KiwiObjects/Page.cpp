@@ -24,6 +24,7 @@
 #include "Page.h"
 #include "Instance.h"
 #include "../KiwiDsp/DspContext.h"
+#include "../KiwiObjects/Connection.h"
 
 namespace Kiwi
 {
@@ -56,6 +57,7 @@ namespace Kiwi
             shared_ptr<Box> box = static_pointer_cast<Box>(object);
             m_boxes.insert(box);
             box->callMethod("id", createTag("id-"+to_string(m_boxes.size())));
+            box->setPage(static_pointer_cast<Page>(shared_from_this()));
             return box;
         }
         else
@@ -106,7 +108,7 @@ namespace Kiwi
     {
         if(from != to && m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
         {
-            shared_ptr<Connection> connect = createConnection(from, outlet, to, inlet);
+            shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
             for(set<shared_ptr<Connection>>::const_iterator it = m_connections.begin(); it != m_connections.end(); ++it)
             {
                 if(*(*it) == *connect)
@@ -123,7 +125,7 @@ namespace Kiwi
     {
         if(from != to && m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
         {
-            shared_ptr<Connection> connect = createConnection(from, outlet, to, inlet);
+            shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
             for(set<shared_ptr<Connection>>::const_iterator it = m_connections.begin(); it != m_connections.end(); ++it)
             {
                 if(*(*it) == *connect)
@@ -145,7 +147,7 @@ namespace Kiwi
     {
         if(from != to && m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
         {
-            shared_ptr<Connection> connect = createConnection(from, outlet, to, inlet);
+            shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
             for(set<shared_ptr<Connection>>::const_iterator it = m_connections.begin(); it != m_connections.end(); ++it)
             {
                 if(*(*it) == *connect)

@@ -24,8 +24,8 @@
 #ifndef __DEF_KIWI_DSP_PROCESS__
 #define __DEF_KIWI_DSP_PROCESS__
 
-#include "../KiwiCore/Defs.h"
-#include "../KiwiCore/Object.h"
+#include "../KiwiBase/Defs.h"
+#include "../KiwiBase/Object.h"
 #include "Signal.h"
 
 namespace Kiwi
