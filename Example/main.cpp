@@ -66,7 +66,7 @@ int main (int argc, char* argv[])
         dico1->append(kiwi->createTag("value3"), 1);
         dico1->append(kiwi->createTag("value4"), dico2);
         
-        dico1->post();
+        //dico1->post();
         kiwi->post("---------");
         dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
          

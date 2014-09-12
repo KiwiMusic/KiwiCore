@@ -29,31 +29,35 @@ namespace Kiwi
 {    
     Box::Box(shared_ptr<Instance> kiwi, string const& name) : Object(kiwi, name), m_last_inlet(0)
     {
-        shared_ptr<Attribute> attr;
-        attr = createAttribute("position");
-        attr->appearance("Position", "list", "Appearance");
-        attr->behavior(false, true, true);
-        attr->set({0., 0.});
+        createAttribute("position", nullptr, nullptr);
+        setAttributeAppearance("position", "Position", "list", "Appearance");
+        setAttributeBehavior("position", false, true, true);
+        setAttributeValues("position", {0., 0.});
         
-        attr = createAttribute("fontname");
-        attr->appearance("Fontname", "Text", "Appearance");
-        attr->behavior(false, true, true);
-        attr->set(createTag("Arial"));
+        createAttribute("fontname", nullptr, nullptr);
+        setAttributeAppearance("fontname", "Fontname", "Text", "Appearance");
+        setAttributeBehavior("fontname", false, true, true);
+        setAttributeValue("fontname", createTag("Arial"));
         
-        attr = createAttribute("fontsize");
-        attr->appearance("Fontsize", "number", "Appearance");
-        attr->behavior(false, true, true);
-        attr->set(12);
+        createAttribute("fontsize", nullptr, nullptr);
+        setAttributeAppearance("fontsize", "Fontsize", "number", "Appearance");
+        setAttributeBehavior("fontsize", false, true, true);
+        setAttributeValue("fontsize", 12);
         
-        attr = createAttribute("fontstyle");
-        attr->appearance("Fontstyle", "Text", "Appearance");
-        attr->behavior(false, true, true);
-        attr->set(createTag("Regular"));
+        createAttribute("fontstyle", nullptr, nullptr);
+        setAttributeAppearance("fontstyle", "Fontstyle", "Text", "Appearance");
+        setAttributeBehavior("fontstyle", false, true, true);
+        setAttributeValue("fontstyle", createTag("Regular"));
         
-        attr = createAttribute("justification");
-        attr->appearance("Justification", "Text", "Appearance");
-        attr->behavior(false, true, true);
-        attr->set(createTag("Left"));
+        createAttribute("justification", nullptr, nullptr);
+        setAttributeAppearance("fontstyle", "Justification", "Text", "Appearance");
+        setAttributeBehavior("fontstyle", false, true, true);
+        setAttributeValue("fontstyle", createTag("Left"));
+        
+        createAttribute("id", (Method)getId, (Method)setId);
+        setAttributeAppearance("id", "ID Number", "Text", "Behavior");
+        setAttributeBehavior("id", true, false, true);
+        setAttributeValue("id", createTag("id-0"));
     }
     
     Box::~Box()
@@ -372,6 +376,16 @@ namespace Kiwi
     {
         assert(index >= 0 && index < m_outlets.size());
         return m_outlets[index]->m_names.find(m_tag_signal) != m_outlets[index]->m_names.end();
+    }
+    
+    void Box::setId(shared_ptr<Box> x, vector<Element>& elements)
+    {
+        x->setAttributeValues("id", elements);
+    }
+    
+    void Box::getId(shared_ptr<Box> x, vector<Element>& elements)
+    {
+        x->getAttributeValues("id", elements);
     }
 }
 

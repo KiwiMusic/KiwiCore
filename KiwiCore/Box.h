@@ -350,6 +350,9 @@ namespace Kiwi
          @return True is the outlet carries signal otherwise it returns false.
          */
         bool isOutletSignal(int index) const noexcept;
+        
+        static void setId(shared_ptr<Box> x, vector<Element>& elements);
+        static void getId(shared_ptr<Box> x, vector<Element>& elements);
     };
 }
 

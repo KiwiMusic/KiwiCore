@@ -24,8 +24,6 @@
 #include "Object.h"
 #include "Instance.h"
 
-#define STACK_LIMIT 256
-
 namespace Kiwi
 {
     Object::Object(shared_ptr<Instance> kiwi, string const& name) :
@@ -66,7 +64,32 @@ namespace Kiwi
         m_listeners.clear();
     }
     
-    void Object::addMethod(shared_ptr<Tag> name, Type type, Method method)
+    void Object::write(shared_ptr<Dico> dico) noexcept
+    {
+        MethodObject mwrite = (MethodObject)getMethod(createTag("write"));
+        if(mwrite)
+            mwrite(shared_from_this(), dico);
+        
+        for(map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+        {
+            it->second->write(dico);
+        }
+        dico->set(createTag("name"), name());
+    }
+    
+    void Object::read(shared_ptr<const Dico> dico) noexcept
+    {
+        for(map<shared_ptr<Tag>, shared_ptr<Attribute>>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+        {
+            it->second->read(dico);
+        }
+    }
+    
+    // ================================================================================ //
+    //                                      METHODS                                     //
+    // ================================================================================ //
+    
+    void Object::addMethod(shared_ptr<Tag> name, Type type, Method method) noexcept
     {
         if(name == m_tag_create)
         {
@@ -76,8 +99,8 @@ namespace Kiwi
             }
             else
             {
-                string message = string("You defined a wrong type for the ") + (string)*name + string( "method ! \n This type has been replaced with elements.");
-                warningObject(message);
+                warningWrongMethodDefinition(name);
+                warning("This type has been replaced with elements.");
                 m_method_create = {T_ELEMENTS, method};
             }
         }
@@ -85,43 +108,43 @@ namespace Kiwi
         {
             m_method_bang = (MethodNothing)method;
             if(type != T_NOTHING)
-                warningObject(string("You defined a wrong type for the bang method !"));
+                warningWrongMethodDefinition(name);
         }
         else if(name == m_tag_long)
         {
             m_method_long = (MethodLong)method;
             if(type != T_LONG)
-                warningObject(string("You defined a wrong type for the long method !"));
+                warningWrongMethodDefinition(name);
         }
         else if(name == m_tag_double)
         {
             m_method_double = (MethodDouble)method;
             if(type != T_DOUBLE)
-                warningObject(string("You defined a wrong type for the double method !"));
+                warningWrongMethodDefinition(name);
         }
         else if(name == m_tag_tag)
         {
             m_method_tag = (MethodTag)method;
             if(type != T_TAG)
-                warningObject(string("You defined a wrong type for the tag method !"));
+                warningWrongMethodDefinition(name);
         }
         else if(name == m_tag_element)
         {
             m_method_element = (MethodElement)method;
             if(type != T_ELEMENT)
-                warningObject(string("You defined a wrong type for the elements method !"));
+                warningWrongMethodDefinition(name);
         }
         else if(name == m_tag_elements)
         {
             m_method_elements = (MethodElements)method;
             if(type != T_ELEMENTS)
-                warningObject(string("You defined a wrong type for the elements method !"));
+                warningWrongMethodDefinition(name);
         }
         else if(name == m_tag_garbage)
         {
             m_method_garbage = (MethodGarbage)method;
             if(type != T_GARBAGE)
-                warningObject(string("You defined a wrong type for the garbage method  !"));
+                warningWrongMethodDefinition(name);
         }
         else if(type == T_OPAQUE)
         {
@@ -135,17 +158,12 @@ namespace Kiwi
             }
             else
             {
-                string message = string("You defined a wrong type for the ") + (string)*name + string( "method ! \n This type has been replaced with elements.");
-                warningObject(message);
+                warningWrongMethodDefinition(name);
+                warning("This type has been replaced with elements.");
                 m_method_standard[name] = {T_ELEMENTS, method};
             }
         }
        
-    }
-    
-    void Object::addMethod(string name, Type type, Method method)
-    {
-        addMethod(createTag(name), type, method);
     }
     
     void Object::removeMethod(shared_ptr<Tag> name) noexcept
@@ -172,12 +190,7 @@ namespace Kiwi
             m_method_opaque.erase(name);
     }
     
-    void Object::removeMethod(string name) noexcept
-    {
-        removeMethod(createTag(name));
-    }
-    
-    bool Object::hasMethod(shared_ptr<Tag> name) const
+    bool Object::hasMethod(shared_ptr<Tag> name) const noexcept
     {
         if(name == m_tag_create)
             return m_method_create.m_method != nullptr;
@@ -204,12 +217,7 @@ namespace Kiwi
         }
     }
     
-    bool Object::hasMethod(string const& name)
-    {
-        return hasMethod(createTag(name));
-    }
-    
-    Method Object::getMethod(shared_ptr<Tag> name) const
+    Method Object::getMethod(shared_ptr<Tag> name) const noexcept
     {
         if(name == m_tag_create)
             return (Method)m_method_create.m_method;
@@ -238,11 +246,6 @@ namespace Kiwi
         }
     }
     
-    Method Object::getMethod(string const& name)
-    {
-        return getMethod(createTag(name));
-    }
-    
     int Object::getNumberOfMethods() const noexcept
     {
         int size = 0;
@@ -265,7 +268,7 @@ namespace Kiwi
         return size + (int)m_method_opaque.size() + (int)m_method_standard.size();
     }
     
-    Type Object::getMethodType(shared_ptr<Tag> name) const
+    Type Object::getMethodType(shared_ptr<Tag> name) const noexcept
     {
         if(name == m_tag_create)
             return m_method_create.m_type;
@@ -300,16 +303,40 @@ namespace Kiwi
         }
     }
     
-    Type Object::getMethodType(string const& name)
+    ObjectMethod Object::getObjectMethod(shared_ptr<Tag> name) const noexcept
     {
-        return getMethodType(createTag(name));
+        if(name == m_tag_create)
+            return m_method_create;
+        else if(name == m_tag_bang)
+            return {T_NOTHING, (Method)m_method_bang};
+        else if(name == m_tag_long)
+            return {T_LONG, (Method)m_method_long};
+        else if(name == m_tag_double)
+            return {T_DOUBLE, (Method)m_method_double};
+        else if(name == m_tag_tag)
+            return {T_TAG, (Method)m_method_tag};
+        else if(name == m_tag_element)
+            return {T_ELEMENT, (Method)m_method_element};
+        else if(name == m_tag_elements)
+            return {T_ELEMENTS, (Method)m_method_elements};
+        else if(name == m_tag_garbage)
+            return {T_ELEMENTS, (Method)m_method_garbage};
+        else
+        {
+            if(m_method_standard.find(name) != m_method_standard.end())
+                return m_method_standard.find(name)->second;
+            else if(m_method_opaque.find(name) != m_method_opaque.end())
+                return {T_OPAQUE, m_method_opaque.find(name)->second};
+            else
+                return {T_NOTHING, (Method)nullptr};
+        }
     }
-
+    
     void Object::callMethod(shared_ptr<Tag> name)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return errorObject(string("Stack overflow"));
-        
+        if(stackIncrement())
+            return;
+
         if(name == m_tag_bang)
         {
             if(m_method_bang != nullptr)
@@ -318,14 +345,12 @@ namespace Kiwi
             }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements;
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         else
@@ -339,35 +364,27 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ") + (string)*name + string(" received nothing !");
-                    warningObject(message);
+                    warningWrongMethodArguments(name, "nothing");
                 }
             }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements;
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         
-        --m_stack_count;
-    }
-    
-    void Object::callMethod(string const& name)
-    {
-        callMethod(createTag(name));
+        stackDecrement();
     }
 
     void Object::callMethod(shared_ptr<Tag> name, long value)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return errorObject(string("Stack overflow"));
+        if(stackIncrement())
+            return;
         
         if(name == m_tag_long)
         {
@@ -375,17 +392,19 @@ namespace Kiwi
                 m_method_long(shared_from_this(), value);
             else if(m_method_double != nullptr)
                 m_method_double(shared_from_this(), value);
+            else if(m_method_element != nullptr)
+            {
+                Element element = value;
+                m_method_element(shared_from_this(), element);
+            }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         else if(name == m_tag_double)
@@ -394,17 +413,19 @@ namespace Kiwi
                 m_method_double(shared_from_this(), value);
             else if(m_method_long != nullptr)
                 m_method_long(shared_from_this(), value);
+            else if(m_method_element != nullptr)
+            {
+                Element element = value;
+                m_method_element(shared_from_this(), element);
+            }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         else
@@ -416,45 +437,41 @@ namespace Kiwi
                 {
                     it->second.m_method(shared_from_this(), value);
                 }
+                else if(it->second.m_type == T_ELEMENT)
+                {
+                    Element element = value;
+                    MethodElement method = (MethodElement)it->second.m_method;
+                    method(shared_from_this(), element);
+                }
                 else if(it->second.m_type == T_ELEMENTS)
                 {
-                    vector<Element> temp;
-                    temp.push_back(value);
-                    it->second.m_method(shared_from_this(), temp);
-                    temp.clear();
+                    vector<Element> elements = {value};
+                    MethodElements method = (MethodElements)it->second.m_method;
+                    method(shared_from_this(), elements);
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received long !");
-                    warningObject(message);
+                    warningWrongMethodArguments(name, "long");
                 }
             }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         
-        --m_stack_count;
-    }
-    
-    void Object::callMethod(string const& name, long value)
-    {
-        callMethod(createTag(name), value);
+        stackDecrement();
     }
     
     void Object::callMethod(shared_ptr<Tag> name, double value)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return errorObject(string("Stack overflow"));
+        if(stackIncrement())
+            return;
         
         if(name == m_tag_double)
         {
@@ -462,17 +479,19 @@ namespace Kiwi
                 m_method_double(shared_from_this(), value);
             else if(m_method_long != nullptr)
                 m_method_long(shared_from_this(), value);
+            else if(m_method_element != nullptr)
+            {
+                Element element = value;
+                m_method_element(shared_from_this(), element);
+            }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         else if(name == m_tag_long)
@@ -481,17 +500,19 @@ namespace Kiwi
                 m_method_long(shared_from_this(), value);
             else if(m_method_double != nullptr)
                 m_method_double(shared_from_this(), value);
+            else if(m_method_element != nullptr)
+            {
+                Element element = value;
+                m_method_element(shared_from_this(), element);
+            }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         else
@@ -503,61 +524,59 @@ namespace Kiwi
                 {
                     it->second.m_method(shared_from_this(), value);
                 }
+                else if(it->second.m_type == T_ELEMENT)
+                {
+                    Element element = value;
+                    MethodElement method = (MethodElement)it->second.m_method;
+                    method(shared_from_this(), element);
+                }
                 else if(it->second.m_type == T_ELEMENTS)
                 {
-                    vector<Element> temp;
-                    temp.push_back(value);
-                    it->second.m_method(shared_from_this(), temp);
-                    temp.clear();
+                    vector<Element> elements = {value};
+                    MethodElements method = (MethodElements)it->second.m_method;
+                    method(shared_from_this(), elements);
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received double !");
-                    warningObject(message);
+                    warningWrongMethodArguments(name, "double");
                 }
             }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         
-        --m_stack_count;
-    }
-    
-    void Object::callMethod(string const& name, double value)
-    {
-        callMethod(createTag(name), value);
+        stackDecrement();
     }
     
     void Object::callMethod(shared_ptr<Tag> name, shared_ptr<Tag> value)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return errorObject(string("Stack overflow"));
+        if(stackIncrement())
+            return;
         
         if(name == m_tag_tag)
         {
             if(m_method_tag != nullptr)
                 m_method_tag(shared_from_this(), value);
+            else if(m_method_element != nullptr)
+            {
+                Element element = value;
+                m_method_element(shared_from_this(), element);
+            }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+               warningWrongMethod(name);
             }
         }
         else
@@ -569,61 +588,59 @@ namespace Kiwi
                 {
                     it->second.m_method(shared_from_this());
                 }
+                else if(it->second.m_type == T_ELEMENT)
+                {
+                    Element element = value;
+                    MethodElement method = (MethodElement)it->second.m_method;
+                    method(shared_from_this(), element);
+                }
                 else if(it->second.m_type == T_ELEMENTS)
                 {
-                    vector<Element> temp;
-                    temp.push_back(value);
-                    it->second.m_method(shared_from_this(), temp);
-                    temp.clear();
+                    vector<Element> elements = {value};
+                    MethodElements method = (MethodElements)it->second.m_method;
+                    method(shared_from_this(), elements);
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received tag !");
-                    warningObject(message);
+                    warningWrongMethodArguments(name, "tag");
                 }
             }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         
-        --m_stack_count;
-    }
-    
-    void Object::callMethod(string const& name, shared_ptr<Tag> value)
-    {
-        callMethod(createTag(name), value);
+        stackDecrement();
     }
     
     void Object::callMethod(shared_ptr<Tag> name, shared_ptr<Object> value)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return errorObject(string("Stack overflow"));
+        if(stackIncrement())
+            return;
         
         if(name == m_tag_object)
         {
             if(m_method_object != nullptr)
                 m_method_object(shared_from_this(), value);
+            else if(m_method_element != nullptr)
+            {
+                Element element = value;
+                m_method_element(shared_from_this(), element);
+            }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         else
@@ -635,83 +652,145 @@ namespace Kiwi
                 {
                     it->second.m_method(shared_from_this());
                 }
+                else if(it->second.m_type == T_ELEMENT)
+                {
+                    Element element = value;
+                    MethodElement method = (MethodElement)it->second.m_method;
+                    method(shared_from_this(), element);
+                }
                 else if(it->second.m_type == T_ELEMENTS)
                 {
-                    vector<Element> temp;
-                    temp.push_back(value);
-                    it->second.m_method(shared_from_this(), temp);
-                    temp.clear();
+                    vector<Element> elements = {value};
+                    MethodElements method = (MethodElements)it->second.m_method;
+                    method(shared_from_this(), elements);
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received tag !");
-                    warningObject(message);
+                    warningWrongMethodArguments(name, "object");
                 }
             }
             else if(m_method_garbage != nullptr)
             {
-                vector<Element> temp;
-                temp.push_back(value);
-                m_method_garbage(shared_from_this(), name, temp);
-                temp.clear();
+                vector<Element> elements = {value};
+                m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         
-        --m_stack_count;
-    }
-    
-    void Object::callMethod(string const& name, shared_ptr<Object> object)
-    {
-        callMethod(createTag(name), object);
+        stackDecrement();
     }
     
     void Object::callMethod(shared_ptr<Tag> name, vector<Element>& elements)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return error(string("Stack overflow"));
+        if(stackIncrement())
+            return;
         
         if(name == m_tag_elements)
         {
             if(m_method_elements != nullptr)
                 m_method_elements(shared_from_this(), elements);
+            else if(m_method_element != nullptr)
+            {
+                if(elements.size() == 1)
+                    m_method_element(shared_from_this(), elements[0]);
+                else if(elements.size() > 1)
+                {
+                    m_method_element(shared_from_this(), elements[0]);
+                    warningWrongMethodArguments(name, "element");
+                }
+                else
+                {
+                     warningWrongMethodArguments(name, "element");
+                }
+            }
             else if(m_method_garbage != nullptr)
             {
                 m_method_garbage(shared_from_this(), name, elements);
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         else if(name == m_tag_bang)
         {
-            --m_stack_count;
-            callMethod(name);
+            if(m_method_bang != nullptr)
+            {
+                m_method_bang(shared_from_this());
+                if(elements.size())
+                {
+                    warningWrongMethodArguments(name, "nothing");
+                }
+            }
+            else if(m_method_garbage != nullptr)
+            {
+                vector<Element> elements;
+                m_method_garbage(shared_from_this(), name, elements);
+            }
+            else
+            {
+                warningWrongMethod(name);
+            }
         }
         else if(name == m_tag_long)
         {
-            --m_stack_count;
-            callMethod(name, (long)elements[0]);
+            stackDecrement();
+            if(elements.size() && (elements[0].isLong() || elements[0].isDouble()))
+            {
+                if(m_method_long != nullptr)
+                {
+                    m_method_long(shared_from_this(), elements[0]);
+                    if(elements.size() > 1)
+                    {
+                        warningWrongMethodArguments(name, "long");
+                    }
+                }
+                else if(m_method_double != nullptr)
+                {
+                    m_method_double(shared_from_this(), elements[0]);
+                    if(elements.size() > 1)
+                    {
+                        warningWrongMethodArguments(name, "double");
+                    }
+                }
+                else if(m_method_element != nullptr)
+                {
+                    m_method_element(shared_from_this(), elements[0]);
+                    if(elements.size() > 1)
+                    {
+                        warningWrongMethodArguments(name, "element");
+                    }
+                }
+                else if(m_method_garbage != nullptr)
+                {
+                    m_method_garbage(shared_from_this(), name, elements);
+                }
+                else
+                {
+                    warningWrongMethod(name);
+                }
+            }
+            else
+            {
+                warningWrongMethodArguments(name, "long");
+            }
         }
         else if(name == m_tag_double)
         {
-            --m_stack_count;
+            stackDecrement();
             callMethod(name, (double)elements[0]);
         }
         else if(name == m_tag_tag)
         {
-            --m_stack_count;
+            stackDecrement();
             callMethod(name, (shared_ptr<Tag>)elements[0]);
         }
         else if(name == m_tag_object)
         {
-            --m_stack_count;
+            stackDecrement();
             callMethod(name, (shared_ptr<Object>)elements[0]);
         }
         else
@@ -721,7 +800,8 @@ namespace Kiwi
             {
                 if(it->second.m_type == T_ELEMENTS)
                 {
-                    it->second.m_method(shared_from_this(), elements);
+                    MethodElements method = (MethodElements)it->second.m_method;
+                    method(shared_from_this(), elements);
                 }
                 else if(elements.size())
                 {
@@ -740,8 +820,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    string message = string("Wrong arguments for the method ")+ (string)*name + string(" received elements !");
-                    warningObject(message);
+                    warningWrongMethodArguments(name, "elements");
                 }
             }
             else if(m_method_garbage != nullptr)
@@ -750,23 +829,17 @@ namespace Kiwi
             }
             else
             {
-                string message = string("Don't have such method : ") + (string)*name;
-                warningObject(message);
+                warningWrongMethod(name);
             }
         }
         
-        --m_stack_count;
-    }
-    
-    void Object::callMethod(string const& name, vector<Element>& elements)
-    {
-        callMethod(createTag(name), elements);
+        stackDecrement();
     }
     
     void Object::callMethodOpaque(shared_ptr<Tag> name, int size, ...)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return errorObject(string("Stack overflow"));
+        if(stackIncrement())
+            return;
         
         map<shared_ptr<Tag>, Method>::iterator it = m_method_opaque.find(name);
         if(it != m_method_opaque.end())
@@ -803,17 +876,16 @@ namespace Kiwi
         }
         else
         {
-            string message = string("Don't have such method : ") + (string)*name;
-            warningObject(message);
+            warningWrongMethod(name);
         }
         
-        --m_stack_count;
+        stackDecrement();
     }
     
     void Object::callMethodOpaque(string name, int size, ...)
     {
-        if(++m_stack_count >= STACK_LIMIT)
-            return errorObject(string("Stack overflow"));
+        if(stackIncrement())
+            return;
         
         map<shared_ptr<Tag>, Method>::iterator it = m_method_opaque.find(createTag(name));
         if(it != m_method_opaque.end())
@@ -850,36 +922,134 @@ namespace Kiwi
         }
         else
         {
-            string message = string("Don't have such method : ") + name;
-            warningObject(message);
+            warningWrongMethod(createTag(name));
         }
         
-        --m_stack_count;
+        stackDecrement();
     }
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTES                                      //
+    // ================================================================================ //
+    
+    void Object::createAttribute(shared_ptr<Tag> name, Method getter, Method setter) noexcept
+    {
+        if(m_attributes.find(name) != m_attributes.end())
+        {
+            error((string)*m_name + string(" : The attribute ") + (string)*name + string(" already exists !"));
+        }
+        else
+        {
+            if(getter)
+                addMethod("get" + (string)*name, T_ELEMENTS, getter);
+            if(setter)
+                addMethod(name, T_ELEMENTS, setter);
+            m_attributes[name] = make_shared<Attribute>(name);
+        }
+    }
+    
+    bool Object::hasAttribute(shared_ptr<Tag> name) const noexcept
+    {
+        return m_attributes.find(name) != m_attributes.end();
+    }
+    
+    shared_ptr<Attribute> Object::getAttribute(shared_ptr<Tag> name) const noexcept
+    {
+        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+            return it->second;
+        else
+            return nullptr;
+    }
+    
+    void Object::setAttributeAppearance(shared_ptr<Tag> name, shared_ptr<Tag> label, shared_ptr<Tag> style, shared_ptr<Tag> category) noexcept
+    {
+        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            it->second->appearance(label, style, category);
+        }
+        else
+        {
+            warningWrongAttribute(name);
+        }
+    }
+    
+    void Object::setAttributeBehavior(shared_ptr<Tag> name, bool opaque, bool visible, bool save) noexcept
+    {
+        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            it->second->behavior(opaque, visible, save);
+        }
+        else
+        {
+            warningWrongAttribute(name);
+        }
+    }
+    
+    void Object::setAttributeValue(shared_ptr<Tag> name, Element const& element) noexcept
+    {
+        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            it->second->set(element);
+        }
+        else
+        {
+            warningWrongAttribute(name);
+        }
+    }
+    
+    void Object::setAttributeValues(shared_ptr<Tag> name, vector<Element> const& elements) noexcept
+    {
+        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            it->second->set(elements);
+        }
+        else
+        {
+            warningWrongAttribute(name);
+        }
+    }
+    
+    Element Object::getAttributeValue(shared_ptr<Tag> name) const noexcept
+    {
+        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            return it->second->get();
+        }
+        else
+        {
+            warningWrongAttribute(name);
+            return 0;
+        }
+    }
+
+    void Object::getAttributeValues(shared_ptr<Tag> name, vector<Element>& elements) const noexcept
+    {
+        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            it->second->get(elements);
+        }
+        else
+        {
+            warningWrongAttribute(name);
+        }
+    }
+    
+    // ================================================================================ //
+    //                                      FACTORY                                     //
+    // ================================================================================ //
     
     shared_ptr<Tag> Object::createTag(string name) const noexcept
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
             return kiwi->createTag(name);
-        else
-            return nullptr;
-    }
-    
-    shared_ptr<Object> Object::createObject(shared_ptr<Tag> name, vector<Element> const& elements) const
-    {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createObject(name, elements);
-        else
-            return nullptr;
-    }
-    
-    shared_ptr<Object> Object::createObject(string name, vector<Element> const& elements) const
-    {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createObject(name, elements);
         else
             return nullptr;
     }
@@ -893,61 +1063,13 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Object> Object::createObject(string name, Element const& element) const
+    shared_ptr<Object> Object::createObject(shared_ptr<Tag> name, vector<Element> const& elements) const
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
-            return kiwi->createObject(name, element);
+            return kiwi->createObject(name, elements);
         else
             return nullptr;
-    }
-    
-    shared_ptr<Attribute> Object::createAttribute(shared_ptr<Tag> name)
-    {
-        if(m_attributes.find(name) != m_attributes.end())
-        {
-            string message = (string)*m_name + string(" : The attribute ") + (string)*name + string(" already exists !");
-            error(message);
-            return nullptr;
-        }
-        
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-        {
-            shared_ptr<Attribute> attr = make_shared<Attribute>(kiwi, name);
-            m_attributes[name] = attr;
-            return attr;
-        }
-        return nullptr;
-    }
-    
-    shared_ptr<Attribute> Object::createAttribute(string name)
-    {
-        return createAttribute(createTag(name));
-    }
-    
-    bool Object::hasAttribute(shared_ptr<Tag> name) const noexcept
-    {
-        return m_attributes.find(name) != m_attributes.end();
-    }
-    
-    bool Object::hasAttribute(string const& name) const noexcept
-    {
-        return hasAttribute(createTag(name));
-    }
-    
-    shared_ptr<Attribute> Object::getAttribute(shared_ptr<Tag> name) const noexcept
-    {
-        map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.find(name);
-        if(it != m_attributes.end())
-            return it->second;
-        else
-            return nullptr;
-    }
-    
-    shared_ptr<Attribute> Object::getAttribute(string const& name) const noexcept
-    {
-        return getAttribute(createTag(name));
     }
     
     shared_ptr<Connection> Object::createConnection(shared_ptr<Box> from, int oulet, shared_ptr<Box> to, int inlet) const
@@ -1018,22 +1140,6 @@ namespace Kiwi
         if(kiwi)
             return kiwi->error(shared_from_this(), message);
     }
-    
-    void Object::write(shared_ptr<Dico> dico)
-    {
-        MethodWrite mwrite = (MethodWrite)getMethod(createTag("write"));
-        if(mwrite)
-            mwrite(shared_from_this(), dico);
-        
-        for(map<shared_ptr<Tag>, shared_ptr<Attribute>>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
-        {
-            it->second->write(dico);
-        }
-        dico->set(createTag("name"), name());
-    }
-    
-    
-    
 }
 
 

@@ -39,8 +39,6 @@ namespace Kiwi
         {
             vector<Element> boxes;
             main->get(createTag("boxes"), boxes);
-            for(int i = 0; i < boxes.size(); i++)
-                static_pointer_cast<Dico>((shared_ptr<Object>)boxes[i])->post();
         }
     }
     
@@ -57,6 +55,7 @@ namespace Kiwi
         {
             shared_ptr<Box> box = static_pointer_cast<Box>(object);
             m_boxes.insert(box);
+            box->callMethod("id", createTag("id-"+to_string(m_boxes.size())));
             return box;
         }
         else
@@ -78,6 +77,7 @@ namespace Kiwi
         {
             shared_ptr<Box> box = static_pointer_cast<Box>(object);
             m_boxes.insert(box);
+            box->callMethod("id", createTag("id-"+to_string(m_boxes.size())));
             return box;
         }
         else

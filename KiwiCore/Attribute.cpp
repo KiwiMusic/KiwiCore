@@ -28,11 +28,9 @@
 
 namespace Kiwi
 {
-    Attribute::Attribute(shared_ptr<Instance> kiwi, shared_ptr<Tag> name) :
-    m_kiwi(kiwi),
+    Attribute::Attribute(shared_ptr<Tag> name) :
     m_name(name)
     {
-        appearance("unknown", "unknown", "unknown");
         behavior(true, false, true);
     }
     
@@ -48,17 +46,6 @@ namespace Kiwi
         m_category = category;
     }
     
-    void Attribute::appearance(string const& label, string const& style, string const& category) noexcept
-    {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-        {
-            m_label = kiwi->createTag(label);
-            m_style = kiwi->createTag(style);
-            m_category = kiwi->createTag(category);
-        }
-    }
-    
     void Attribute::behavior(bool opaque, bool visible, bool save) noexcept
     {
         m_opaque = opaque;
@@ -68,8 +55,7 @@ namespace Kiwi
     
     void Attribute::get(vector<Element>& elements) const noexcept
     {
-        for(int i = 0; i < m_values.size(); i++)
-            elements[i] = m_values[i];
+        elements = m_values;
     }
     
     Element Attribute::get() const noexcept
@@ -90,12 +76,12 @@ namespace Kiwi
         m_values = elements;
     }
     
-    void Attribute::write(shared_ptr<Dico> dico)
+    void Attribute::write(shared_ptr<Dico> dico) const noexcept
     {
         dico->set(m_name, m_values);
     }
     
-    void Attribute::read(shared_ptr<Dico> dico)
+    void Attribute::read(shared_ptr<const Dico> dico) noexcept
     {
         vector<Element> elements;
         dico->get(m_name, elements);

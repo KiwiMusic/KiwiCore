@@ -31,6 +31,7 @@
 namespace Kiwi
 {
     class Instance;
+    class Object;
     // ================================================================================ //
     //                                      ATTRIBUTE                                   //
     // ================================================================================ //
@@ -41,9 +42,8 @@ namespace Kiwi
      */
     class Attribute
     {
+        friend class Object;
     private:
-        const weak_ptr<Instance>    m_kiwi;///< The owner
-        
         shared_ptr<Tag>             m_name;     ///< The name of the attribute
         
         shared_ptr<Tag>             m_label;    ///< The label of the attribute
@@ -56,18 +56,6 @@ namespace Kiwi
         
         vector<Element>             m_values;   ///< The list of elements
         
-    public:
-        
-        //! Constructor.
-        /** Allocate and initialize the member values.
-         */
-        Attribute(shared_ptr<Instance> kiwi, shared_ptr<Tag> name);
-        
-        //! Destructor.
-        /** Clear the attribute.
-         */
-        ~Attribute();
-        
         //! Set the label, the style and the category of the attribute.
         /** The function sets the label, the style and the category of the attribute.
          @param label    The label of the attribute.
@@ -76,14 +64,6 @@ namespace Kiwi
          */
         void appearance(shared_ptr<Tag> label, shared_ptr<Tag> style, shared_ptr<Tag> category) noexcept;
         
-        //! Set the label, the style and the category of the attribute.
-        /** The function sets the label, the style and the category of the attribute.
-         @param label    The label of the attribute.
-         @param style    The style of the attribute.
-         @param category    The category of the attribute.
-         */
-        void appearance(string const& label, string const& style, string const& category) noexcept;
-        
         //! Set the attribute opaque, visible and save states.
         /** The function sets the attribute opaque, visible and save states
          @param opaque Opaque or not.
@@ -91,6 +71,36 @@ namespace Kiwi
          @param save Saved or not.
          */
         void behavior(bool opaque, bool visible, bool save) noexcept;
+        
+        //! Set the value with an element.
+        /** The function sets the value with an element and resize the values to one if necessary.
+         @param element The element.
+         */
+        void set(Element const& element) noexcept;
+        
+        //! Set the values with a vector of elements.
+        /** The function sets the values with a vector of elements and resize the values if necessary.
+         @param elements The vector of elements.
+         */
+        void set(vector<Element> const& elements) noexcept;
+        
+        //! Read the attribute in a dico.
+        /** The function reads the attribute in a dico.
+         @param dico The dico.
+         */
+        void read(shared_ptr<const Dico> dico) noexcept;
+        
+    public:
+        
+        //! Constructor.
+        /** Allocate and initialize the member values.
+         */
+        Attribute(shared_ptr<Tag> name);
+        
+        //! Destructor.
+        /** Clear the attribute.
+         */
+        ~Attribute();
         
         //! Retrieve the name of the attribute.
         /** The function retrieves the name of the attribute.
@@ -167,29 +177,11 @@ namespace Kiwi
          */
         Element get() const noexcept;
         
-        //! Set the value with an element.
-        /** The function sets the value with an element and resize the values to one if necessary.
-         @param element The element.
-         */
-        void set(Element const& element) noexcept;
-        
-        //! Set the values with a vector of elements.
-        /** The function sets the values with a vector of elements and resize the values if necessary.
-         @param elements The vector of elements.
-         */
-        void set(vector<Element> const& elements) noexcept;
-        
         //! Write the attribute in a dico.
         /** The function writes the attribute in a dico.
          @param dico The dico.
          */
-        void write(shared_ptr<Dico> dico);
-        
-        //! Read the attribute in a dico.
-        /** The function reads the attribute in a dico.
-         @param dico The dico.
-         */
-        void read(shared_ptr<Dico> dico);
+        void write(shared_ptr<Dico> dico) const noexcept;
     };
 }
 
