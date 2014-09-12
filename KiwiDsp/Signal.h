@@ -24,8 +24,8 @@
 #ifndef __DEF_KIWI_SIGNAL__
 #define __DEF_KIWI_SIGNAL__
 
-#include "Defs.h"
-#include "Object.h"
+#include "../KiwiCore/Defs.h"
+#include "../KiwiCore/Object.h"
 
 namespace Kiwi
 {

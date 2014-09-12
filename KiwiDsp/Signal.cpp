@@ -21,10 +21,10 @@
  ==============================================================================
 */
 
-#include "DspNode.h"
-#include "Page.h"
-#include "Iolet.h"
 #include "Signal.h"
+#include "DspNode.h"
+#include "../KiwiCore/Page.h"
+#include "../KiwiCore/Iolet.h"
 
 namespace Kiwi
 {

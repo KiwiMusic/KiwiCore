@@ -22,8 +22,8 @@
 */
 
 #include "DspContext.h"
-#include "Page.h"
-#include "Iolet.h"
+#include "../KiwiCore/Page.h"
+#include "../KiwiCore/Iolet.h"
 
 namespace Kiwi
 {

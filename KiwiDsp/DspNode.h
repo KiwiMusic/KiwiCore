@@ -24,8 +24,8 @@
 #ifndef __DEF_KIWI_DSP_NODE__
 #define __DEF_KIWI_DSP_NODE__
 
-#include "Defs.h"
-#include "Object.h"
+#include "../KiwiCore/Defs.h"
+#include "../KiwiCore/Object.h"
 #include "Signal.h"
 #include "DspProcess.h"
 

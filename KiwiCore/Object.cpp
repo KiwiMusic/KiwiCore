@@ -1090,14 +1090,9 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Json> Object::createJson() const
-    {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createJson();
-        else
-            return nullptr;
-    }
+    // ================================================================================ //
+    //                                      MESSAGES                                    //
+    // ================================================================================ //
     
     void Object::post(string message) const noexcept
     {

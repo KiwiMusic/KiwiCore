@@ -28,7 +28,6 @@
 #include "Tag.h"
 #include "Element.h"
 #include "Object.h"
-#include "Json.h"
 
 namespace Kiwi
 {
@@ -46,6 +45,9 @@ namespace Kiwi
     private:
         map<const shared_ptr<Tag>, vector<Element>>  m_entries;
         
+        void doread(shared_ptr<Dico> dico, ifstream& file, string& line);
+        void dowrite(shared_ptr<Dico> dico, ofstream& file, string& line);
+        void dopost(shared_ptr<Dico> dico, string& text, string line = "");
     public:
         
         //! Constructor.

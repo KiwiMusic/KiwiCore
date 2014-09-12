@@ -37,7 +37,6 @@ namespace Kiwi
     class DspNode;
     class Box;
     class Dico;
-    class Json;
     class Connection;
     class ObjectListener;
     
@@ -688,11 +687,6 @@ namespace Kiwi
         /** This function uses the object's instance to create a dico.
          */
         shared_ptr<Dico> createDico() const;
-        
-        //! Json factory.
-        /** This function uses the instance specific dico factory to create a json.
-         */
-        shared_ptr<Json> createJson() const;
         
         // ================================================================================ //
         //                                      MESSAGES                                    //

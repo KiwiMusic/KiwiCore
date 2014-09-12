@@ -15,17 +15,16 @@
 		8F73C7DD19B9DB110041C577 /* Box.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7BA19B9DB110041C577 /* Box.cpp */; };
 		8F73C7DE19B9DB110041C577 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7BC19B9DB110041C577 /* Console.cpp */; };
 		8F73C7DF19B9DB110041C577 /* Dico.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7C019B9DB110041C577 /* Dico.cpp */; };
-		8F73C7E019B9DB110041C577 /* DspContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7C219B9DB110041C577 /* DspContext.cpp */; };
-		8F73C7E119B9DB110041C577 /* DspNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7C419B9DB110041C577 /* DspNode.cpp */; };
-		8F73C7E219B9DB110041C577 /* DspProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7C619B9DB110041C577 /* DspProcess.cpp */; };
 		8F73C7E319B9DB110041C577 /* Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7C819B9DB110041C577 /* Element.cpp */; };
 		8F73C7E419B9DB110041C577 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CA19B9DB110041C577 /* Instance.cpp */; };
 		8F73C7E519B9DB110041C577 /* Iolet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CC19B9DB110041C577 /* Iolet.cpp */; };
 		8F73C7E619B9DB110041C577 /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CE19B9DB110041C577 /* Object.cpp */; };
 		8F73C7E819B9DB110041C577 /* Page.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D219B9DB110041C577 /* Page.cpp */; };
-		8F73C7E919B9DB110041C577 /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D419B9DB110041C577 /* Signal.cpp */; };
 		8F73C7EA19B9DB110041C577 /* Tag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D619B9DB110041C577 /* Tag.cpp */; };
-		8F9FCF3419BDA35300EEAC03 /* Json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F9FCF3319BDA35300EEAC03 /* Json.cpp */; };
+		8FBA0E8019C2DC1600139375 /* DspContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7819C2DC1600139375 /* DspContext.cpp */; };
+		8FBA0E8119C2DC1600139375 /* DspNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7A19C2DC1600139375 /* DspNode.cpp */; };
+		8FBA0E8219C2DC1600139375 /* DspProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7C19C2DC1600139375 /* DspProcess.cpp */; };
+		8FBA0E8319C2DC1600139375 /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7E19C2DC1600139375 /* Signal.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,12 +58,6 @@
 		8F73C7BF19B9DB110041C577 /* Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Defs.h; sourceTree = "<group>"; };
 		8F73C7C019B9DB110041C577 /* Dico.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dico.cpp; sourceTree = "<group>"; };
 		8F73C7C119B9DB110041C577 /* Dico.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dico.h; sourceTree = "<group>"; };
-		8F73C7C219B9DB110041C577 /* DspContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspContext.cpp; sourceTree = "<group>"; };
-		8F73C7C319B9DB110041C577 /* DspContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspContext.h; sourceTree = "<group>"; };
-		8F73C7C419B9DB110041C577 /* DspNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspNode.cpp; sourceTree = "<group>"; };
-		8F73C7C519B9DB110041C577 /* DspNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspNode.h; sourceTree = "<group>"; };
-		8F73C7C619B9DB110041C577 /* DspProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspProcess.cpp; sourceTree = "<group>"; };
-		8F73C7C719B9DB110041C577 /* DspProcess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspProcess.h; sourceTree = "<group>"; };
 		8F73C7C819B9DB110041C577 /* Element.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Element.cpp; sourceTree = "<group>"; };
 		8F73C7C919B9DB110041C577 /* Element.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Element.h; sourceTree = "<group>"; };
 		8F73C7CA19B9DB110041C577 /* Instance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Instance.cpp; sourceTree = "<group>"; };
@@ -75,14 +68,18 @@
 		8F73C7CF19B9DB110041C577 /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
 		8F73C7D219B9DB110041C577 /* Page.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Page.cpp; sourceTree = "<group>"; };
 		8F73C7D319B9DB110041C577 /* Page.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Page.h; sourceTree = "<group>"; };
-		8F73C7D419B9DB110041C577 /* Signal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Signal.cpp; sourceTree = "<group>"; };
-		8F73C7D519B9DB110041C577 /* Signal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Signal.h; sourceTree = "<group>"; };
 		8F73C7D619B9DB110041C577 /* Tag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Tag.cpp; sourceTree = "<group>"; };
 		8F73C7D719B9DB110041C577 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
 		8F73C7D819B9DB110041C577 /* Tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tools.h; sourceTree = "<group>"; };
 		8F96739219B9C7D100C8EE72 /* KiwiCore */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KiwiCore; sourceTree = BUILT_PRODUCTS_DIR; };
-		8F9ABFC119BC499F001C85AC /* Json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Json.h; sourceTree = "<group>"; };
-		8F9FCF3319BDA35300EEAC03 /* Json.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Json.cpp; sourceTree = "<group>"; };
+		8FBA0E7819C2DC1600139375 /* DspContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspContext.cpp; sourceTree = "<group>"; };
+		8FBA0E7919C2DC1600139375 /* DspContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspContext.h; sourceTree = "<group>"; };
+		8FBA0E7A19C2DC1600139375 /* DspNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspNode.cpp; sourceTree = "<group>"; };
+		8FBA0E7B19C2DC1600139375 /* DspNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspNode.h; sourceTree = "<group>"; };
+		8FBA0E7C19C2DC1600139375 /* DspProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspProcess.cpp; sourceTree = "<group>"; };
+		8FBA0E7D19C2DC1600139375 /* DspProcess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspProcess.h; sourceTree = "<group>"; };
+		8FBA0E7E19C2DC1600139375 /* Signal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Signal.cpp; sourceTree = "<group>"; };
+		8FBA0E7F19C2DC1600139375 /* Signal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Signal.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +109,7 @@
 				8F73C7B119B9DB110041C577 /* Kiwi.h */,
 				8F73C7B219B9DB110041C577 /* KiwiBoxes */,
 				8F73C7B719B9DB110041C577 /* KiwiCore */,
+				8FBA0E7719C2DC1600139375 /* KiwiDsp */,
 				8F73C7D919B9DB110041C577 /* KiwiObjects */,
 			);
 			name = Sources;
@@ -142,12 +140,6 @@
 				8F73C7BF19B9DB110041C577 /* Defs.h */,
 				8F73C7C019B9DB110041C577 /* Dico.cpp */,
 				8F73C7C119B9DB110041C577 /* Dico.h */,
-				8F73C7C219B9DB110041C577 /* DspContext.cpp */,
-				8F73C7C319B9DB110041C577 /* DspContext.h */,
-				8F73C7C419B9DB110041C577 /* DspNode.cpp */,
-				8F73C7C519B9DB110041C577 /* DspNode.h */,
-				8F73C7C619B9DB110041C577 /* DspProcess.cpp */,
-				8F73C7C719B9DB110041C577 /* DspProcess.h */,
 				8F73C7C819B9DB110041C577 /* Element.cpp */,
 				8F73C7C919B9DB110041C577 /* Element.h */,
 				8F73C7CA19B9DB110041C577 /* Instance.cpp */,
@@ -158,13 +150,9 @@
 				8F73C7CF19B9DB110041C577 /* Object.h */,
 				8F73C7D219B9DB110041C577 /* Page.cpp */,
 				8F73C7D319B9DB110041C577 /* Page.h */,
-				8F73C7D419B9DB110041C577 /* Signal.cpp */,
-				8F73C7D519B9DB110041C577 /* Signal.h */,
 				8F73C7D619B9DB110041C577 /* Tag.cpp */,
 				8F73C7D719B9DB110041C577 /* Tag.h */,
 				8F73C7D819B9DB110041C577 /* Tools.h */,
-				8F9FCF3319BDA35300EEAC03 /* Json.cpp */,
-				8F9ABFC119BC499F001C85AC /* Json.h */,
 			);
 			name = KiwiCore;
 			path = ../KiwiCore;
@@ -194,6 +182,22 @@
 				8F96739219B9C7D100C8EE72 /* KiwiCore */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8FBA0E7719C2DC1600139375 /* KiwiDsp */ = {
+			isa = PBXGroup;
+			children = (
+				8FBA0E7819C2DC1600139375 /* DspContext.cpp */,
+				8FBA0E7919C2DC1600139375 /* DspContext.h */,
+				8FBA0E7A19C2DC1600139375 /* DspNode.cpp */,
+				8FBA0E7B19C2DC1600139375 /* DspNode.h */,
+				8FBA0E7C19C2DC1600139375 /* DspProcess.cpp */,
+				8FBA0E7D19C2DC1600139375 /* DspProcess.h */,
+				8FBA0E7E19C2DC1600139375 /* Signal.cpp */,
+				8FBA0E7F19C2DC1600139375 /* Signal.h */,
+			);
+			name = KiwiDsp;
+			path = ../KiwiDsp;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,21 +253,20 @@
 			files = (
 				8F73C7E319B9DB110041C577 /* Element.cpp in Sources */,
 				8F73C7DF19B9DB110041C577 /* Dico.cpp in Sources */,
-				8F73C7E219B9DB110041C577 /* DspProcess.cpp in Sources */,
 				8F73C78219B9C81E0041C577 /* main.cpp in Sources */,
 				8F73C7E619B9DB110041C577 /* Object.cpp in Sources */,
+				8FBA0E8319C2DC1600139375 /* Signal.cpp in Sources */,
 				8F73C7EA19B9DB110041C577 /* Tag.cpp in Sources */,
 				8F73C7E819B9DB110041C577 /* Page.cpp in Sources */,
+				8FBA0E8219C2DC1600139375 /* DspProcess.cpp in Sources */,
 				8F73C7DB19B9DB110041C577 /* ArithmeticTilde.cpp in Sources */,
-				8F73C7E919B9DB110041C577 /* Signal.cpp in Sources */,
-				8F73C7E019B9DB110041C577 /* DspContext.cpp in Sources */,
-				8F9FCF3419BDA35300EEAC03 /* Json.cpp in Sources */,
+				8FBA0E8119C2DC1600139375 /* DspNode.cpp in Sources */,
 				8F73C7E419B9DB110041C577 /* Instance.cpp in Sources */,
+				8FBA0E8019C2DC1600139375 /* DspContext.cpp in Sources */,
 				8F73C7DC19B9DB110041C577 /* Attribute.cpp in Sources */,
 				8F73C7E519B9DB110041C577 /* Iolet.cpp in Sources */,
 				8F73C7DE19B9DB110041C577 /* Console.cpp in Sources */,
 				8F73C7DA19B9DB110041C577 /* Arithmetic.cpp in Sources */,
-				8F73C7E119B9DB110041C577 /* DspNode.cpp in Sources */,
 				8F73C7DD19B9DB110041C577 /* Box.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

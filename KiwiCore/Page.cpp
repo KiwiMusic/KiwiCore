@@ -23,7 +23,7 @@
 
 #include "Page.h"
 #include "Instance.h"
-#include "DspContext.h"
+#include "../KiwiDsp/DspContext.h"
 
 namespace Kiwi
 {
