@@ -13,7 +13,6 @@
 		8F73C7DB19B9DB110041C577 /* ArithmeticTilde.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7B519B9DB110041C577 /* ArithmeticTilde.cpp */; };
 		8F73C7DC19B9DB110041C577 /* Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7B819B9DB110041C577 /* Attribute.cpp */; };
 		8F73C7DD19B9DB110041C577 /* Box.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7BA19B9DB110041C577 /* Box.cpp */; };
-		8F73C7DE19B9DB110041C577 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7BC19B9DB110041C577 /* Console.cpp */; };
 		8F73C7DF19B9DB110041C577 /* Dico.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7C019B9DB110041C577 /* Dico.cpp */; };
 		8F73C7E319B9DB110041C577 /* Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7C819B9DB110041C577 /* Element.cpp */; };
 		8F73C7E419B9DB110041C577 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CA19B9DB110041C577 /* Instance.cpp */; };
@@ -21,10 +20,10 @@
 		8F73C7E619B9DB110041C577 /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7CE19B9DB110041C577 /* Object.cpp */; };
 		8F73C7E819B9DB110041C577 /* Page.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D219B9DB110041C577 /* Page.cpp */; };
 		8F73C7EA19B9DB110041C577 /* Tag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7D619B9DB110041C577 /* Tag.cpp */; };
-		8FBA0E8019C2DC1600139375 /* DspContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7819C2DC1600139375 /* DspContext.cpp */; };
-		8FBA0E8119C2DC1600139375 /* DspNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7A19C2DC1600139375 /* DspNode.cpp */; };
-		8FBA0E8219C2DC1600139375 /* DspProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7C19C2DC1600139375 /* DspProcess.cpp */; };
-		8FBA0E8319C2DC1600139375 /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBA0E7E19C2DC1600139375 /* Signal.cpp */; };
+		8FCE3DDF19C2EDD200DEAA7F /* DspContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DD719C2EDD200DEAA7F /* DspContext.cpp */; };
+		8FCE3DE019C2EDD200DEAA7F /* DspNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DD919C2EDD200DEAA7F /* DspNode.cpp */; };
+		8FCE3DE119C2EDD200DEAA7F /* DspProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DDB19C2EDD200DEAA7F /* DspProcess.cpp */; };
+		8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -52,8 +51,6 @@
 		8F73C7B919B9DB110041C577 /* Attribute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Attribute.h; sourceTree = "<group>"; };
 		8F73C7BA19B9DB110041C577 /* Box.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Box.cpp; sourceTree = "<group>"; };
 		8F73C7BB19B9DB110041C577 /* Box.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Box.h; sourceTree = "<group>"; };
-		8F73C7BC19B9DB110041C577 /* Console.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Console.cpp; sourceTree = "<group>"; };
-		8F73C7BD19B9DB110041C577 /* Console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Console.h; sourceTree = "<group>"; };
 		8F73C7BE19B9DB110041C577 /* Core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
 		8F73C7BF19B9DB110041C577 /* Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Defs.h; sourceTree = "<group>"; };
 		8F73C7C019B9DB110041C577 /* Dico.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dico.cpp; sourceTree = "<group>"; };
@@ -72,14 +69,14 @@
 		8F73C7D719B9DB110041C577 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
 		8F73C7D819B9DB110041C577 /* Tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tools.h; sourceTree = "<group>"; };
 		8F96739219B9C7D100C8EE72 /* KiwiCore */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KiwiCore; sourceTree = BUILT_PRODUCTS_DIR; };
-		8FBA0E7819C2DC1600139375 /* DspContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspContext.cpp; sourceTree = "<group>"; };
-		8FBA0E7919C2DC1600139375 /* DspContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspContext.h; sourceTree = "<group>"; };
-		8FBA0E7A19C2DC1600139375 /* DspNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspNode.cpp; sourceTree = "<group>"; };
-		8FBA0E7B19C2DC1600139375 /* DspNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspNode.h; sourceTree = "<group>"; };
-		8FBA0E7C19C2DC1600139375 /* DspProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspProcess.cpp; sourceTree = "<group>"; };
-		8FBA0E7D19C2DC1600139375 /* DspProcess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspProcess.h; sourceTree = "<group>"; };
-		8FBA0E7E19C2DC1600139375 /* Signal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Signal.cpp; sourceTree = "<group>"; };
-		8FBA0E7F19C2DC1600139375 /* Signal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Signal.h; sourceTree = "<group>"; };
+		8FCE3DD719C2EDD200DEAA7F /* DspContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspContext.cpp; sourceTree = "<group>"; };
+		8FCE3DD819C2EDD200DEAA7F /* DspContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspContext.h; sourceTree = "<group>"; };
+		8FCE3DD919C2EDD200DEAA7F /* DspNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspNode.cpp; sourceTree = "<group>"; };
+		8FCE3DDA19C2EDD200DEAA7F /* DspNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspNode.h; sourceTree = "<group>"; };
+		8FCE3DDB19C2EDD200DEAA7F /* DspProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspProcess.cpp; sourceTree = "<group>"; };
+		8FCE3DDC19C2EDD200DEAA7F /* DspProcess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspProcess.h; sourceTree = "<group>"; };
+		8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Signal.cpp; sourceTree = "<group>"; };
+		8FCE3DDE19C2EDD200DEAA7F /* Signal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Signal.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,7 +106,7 @@
 				8F73C7B119B9DB110041C577 /* Kiwi.h */,
 				8F73C7B219B9DB110041C577 /* KiwiBoxes */,
 				8F73C7B719B9DB110041C577 /* KiwiCore */,
-				8FBA0E7719C2DC1600139375 /* KiwiDsp */,
+				8FCE3DD619C2EDD200DEAA7F /* KiwiDsp */,
 				8F73C7D919B9DB110041C577 /* KiwiObjects */,
 			);
 			name = Sources;
@@ -134,8 +131,6 @@
 				8F73C7B919B9DB110041C577 /* Attribute.h */,
 				8F73C7BA19B9DB110041C577 /* Box.cpp */,
 				8F73C7BB19B9DB110041C577 /* Box.h */,
-				8F73C7BC19B9DB110041C577 /* Console.cpp */,
-				8F73C7BD19B9DB110041C577 /* Console.h */,
 				8F73C7BE19B9DB110041C577 /* Core.h */,
 				8F73C7BF19B9DB110041C577 /* Defs.h */,
 				8F73C7C019B9DB110041C577 /* Dico.cpp */,
@@ -184,17 +179,17 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8FBA0E7719C2DC1600139375 /* KiwiDsp */ = {
+		8FCE3DD619C2EDD200DEAA7F /* KiwiDsp */ = {
 			isa = PBXGroup;
 			children = (
-				8FBA0E7819C2DC1600139375 /* DspContext.cpp */,
-				8FBA0E7919C2DC1600139375 /* DspContext.h */,
-				8FBA0E7A19C2DC1600139375 /* DspNode.cpp */,
-				8FBA0E7B19C2DC1600139375 /* DspNode.h */,
-				8FBA0E7C19C2DC1600139375 /* DspProcess.cpp */,
-				8FBA0E7D19C2DC1600139375 /* DspProcess.h */,
-				8FBA0E7E19C2DC1600139375 /* Signal.cpp */,
-				8FBA0E7F19C2DC1600139375 /* Signal.h */,
+				8FCE3DD719C2EDD200DEAA7F /* DspContext.cpp */,
+				8FCE3DD819C2EDD200DEAA7F /* DspContext.h */,
+				8FCE3DD919C2EDD200DEAA7F /* DspNode.cpp */,
+				8FCE3DDA19C2EDD200DEAA7F /* DspNode.h */,
+				8FCE3DDB19C2EDD200DEAA7F /* DspProcess.cpp */,
+				8FCE3DDC19C2EDD200DEAA7F /* DspProcess.h */,
+				8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */,
+				8FCE3DDE19C2EDD200DEAA7F /* Signal.h */,
 			);
 			name = KiwiDsp;
 			path = ../KiwiDsp;
@@ -254,18 +249,17 @@
 				8F73C7E319B9DB110041C577 /* Element.cpp in Sources */,
 				8F73C7DF19B9DB110041C577 /* Dico.cpp in Sources */,
 				8F73C78219B9C81E0041C577 /* main.cpp in Sources */,
+				8FCE3DDF19C2EDD200DEAA7F /* DspContext.cpp in Sources */,
+				8FCE3DE019C2EDD200DEAA7F /* DspNode.cpp in Sources */,
+				8FCE3DE119C2EDD200DEAA7F /* DspProcess.cpp in Sources */,
 				8F73C7E619B9DB110041C577 /* Object.cpp in Sources */,
-				8FBA0E8319C2DC1600139375 /* Signal.cpp in Sources */,
 				8F73C7EA19B9DB110041C577 /* Tag.cpp in Sources */,
+				8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */,
 				8F73C7E819B9DB110041C577 /* Page.cpp in Sources */,
-				8FBA0E8219C2DC1600139375 /* DspProcess.cpp in Sources */,
 				8F73C7DB19B9DB110041C577 /* ArithmeticTilde.cpp in Sources */,
-				8FBA0E8119C2DC1600139375 /* DspNode.cpp in Sources */,
 				8F73C7E419B9DB110041C577 /* Instance.cpp in Sources */,
-				8FBA0E8019C2DC1600139375 /* DspContext.cpp in Sources */,
 				8F73C7DC19B9DB110041C577 /* Attribute.cpp in Sources */,
 				8F73C7E519B9DB110041C577 /* Iolet.cpp in Sources */,
-				8F73C7DE19B9DB110041C577 /* Console.cpp in Sources */,
 				8F73C7DA19B9DB110041C577 /* Arithmetic.cpp in Sources */,
 				8F73C7DD19B9DB110041C577 /* Box.cpp in Sources */,
 			);

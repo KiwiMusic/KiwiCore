@@ -447,7 +447,7 @@ namespace Kiwi
          */
         inline void warningWrongMethodDefinition(shared_ptr<Tag> name) const noexcept
         {
-            warning((string)*m_name + "has a wrong defintion of the type for the "+ (string)*name +" method !");
+            warning((string)*m_name + " has a wrong defintion of the type for the "+ (string)*name +" method !");
         }
         
         // ================================================================================ //

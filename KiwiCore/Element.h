@@ -27,7 +27,6 @@
 #include "Defs.h"
 #include "Tag.h"
 
-// Later try to figure out to use union instead of struct and to real translator of value and finish elements
 namespace Kiwi
 {
     class Object;

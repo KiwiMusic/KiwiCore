@@ -27,7 +27,6 @@
 #include "Defs.h"
 #include "Tag.h"
 #include "Element.h"
-#include "Console.h"
 #include "Object.h"
 
 // Add hot and cold inlets and clean the notifications and functions

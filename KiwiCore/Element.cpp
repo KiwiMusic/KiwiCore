@@ -23,7 +23,8 @@
 
 #include "Element.h"
 #include "Object.h"
-#include "Instance.h"
+#include "Box.h"
+#include "Dico.h"
 
 namespace Kiwi
 {

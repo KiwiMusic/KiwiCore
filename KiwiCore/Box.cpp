@@ -380,12 +380,15 @@ namespace Kiwi
     
     void Box::setId(shared_ptr<Box> x, vector<Element>& elements)
     {
-        x->setAttributeValues("id", elements);
+        if(elements.size() && elements[0].isTag())
+            x->setAttributeValue("id", elements[0]);
+        else
+            x->warningObject(" ");
     }
     
     void Box::getId(shared_ptr<Box> x, vector<Element>& elements)
     {
-        x->getAttributeValues("id", elements);
+        elements = {x->getAttributeValue("id")};
     }
 }
 

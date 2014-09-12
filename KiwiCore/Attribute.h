@@ -30,7 +30,6 @@
 
 namespace Kiwi
 {
-    class Instance;
     class Object;
     // ================================================================================ //
     //                                      ATTRIBUTE                                   //

@@ -22,9 +22,7 @@
 */
 
 #include "Attribute.h"
-#include "Object.h"
 #include "Dico.h"
-#include "Instance.h"
 
 namespace Kiwi
 {
