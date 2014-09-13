@@ -70,18 +70,33 @@ namespace Kiwi
         if(mwrite)
             mwrite(shared_from_this(), dico);
         
-        for(map<shared_ptr<Tag>, shared_ptr<Attribute>>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+        vector<Element> elements;
+        for(map<shared_ptr<Tag>, shared_ptr<Attribute>>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
         {
-            it->second->write(dico);
+            if(it->second->save())
+            {
+                elements.clear();
+                if(hasMethod("get" + (string)*it->second->name()))
+                {
+                    callMethod("get" + (string)*it->second->name(), elements);
+                }
+                dico->set(it->second->name(), elements);
+            }
         }
         dico->set(createTag("name"), name());
     }
     
-    void Object::read(shared_ptr<const Dico> dico) noexcept
+    void Object::read(shared_ptr<Dico> dico) noexcept
     {
+        vector<Element> elements;
         for(map<shared_ptr<Tag>, shared_ptr<Attribute>>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
         {
-            it->second->read(dico);
+            elements.clear();
+            dico->get(it->second->name(), elements);
+            if(hasMethod(it->second->name()) && elements.size())
+            {
+                callMethod(it->second->name(), elements);
+            }
         }
     }
     
@@ -586,7 +601,8 @@ namespace Kiwi
             {
                 if(it->second.m_type == T_TAG)
                 {
-                    it->second.m_method(shared_from_this());
+                    MethodTag method = (MethodTag) it->second.m_method;
+                    method(shared_from_this(), value);
                 }
                 else if(it->second.m_type == T_ELEMENT)
                 {
@@ -815,7 +831,8 @@ namespace Kiwi
                     }
                     else if(it->second.m_type == T_TAG && elements[0].isTag())
                     {
-                        it->second.m_method(shared_from_this(), (shared_ptr<Tag>)(elements[0]));
+                        MethodTag method = (MethodTag)it->second.m_method;
+                        method(shared_from_this(), (shared_ptr<Tag>)(elements[0]));
                     }
                 }
                 else
@@ -941,9 +958,13 @@ namespace Kiwi
         else
         {
             if(getter)
+            {
                 addMethod("get" + (string)*name, T_ELEMENTS, getter);
+            }
             if(setter)
+            {
                 addMethod(name, T_ELEMENTS, setter);
+            }
             m_attributes[name] = make_shared<Attribute>(name);
         }
     }
@@ -1058,7 +1079,12 @@ namespace Kiwi
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
-            return kiwi->createObject(name, element);
+        {
+            shared_ptr<Dico> dico = kiwi->createDico();
+            dico->set(createTag("name"), name);
+            dico->set(createTag("arguments"), element);
+            return kiwi->createObject(dico);
+        }
         else
             return nullptr;
     }
@@ -1067,7 +1093,36 @@ namespace Kiwi
     {
         shared_ptr<Instance> kiwi = m_kiwi.lock();
         if(kiwi)
-            return kiwi->createObject(name, elements);
+        {
+            shared_ptr<Dico> dico = kiwi->createDico();
+            dico->set(createTag("name"), name);
+            dico->set(createTag("arguments"), elements);
+            return kiwi->createObject(dico);
+        }
+        else
+            return nullptr;
+    }
+    
+    shared_ptr<Object> Object::createObject(shared_ptr<Dico> dico) const
+    {
+        shared_ptr<Instance> kiwi = m_kiwi.lock();
+        if(kiwi)
+        {
+            return kiwi->createObject(dico);
+        }
+        else
+            return nullptr;
+    }
+    
+    shared_ptr<Object> Object::createObject(string const& text) const
+    {
+        shared_ptr<Instance> kiwi = m_kiwi.lock();
+        if(kiwi)
+        {
+            shared_ptr<Dico> dico = kiwi->createDico();
+            dico->readFormatted(text);
+            return kiwi->createObject(dico);
+        }
         else
             return nullptr;
     }

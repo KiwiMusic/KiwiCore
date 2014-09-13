@@ -85,10 +85,14 @@ namespace Kiwi
         if(from && to)
         {
             vector<Element> elements;
+            shared_ptr<Tag> idfrom, idto;
             from->callMethod("getid", elements);
-            shared_ptr<Tag> idfrom = (shared_ptr<Tag>)elements[0];
+            if(elements.size())
+                idfrom = (shared_ptr<Tag>)elements[0];
+            elements.clear();
             to->callMethod("getid", elements);
-            shared_ptr<Tag> idto = (shared_ptr<Tag>)elements[0];
+            if(elements.size())
+                idto = (shared_ptr<Tag>)elements[0];
             if(idfrom && idto)
             {
                 dico->set("from", idfrom);

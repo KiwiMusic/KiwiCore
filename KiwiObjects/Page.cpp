@@ -49,6 +49,32 @@ namespace Kiwi
         m_boxes.clear();
     }
 
+    shared_ptr<Box> Page::createBox(string const& text)
+    {
+        shared_ptr<Dico> dico = createDico();
+        if(dico)
+        {
+            dico->readFormatted(text);
+            dico->set(createTag("id"), createTag("id-"+to_string(m_boxes.size()+1)));
+            shared_ptr<Object> object = createObject(dico);
+            if(object)
+            {
+                if(object->isBox())
+                {
+                    shared_ptr<Box> box = static_pointer_cast<Box>(object);
+                    m_boxes.insert(box);
+                    box->setPage(static_pointer_cast<Page>(shared_from_this()));
+                    return box;
+                }
+                else
+                {
+                    error(string("The object " + (string)*object->name() + " isn't patchable !"));
+                }
+            }
+        }
+        return shared_ptr<Box>();
+    }
+    
     shared_ptr<Box> Page::createBox(shared_ptr<Tag> name, vector<Element> const& elements)
     {
         shared_ptr<Object> object = createObject(name, elements);

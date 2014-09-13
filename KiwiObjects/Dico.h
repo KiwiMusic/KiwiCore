@@ -327,14 +327,20 @@ namespace Kiwi
          @param file The name of the file.
          @param directory The name of the directory.
          */
-        void write(string filename, string directoryname = "");
+        void write(string const& filename, string const& directoryname = "");
         
-        //! Read a dico from a text file.
-        /** The function reads a dico from a text file.
+        //! Read a text file to fill the dico.
+        /** The function reads a text file to fill the dico.
          @param filename        The name of the file.
          @param directoryname   The name of the directory.
          */
-        void read(string filename, string directoryname = "");
+        void read(string const& filename, string const&directoryname = "");
+        
+        //! Read a string to fill the dico.
+        /** The function reads a string to fill the dico.
+         @param text The string to read.
+         */
+        void readFormatted(string const& text);
         
         //! Post the content of the dico.
         /** The posts the content of the dico.

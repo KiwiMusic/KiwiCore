@@ -31,7 +31,7 @@ namespace Kiwi
     //                                      INSTANCE                                    //
     // ================================================================================ //
     
-    Instance::Instance() : m_untitled_pages(0)
+    Instance::Instance() noexcept : m_untitled_pages(0), m_dsp_running(0)
     {
         
     }
@@ -42,10 +42,12 @@ namespace Kiwi
         m_prototypes.clear();
     }
     
-    void Instance::init()
+    shared_ptr<Instance> Instance::create()
     {
-        Arithmetic::load(shared_from_this());
-        ArithmeticTilde::load(shared_from_this());
+        shared_ptr<Instance> that = make_shared<Instance>();
+        Arithmetic::load(that);
+        ArithmeticTilde::load(that);
+        return that;
     }
     
     void Instance::addObjectPrototype(unique_ptr<Object> object)
@@ -53,8 +55,7 @@ namespace Kiwi
         map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(object->name());
         if(it != m_prototypes.end())
         {
-            string message = string("The object prototype ") + (string)*object->name() + string(" already exist !");
-            error(message);
+            error("The object prototype " + (string)*object->name() + " already exist !");
         }
         else
         {
@@ -62,88 +63,144 @@ namespace Kiwi
         }
     }
     
-    shared_ptr<Object> Instance::createObject(string name, vector<Element> const& elements)
-    {
-        return createObject(createTag(name), elements);
-    }
+    // ================================================================================ //
+    //                                      FACTORY                                     //
+    // ================================================================================ //
     
-    shared_ptr<Object> Instance::createObject(string name, Element const& element)
-    {
-        vector<Element> elements = {element};
-        return createObject(createTag(name), elements);
-    }
-    
-    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, Element const& element)
-    {
-        vector<Element> elements = {element};
-        return createObject(name, elements);
-    }
-    
-    shared_ptr<Object> Instance::createObject(string name)
-    {
-        vector<Element> elements;
-        return createObject(createTag(name), elements);
-    }
-    
-    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name)
-    {
-        vector<Element> elements;
-        return createObject(name, elements);
-    }
-    
-    shared_ptr<Object> Instance::createObject(shared_ptr<Tag> name, vector<Element> const& elements)
+    shared_ptr<Object> Instance::createObject(shared_ptr<Dico> dico) noexcept
     {
         shared_ptr<Object> object;
-        map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);
-        if(it != m_prototypes.end())
+        shared_ptr<Tag> name = (shared_ptr<Tag>)dico->get(createTag("name"));
+        if(name)
         {
-            shared_ptr<Tag> cteTag = createTag("create");
-            MethodCreate create = (MethodCreate)it->second->getMethod(cteTag);
-            if(create)
+            map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);
+            if(it != m_prototypes.end())
             {
-                if(it->second->getMethodType(cteTag) == T_NOTHING)
+                ObjectMethod create = (ObjectMethod)it->second->getObjectMethod(createTag("create"));
+                if(create.m_method)
                 {
-                    if(elements.size() == 0)
+                    vector<Element> elements;
+                    dico->get(createTag("arguments"), elements);
+                    switch (create.m_type)
                     {
-                        return create(shared_from_this(), name);
-                    }
-                    else
-                    {
-                        error("This object doesn't support creation args ect...");
-                    }
-                }
-            
-                if(elements.size() == 0)
-                {
-                    if(it->second->getMethodType(cteTag) == T_NOTHING)
-                    {
-                        return create(shared_from_this(), name);
-                    }
-                }
-                if(elements.size() == 1)
-                {
-                    if(it->second->getMethodType(cteTag) == T_LONG && (elements[0].isLong() || elements[0].isDouble()))
-                    {
-                       return create(shared_from_this(), name, (long)elements[0]);
-                    }
-                    else if(it->second->getMethodType(cteTag) == T_DOUBLE && (elements[0].isDouble() || elements[0].isLong()))
-                    {
-                        return create(shared_from_this(), name, (double)elements[0]);
-                    }
-                    else if(it->second->getMethodType(cteTag) == T_TAG && elements[0].isTag())
-                    {
-                        //return create(shared_from_this(), name, (shared_ptr<Tag>)(elements[0]));
-                    }
+                        case T_NOTHING:
+        
+                            object = MethodCreate(create.m_method)(shared_from_this(), name);
+                            if(elements.size())
+                            {
+                                warningCreation(name);
+                            }
+                            break;
+                            
+                        case T_LONG:
+                            
+                            if(elements.size() && (elements[0].isLong() || elements[0].isDouble()))
+                            {
+                                object = MethodCreate(create.m_method)(shared_from_this(), name, (long)elements[0]);
+                                if(elements.size() > 1)
+                                {
+                                   warningCreation(name);
+                                }
+                            }
+                            else
+                            {
+                                errorCreation(name, "long");
+                            }
+                            break;
+                            
+                        case T_DOUBLE:
+                            
+                            if(elements.size() && (elements[0].isLong() || elements[0].isDouble()))
+                            {
+                                object = MethodCreate(create.m_method)(shared_from_this(), name, (double)elements[0]);
+                                if(elements.size() > 1)
+                                {
+                                    warningCreation(name);
+                                }
+                            }
+                            else
+                            {
+                                errorCreation(name, "double");
+                            }
+                            break;
                         
-                       
+                        case T_TAG:
+                            
+                            if(elements.size() && elements[0].isTag())
+                            {
+                                object = MethodCreateTag(create.m_method)(shared_from_this(), name, (shared_ptr<Tag>)elements[0]);
+                                if(elements.size() > 1)
+                                {
+                                    warningCreation(name);
+                                }
+                            }
+                            else
+                            {
+                                errorCreation(name, "tag");
+                            }
+                            break;
+                            
+                        case T_OBJECT:
+                            
+                            if(elements.size() && elements[0].isObject())
+                            {
+                                object = MethodCreateObject(create.m_method)(shared_from_this(), name, dico);
+                            }
+                            else
+                            {
+                                errorCreation(name, "object");
+                            }
+                            break;
+                            
+                        case T_ELEMENT:
+                            
+                            if(elements.size())
+                            {
+                                object = MethodCreateElement(create.m_method)(shared_from_this(), name, elements[0]);
+                                if(elements.size() > 1)
+                                {
+                                    warningCreation(name);
+                                }
+                            }
+                            else
+                            {
+                                errorCreation(name, "element");
+                            }
+                            break;
+                            
+                        case T_ELEMENTS:
+                            
+                            object = MethodCreateElements(create.m_method)(shared_from_this(), name, elements);
+                            break;
+                            
+                        default:
+                            error("The object \"" + (string)*name + " doesn't have a creation method properly defined.");
+                            break;
+                    }
+                    if(object && create.m_type != T_OBJECT)
+                    {
+                        object->read(dico);
+                    }
                 }
-                return create(shared_from_this(), name, &elements);
+                else
+                {
+                    error("The object \"" + (string)*name + " can't be allocated dynamically.");
+                }
+            }
+            else
+            {
+                error("The object \"" + (string)*name + " doesn't exists.");
             }
         }
+        else
+        {
+            error("The dico should have tag in a name key to create an object.");
+        }
+    
         return object;
     }
 
-    shared_ptr<Dico> Instance::createDico()
+    shared_ptr<Dico> Instance::createDico() noexcept
     {
         return make_shared<Dico>(shared_from_this());
     }
@@ -172,23 +229,38 @@ namespace Kiwi
         }
     }
     
+    // ================================================================================ //
+    //                                      DSP                                         //
+    // ================================================================================ //
+    
     void Instance::startDsp(double samplerate, long vectorsize)
     {
-        for(int i = 0; i < m_pages.size(); i++)
+        m_dsp_running = true;
+        for(size_t i = 0; i < m_pages.size(); i++)
             m_pages[i]->startDsp(samplerate, vectorsize);
     }
     
-    void Instance::tickDsp()
+    void Instance::tickDsp() const noexcept
     {
-        for(int i = 0; i < m_pages.size(); i++)
+        for(size_t i = 0; i < m_pages.size(); i++)
             m_pages[i]->tickDsp();
     }
     
     void Instance::stopDsp()
     {
-        for(int i = 0; i < m_pages.size(); i++)
+        for(size_t i = 0; i < m_pages.size(); i++)
             m_pages[i]->stopDsp();
+        m_dsp_running = false;
     }
+    
+    bool Instance::isDspRunning() const noexcept
+    {
+        return m_dsp_running;
+    }
+    
+    // ================================================================================ //
+    //                                      CONSOLE                                     //
+    // ================================================================================ //
     
     void Instance::bind(weak_ptr<InstanceListener> listener)
     {

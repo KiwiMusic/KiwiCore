@@ -356,6 +356,8 @@ namespace Kiwi
         
         static void setId(shared_ptr<Box> x, vector<Element>& elements);
         static void getId(shared_ptr<Box> x, vector<Element>& elements);
+        static void setText(shared_ptr<Box> x, vector<Element>& elements);
+        static void getText(shared_ptr<Box> x, vector<Element>& elements);
     };
 }
 

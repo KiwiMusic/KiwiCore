@@ -31,6 +31,7 @@ namespace Kiwi
 {    
     Box::Box(shared_ptr<Instance> kiwi, string const& name) : Object(kiwi, name), m_last_inlet(0)
     {
+        /*
         createAttribute("position", nullptr, nullptr);
         setAttributeAppearance("position", "Position", "list", "Appearance");
         setAttributeBehavior("position", false, true, true);
@@ -55,11 +56,16 @@ namespace Kiwi
         setAttributeAppearance("fontstyle", "Justification", "Text", "Appearance");
         setAttributeBehavior("fontstyle", false, true, true);
         setAttributeValue("fontstyle", createTag("Left"));
-        
-        createAttribute("id", (Method)getId, (Method)setId);
-        setAttributeAppearance("id", "ID Number", "Text", "Behavior");
+        */
+        createAttribute("id", (Method)getId,  (Method)setId);
+        setAttributeAppearance("id", "ID Number", "Text", "Misc");
         setAttributeBehavior("id", true, false, true);
         setAttributeValue("id", createTag("id-0"));
+        
+        createAttribute("text", (Method)getText, (Method)setText);
+        setAttributeAppearance("text", "Text", "Text", "Misc");
+        setAttributeBehavior("text", true, false, true);
+        setAttributeValue("text", createTag(name));
     }
     
     Box::~Box()
@@ -383,14 +389,31 @@ namespace Kiwi
     void Box::setId(shared_ptr<Box> x, vector<Element>& elements)
     {
         if(elements.size() && elements[0].isTag())
+        {
             x->setAttributeValue("id", elements[0]);
+        }
         else
-            x->warningObject(" ");
+        {
+            x->warningObject("The tag isn't valid");
+        }
     }
     
     void Box::getId(shared_ptr<Box> x, vector<Element>& elements)
     {
         elements = {x->getAttributeValue("id")};
+    }
+    
+    void Box::setText(shared_ptr<Box> x, vector<Element>& elements)
+    {
+        if(elements.size() && elements[0].isTag())
+            x->setAttributeValue("text", elements[0]);
+        else
+            x->warningObject(" attribute set text");
+    }
+    
+    void Box::getText(shared_ptr<Box> x, vector<Element>& elements)
+    {
+        elements = {x->getAttributeValue("text")};
     }
 }
 

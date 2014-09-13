@@ -37,6 +37,7 @@
 #include <list>
 #include <set>
 #include <deque>
+#include <thread>
 
 #ifdef __APPLE__
 #include <Accelerate/Accelerate.h>

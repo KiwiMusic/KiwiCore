@@ -47,36 +47,111 @@ namespace Kiwi
     {
     private:
         
-        int                                                                     m_untitled_pages;
+        typedef shared_ptr<Object> (*MethodCreate)(shared_ptr<Instance>, shared_ptr<Tag> name, ...);
+        typedef shared_ptr<Object> (*MethodCreateTag)(shared_ptr<Instance>, shared_ptr<Tag> name, shared_ptr<Tag> arg);
+        typedef shared_ptr<Object> (*MethodCreateObject)(shared_ptr<Instance>, shared_ptr<Tag> name, shared_ptr<Dico> arg);
+        typedef shared_ptr<Object> (*MethodCreateElement)(shared_ptr<Instance>, shared_ptr<Tag> name, Element arg);
+        typedef shared_ptr<Object> (*MethodCreateElements)(shared_ptr<Instance>, shared_ptr<Tag> name, vector<Element> arg);
+        
+        size_t  m_untitled_pages;
+        bool    m_dsp_running;
+        
         vector<shared_ptr<Page>>                                                m_pages;
         map<shared_ptr<Tag>, unique_ptr<Object>>                                m_prototypes;
         set<weak_ptr<InstanceListener>, owner_less<weak_ptr<InstanceListener>>> m_listeners;
         
+        inline void warningCreation(shared_ptr<Tag> name)
+        {
+            warning("The object \"" + (string)*name + " have too many arguments for the creation.");
+        }
+        
+        inline void errorCreation(shared_ptr<Tag> name, string const& type)
+        {
+            warning("The object \"" + (string)*name + " couldn't be created. The creation method expects " + type + " but have other arguments.");
+        }
     public:
-        Instance();
+        
+        //! The constructor.
+        /** You should never use this method except if you really know what you do.
+         */
+        Instance() noexcept;
+        
+        //! The constructor.
+        /** You should never use this method except if you really know what you do.
+         */
         ~Instance();
         
-        void init();
+        //! The instance creation method.
+        /** The function allocates an instance and initialize the defaults boxes.
+         */
+        static shared_ptr<Instance> create();
         
-        void addObjectPrototype(unique_ptr<Object>);
+        //! Add an object prototype to the instance.
+        /** The function adds an object prototype to the instance
+         @param object The prototype of the object.
+         */
+        void addObjectPrototype(unique_ptr<Object> object);
         
-        shared_ptr<Object> createObject(string name, vector<Element> const& elements);
-        shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element> const& elements);
-        shared_ptr<Object> createObject(string name, Element const& element);
-        shared_ptr<Object> createObject(shared_ptr<Tag> name, Element const& element);
-        shared_ptr<Object> createObject(string name);
-        shared_ptr<Object> createObject(shared_ptr<Tag> name);
-        shared_ptr<Dico> createDico();
+        // ================================================================================ //
+        //                                      FACTORY                                     //
+        // ================================================================================ //
         
-        shared_ptr<Page> createPage(string file = string(""), string directory = string(""));
+        //! Create an object.
+        /** The function creates an object with a dico. The dico must have a key "name" with the name of the object and a key "arguments" with the arguments of the object. The others keys will be passed as attributes.
+         @param dico The dico.
+         @return The object.
+         */
+        shared_ptr<Object> createObject(shared_ptr<Dico> dico) noexcept;
+        
+        //! Create a dico.
+        /** The function creates an dico.
+         @return The dico.
+         */
+        shared_ptr<Dico> createDico() noexcept;
+        
+        //! Create a page.
+        /** The function loads a page or creates an empty page if the filename is empty.
+         @param filename The name of the file.
+         @param directoryname The name of the directory.
+         @return The page.
+         */
+        shared_ptr<Page> createPage(string filename = string(""), string directoryname = string(""));
+        
+        //! Close a page.
+        /** The function closes page.
+         @param page The page.
+         */
         void closePage(shared_ptr<Page> page);
         
+        // ================================================================================ //
+        //                                      DSP                                         //
+        // ================================================================================ //
         
+        //! Start the dsp.
+        /** The function start the dsp chains of all the pages.
+         @param samplerate The sample rate.
+         @param vectorsize The vector size of the signal.
+         */
         void startDsp(double samplerate, long vectorsize);
         
-        void tickDsp();
+        //! Perform a tick on the dsp.
+        /** The function calls once all the process methods of the dsp chains of all the pages.
+         */
+        void tickDsp() const noexcept;
         
+        //! Stop the dsp.
+        /** The function stop the dsp chains of all the pages.
+         */
         void stopDsp();
+        
+        //! Check if the dsp is running.
+        /** The function checks if the dsp is running
+         */
+        bool isDspRunning() const noexcept;
+        
+        // ================================================================================ //
+        //                                      CONSOLE                                     //
+        // ================================================================================ //
         
         //! Add an console listener in the binding list of the console.
         /** The function adds an console listener in the binding list of the console. If the console listener is already in the binding list, the function doesn't do anything.

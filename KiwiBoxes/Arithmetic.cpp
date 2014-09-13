@@ -49,6 +49,11 @@ namespace Kiwi
     sObject Plus::create(sInstance kiwi, sTag name, Element element)
     {
         This x =  make_shared<Plus>(kiwi, element);
+        if(!element.isLong() && !element.isDouble())
+        {
+            x->errorObject("Wrong arguments.");
+        }
+        
         if(x->m_double)
             x->m_addend = (double)element;
         else

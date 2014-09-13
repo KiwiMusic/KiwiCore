@@ -57,8 +57,6 @@ namespace Kiwi
     typedef void (*MethodDsp)(shared_ptr<Box>, shared_ptr<DspNode> node);
     typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
     
-    typedef shared_ptr<Object> (*MethodCreate)(shared_ptr<Instance>, shared_ptr<Tag> name, ...);
-    
     struct ObjectMethod
     {
         Type    m_type;
@@ -159,7 +157,7 @@ namespace Kiwi
         /** The function reads a dico an applyes the changes.
          @param dico The dico.
          */
-        virtual void read(shared_ptr<const Dico> dico) noexcept;
+        virtual void read(shared_ptr<Dico> dico) noexcept;
         
         // ================================================================================ //
         //                                      METHODS                                     //
@@ -645,6 +643,7 @@ namespace Kiwi
         /** This function uses the object's instance to create an object.
          @param name The name of the tag to retrieve.
          @param element The elements for the object argument.
+         @return    The object.
          */
         shared_ptr<Object> createObject(shared_ptr<Tag> name, Element const& element) const;
         
@@ -652,6 +651,7 @@ namespace Kiwi
         /** This function uses the object's instance to create an object.
          @param name The name of the tag to retrieve.
          @param element The elements for the object argument.
+         @return    The object.
          */
         inline shared_ptr<Object> createObject(string name, Element const& element) const
         {
@@ -662,6 +662,7 @@ namespace Kiwi
         /** This function uses the object's instance to create an object.
          @param name The name of the tag to retrieve.
          @param elements The vector of elements for the object argument.
+         @return    The object.
          */
         shared_ptr<Object> createObject(shared_ptr<Tag> name, vector<Element> const& elements) const;
         
@@ -669,11 +670,26 @@ namespace Kiwi
         /** This function uses the object's instance to create an object.
          @param name The name of the tag to retrieve.
          @param elements The vector of elements for the object argument.
+         @return    The object.
          */
         inline shared_ptr<Object> createObject(string name, vector<Element> const& elements) const
         {
             return createObject(createTag(name), elements);
         }
+        
+        //! Object factory.
+        /** This function uses the object's instance to create an object with a dico.
+         @param dico The dico that defines the object.
+         @return    The object.
+         */
+        shared_ptr<Object> createObject(shared_ptr<Dico> dico) const;
+        
+        //! Object factory.
+        /** This function uses the object's instance to create an object.
+         @param dico The dico that defines the object.
+         @return    The object.
+         */
+        shared_ptr<Object> createObject(string const& text) const;
         
         //! Dico factory.
         /** This function uses the object's instance to create a dico.

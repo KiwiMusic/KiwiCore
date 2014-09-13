@@ -141,7 +141,7 @@ namespace Kiwi
             set(key, elements);
     }
     
-    void Dico::write(string filename, string directoryname)
+    void Dico::write(string const& filename, string const& directoryname)
     {
         ofstream file;
         if(directoryname.size() && filename.size())
@@ -173,7 +173,7 @@ namespace Kiwi
         file.close();
     }
     
-    void Dico::read(string filename, string directoryname)
+    void Dico::read(string const& filename, string const& directoryname)
     {
         ifstream file;
         if(directoryname.size() && filename.size())
@@ -201,6 +201,56 @@ namespace Kiwi
         }
         
         file.close();
+    }
+    
+    void Dico::readFormatted(string const& text)
+    {
+        if(text.size())
+        {
+            clear();
+            bool mode = false;
+            string word;
+            string key = "name";
+            vector<Element> elements;
+            istringstream iss(text);
+            while(iss >> word)
+            {
+                if(mode)
+                {
+                    if(word[0] == '@')
+                    {
+                        set(createTag(key), elements);
+                        elements.clear();
+                        key = word.c_str()+1;
+                    }
+                    else
+                    {
+                        if(isdigit(word[0]))
+                        {
+                            if(word.find('.'))
+                            {
+                                elements.push_back(atof(word.c_str()));
+                            }
+                            else
+                            {
+                                elements.push_back(atol(word.c_str()));
+                            }
+                        }
+                        else
+                        {
+                            elements.push_back(createTag(word));
+                        }
+                    }
+                }
+                else
+                {
+                    set(createTag(key), createTag(word));
+                    key = "arguments";
+                    mode = true;
+                }
+            }
+            set(createTag(key), elements);
+        }
     }
     
     void Dico::post()
