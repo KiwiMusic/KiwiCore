@@ -44,18 +44,6 @@ namespace Kiwi
     // ================================================================================ //
     
     typedef void (*Method)(shared_ptr<Object>, ...);
-    typedef void (*MethodNothing)(shared_ptr<Object>);
-    typedef void (*MethodLong)(shared_ptr<Object>, long value);
-    typedef void (*MethodDouble)(shared_ptr<Object>, double value);
-    typedef void (*MethodTag)(shared_ptr<Object>, shared_ptr<Tag> tag);
-    typedef void (*MethodObject)(shared_ptr<Object>, shared_ptr<Object> object);
-    typedef void (*MethodElement)(shared_ptr<Object>, Element& elements);
-    typedef void (*MethodElements)(shared_ptr<Object>, vector<Element>& elements);
-    typedef void (*MethodGarbage)(shared_ptr<Object>, shared_ptr<Tag> tag, vector<Element>& elements);
-    
-    
-    typedef void (*MethodDsp)(shared_ptr<Box>, shared_ptr<DspNode> node);
-    typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
     
     struct ObjectMethod
     {
@@ -100,6 +88,15 @@ namespace Kiwi
         const shared_ptr<Tag>                       m_name;
         int                                         m_stack_count;
     
+        typedef void (*MethodNothing)(shared_ptr<Object>);
+        typedef void (*MethodLong)(shared_ptr<Object>, long value);
+        typedef void (*MethodDouble)(shared_ptr<Object>, double value);
+        typedef void (*MethodTag)(shared_ptr<Object>, shared_ptr<Tag> tag);
+        typedef void (*MethodObject)(shared_ptr<Object>, shared_ptr<Object> object);
+        typedef void (*MethodElement)(shared_ptr<Object>, Element& elements);
+        typedef void (*MethodElements)(shared_ptr<Object>, vector<Element>& elements);
+        typedef void (*MethodGarbage)(shared_ptr<Object>, shared_ptr<Tag> tag, vector<Element>& elements);
+        
         ObjectMethod                                m_method_create;
         MethodNothing                               m_method_bang;
         MethodLong                                  m_method_long;

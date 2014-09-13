@@ -49,6 +49,9 @@ namespace Kiwi
     private:
         friend DspContext;
         
+        typedef void (*MethodDsp)(shared_ptr<Box>, shared_ptr<DspNode> node);
+        typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
+        
         const shared_ptr<Box>   m_box;
         const int               m_nins;
         const int               m_nouts;
@@ -96,7 +99,7 @@ namespace Kiwi
         /** This function adds a process method to the node.
          @param method The process method to add.
          */
-        void    addMethod(MethodProcess method);
+        void    addMethod(Method method);
         
         //! Retrieve the sample rate of the node.
         /** This function retrieves the sample rate of the node.

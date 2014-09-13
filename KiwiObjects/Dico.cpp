@@ -250,6 +250,7 @@ namespace Kiwi
                 }
             }
             set(createTag(key), elements);
+            set(createTag("text"), createTag(text));
         }
     }
     

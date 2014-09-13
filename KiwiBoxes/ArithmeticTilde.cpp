@@ -76,19 +76,19 @@ namespace Kiwi
             node->setInplace(true);
             if(node->isInputConnected(0) && node->isInputConnected(1))
             {
-                node->addMethod((MethodProcess)processBoth);
+                node->addMethod((Method)processBoth);
             }
             else if(node->isInputConnected(0) && !node->isInputConnected(1))
             {
-                node->addMethod((MethodProcess)processLeft);
+                node->addMethod((Method)processLeft);
             }
             else if(!node->isInputConnected(0) && node->isInputConnected(1))
             {
-                node->addMethod((MethodProcess)processRight);
+                node->addMethod((Method)processRight);
             }
             else
             {
-                node->addMethod((MethodProcess)processNone);
+                node->addMethod((Method)processNone);
             }
         }
     }

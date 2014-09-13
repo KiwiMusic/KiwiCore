@@ -45,6 +45,8 @@ namespace Kiwi
     class DspProcess
     {
     private:
+        typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
+        
         const MethodProcess     m_process;
         const shared_ptr<Box>   m_box;
         const int               m_nins;

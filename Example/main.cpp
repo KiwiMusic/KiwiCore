@@ -20,12 +20,14 @@ int main (int argc, char* argv[])
         kiwi->post("---------");
         shared_ptr<Page> page = kiwi->createPage("test.kiwi", "/Users/Pierre/Desktop");
         {
-            shared_ptr<Box> obj1 = page->createBox("+~ 1 @text +~ 1");
+            shared_ptr<Box> obj1 = page->createBox("+~ 1");
             shared_ptr<Box> obj2 = page->createBox("+~ 1.2");
             shared_ptr<Box> obj3 = page->createBox("+~ 1.25");
             shared_ptr<Box> obj4 = page->createBox("+~ 1");
             shared_ptr<Box> obj5 = page->createBox("+~ 1");
             shared_ptr<Box> obj6 = page->createBox("+~ 1.");
+            
+            page->createBox("+ 1.");
             
             page->connect(obj1, 0, obj2, 0);
             page->connect(obj2, 0, obj3, 0);

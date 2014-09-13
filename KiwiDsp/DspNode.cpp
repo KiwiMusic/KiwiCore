@@ -91,9 +91,9 @@ namespace Kiwi
             m_outputs_nodes[outlet].erase(node);
     }
     
-    void DspNode::addMethod(MethodProcess method)
+    void DspNode::addMethod(Method method)
     {
-        m_processes.push_back(method);
+        m_processes.push_back((MethodProcess)method);
     }
     
     double DspNode::getSamplerate() const noexcept
