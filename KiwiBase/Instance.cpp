@@ -22,6 +22,7 @@
 */
 
 #include "Instance.h"
+#include "../KiwiBoxes/Basic.h"
 #include "../KiwiBoxes/Arithmetic.h"
 #include "../KiwiBoxes/ArithmeticTilde.h"
 
@@ -45,6 +46,7 @@ namespace Kiwi
     shared_ptr<Instance> Instance::create()
     {
         shared_ptr<Instance> that = make_shared<Instance>();
+		Basic::load(that);
         Arithmetic::load(that);
         ArithmeticTilde::load(that);
         return that;
@@ -209,7 +211,7 @@ namespace Kiwi
     {
         if(file.empty())
 		{
-			file = string("Untitled") + to_string(++m_untitled_pages);
+			file = string("Untitled ") + to_string(++m_untitled_pages);
 		}
   
         shared_ptr<Page> newPage = make_shared<Page>(shared_from_this(), file, directory);
@@ -264,12 +266,14 @@ namespace Kiwi
     
     void Instance::bind(weak_ptr<InstanceListener> listener)
     {
-        m_listeners.insert(listener);
+		if (!listener.expired())
+			m_listeners.insert(listener);
     }
     
     void Instance::unbind(weak_ptr<InstanceListener> listener)
     {
-        m_listeners.erase(listener);
+		if (!listener.expired())
+			m_listeners.erase(listener);
     }
     
     void Instance::post(string message) const noexcept
@@ -284,77 +288,77 @@ namespace Kiwi
             to->post(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
             ++it;
         }
-        }
+	}
         
-        void Instance::post(const shared_ptr<const Object> object, string message) const noexcept
-        {
+	void Instance::post(const shared_ptr<const Object> object, string message) const noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << (string)*object->name() << " : " << message << "\n";
+		cerr << (string)*object->name() << " : " << message << "\n";
 #endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->post(shared_from_this(), object, message);
-                ++it;
-            }
-        }
+        set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+			shared_ptr<InstanceListener> to = (*it).lock();
+            to->post(shared_from_this(), object, message);
+            ++it;
+		}
+	}
         
-        void Instance::warning(string message) const noexcept
-        {
+    void Instance::warning(string message) const noexcept
+	{
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << "warning : " << message << "\n";
+		cerr << "warning : " << message << "\n";
 #endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->warning(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
-                ++it;
-            }
-        }
+        set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+			shared_ptr<InstanceListener> to = (*it).lock();
+            to->warning(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
+            ++it;
+		}
+	}
         
-        void Instance::warning(const shared_ptr<const Object> object, string message) const noexcept
-        {
+    void Instance::warning(const shared_ptr<const Object> object, string message) const noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << (string)*object->name() << " : " << message << "\n";
+		cerr << (string)*object->name() << " : " << message << "\n";
 #endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->warning(shared_from_this(), object, message);
-                ++it;
-            }
-        }
+        set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+			shared_ptr<InstanceListener> to = (*it).lock();
+            to->warning(shared_from_this(), object, message);
+            ++it;
+		}
+	}
         
-        void Instance::error(string message) const noexcept
-        {
+    void Instance::error(string message) const noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << "error : " << message << "\n";
+		cerr << "error : " << message << "\n";
 #endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->error(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
-                ++it;
-            }
-        }
-        
-        void Instance::error(const shared_ptr<const Object> object, string message) const noexcept
+        set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
+        while(it != m_listeners.end())
         {
+			shared_ptr<InstanceListener> to = (*it).lock();
+            to->error(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
+            ++it;
+		}
+	}
+	
+	void Instance::error(const shared_ptr<const Object> object, string message) const noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << (string)*object->name() << " : " << message << "\n";
+		cerr << (string)*object->name() << " : " << message << "\n";
 #endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->error(shared_from_this(), object, message);
-                ++it;
-            }
-        }
+        set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+			shared_ptr<InstanceListener> to = (*it).lock();
+            to->error(shared_from_this(), object, message);
+            ++it;
+		}
+	}
 }
 
 

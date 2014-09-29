@@ -70,7 +70,6 @@ namespace Kiwi
         //! Create a box.
         /** The function instantiates a box in the page.
          @param name        The name of the box.
-         @param elements    A vector of elements.
          @return A pointer to the box.
          */
         shared_ptr<Box> createBox(string const& text);

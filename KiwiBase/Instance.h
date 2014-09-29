@@ -62,12 +62,12 @@ namespace Kiwi
         
         inline void warningCreation(shared_ptr<Tag> name)
         {
-            warning("The object \"" + (string)*name + " have too many arguments for the creation.");
+            warning("The object \"" + (string)*name + "\" have too many arguments for the creation.");
         }
         
         inline void errorCreation(shared_ptr<Tag> name, string const& type)
         {
-            warning("The object \"" + (string)*name + " couldn't be created. The creation method expects " + type + " but have other arguments.");
+            warning("The object \"" + (string)*name + "\" couldn't be created. The creation method expects " + type + " but have other arguments.");
         }
     public:
         
