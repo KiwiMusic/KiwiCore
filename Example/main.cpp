@@ -14,63 +14,41 @@ using namespace Kiwi;
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    clock_t t;
     shared_ptr<Instance> kiwi = Instance::create();
     {
         kiwi->post("---------");
         shared_ptr<Page> page = kiwi->createPage("test.kiwi", "/Users/Pierre/Desktop");
         {
-            shared_ptr<Box> obj1 = page->createBox("+~ 1");
-            shared_ptr<Box> obj2 = page->createBox("+~ 1.2");
-            shared_ptr<Box> obj3 = page->createBox("+~ 1.25");
-            shared_ptr<Box> obj4 = page->createBox("+~ 1");
-            shared_ptr<Box> obj5 = page->createBox("+~ 1");
-            shared_ptr<Box> obj6 = page->createBox("+~ 1.");
-            
-            page->createBox("+ 1.");
-            
+            sBox obj1 = page->createBox("+");
+            obj1 = page->createBox("+");
+            obj1 = page->createBox("+");
+            sBox obj2 = page->createBox("+ 2. @bgcolor 0.1 2. 1 2");
             page->connect(obj1, 0, obj2, 0);
-            page->connect(obj2, 0, obj3, 0);
-            page->connect(obj3, 0, obj4, 0);
-            page->connect(obj4, 0, obj5, 0);
-            page->connect(obj5, 0, obj6, 0);
-
-            kiwi->startDsp(44100., 2048);
-            t = clock();
-            
-            for(int i = 0; i < 44100; i += 2048)
-                kiwi->tickDsp();
-            
-            t = clock() - t;
-            double tt = ((float)t)/CLOCKS_PER_SEC;
-            cout << t << " clicks (" << tt << "seconds).\n";
-            
-            kiwi->stopDsp();
             page->write();
+            
+            sTag ftf = kiwi->createTag("tttt");
+            sDico tata = kiwi->createDico();
+            tata->append(kiwi->createTag("zaza"), {1, 1.2, 360, kiwi->createTag("zaza~ \n \""), 12});
+            sDico zozo = kiwi->createDico();
+            zozo->append(ftf, 1);
+            zozo->append(kiwi->createTag("jjjj"), 2);
+            zozo->append(kiwi->createTag("llll"), 3);
+            sDico zizi = kiwi->createDico();
+            zizi->append(ftf, kiwi->createTag("mm"));
+            zizi->append(kiwi->createTag("jjjj"), kiwi->createTag("pp"));
+            zizi->append(kiwi->createTag("llll"), kiwi->createTag("ff"));
+            zozo->append(kiwi->createTag("oooo"), zizi);
+            tata->append(kiwi->createTag("z°oz,,o"), {zozo, 1.2, 360, kiwi->createTag("zaza"), 12});
+            tata->write("Testt.kiwi", "/Users/Pierre/Desktop");
+            
+            sDico tre = kiwi->createDico();
+            tre->read("Testt.kiwi", "/Users/Pierre/Desktop");
+            tre->write("Testt2.kiwi", "/Users/Pierre/Desktop");
+            
+            cout << stod("2.3e-3") << " " << stod("1.2.2") << "\n";
+            string nana("zaza~ \n \\\"\" 23 zazazazazaz");
+            cout << tre->jsonUnescape(nana) << "\n";
         }
-        kiwi->post("---------");
-        
-        sDico dico1 = kiwi->createDico();
-        sDico dico2 = kiwi->createDico();
-        sDico dico3 = kiwi->createDico();
-        
-        dico3->append("aa", {9, 8, 7});
-        dico3->append("bb", kiwi->createTag("zozo"));
-        
-        dico2->append("vd", dico3);
-        dico2->append("va", {3, 8, 1});
-        dico2->append("vb", 1.6666);
-        dico2->append("vc", {12, 9, 3, kiwi->createTag("nona"), 11});
-        
-        dico1->append("value1", kiwi->createTag("zaza"));
-        dico1->append("value2", 1.2);
-        dico1->append("value3", 1);
-        dico1->append("value4", dico2);
-        
-        //kiwi->post("---------");
-        dico1->write("zaza.kiwi", "/Users/Pierre/Desktop");
-        dico1->read("zaza.kiwi", "/Users/Pierre/Desktop");
-        //dico1->post();
     }
     return 0;
 }

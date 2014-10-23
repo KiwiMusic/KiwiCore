@@ -26,64 +26,204 @@
 
 namespace Kiwi
 {
-    Attribute::Attribute(shared_ptr<Tag> name) :
-    m_name(name)
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTE FACTORY                               //
+    // ================================================================================ //
+    
+    AttributeFactory::AttributeFactory() noexcept
     {
-        behavior(true, false, true);
+        
+    }
+    
+    AttributeFactory::~AttributeFactory()
+    {
+        m_attributes.clear();
+    }
+    
+    
+    void AttributeFactory::receive(ElemVector const& elements)
+    {
+        if(elements.size() && elements[0].isTag())
+        {
+            map<sTag, sAttribute>::const_iterator it = m_attributes.find((sTag)elements[0]);
+            if(it != m_attributes.end())
+            {
+                ElemVector nelements;
+                nelements.assign(elements.begin()+1, elements.end());
+                if(!(it->second->m_behavior & Attribute::Opaque))
+                {
+                    it->second->set(nelements);
+                    if(it->second->m_behavior & Attribute::Notify)
+                    {
+                        notify(it->second);
+                    }
+                }
+            }
+        }
+    }
+    
+    void AttributeFactory::write(shared_ptr<Dico> dico) const noexcept
+    {
+        for(map<sTag, sAttribute>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+        {
+            if(it->second->m_behavior & Attribute::Saved)
+            {
+                it->second->write(dico);
+            }
+        }
+    }
+    
+    void AttributeFactory::read(shared_ptr<const Dico> dico) noexcept
+    {
+        for(map<sTag, sAttribute>::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+        {
+            it->second->read(dico);
+        }
+    }
+    
+    sAttribute AttributeFactory::getAttribute(sTag name) const noexcept
+    {
+        map<sTag, sAttribute>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end() && it->second->m_behavior & Attribute::Visible)
+            return it->second;
+        else
+            return nullptr;
+    }
+    
+    void AttributeFactory::notify(sAttribute attr)
+    {
+        ;
+    }
+    
+    void AttributeFactory::addAttribute(shared_ptr<Attribute> attr)
+    {
+        m_attributes[attr->name()] = attr;
+    }
+    
+    void AttributeFactory::setAttributeAppearance(sTag name, string const& label, string const& style, string const& category)
+    {
+        map<sTag, sAttribute>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            it->second->m_label = label;
+            it->second->m_style = style;
+            it->second->m_category = category;
+        }
+    }
+    
+    void AttributeFactory::setAttributeBehavior(sTag name, long behavior)
+    {
+        map<sTag, sAttribute>::const_iterator it = m_attributes.find(name);
+        if(it != m_attributes.end())
+        {
+            it->second->m_behavior = 0 | behavior;
+        }
+    }
+    
+    // ================================================================================ //
+    //                                      ATTRIBUTE                                   //
+    // ================================================================================ //
+    
+    Attribute::Attribute(sTag name,
+                         string const& label,
+                         string const& style,
+                         string const& category,
+                         long behavior) :
+    m_name(name),
+    m_label(label),
+    m_style(style),
+    m_category(category),
+    m_behavior(0 | behavior)
+    {
+        
+        ;
     }
     
     Attribute::~Attribute()
     {
-        m_values.clear();
-    }
-    
-    void Attribute::appearance(shared_ptr<Tag> label, shared_ptr<Tag> style, shared_ptr<Tag> category) noexcept
-    {
-        m_label = label;
-        m_style = style;
-        m_category = category;
-    }
-    
-    void Attribute::behavior(bool opaque, bool visible, bool save) noexcept
-    {
-        m_opaque = opaque;
-        m_visible = visible;
-        m_save = save;
-    }
-    
-    void Attribute::get(vector<Element>& elements) const noexcept
-    {
-        elements = m_values;
-    }
-    
-    Element Attribute::get() const noexcept
-    {
-        if(m_values.size())
-            return m_values[0];
-        else
-            return 0;
-    }
-    
-    void Attribute::set(Element const& element) noexcept
-    {
-        m_values = {element};
-    }
-    
-    void Attribute::set(vector<Element> const& elements) noexcept
-    {
-        m_values = elements;
+        ;
     }
     
     void Attribute::write(shared_ptr<Dico> dico) const noexcept
     {
-        dico->set(m_name, m_values);
+        ElemVector elements;
+        get(elements);
+        dico->set(m_name, elements);
     }
     
-    void Attribute::read(shared_ptr<const Dico> dico) noexcept
+    void Attribute::read(shared_ptr<const Dico> dico)
     {
-        vector<Element> elements;
+        ElemVector elements;
         dico->get(m_name, elements);
         set(elements);
+    }
+    
+    // ================================================================================ //
+    //                                      ATTRIBUTE TYPED                             //
+    // ================================================================================ //
+    
+    AttributeDouble::AttributeDouble(sTag name, string const& label, string const& style, string const& category, long behavior) : Attribute(name, label, style, category, behavior)
+    {
+    }
+    
+    AttributeDouble::~AttributeDouble()
+    {
+    }
+    
+    void AttributeDouble::set(ElemVector const& elements)
+    {
+        if(elements.size() && (elements[0].isLong() || elements[0].isDouble()))
+        {
+            m_value = elements[0];
+        }
+    }
+    
+    void AttributeDouble::get(ElemVector& elements) const noexcept
+    {
+        elements = {m_value};
+    }
+
+    AttributeTag::AttributeTag(sTag name, string const& label, string const& style, string const& category, long behavior) : Attribute(name, label, style, category, behavior)
+    {
+    }
+    
+    AttributeTag::~AttributeTag()
+    {
+    }
+    
+    void AttributeTag::set(ElemVector const& elements)
+    {
+        if(elements.size() && elements[0].isTag())
+        {
+            m_value = elements[0];
+        }
+    }
+    
+    void AttributeTag::get(ElemVector& elements) const noexcept
+    {
+        elements = {m_value};
+    }
+    
+    AttributeObject::AttributeObject(sTag name, string const& label, string const& style, string const& category, long behavior) : Attribute(name, label, style, category, behavior)
+    {
+    }
+    
+    AttributeObject::~AttributeObject()
+    {
+    }
+    
+    void AttributeObject::set(ElemVector const& elements)
+    {
+        if(elements.size() && elements[0].isObject())
+        {
+            m_value = elements[0];
+        }
+    }
+    
+    void AttributeObject::get(ElemVector& elements) const noexcept
+    {
+        elements = {m_value};
     }
 }
 

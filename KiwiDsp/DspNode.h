@@ -99,7 +99,7 @@ namespace Kiwi
         /** This function adds a process method to the node.
          @param method The process method to add.
          */
-        void    addMethod(Method method);
+        //void    addMethod(Method method);
         
         //! Retrieve the sample rate of the node.
         /** This function retrieves the sample rate of the node.

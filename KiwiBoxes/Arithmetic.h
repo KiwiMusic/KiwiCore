@@ -35,204 +35,31 @@ namespace Kiwi
     // ================================================================================ //
     //                                      PLUS                                        //
     // ================================================================================ //
-    
     class Plus : public Box
     {
     private:
-        typedef shared_ptr<Plus> This;
+        typedef shared_ptr<Plus> sPlus;
         friend class Arithmetic;
         const bool      m_double;
         double          m_augend;
         double          m_addend;
     public:
-        Plus(sInstance kiwi, Element elements);
+        Plus(sInstance kiwi, ElemVector const& elements = {0});
         ~Plus();
-        
-        static sObject create(sInstance kiwi, sTag name, Element element);
-        static void receiveBang(This x);
-        static void receiveLong(This x, long value);
-        static void receiveDouble(This x, double value);
-    };
-    
-    // ================================================================================ //
-    //                                      MINUS                                       //
-    // ================================================================================ //
-    /*
-    class Minus : public Object
-    {
-    private:
-        friend class    Arithmetic;
-        const bool      m_double;
-        double          m_minuend;
-        double          m_subtrahend;
-    protected:
-        Minus(KiwiInstance* kiwi, const string name, vector<Element>& elements);
-    public:
-        ~Minus();
-        void output();
-        void receiveBang(const Inlet* inlet) override;
-        void receiveLong(const Inlet* inlet, long value) override;
-        void receiveDouble(const Inlet* inlet, double value) override;
-        
-        KIWI_CREATE(Minus);
-    };
-    
-    // ================================================================================ //
-    //                                      TIMES                                       //
-    // ================================================================================ //
-    
-    class Times : public Object
-    {
-    private:
-        friend class Arithmetic;
-        const bool  m_double;
-        double      m_multiplicand;
-        double      m_multiplier;
-    protected:
-        Times(KiwiInstance* kiwi, const string name, vector<Element>& elements);
-    public:
-        ~Times();
-        void output();
-        void receiveBang(const Inlet* inlet) override;
-        void receiveLong(const Inlet* inlet, long value) override;
-        void receiveDouble(const Inlet* inlet, double value) override;
-        
-        KIWI_CREATE(Times);
-    };
-    
-    // ================================================================================ //
-    //                                     DIVIDE                                       //
-    // ================================================================================ //
-    
-    class Divide : public Object
-    {
-    private:
-        friend class Arithmetic;
-        const bool  m_double;
-        double      m_dividend;
-        double      m_divisor;
-    protected:
-        Divide(KiwiInstance* kiwi, const string name, vector<Element>& elements);
-    public:
-        ~Divide();
-        void output();
-        void receiveBang(const Inlet* inlet) override;
-        void receiveLong(const Inlet* inlet, long value) override;
-        void receiveDouble(const Inlet* inlet, double value) override;
-        
-        KIWI_CREATE(Divide);
-    };
-    
-    // ================================================================================ //
-    //                                     MODULO                                       //
-    // ================================================================================ //
-    
-    class Modulo : public Object
-    {
-    private:
-        friend class Arithmetic;
-        const bool  m_double;
-        double      m_dividend;
-        double      m_divisor;
-    protected:
-        Modulo(KiwiInstance* kiwi, const string name, vector<Element>& elements);
-    public:
-        ~Modulo();
-        void output();
-        void receiveBang(const Inlet* inlet) override;
-        void receiveLong(const Inlet* inlet, long value) override;
-        void receiveDouble(const Inlet* inlet, double value) override;
-        
-        KIWI_CREATE(Modulo);
-    };
-    
-    // ================================================================================ //
-    //                                     POWER                                        //
-    // ================================================================================ //
-    
-    class Power : public Object
-    {
-    private:
-        friend class Arithmetic;
-        const bool  m_double;
-        double      m_base;
-        double      m_exponent;
-    protected:
-        Power(KiwiInstance* kiwi, const string name, vector<Element>& elements);
-    public:
-        ~Power();
-        void output();
-        void receiveBang(const Inlet* inlet) override;
-        void receiveLong(const Inlet* inlet, long value) override;
-        void receiveDouble(const Inlet* inlet, double value) override;
-        
-        KIWI_CREATE(Power);
-    };
-    
-    // ================================================================================ //
-    //                                     SQUARE                                       //
-    // ================================================================================ //
-    
-    class Square : public Object
-    {
-    private:
-        friend class Arithmetic;
-        const bool  m_double;
-        double      m_radiacand;
-    protected:
-        Square(KiwiInstance* kiwi, const string name, vector<Element>& elements);
-    public:
-        ~Square();
-        void output();
-        void receiveBang(const Inlet* inlet) override;
-        void receiveLong(const Inlet* inlet, long value) override;
-        void receiveDouble(const Inlet* inlet, double value) override;
-        
-        KIWI_CREATE(Square);
-    };
-    
-    // ================================================================================ //
-    //                                     ROOT                                         //
-    // ================================================================================ //
-    
-    class Root : public Object
-    {
-    private:
-        friend class Arithmetic;
-        const bool  m_double;
-        double      m_radiacand;
-        double      m_degree;
-    protected:
-        Root(KiwiInstance* kiwi, const string name, vector<Element>& elements);
-    public:
-        ~Root();
-        void output();
-        void receiveBang(const Inlet* inlet) override;
-        void receiveLong(const Inlet* inlet, long value) override;
-        void receiveDouble(const Inlet* inlet, double value) override;
-        
-        KIWI_CREATE(Root);
+        void receive(ElemVector const& elements) override;
+        sObject create(sDico dico) const override;
     };
     
     // ================================================================================ //
     //                              ARITHMETIC LOADER                                   //
     // ================================================================================ //
-    */
+    
     class Arithmetic
     {
     public:
-        static void load(shared_ptr<Instance> kiwi)
+        static void load(sInstance kiwi)
         {
-            kiwi->addObjectPrototype(unique_ptr<Box>(new Plus(kiwi, 0)));
-            /*
-            k->addObjectPrototype(unique_ptr<Object>(new Minus(k, string("Minus"), elements)));
-            k->addObjectPrototype(unique_ptr<Object>(new Minus(k, string("-"), elements)));
-            k->addObjectPrototype(unique_ptr<Object>(new Times(k, string("Times"), elements)));
-            k->addObjectPrototype(unique_ptr<Object>(new Times(k, string("*"), elements)));
-            k->addObjectPrototype(unique_ptr<Object>(new Divide(k, string("Divide"), elements)));
-            k->addObjectPrototype(unique_ptr<Object>(new Divide(k, string("/"), elements)));
-            k->addObjectPrototype(unique_ptr<Object>(new Modulo(k, string("Modulo"), elements)));
-            k->addObjectPrototype(unique_ptr<Object>(new Modulo(k, string("%"), elements)));*/
+            kiwi->addObjectPrototype(unique_ptr<Box>(new Plus(kiwi)));
         }
     };
     

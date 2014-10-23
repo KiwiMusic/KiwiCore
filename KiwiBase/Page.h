@@ -44,9 +44,10 @@ namespace Kiwi
     /**
      The page is the counterpart of the max patcher or the pd canvas.
      */
-    class Page : public Object, public ObjectListener
+    class Page
     {
     private:
+        const weak_ptr<Instance>    m_kiwi;
         string                      m_file;
         string                      m_directory;
         
@@ -54,7 +55,30 @@ namespace Kiwi
         set<shared_ptr<Connection>> m_connections;
         shared_ptr<DspContext>      m_dsp_context;
         
+        sDico toDico(string const& text);
+        
+        //! Tag creator.
+        /** This function uses the kiwi instance to create a tag.
+         @param name The name of the tag to retrieve.
+         @return    The tag that match with the name.
+         */
+        sTag createTag(string const& name) const;
+        
+        //! Object creator.
+        /** This function uses the kiwi instance to create an object with a dico.
+         @param dico The dico that defines the object.
+         @return    The object.
+         */
+        shared_ptr<Object> createObject(sDico dico) const;
+        
+        //! Dico creator.
+        /** This function uses the kiwi instance to create a dico.
+         @return    The dico.
+         */
+        sDico createDico() const;
+        
     public:
+        
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
@@ -74,38 +98,6 @@ namespace Kiwi
          @return A pointer to the box.
          */
         shared_ptr<Box> createBox(string const& text);
-        
-        //! Create a box.
-        /** The function instantiates a box in the page.
-         @param name        The name of the box.
-         @param elements    A vector of elements.
-         @return A pointer to the box.
-         */
-        shared_ptr<Box> createBox(shared_ptr<Tag> name, vector<Element> const& elements);
-        
-        //! Create a box.
-        /** The function instantiates a box in the page.
-         @param name        The name of the box.
-         @param elements    A vector of elements.
-         @return A pointer to the box.
-         */
-        shared_ptr<Box> createBox(string name, vector<Element> const& elements);
-
-        //! Create a box.
-        /** The function instantiates a box in the page.
-         @param name        The name of the box.
-         @param element     An element.
-         @return A pointer to the box.
-         */
-        shared_ptr<Box> createBox(shared_ptr<Tag> name, Element const& element);
-        
-        //! Create a box.
-        /** The function instantiates a box in the page.
-         @param name        The name of the box.
-         @param element     An element.
-         @return A pointer to the box.
-         */
-        shared_ptr<Box> createBox(string name, Element const& element);
 
         //! Free a box.
         /** The function removes a box from the page.
@@ -121,7 +113,7 @@ namespace Kiwi
          @param inlet       The inlet index.
          @return True if the inlet is compatible otherwise false.
          */
-        bool compatible(shared_ptr<Box> from, int outlet, shared_ptr<Box> to, int inlet);
+        bool compatible(shared_ptr<Box> from, int outletIndex, shared_ptr<Box> to, int inletIndex);
         
         //! Create a connection between an outlet to an inlet.
         /** The function connects an inlet to the outlet.

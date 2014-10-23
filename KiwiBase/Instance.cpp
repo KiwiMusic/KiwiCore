@@ -26,7 +26,7 @@
 #include "../KiwiBoxes/ArithmeticTilde.h"
 
 namespace Kiwi
-{
+{    
     // ================================================================================ //
     //                                      INSTANCE                                    //
     // ================================================================================ //
@@ -67,125 +67,15 @@ namespace Kiwi
     //                                      FACTORY                                     //
     // ================================================================================ //
     
-    shared_ptr<Object> Instance::createObject(shared_ptr<Dico> dico) noexcept
+    shared_ptr<Object> Instance::createObject(shared_ptr<Dico> dico)
     {
-        shared_ptr<Object> object;
         shared_ptr<Tag> name = (shared_ptr<Tag>)dico->get(createTag("name"));
         if(name)
         {
             map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);
             if(it != m_prototypes.end())
             {
-                ObjectMethod create = (ObjectMethod)it->second->getObjectMethod(createTag("create"));
-                if(create.m_method)
-                {
-                    vector<Element> elements;
-                    dico->get(createTag("arguments"), elements);
-                    switch (create.m_type)
-                    {
-                        case T_NOTHING:
-        
-                            object = MethodCreate(create.m_method)(shared_from_this(), name);
-                            if(elements.size())
-                            {
-                                warningCreation(name);
-                            }
-                            break;
-                            
-                        case T_LONG:
-                            
-                            if(elements.size() && (elements[0].isLong() || elements[0].isDouble()))
-                            {
-                                object = MethodCreate(create.m_method)(shared_from_this(), name, (long)elements[0]);
-                                if(elements.size() > 1)
-                                {
-                                   warningCreation(name);
-                                }
-                            }
-                            else
-                            {
-                                errorCreation(name, "long");
-                            }
-                            break;
-                            
-                        case T_DOUBLE:
-                            
-                            if(elements.size() && (elements[0].isLong() || elements[0].isDouble()))
-                            {
-                                object = MethodCreate(create.m_method)(shared_from_this(), name, (double)elements[0]);
-                                if(elements.size() > 1)
-                                {
-                                    warningCreation(name);
-                                }
-                            }
-                            else
-                            {
-                                errorCreation(name, "double");
-                            }
-                            break;
-                        
-                        case T_TAG:
-                            
-                            if(elements.size() && elements[0].isTag())
-                            {
-                                object = MethodCreateTag(create.m_method)(shared_from_this(), name, (shared_ptr<Tag>)elements[0]);
-                                if(elements.size() > 1)
-                                {
-                                    warningCreation(name);
-                                }
-                            }
-                            else
-                            {
-                                errorCreation(name, "tag");
-                            }
-                            break;
-                            
-                        case T_OBJECT:
-                            
-                            if(elements.size() && elements[0].isObject())
-                            {
-                                object = MethodCreateObject(create.m_method)(shared_from_this(), name, dico);
-                            }
-                            else
-                            {
-                                errorCreation(name, "object");
-                            }
-                            break;
-                            
-                        case T_ELEMENT:
-                            
-                            if(elements.size())
-                            {
-                                object = MethodCreateElement(create.m_method)(shared_from_this(), name, elements[0]);
-                                if(elements.size() > 1)
-                                {
-                                    warningCreation(name);
-                                }
-                            }
-                            else
-                            {
-                                errorCreation(name, "element");
-                            }
-                            break;
-                            
-                        case T_ELEMENTS:
-                            
-                            object = MethodCreateElements(create.m_method)(shared_from_this(), name, elements);
-                            break;
-                            
-                        default:
-                            error("The object \"" + (string)*name + " doesn't have a creation method properly defined.");
-                            break;
-                    }
-                    if(object && create.m_type != T_OBJECT)
-                    {
-                        object->read(dico);
-                    }
-                }
-                else
-                {
-                    error("The object \"" + (string)*name + " can't be allocated dynamically.");
-                }
+                return it->second->create(dico);
             }
             else
             {
@@ -197,10 +87,10 @@ namespace Kiwi
             error("The dico should have tag in a name key to create an object.");
         }
     
-        return object;
+        return nullptr;
     }
 
-    shared_ptr<Dico> Instance::createDico() noexcept
+    shared_ptr<Dico> Instance::createDico()
     {
         return make_shared<Dico>(shared_from_this());
     }
@@ -209,7 +99,7 @@ namespace Kiwi
     {
         if(file.empty())
 		{
-			file = string("Untitled") + to_string(++m_untitled_pages);
+			file = string("Untitled") + toString(++m_untitled_pages);
 		}
   
         shared_ptr<Page> newPage = make_shared<Page>(shared_from_this(), file, directory);
@@ -272,7 +162,7 @@ namespace Kiwi
         m_listeners.erase(listener);
     }
     
-    void Instance::post(string message) const noexcept
+    void Instance::post(string const& message) const noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
         cout << message << "\n";
@@ -284,9 +174,9 @@ namespace Kiwi
             to->post(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
             ++it;
         }
-        }
+    }
         
-        void Instance::post(const shared_ptr<const Object> object, string message) const noexcept
+        void Instance::post(const shared_ptr<const Object> object, string const& message) const noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
             cerr << (string)*object->name() << " : " << message << "\n";
@@ -300,7 +190,7 @@ namespace Kiwi
             }
         }
         
-        void Instance::warning(string message) const noexcept
+        void Instance::warning(string const& message) const noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
             cerr << "warning : " << message << "\n";
@@ -314,7 +204,7 @@ namespace Kiwi
             }
         }
         
-        void Instance::warning(const shared_ptr<const Object> object, string message) const noexcept
+        void Instance::warning(const shared_ptr<const Object> object, string const& message) const noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
             cerr << (string)*object->name() << " : " << message << "\n";
@@ -328,7 +218,7 @@ namespace Kiwi
             }
         }
         
-        void Instance::error(string message) const noexcept
+        void Instance::error(string const& message) const noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
             cerr << "error : " << message << "\n";
@@ -342,7 +232,7 @@ namespace Kiwi
             }
         }
         
-        void Instance::error(const shared_ptr<const Object> object, string message) const noexcept
+        void Instance::error(const shared_ptr<const Object> object, string const& message) const noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
             cerr << (string)*object->name() << " : " << message << "\n";

@@ -22,7 +22,7 @@
 */
 
 
-#include "Object.h"
+#include "Tag.h"
 
 namespace Kiwi
 {
@@ -54,7 +54,7 @@ namespace Kiwi
     //                                      TAG FACTORY                                 //
     // ================================================================================ //
     
-    TagFactory::TagFactory()
+    TagFactory::TagFactory() noexcept
     {
         
     }
@@ -64,7 +64,7 @@ namespace Kiwi
         m_tags.clear();
     }
     
-    shared_ptr<Tag> TagFactory::createTag(string const& name) noexcept
+    shared_ptr<Tag> TagFactory::createTag(string const& name)
     {
         map<string, shared_ptr<Tag>>::const_iterator it = m_tags.find(name);
         if(it != m_tags.end())

@@ -41,7 +41,6 @@ namespace Kiwi
      The tag factory is the only class that can create and delete tags. Important, a tag factory is always created with a kiwi instance to manage global instance's tag ans most often this tag factory will be sufficient for your needs. If you want another tag factory, don't forget that the tags created with it won't be retrievable by the natives classes or other extern classes. With other words, if you just want to bind your object to a global tag use the method of your object.
      @see Tag
      */
-    
     class TagFactory
     {
     private:
@@ -51,7 +50,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        TagFactory();
+        TagFactory() noexcept;
         
         //! The destructor.
         /** You should never use this method except if you really know what you do.
@@ -63,7 +62,7 @@ namespace Kiwi
          @param     The name of the tag to retrieve.
          @return    The tag that match with the name.
          */
-        shared_ptr<Tag> createTag(string const& name) noexcept;
+        shared_ptr<Tag> createTag(string const& name);
     };
     
     // ================================================================================ //
@@ -78,7 +77,7 @@ namespace Kiwi
     class Tag
     {
     private:
-        const string  m_name;
+        const string m_name;
         set<weak_ptr<Object>, owner_less<weak_ptr<Object>>> m_objects;
 
     public:
@@ -106,9 +105,9 @@ namespace Kiwi
         /** The function retrieves the number of objects in the binding list of the tag.
          @return The number of objects binded to the tag.
          */
-        inline int size() const noexcept
+        inline size_t size() const noexcept
         {
-            return (int)m_objects.size();
+            return m_objects.size();
         }
         
         //! Retrieve an object from the binding list of the tag.
@@ -116,12 +115,12 @@ namespace Kiwi
          @param index   The position of the object in the binding list from 0 to the number of objects in the binding list -1.
          @return        The pointer of the binded objects or NULL is the index is less than 0 or greater or equal to the number of objects in the binding list.
          */
-        inline weak_ptr<Object> operator[](int index) const noexcept
+        inline shared_ptr<Object> get(size_t index) const noexcept
         {
             set<weak_ptr<Object>>::iterator it = m_objects.begin();
             while(--index && it != m_objects.end())
                 ++it;
-            return *(it);
+            return (*(it)).lock();
         }
         
         //! Add an objects in the binding list of the tag.
@@ -138,6 +137,17 @@ namespace Kiwi
          */
         void unbind(weak_ptr<Object> object);
     };
+    
+    //! The shared pointer of a tag.
+    /**
+     The stag is shared pointer of a tag.
+     */
+    typedef shared_ptr<Tag>         sTag;
+    
+    inline string toString(const sTag __val)
+    {
+        return (string)*__val;
+    }
 };
 
 

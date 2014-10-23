@@ -23,7 +23,8 @@
 
 #include "DspNode.h"
 #include "DspContext.h"
-#include "../KiwiObjects/Page.h"
+#include "../KiwiBase/Page.h"
+#include "../KiwiBase/Tools.h"
 
 namespace Kiwi
 {

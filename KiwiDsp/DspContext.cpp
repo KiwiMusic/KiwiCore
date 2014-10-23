@@ -22,8 +22,8 @@
 */
 
 #include "DspContext.h"
-#include "../KiwiObjects/Box.h"
-#include "../KiwiObjects/Connection.h"
+#include "../KiwiBase/Box.h"
+#include "../KiwiBase/Connection.h"
 
 namespace Kiwi
 {
@@ -68,7 +68,7 @@ namespace Kiwi
     
     void DspContext::addBox(shared_ptr<Box> box)
     {
-        if(box->isDsp())
+        if(box->type() == Object::DSPBOX)
         {
             m_nodes.push_back(make_shared<DspNode>(box));
         }
@@ -89,13 +89,14 @@ namespace Kiwi
     
     void DspContext::addConnection(shared_ptr<Connection> connection)
     {
-        if(connection->isDsp())
+        int size = (int)m_nodes.size();
+        shared_ptr<DspNode> nodeFrom, nodeTo;
+        /*
+        shared_ptr<Box> boxFrom = connection->getFrom();
+        shared_ptr<Box> boxTo = connection->getTo();
+        
+        if(nodeFrom && nodeTo)
         {
-            int size = (int)m_nodes.size();
-            shared_ptr<DspNode> nodeFrom, nodeTo;
-            shared_ptr<Box> boxFrom = connection->getFrom();
-            shared_ptr<Box> boxTo = connection->getTo();
-            
             for(int i = 0; i < size; i++)
             {
                 if(m_nodes[i]->m_box == boxFrom)
@@ -103,18 +104,17 @@ namespace Kiwi
                 else if(m_nodes[i]->m_box == boxTo)
                     nodeTo = m_nodes[i];
                 
-                if(nodeFrom && nodeTo)
-                {
-                    nodeFrom->addOutput(nodeTo, boxFrom->getOutletSignalIndex(connection->getOutletIndex()));
-                    nodeTo->addInput(nodeFrom, boxTo->getInletSignalIndex(connection->getInletIndex()));
-                    return;
-                }
+                nodeFrom->addOutput(nodeTo, boxFrom->getOutletSignalIndex(connection->getOutletIndex()));
+                nodeTo->addInput(nodeFrom, boxTo->getInletSignalIndex(connection->getInletIndex()));
+                return;
             }
-        }
+        }*/
+        
     }
     
     void DspContext::removeConnection(shared_ptr<Connection> connection)
     {
+        /*
         if(connection->isDsp())
         {
             int size = (int)m_nodes.size();
@@ -136,7 +136,7 @@ namespace Kiwi
                     return;
                 }
             }
-        }
+        }*/
     }
     
     void DspContext::addProcess(shared_ptr<DspProcess> process)

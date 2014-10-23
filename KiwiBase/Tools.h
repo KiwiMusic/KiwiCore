@@ -28,10 +28,6 @@
 
 namespace Kiwi
 {
-    class Box;
-    class Object;
-    class Element;
-    
     template <typename Type> Type clip(const Type& n, const Type& lower, const Type& upper)
     {
         return max(lower, min(n, upper));
@@ -49,6 +45,65 @@ namespace Kiwi
         x |= x >> 8;
         x |= x >> 16;
         return x+1;
+    }
+    
+    inline string toString(int __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(unsigned __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(long __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(unsigned long __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(long long __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(unsigned long long __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(float __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(double __val)
+    {
+        return to_string(__val);
+    }
+    
+    inline string toString(long double __val)
+    {
+        return to_string(__val);
+    }
+    
+    template< typename T > string toHex( T i )
+    {
+        std::stringstream stream;
+        stream << "0x" << setfill('0') << setw(sizeof(T)*2) << hex << i;
+        return stream.str();
+    }
+    
+    template< typename T > string toId( T i )
+    {
+        std::stringstream stream;
+        stream << "u" << dec << i;
+        return stream.str();
     }
     
     inline void signalAddSignal(const sample* in1, const sample* in2, sample* out1, long vectorsize)

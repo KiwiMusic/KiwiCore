@@ -21,80 +21,162 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_ATTRIBUTE__
-#define __DEF_KIWI_ATTRIBUTE__
+#ifndef __DEF_KIWI_OBJECT_ATTRIBUTE__
+#define __DEF_KIWI_OBJECT_ATTRIBUTE__
 
 #include "Defs.h"
 #include "Tag.h"
 #include "Element.h"
+#include "Dico.h"
 
 namespace Kiwi
 {
-    class Object;
+    class Instance;
+    class Attribute;
+    
+    //! The shared pointer of a attribute.
+    /**
+     The sAttribute is shared pointer of a attribute.
+     */
+    typedef shared_ptr<Attribute>         sAttribute;
+    
     // ================================================================================ //
-    //                                      ATTRIBUTE                                   //
+    //                                  ATTRIBUTE FACTORY                               //
     // ================================================================================ //
     
-    //! The attribute holds a set of values of differents kinds and differents sizes....
+    //! The attribute factory creates attributes.
     /**
-     The attribute...
+     The attribute factory manages attributes.
+     @see Tag
      */
-    class Attribute
+    class AttributeFactory
     {
-        friend class Object;
     private:
-        shared_ptr<Tag>             m_name;     ///< The name of the attribute
+        map<sTag, sAttribute>       m_attributes;
         
-        shared_ptr<Tag>             m_label;    ///< The label of the attribute
-        shared_ptr<Tag>             m_style;    ///< The style of the attribute
-        shared_ptr<Tag>             m_category; ///< The category of the attribute
+    public:
         
-        bool                        m_visible;  ///< If the attribute is visible by the user (default true)
-        bool                        m_opaque;   ///< If the attribute cant be changed by the user (default false)
-        bool                        m_save;     ///< If the attribute should be saved (default true)
-        
-        vector<Element>             m_values;   ///< The list of elements
-        
-        //! Set the label, the style and the category of the attribute.
-        /** The function sets the label, the style and the category of the attribute.
-         @param label    The label of the attribute.
-         @param style    The style of the attribute.
-         @param category    The category of the attribute.
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
          */
-        void appearance(shared_ptr<Tag> label, shared_ptr<Tag> style, shared_ptr<Tag> category) noexcept;
+        AttributeFactory() noexcept;
         
-        //! Set the attribute opaque, visible and save states.
-        /** The function sets the attribute opaque, visible and save states
+        //! Descrutor.
+        /** Free the attributes.
+         */
+        ~AttributeFactory();
+        
+        //! Write the object in a dico.
+        /** The function writes the name of the object in a dico.
+         @param dico The dico.
+         */
+        void write(shared_ptr<Dico> dico) const noexcept;
+        
+        //! Retrieve an attribute.
+        /** The function retrieves an attribute.
+         @param name The name of the attribute.
+         @return The attribute.
+         */
+        sAttribute getAttribute(sTag name) const noexcept;
+        
+        //! The receive method that set the values of the attributes.
+        /** The function looks for the names of that match with the attributes and call the set methods if necessary. 
+         @param elements    A list of elements to pass.
+         */
+        void receive(ElemVector const& elements);
+        
+    protected:
+        
+        //! Read a dico.
+        /** The function reads a dico but doesn't do anything.
+         @param dico The dico.
+         */
+        void read(shared_ptr<const Dico> dico) noexcept;
+        
+        //! Receive a notification from an attribute.
+        /** The function receives the notifications from the attribute.
+         @param attr The attribute that notify.
+         */
+        virtual void notify(sAttribute attr);
+        
+        //! Add a new attribute.
+        /** The function adds a new attribute to the object.
+         @param name    A name for the attribute.
+         */
+        void addAttribute(sAttribute attr);
+        
+        //! Set the label, the style and the category of an attribute.
+        /** The function set the label, the style and the category of an attribute.
+         @param name The name of the attribute.
+         @param label The label of the attribute.
+         @param style The style of the attribute.
+         @param category The category of the attribute.
+         */
+        void setAttributeAppearance(sTag name, string const& label, string const& style, string const& category);
+        
+        //! Set the attribute opaque, visible and save states of an attribute.
+        /** The function sets the attribute opaque, visible and save states of an attribute.
+         @param name The name of the attribute.
          @param opaque Opaque or not.
          @param visible Visible or not.
          @param save Saved or not.
          */
-        void behavior(bool opaque, bool visible, bool save) noexcept;
+        void setAttributeBehavior(sTag name, long behavior);
+    };
+    
+    // ================================================================================ //
+    //                                      ATTRIBUTE                                   //
+    // ================================================================================ //
+    
+    //! The attribute holds a set of values of differents kinds and differents sizes.
+    /**
+     The attribute manages a set of values.
+     */
+    class Attribute
+    {
+    public:
         
-        //! Set the value with an element.
-        /** The function sets the value with an element and resize the values to one if necessary.
-         @param element The element.
-         */
-        void set(Element const& element) noexcept;
+        enum
+        {
+            Visible = (1<<0),
+            Opaque  = (1<<1),
+            Saved   = (1<<2),
+            Notify  = (1<<3)
+        };
         
-        //! Set the values with a vector of elements.
-        /** The function sets the values with a vector of elements and resize the values if necessary.
-         @param elements The vector of elements.
-         */
-        void set(vector<Element> const& elements) noexcept;
+        friend class AttributeFactory;
+        
+    private:
+        sTag            m_name;     ///< The name of the attribute
+        string          m_label;    ///< The label of the attribute
+        string          m_style;    ///< The style of the attribute
+        string          m_category; ///< The category of the attribute
+        long            m_behavior; ///< The behavior of the attribute
         
         //! Read the attribute in a dico.
         /** The function reads the attribute in a dico.
          @param dico The dico.
          */
-        void read(shared_ptr<const Dico> dico) noexcept;
+        virtual void read(shared_ptr<const Dico> dico);
+        
+        //! Set the values with a vector of elements.
+        /** The function sets the values with a vector of elements and resize the values if necessary.
+         @param elements The vector of elements.
+         */
+        virtual void set(ElemVector const& elements) = 0;
         
     public:
         
         //! Constructor.
         /** Allocate and initialize the member values.
          */
-        Attribute(shared_ptr<Tag> name);
+        Attribute(sTag name,
+                  string const& label,
+                  string const& style,
+                  string const& category,
+                  long behavior);
         
         //! Destructor.
         /** Clear the attribute.
@@ -105,7 +187,7 @@ namespace Kiwi
         /** The function retrieves the name of the attribute.
          @return The name of the attribute.
          */
-        inline shared_ptr<Tag> name()
+        inline sTag name()
         {
             return m_name;
         }
@@ -114,7 +196,7 @@ namespace Kiwi
         /** The function retrieves the attribute label.
          @return The attribute label.
          */
-        inline shared_ptr<Tag> label() const noexcept
+        inline string label() const noexcept
         {
             return m_label;
         }
@@ -123,7 +205,7 @@ namespace Kiwi
         /** The function retrieves the attribute style.
          @return The attribute style.
          */
-        inline shared_ptr<Tag> style() const noexcept
+        inline string style() const noexcept
         {
             return m_style;
         }
@@ -132,55 +214,59 @@ namespace Kiwi
         /** The function retrieves the attribute category.
          @return The attribute category.
          */
-        inline shared_ptr<Tag> category() const noexcept
+        inline string category() const noexcept
         {
             return m_category;
-        }
-        
-        //! Retrieve the attribute visible status.
-        /** The function retrieves the attribute visible status.
-         @return true if the attribute is visible otherwise false.
-         */
-        inline bool visible() const noexcept
-        {
-            return m_visible;
-        }
-        
-        //! Retrieve the attribute opaque status.
-        /** The function retrieves the attribute opaque status.
-         @return true if the attribute is opaque otherwise false.
-         */
-        inline bool opaque() const noexcept
-        {
-            return m_opaque;
-        }
-        
-        //! Retrieve the attribute save status.
-        /** The function retrieves the attribute save status
-         @return true if the attribute is saved otherwise false.
-         */
-        inline bool save() const noexcept
-        {
-            return m_save;
         }
         
         //! Retrieve the values.
         /** The function retrieves the values.
          @param elements The vector of elements to fill.
          */
-        void get(vector<Element>& elements) const noexcept;
-        
-        //! Retrieve the value.
-        /** The function retrieves the unique or first value.
-         @return The element.
-         */
-        Element get() const noexcept;
+        virtual void get(ElemVector& elements) const noexcept = 0;
         
         //! Write the attribute in a dico.
         /** The function writes the attribute in a dico.
          @param dico The dico.
          */
-        void write(shared_ptr<Dico> dico) const noexcept;
+        virtual void write(shared_ptr<Dico> dico) const noexcept;
+    };
+    
+    // ================================================================================ //
+    //                                      ATTRIBUTE TYPED                             //
+    // ================================================================================ //
+    
+    class AttributeDouble : public Attribute
+    {
+    private:
+        double m_value;
+        void set(ElemVector const& elements) override;
+    public:
+        AttributeDouble(sTag name, string const& label, string const& style, string const& category, long behavior);
+        ~AttributeDouble();
+        void get(ElemVector& elements) const noexcept;
+    };
+    
+    class AttributeTag : public Attribute
+    {
+    private:
+        shared_ptr<Tag> m_value;
+        void set(ElemVector const& elements) override;
+    public:
+        AttributeTag(sTag name, string const& label, string const& style, string const& category, long behavior);
+        ~AttributeTag();
+        void get(ElemVector& elements) const noexcept;
+    };
+    
+    class AttributeObject : public Attribute
+    {
+    private:
+        shared_ptr<Object> m_value;
+        void set(ElemVector const& elements) override;
+    public:
+        AttributeObject(sTag name, string const& label, string const& style, string const& category, long behavior);
+        ~AttributeObject();
+        void get(ElemVector& elements) const noexcept;
     };
 }
 

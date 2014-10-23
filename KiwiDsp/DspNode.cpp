@@ -23,7 +23,7 @@
 
 #include "DspNode.h"
 #include "DspContext.h"
-#include "../KiwiObjects/Box.h"
+#include "../KiwiBase/Box.h"
 
 namespace Kiwi
 {
@@ -34,8 +34,8 @@ namespace Kiwi
     DspNode::DspNode(shared_ptr<Box> box) :
     
     m_box(box),
-    m_nins(m_box->getNumberOfSignalInlets()),
-    m_nouts(m_box->getNumberOfSignalOutlets()),
+    m_nins(0),
+    m_nouts(0),
     
     m_vectorsize(0),
     m_samplerate(0),
@@ -90,11 +90,11 @@ namespace Kiwi
         if(outlet >= 0 && outlet < m_nouts)
             m_outputs_nodes[outlet].erase(node);
     }
-    
+    /*
     void DspNode::addMethod(Method method)
     {
         m_processes.push_back((MethodProcess)method);
-    }
+    }*/
     
     double DspNode::getSamplerate() const noexcept
     {
@@ -283,7 +283,7 @@ namespace Kiwi
         m_sig_outs.resize(m_nouts);
         
         clean();
-        
+        /*
         MethodDsp dspmethod = (MethodDsp)m_box->getMethod("dsp");
         if(dspmethod)
             dspmethod(m_box, shared_from_this());
@@ -299,7 +299,7 @@ namespace Kiwi
                 context->addProcess(process);
             }
             m_valid = true;
-        }
+        }*/
     }
 }
 

@@ -32,20 +32,14 @@ namespace Kiwi
     class Object;
     class Box;
     class Dico;
+    class Element;
+
     
-    typedef enum
-    {
-        T_NOTHING   = (1<<0),
-        T_OPAQUE    = (1<<1),
-        T_LONG      = (1<<2),
-        T_DOUBLE    = (1<<3),
-        T_TAG       = (1<<4),
-        T_OBJECT    = (1<<5),
-        T_ELEMENT   = (1<<6),
-        T_ELEMENTS  = (1<<7),
-        T_GARBAGE   = (1<<8),
-        T_SIGNAL    = (1<<9)
-    }Type;
+    //! The vector of elements
+    /**
+     The elements is a standard vector of elements.
+     */
+    typedef vector<Element> ElemVector;
     
     // ================================================================================ //
     //                                      ELEMENT                                     //
@@ -53,21 +47,36 @@ namespace Kiwi
     
     //! The element holds variables of different kinds.
     /**
-     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and an object but can receives an int, a long, a float, a double, an object (weak or not), a box (weak or not) or a dico (weak or not).
+     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and an object but can receives an int, a long, a float, a double, a tag (weak or shared) or an object (weak or shared).
      */
     class Element
     {
+        
+    public:
+        
+        enum Type
+        {
+            NOTHING   = 0,
+            LONG      = 1,
+            DOUBLE    = 2,
+            TAG       = 3,
+            OBJECT    = 4,
+            DICO      = 5,
+            VECTOR    = 6
+        };
+        
     private:
         struct Ele
         {
-            long                m_long;
-            double              m_double;
-            shared_ptr<Tag>     m_tag;
-            shared_ptr<Object>  m_object;
+            long                m_long      = 0;
+            double              m_double    = 0;
+            shared_ptr<Tag>     m_tag       = nullptr;
+            shared_ptr<Object>  m_object    = nullptr;
+            shared_ptr<Dico>    m_dico      = nullptr;
         };
         
-        Type    m_type;
-        Ele     m_val;
+        Element::Type   m_type;
+        Ele             m_val;
     public:
         
         //! Constructor.
@@ -85,6 +94,11 @@ namespace Kiwi
          */
         Element(long value) noexcept;
         
+        //! Constructor with a long value.
+        /** The function allocates the element with a long value.
+         */
+        Element(size_t value) noexcept;
+        
         //! Constructor with a float value.
         /** The function allocates the element with a double value from a casted float value.
          */
@@ -98,10 +112,15 @@ namespace Kiwi
         //! Constructor with a tag.
         /** The function allocates the element with a tag.
          */
+        Element(weak_ptr<Tag> tag) noexcept;
+        
+        //! Constructor with a tag.
+        /** The function allocates the element with a tag.
+         */
         Element(shared_ptr<Tag> tag) noexcept;
         
-        //! Constructor with a weak object.
-        /** The function allocates the element with a locked weak object.
+        //! Constructor with an object.
+        /** The function allocates the element with an object.
          */
         Element(weak_ptr<Object> object) noexcept;
         
@@ -110,25 +129,15 @@ namespace Kiwi
          */
         Element(shared_ptr<Object> object) noexcept;
         
-        //! Constructor with a weak box.
-        /** The function allocates the element with a locked weak box.
+        //! Constructor with a dico.
+        /** The function allocates the element with a dico.
          */
-        Element(weak_ptr<Box> object) noexcept;
-        
-        //! Constructor with a box.
-        /** The function allocates the element with a box.
-         */
-        Element(shared_ptr<Box> object) noexcept;
-        
-        //! Constructor with a weak dico.
-        /** The function allocates the element with a locked weak dico.
-         */
-        Element(weak_ptr<Dico> object) noexcept;
+        Element(weak_ptr<Dico> dico) noexcept;
         
         //! Constructor with a dico.
         /** The function allocates the element with a dico.
          */
-        Element(shared_ptr<Dico> object) noexcept;
+        Element(shared_ptr<Dico> dico) noexcept;
         
         //! Destructor.
         /** Doesn't perform anything.
@@ -139,7 +148,7 @@ namespace Kiwi
         /** The function retrieves the type of the element, you should always check the type of the element before to retrieve the value.
          @return    The type of the element as a type.
          */
-        inline Type type() const noexcept
+        inline Element::Type type() const noexcept
         {
             return m_type;
         }
@@ -150,7 +159,7 @@ namespace Kiwi
          */
         inline bool isLong() const noexcept
         {
-            return m_type == T_LONG;
+            return m_type == Element::LONG;
         }
         
         //! Check if the element is of type double.
@@ -159,7 +168,7 @@ namespace Kiwi
          */
         inline bool isDouble() const noexcept
         {
-            return m_type == T_DOUBLE;
+            return m_type == Element::DOUBLE;
         }
         
         //! Check if the element is of type tag.
@@ -168,7 +177,7 @@ namespace Kiwi
          */
         inline bool isTag() const noexcept
         {
-            return m_type == T_TAG;
+            return m_type == Element::TAG;
         }
         
         //! Check if the element is of type object.
@@ -177,7 +186,16 @@ namespace Kiwi
          */
         inline bool isObject() const noexcept
         {
-            return m_type == T_OBJECT;
+            return m_type == Element::OBJECT;
+        }
+        
+        //! Check if the element is of type dico.
+        /** The function checks if the element is of type dico.
+         @return    true if the element is a dico.
+         */
+        inline bool isDico() const noexcept
+        {
+            return m_type == Element::DICO;
         }
         
         //! Cast the element to an int.
@@ -208,41 +226,35 @@ namespace Kiwi
         /** The function casts the element to a tag.
          @return A tag if the element is a tag otherwise a nullptr.
          */
+        operator weak_ptr<Tag>() const noexcept;
+        
+        //! Cast the element to a tag.
+        /** The function casts the element to a tag.
+         @return A tag if the element is a tag otherwise a nullptr.
+         */
         operator shared_ptr<Tag>() const noexcept;
         
-        //! Cast the element to a weak object.
-        /** The function casts the element to a weak object.
-         @return A weak object if the element is an object otherwise a nullptr.
+        //! Cast the element to an object.
+        /** The function casts the element to an object.
+         @return An object if the element is an object otherwise a nullptr.
          */
         operator weak_ptr<Object>() const noexcept;
         
         //! Cast the element to an object.
-        /** The function casts the element to a weak object.
+        /** The function casts the element to an object.
          @return An object if the element is an object otherwise a nullptr.
          */
         operator shared_ptr<Object>() const noexcept;
         
-        //! Cast the element to a weak box.
-        /** The function casts the element to a weak box.
-         @return A weak box if the element is an object otherwise a nullptr.
-         */
-        operator weak_ptr<Box>() const noexcept;
-        
-        //! Cast the element to a box.
-        /** The function casts the element to a box.
-         @return A box if the element is an object otherwise a nullptr.
-         */
-        operator shared_ptr<Box>() const noexcept;
-        
-        //! Cast the element to a weak dico.
-        /** The function casts the element to a weak dico.
-         @return A weak dico if the element is an object otherwise a nullptr.
+        //! Cast the element to a dico.
+        /** The function casts the element to a dico.
+         @return An dico if the element is a dico otherwise a nullptr.
          */
         operator weak_ptr<Dico>() const noexcept;
         
         //! Cast the element to a dico.
         /** The function casts the element to a dico.
-         @return A dico if the element is an object otherwise a nullptr.
+         @return An dico if the element is a dico otherwise a nullptr.
          */
         operator shared_ptr<Dico>() const noexcept;
         
@@ -286,11 +298,18 @@ namespace Kiwi
          @param tag   The tag.
          @return An element.
          */
+        Element& operator=(weak_ptr<Tag> tag) noexcept;
+        
+        //! Set up the element with a tag.
+        /** The function sets up the element with a tag.
+         @param tag   The tag.
+         @return An element.
+         */
         Element& operator=(shared_ptr<Tag> tag) noexcept;
         
-        //! Set up the element with a weak object.
-        /** The function sets up the element with a weak object.
-         @param object   The weak object.
+        //! Set up the element with an object.
+        /** The function sets up the element with an object.
+         @param object   The object.
          @return An element.
          */
         Element& operator=(weak_ptr<Object> object) noexcept;
@@ -302,33 +321,19 @@ namespace Kiwi
          */
         Element& operator=(shared_ptr<Object> object) noexcept;
         
-        //! Set up the element with a weak box.
-        /** The function sets up the element with a weak box.
-         @param object   The weak box.
+        //! Set up the element with a dico.
+        /** The function sets up the element with a dico.
+         @param dico   The dico.
          @return An element.
          */
-        Element& operator=(weak_ptr<Box> object) noexcept;
-        
-        //! Set up the element with a box.
-        /** The function sets up the element with a box.
-         @param object   The box.
-         @return An element.
-         */
-        Element& operator=(shared_ptr<Box> object) noexcept;
-        
-        //! Set up the element with a weak dico.
-        /** The function sets up the element with a weak dico.
-         @param object   The weak dico.
-         @return An element.
-         */
-        Element& operator=(weak_ptr<Dico> object) noexcept;
+        Element& operator=(weak_ptr<Dico> dico) noexcept;
         
         //! Set up the element with a dico.
         /** The function sets up the element with a dico.
-         @param object   The dico.
+         @param dico   The dico.
          @return An element.
          */
-        Element& operator=(shared_ptr<Dico> object) noexcept;
+        Element& operator=(shared_ptr<Dico> dico) noexcept;
         
         //! Compare the element with another.
         /** The function compares the element with another.
@@ -370,50 +375,47 @@ namespace Kiwi
          @param value   The tag.
          @return true if the element hold the tag otherwise false.
          */
+        bool operator==(weak_ptr<Tag> tag) const noexcept;
+        
+        //! Compare the element with a tag.
+        /** The function compares the element with a tag.
+         @param value   The tag.
+         @return true if the element hold the tag otherwise false.
+         */
         bool operator==(shared_ptr<Tag> tag) const noexcept;
         
-        //! Compare the element with a weak object.
-        /** The function compares the element with a locked weak object.
-         @param object   The weak object.
-         @return true if the element hold the locked weak object otherwise false.
+        //! Compare the element with an object.
+        /** The function compares the element with an object.
+         @param object   The object.
+         @return true if the element hold the object otherwise false.
          */
         bool operator==(weak_ptr<Object> object) const noexcept;
         
         //! Compare the element with an object.
         /** The function compares the element with an object.
          @param object   The object.
-         @return true if the element hold the objectotherwise false.
+         @return true if the element hold the object otherwise false.
          */
         bool operator==(shared_ptr<Object> object) const noexcept;
         
-        //! Compare the element with a weak box.
-        /** The function compares the element with a locked weak box.
-         @param object   The weak box.
-         @return true if the element hold the locked weak box otherwise false.
+        //! Compare the element with a dico.
+        /** The function compares the element with a dico.
+         @param dico   The dico.
+         @return true if the element hold the dico otherwise false.
          */
-        bool operator==(weak_ptr<Box> object) const noexcept;
-        
-        //! Compare the element with a box.
-        /** The function compares the element with a box.
-         @param object   The box.
-         @return true if the element hold the box otherwise false.
-         */
-        bool operator==(shared_ptr<Box> object) const noexcept;
-        
-        //! Compare the element with a weak dico.
-        /** The function compares the element with a locked weak dico.
-         @param object   The weak box.
-         @return true if the element hold the locked weak dico otherwise false.
-         */
-        bool operator==(weak_ptr<Dico> object) const noexcept;
+        bool operator==(weak_ptr<Dico> dico) const noexcept;
         
         //! Compare the element with a dico.
         /** The function compares the element with a dico.
-         @param object   The dico.
+         @param dico   The dico.
          @return true if the element hold the dico otherwise false.
          */
-        bool operator==(shared_ptr<Dico> object) const noexcept;
+        bool operator==(shared_ptr<Dico> dico) const noexcept;
     };
+    
+    string toString(Element const& __val);
+    string toString(ElemVector const& __val);
+    string toString(Element::Type __val);
 }
 
 

@@ -23,6 +23,7 @@
 
 
 #include "ArithmeticTilde.h"
+#include "../KiwiBase/Tools.h"
 
 namespace Kiwi
 {
@@ -32,11 +33,8 @@ namespace Kiwi
     
     PlusTilde::PlusTilde(shared_ptr<Instance> kiwi) : Box(kiwi, "+~")
     {
-        addMethod("create", T_ELEMENTS, (Method)create);
-        addMethod("long",   T_LONG,     (Method)receiveLong);
-        addMethod("double", T_DOUBLE,   (Method)receiveDouble);
-        addMethod("dsp",    T_OPAQUE,   (Method)dsp);
-    };
+        ;
+    }
     
     shared_ptr<Object> PlusTilde::create(shared_ptr<Instance> kiwi, const shared_ptr<Tag> name, vector<Element>& elements)
     {
@@ -45,7 +43,7 @@ namespace Kiwi
         x->m_addend = 0;
         if(elements.size())
             x->m_addend = (double)elements[0];
-        
+        /*
         x->addInlet("signal");
         x->addInlet("signal", "long", "double");
         x->addOutlet("signal");
@@ -53,19 +51,19 @@ namespace Kiwi
         x->setInletAttributes(0, "Augend", InletPolarity::Hot);
         x->setInletAttributes(1, "Addend", InletPolarity::Hot);
         x->setOutletDescription(0, "Sum");
-        
+        */
         return static_pointer_cast<Object>(x);
     }
     
     void PlusTilde::receiveLong(This x, long value)
     {
-        if(x->getProxy() == 1)
+        if(x->getInletIndex() == 1)
             x->m_addend = value;
     }
     
     void PlusTilde::receiveDouble(This x, double value)
     {
-        if(x->getProxy() == 1)
+        if(x->getInletIndex() == 1)
             x->m_addend = value;
     }
     
@@ -73,7 +71,7 @@ namespace Kiwi
     {
         if(node->isOutputConnected(0))
         {
-            node->setInplace(true);
+            node->setInplace(true);/*
             if(node->isInputConnected(0) && node->isInputConnected(1))
             {
                 node->addMethod((Method)processBoth);
@@ -89,7 +87,7 @@ namespace Kiwi
             else
             {
                 node->addMethod((Method)processNone);
-            }
+            }*/
         }
     }
     
@@ -121,8 +119,8 @@ namespace Kiwi
     {
         shared_ptr<MinusTilde> minus = make_shared<MinusTilde>(kiwi);
         
-        minus->addMethod("long",         T_LONG,     (Method)receiveLong);
-        minus->addMethod("double",       T_DOUBLE,   (Method)receiveDouble);
+        minus->addMethod("long",         LONG,     (Method)receiveLong);
+        minus->addMethod("double",       DOUBLE,   (Method)receiveDouble);
         minus->addMethod("dsp",          T_OPAQUE,   (Method)dsp);
         
         minus->m_subtrahend = 0;

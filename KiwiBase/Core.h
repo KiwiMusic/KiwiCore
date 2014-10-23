@@ -35,11 +35,7 @@
 
 namespace Kiwi
 {
-    typedef shared_ptr<Instance>    sInstance;
-    typedef shared_ptr<Object>      sObject;
-    typedef shared_ptr<Tag>         sTag;
-    typedef shared_ptr<Dico>        sDico;
-    typedef vector<Element>         Elements;
+    ;
 };
 
 

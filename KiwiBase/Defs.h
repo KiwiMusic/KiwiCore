@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cstring>
 #include <algorithm>
@@ -52,6 +53,7 @@ namespace Kiwi
 #else
     typedef float sample;
 #endif
+    
 };
 
 #endif
