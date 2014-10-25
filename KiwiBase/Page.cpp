@@ -209,7 +209,22 @@ namespace Kiwi
         main->set(createTag("boxes"), elements);
         main->write(m_file, m_directory);
     }
-    
+	
+	sDico Page::getDico()
+	{
+		sDico main = createDico();
+		ElemVector elements;
+		
+		for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
+		{
+			sDico box = createDico();
+			(*it)->write(box);
+			elements.push_back(box);
+		}
+		main->set(createTag("boxes"), elements);
+		return main;
+	}
+	
     sDico Page::toDico(string const& text)
     {
         sDico dico = createDico();

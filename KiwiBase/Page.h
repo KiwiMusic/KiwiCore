@@ -90,6 +90,12 @@ namespace Kiwi
         ~Page();
         
         void write();
+		
+		//! Get the dico of the page
+		/** Get the dico of the page
+		 @return The dico of the page.
+		 */
+		sDico getDico();
         
         //! Create a box.
         /** The function instantiates a box in the page.
