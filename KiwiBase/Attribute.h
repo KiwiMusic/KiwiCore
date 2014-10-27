@@ -66,7 +66,7 @@ namespace Kiwi
         //! Descrutor.
         /** Free the attributes.
          */
-        ~AttributeFactory();
+        virtual ~AttributeFactory();
         
         //! Write the object in a dico.
         /** The function writes the name of the object in a dico.
@@ -181,7 +181,7 @@ namespace Kiwi
         //! Destructor.
         /** Clear the attribute.
          */
-        ~Attribute();
+        virtual ~Attribute();
         
         //! Retrieve the name of the attribute.
         /** The function retrieves the name of the attribute.
@@ -243,7 +243,7 @@ namespace Kiwi
         void set(ElemVector const& elements) override;
     public:
         AttributeDouble(sTag name, string const& label, string const& style, string const& category, long behavior);
-        ~AttributeDouble();
+        virtual ~AttributeDouble();
         void get(ElemVector& elements) const noexcept;
     };
     
@@ -254,7 +254,7 @@ namespace Kiwi
         void set(ElemVector const& elements) override;
     public:
         AttributeTag(sTag name, string const& label, string const& style, string const& category, long behavior);
-        ~AttributeTag();
+        virtual ~AttributeTag();
         void get(ElemVector& elements) const noexcept;
     };
     
@@ -265,7 +265,7 @@ namespace Kiwi
         void set(ElemVector const& elements) override;
     public:
         AttributeObject(sTag name, string const& label, string const& style, string const& category, long behavior);
-        ~AttributeObject();
+        virtual ~AttributeObject();
         void get(ElemVector& elements) const noexcept;
     };
 }
