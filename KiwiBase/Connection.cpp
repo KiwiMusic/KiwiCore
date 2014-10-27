@@ -108,6 +108,9 @@ namespace Kiwi
     //                                      CONNECTION                                  //
     // ================================================================================ //
     
+    sTag tagFrom = make_shared<Tag>("from");
+    sTag tagTo = make_shared<Tag>("to");
+    
     Connection::Connection(const shared_ptr<Box> from, const shared_ptr<Outlet> outlet, const shared_ptr<Box> to, const shared_ptr<Inlet> inlet) noexcept :
     m_from(from),
     m_to(to),
@@ -141,31 +144,8 @@ namespace Kiwi
         
         if(from && to && outlet && inlet)
         {
-            ElemVector elements;
-            sTag idfrom, idto;
-            /*
-            from->getAttribute("id")->get(elements);
-            if(elements.size())
-            {
-                idfrom = elements[0];
-                elements.clear();
-            }
-            to->getAttribute("id")->get(elements);
-            if(elements.size())
-            {
-                idto = elements[0];
-                elements.clear();
-            }*/
-            
-            if(idfrom && idto)
-            {
-                /*
-                dico->set("from", idfrom);
-                dico->set("to", idto);
-                dico->set("outlet", outlet->index());
-                dico->set("inlet", inlet->index());
-                 */
-            }
+            dico->set(tagFrom, {from->getId(), outlet->index()});
+            dico->set(tagTo, {to->getId(), inlet->index()});
         }
     }
 }

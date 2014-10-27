@@ -20,10 +20,10 @@ int main (int argc, char* argv[])
         shared_ptr<Page> page = kiwi->createPage("test.kiwi", "/Users/Pierre/Desktop");
         {
             sBox obj1 = page->createBox("+");
-            obj1 = page->createBox("+");
-            obj1 = page->createBox("+");
-            sBox obj2 = page->createBox("+ 2. @bgcolor 0.1 2. 1 2");
+            sBox obj2 = page->createBox("+ 2");
+            sBox obj3 = page->createBox("+ 1");
             page->connect(obj1, 0, obj2, 0);
+            page->connect(obj3, 0, obj2, 1);
             page->write();
             
             sTag ftf = kiwi->createTag("tttt");

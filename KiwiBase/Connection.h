@@ -124,6 +124,7 @@ namespace Kiwi
         void disconnect(const shared_ptr<Inlet> inlet);
         
         void setIndex(size_t index);
+        
     public:
         //! The constructor.
         /** You should never use this method except if you really know what you're doing.

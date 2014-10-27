@@ -78,20 +78,21 @@ namespace Kiwi
             return nullptr;
     }
     
-    shared_ptr<Box> Page::createBox(string const& text)
+    sBox Page::createBox(string const& text)
     {
-        shared_ptr<Dico> dico = toDico(text);
+        sDico dico = toDico(text);
         if(dico)
         {
-            shared_ptr<Object> object = createObject(dico);
+            sObject object = createObject(dico);
             if(object)
             {
                 if(object->type() == Object::BOX)
                 {
-                    shared_ptr<Box> box = static_pointer_cast<Box>(object);
+                    sBox box = static_pointer_cast<Box>(object);
+                    box->setId(m_boxes.size()+1);
                     box->read(dico);
                     m_boxes.insert(box);
-                    //box->setPage(static_pointer_cast<Page>(shared_from_this()));
+                    //box->setPage(shared_from_this());
                     return box;
                 }
                 else
@@ -100,7 +101,7 @@ namespace Kiwi
                 }
             }
         }
-        return shared_ptr<Box>();
+        return nullptr;
     }
     
     void Page::freeBox(shared_ptr<Box> box)
@@ -198,15 +199,25 @@ namespace Kiwi
     void Page::write()
     {
         sDico main = createDico();
-        ElemVector elements;
         
+        ElemVector boxes;
         for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
-            sDico box = createDico();
-            (*it)->write(box);
-            elements.push_back(box);
+            boxes.push_back(static_pointer_cast<Object>(*it));
         }
-        main->set(createTag("boxes"), elements);
+        main->set(createTag("boxes"), boxes);
+        
+        ElemVector connections;
+        for(set<shared_ptr<Connection>>::iterator it = m_connections.begin(); it != m_connections.end(); ++it)
+        {
+            sDico connection = createDico();
+            sDico subconnect = createDico();
+            (*it)->write(subconnect);
+            connection->set(createTag("connection"), subconnect);
+            connections.push_back(connection);
+        }
+        main->set(createTag("connections"), connections);
+        
         main->write(m_file, m_directory);
     }
     
@@ -258,7 +269,6 @@ namespace Kiwi
             }
             dico->set(createTag(key), elements);
             dico->set(createTag("text"), createTag(text));
-            dico->set(createTag("id"), createTag("id-"+to_string(m_boxes.size()+1)));
         }
         return dico;
     }

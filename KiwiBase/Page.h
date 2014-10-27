@@ -44,14 +44,14 @@ namespace Kiwi
     /**
      The page is the counterpart of the max patcher or the pd canvas.
      */
-    class Page
+    class Page : public enable_shared_from_this<Page>
     {
     private:
         const weak_ptr<Instance>    m_kiwi;
         string                      m_file;
         string                      m_directory;
         
-        set<shared_ptr<Box>>        m_boxes;
+        set<sBox>                   m_boxes;
         set<shared_ptr<Connection>> m_connections;
         shared_ptr<DspContext>      m_dsp_context;
         
@@ -96,13 +96,13 @@ namespace Kiwi
          @param name        The name of the box.
          @return A pointer to the box.
          */
-        shared_ptr<Box> createBox(string const& text);
+        sBox createBox(string const& text);
 
         //! Free a box.
         /** The function removes a box from the page.
          @param box        The pointer to the box.
          */
-        void freeBox(shared_ptr<Box> box);
+        void freeBox(sBox box);
         
         //! Check if an inlet is compatible with an outlet.
         /** The function checks if the inlet is compatible with the outlet.
@@ -112,7 +112,7 @@ namespace Kiwi
          @param inlet       The inlet index.
          @return True if the inlet is compatible otherwise false.
          */
-        bool compatible(shared_ptr<Box> from, int outletIndex, shared_ptr<Box> to, int inletIndex);
+        bool compatible(sBox from, int outletIndex, sBox to, int inletIndex);
         
         //! Create a connection between an outlet to an inlet.
         /** The function connects an inlet to the outlet.
@@ -122,7 +122,7 @@ namespace Kiwi
          @param inlet       The inlet index.
          @return True if the inlet has been connected otherwise false.
          */
-        bool connect(shared_ptr<Box> from, int outlet, shared_ptr<Box> to, int inlet);
+        bool connect(sBox from, int outlet, sBox to, int inlet);
         
         //! Delete a connection or a set of connection.
         /** The function disconnects an inlet from an outlet if all the arguments are specified, an inlet from all the outlets if the outlet's box is null, an outlet from all the inlets if the inlet's box is null, all the inlets of a box if only the inlet's box is specified and the inlet index is negative and all the outlets if only the outlet's box is specified and the outlet index is negative.

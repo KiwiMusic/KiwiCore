@@ -55,6 +55,25 @@ namespace Kiwi
         size_t          m_last_inlet;
         size_t          m_stack_count;
         size_t          m_id;
+        
+        //! Set the id of the boxe.
+        /** The function sets the id of the boxe.
+         @param _id    The id number.
+         */
+        inline void setId(size_t _id) noexcept
+        {
+            m_id = _id;
+        }
+        
+        //! Set the page of the boxe.
+        /** The function sets the page of the boxe.
+         @param page   The page.
+         */
+        inline void setPage(weak_ptr<Page>  page) noexcept
+        {
+            m_page = page;
+        }
+        
         // ================================================================================ //
         //                                      INLETS                                      //
         // ================================================================================ //
@@ -182,6 +201,15 @@ namespace Kiwi
          @param elements    A list of elements to pass.
          */
         virtual void receive(ElemVector const& elements) override;
+        
+        //! Retreive the id of the boxe.
+        /** The function retreives the id of the boxe.
+         @param elements    A list of elements to pass.
+         */
+        inline size_t getId() const noexcept
+        {
+            return m_id;
+        }
     };
     
     typedef shared_ptr<Box>      sBox;

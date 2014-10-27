@@ -30,6 +30,7 @@ namespace Kiwi
 {
     sTag tagNinlets     = make_shared<Tag>("ninlets");
     sTag tagNoutlets    = make_shared<Tag>("noutlets");
+    sTag tagId          = make_shared<Tag>("id");
     
     // ================================================================================ //
     //                                      BOX                                         //
@@ -58,6 +59,7 @@ namespace Kiwi
         AttributeFactory::write(dico);
         dico->set(tagNinlets, (long)m_inlets.size());
         dico->set(tagNoutlets, (long)m_outlets.size());
+        dico->set(tagId, (long)m_id);
     }
     
     void Box::read(shared_ptr<const Dico> dico) noexcept
@@ -128,13 +130,13 @@ namespace Kiwi
         if(m_stack_count < 256)
         {
             m_last_inlet = index;
-            Object::receive(values);
+            Box::receive(values);
         }
         else if(m_stack_count == 256)
         {
             error(shared_from_this(), string("Stack overflow"));
             m_last_inlet = index;
-            Object::receive(values);
+            Box::receive(values);
         }
         --m_stack_count;
     }
