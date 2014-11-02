@@ -22,7 +22,6 @@
 */
 
 #include "Element.h"
-#include "Object.h"
 #include "Box.h"
 #include "Dico.h"
 
@@ -68,34 +67,22 @@ namespace Kiwi
         m_val.m_double = value;
     }
     
-    Element::Element(weak_ptr<Tag> tag) noexcept
+    Element::Element(string const& tag) noexcept
     {
         m_type = Element::TAG;
-        m_val.m_tag = tag.lock();
+        m_val.m_tag = Tag::create(tag);
     }
     
-    Element::Element(shared_ptr<Tag> tag) noexcept
+    Element::Element(sTag tag) noexcept
     {
         m_type = Element::TAG;
         m_val.m_tag = tag;
     }
     
-    Element::Element(weak_ptr<Object> object) noexcept
+    Element::Element(shared_ptr<Box> box) noexcept
     {
-        m_type = Element::OBJECT;
-        m_val.m_object = object.lock();
-    }
-    
-    Element::Element(shared_ptr<Object> object) noexcept
-    {
-        m_type = Element::OBJECT;
-        m_val.m_object = object;
-    }
-    
-    Element::Element(weak_ptr<Dico> dico) noexcept
-    {
-        m_type = Element::DICO;
-        m_val.m_dico = dico.lock();
+        m_type = Element::BOX;
+        m_val.m_box = box;
     }
     
     Element::Element(shared_ptr<Dico> dico) noexcept
@@ -129,6 +116,16 @@ namespace Kiwi
             return 0;
     }
     
+    Element::operator size_t() const noexcept
+    {
+        if(m_type == Element::LONG)
+            return m_val.m_long;
+        else if(m_type == Element::DOUBLE)
+            return (long)m_val.m_double;
+        else
+            return 0;
+    }
+    
     Element::operator float() const noexcept
     {
         if(m_type == Element::DOUBLE)
@@ -149,29 +146,14 @@ namespace Kiwi
             return 0;
     }
     
-    Element::operator weak_ptr<Tag>() const noexcept
+    Element::operator sTag() const noexcept
     {
         return m_val.m_tag;
     }
     
-    Element::operator shared_ptr<Tag>() const noexcept
+    Element::operator shared_ptr<Box>() const noexcept
     {
-        return m_val.m_tag;
-    }
-    
-    Element::operator weak_ptr<Object>() const noexcept
-    {
-        return m_val.m_object;
-    }
-    
-    Element::operator shared_ptr<Object>() const noexcept
-    {
-        return m_val.m_object;
-    }
-    
-    Element::operator weak_ptr<Dico>() const noexcept
-    {
-        return m_val.m_dico;
+        return m_val.m_box;
     }
     
     Element::operator shared_ptr<Dico>() const noexcept
@@ -189,7 +171,7 @@ namespace Kiwi
         else if(m_type == Element::TAG)
             m_val.m_tag = other.m_val.m_tag;
             else
-        m_val.m_object = other.m_val.m_object;
+        m_val.m_box = other.m_val.m_box;
             return *this;
     }
     
@@ -221,38 +203,24 @@ namespace Kiwi
         return *this;
     }
     
-    Element& Element::operator=(weak_ptr<Tag> tag) noexcept
+    Element& Element::operator=(string const& tag) noexcept
     {
         m_type  = Element::TAG;
-        m_val.m_tag = tag.lock();
+        m_val.m_tag = Tag::create(tag);
         return *this;
     }
     
-    Element& Element::operator=(shared_ptr<Tag> tag) noexcept
+    Element& Element::operator=(sTag tag) noexcept
     {
         m_type  = Element::TAG;
         m_val.m_tag = tag;
         return *this;
     }
     
-    Element& Element::operator=(weak_ptr<Object> object) noexcept
+    Element& Element::operator=(shared_ptr<Box> box) noexcept
     {
-        m_type  = Element::OBJECT;
-        m_val.m_object = object.lock();
-        return *this;
-    }
-    
-    Element& Element::operator=(shared_ptr<Object> object) noexcept
-    {
-        m_type  = Element::OBJECT;
-        m_val.m_object = object;
-        return *this;
-    }
-    
-    Element& Element::operator=(weak_ptr<Dico> dico) noexcept
-    {
-        m_type  = Element::DICO;
-        m_val.m_dico = dico.lock();
+        m_type  = Element::BOX;
+        m_val.m_box = box;
         return *this;
     }
     
@@ -279,9 +247,9 @@ namespace Kiwi
             {
                 return m_val.m_tag == other.m_val.m_tag;
             }
-            else if(m_type == Element::OBJECT)
+            else if(m_type == Element::BOX)
             {
-                return m_val.m_object == other.m_val.m_object;
+                return m_val.m_box == other.m_val.m_box;
             }
             else
             {
@@ -311,29 +279,19 @@ namespace Kiwi
         return m_type == Element::LONG && m_val.m_double == value;
     }
     
-    bool Element::operator==(weak_ptr<Tag> tag) const noexcept
+    bool Element::operator==(string const& tag) const noexcept
     {
-        return m_type == Element::TAG && m_val.m_tag == tag.lock();
+        return m_type == Element::TAG && m_val.m_tag == Tag::create(tag);
     }
     
-    bool Element::operator==(shared_ptr<Tag> tag) const noexcept
+    bool Element::operator==(sTag tag) const noexcept
     {
         return m_type == Element::TAG && m_val.m_tag == tag;
     }
-    
-    bool Element::operator==(weak_ptr<Object> object) const noexcept
+
+    bool Element::operator==(shared_ptr<Box> box) const noexcept
     {
-        return m_type == Element::OBJECT && m_val.m_object == object.lock();
-    }
-    
-    bool Element::operator==(shared_ptr<Object> object) const noexcept
-    {
-        return m_type == Element::OBJECT && m_val.m_object == object;
-    }
-    
-    bool Element::operator==(weak_ptr<Dico> dico) const noexcept
-    {
-        return m_type == Element::DICO && m_val.m_dico == dico.lock();
+        return m_type == Element::BOX && m_val.m_box == box;
     }
     
     bool Element::operator==(shared_ptr<Dico> dico) const noexcept
@@ -354,8 +312,8 @@ namespace Kiwi
             case Element::TAG:
                 return toString((sTag)__val);
                 break;
-            case Element::OBJECT:
-                return toString((sObject)__val);
+            case Element::BOX:
+                return toString(shared_ptr<const Box>((sBox)__val));
                 break;
             case Element::DICO:
                 return toString((sDico)__val);
@@ -397,8 +355,8 @@ namespace Kiwi
             case Element::TAG:
                 return "tag";
                 break;
-            case Element::OBJECT:
-                return "object";
+            case Element::BOX:
+                return "box";
                 break;
             case Element::DICO:
                 return "dico";

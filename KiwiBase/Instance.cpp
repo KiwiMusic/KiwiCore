@@ -31,7 +31,8 @@ namespace Kiwi
     //                                      INSTANCE                                    //
     // ================================================================================ //
     
-    Instance::Instance() noexcept : m_untitled_pages(0), m_dsp_running(0)
+    Instance::Instance() noexcept :
+    m_dsp_running(0)
     {
         
     }
@@ -39,107 +40,70 @@ namespace Kiwi
     Instance::~Instance()
     {
         m_pages.clear();
-        m_prototypes.clear();
+        m_listeners.clear();
     }
     
     shared_ptr<Instance> Instance::create()
     {
-        shared_ptr<Instance> that = make_shared<Instance>();
-        Arithmetic::load(that);
-        ArithmeticTilde::load(that);
-        return that;
-    }
-    
-    void Instance::addObjectPrototype(unique_ptr<Object> object)
-    {
-        map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(object->name());
-        if(it != m_prototypes.end())
-        {
-            error("The object prototype " + (string)*object->name() + " already exist !");
-        }
-        else
-        {
-            m_prototypes[object->name()] = move(object);
-        }
+        arithmetic();
+        return make_shared<Instance>();
     }
     
     // ================================================================================ //
     //                                      FACTORY                                     //
     // ================================================================================ //
-    
-    shared_ptr<Object> Instance::createObject(shared_ptr<Dico> dico)
-    {
-        shared_ptr<Tag> name = (shared_ptr<Tag>)dico->get(createTag("name"));
-        if(name)
-        {
-            map<shared_ptr<Tag>, unique_ptr<Object>>::iterator it = m_prototypes.find(name);
-            if(it != m_prototypes.end())
-            {
-                return it->second->create(dico);
-            }
-            else
-            {
-                error("The object \"" + (string)*name + " doesn't exists.");
-            }
-        }
-        else
-        {
-            error("The dico should have tag in a name key to create an object.");
-        }
-    
-        return nullptr;
-    }
 
-    shared_ptr<Dico> Instance::createDico()
+    sPage Instance::createPage(sDico dico)
     {
-        return make_shared<Dico>(shared_from_this());
-    }
-
-    shared_ptr<Page> Instance::createPage(string file, string directory)
-    {
-        if(file.empty())
-		{
-			file = string("Untitled") + toString(++m_untitled_pages);
-		}
-  
-        shared_ptr<Page> newPage = make_shared<Page>(shared_from_this(), file, directory);
-        m_pages.push_back(newPage);
-        return newPage;
-    }
-    
-    void Instance::closePage(shared_ptr<Page> page)
-    {
-        for(int i = 0; i < m_pages.size(); i++)
+        sPage page = Page::create(shared_from_this(), dico);
+        m_pages.insert(page);
+        for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
         {
-            if(m_pages[i] == page)
+            Instance::sListener listener = (*it).lock();
+            if(listener)
             {
-                m_pages.erase(m_pages.begin()+i);
-                break;
+                listener->pageHasBeenCreated(shared_from_this(), page);
             }
         }
+        return page;
     }
     
-    // ================================================================================ //
-    //                                      DSP                                         //
-    // ================================================================================ //
+    void Instance::removePage(sPage page)
+    {
+        for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+        {
+            Instance::sListener listener = (*it).lock();
+            if(listener)
+            {
+                listener->pageHasBeenRemoved(shared_from_this(), page);
+            }
+        }
+        m_pages.erase(page);
+    }
     
     void Instance::startDsp(double samplerate, long vectorsize)
     {
-        m_dsp_running = true;
-        for(size_t i = 0; i < m_pages.size(); i++)
-            m_pages[i]->startDsp(samplerate, vectorsize);
+        m_dsp_running   = true;
+        for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
+        {
+            (*it)->startDsp(samplerate, vectorsize);
+        }
     }
     
-    void Instance::tickDsp() const noexcept
+    inline void Instance::tickDsp() const noexcept
     {
-        for(size_t i = 0; i < m_pages.size(); i++)
-            m_pages[i]->tickDsp();
+        for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
+        {
+            (*it)->tickDsp();
+        }
     }
     
     void Instance::stopDsp()
     {
-        for(size_t i = 0; i < m_pages.size(); i++)
-            m_pages[i]->stopDsp();
+        for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
+        {
+            (*it)->stopDsp();
+        }
         m_dsp_running = false;
     }
     
@@ -148,103 +112,15 @@ namespace Kiwi
         return m_dsp_running;
     }
     
-    // ================================================================================ //
-    //                                      CONSOLE                                     //
-    // ================================================================================ //
-    
-    void Instance::bind(weak_ptr<InstanceListener> listener)
+    void Instance::bind(weak_ptr<Instance::Listener> listener)
     {
         m_listeners.insert(listener);
     }
     
-    void Instance::unbind(weak_ptr<InstanceListener> listener)
+    void Instance::unbind(weak_ptr<Instance::Listener> listener)
     {
         m_listeners.erase(listener);
     }
-    
-    void Instance::post(string const& message) const noexcept
-    {
-#if defined(DEBUG) || defined(NO_GUI)
-        cout << message << "\n";
-#endif
-        set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-        while(it != m_listeners.end())
-        {
-            shared_ptr<InstanceListener> to = (*it).lock();
-            to->post(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
-            ++it;
-        }
-    }
-        
-        void Instance::post(const shared_ptr<const Object> object, string const& message) const noexcept
-        {
-#if defined(DEBUG) || defined(NO_GUI)
-            cerr << (string)*object->name() << " : " << message << "\n";
-#endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->post(shared_from_this(), object, message);
-                ++it;
-            }
-        }
-        
-        void Instance::warning(string const& message) const noexcept
-        {
-#if defined(DEBUG) || defined(NO_GUI)
-            cerr << "warning : " << message << "\n";
-#endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->warning(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
-                ++it;
-            }
-        }
-        
-        void Instance::warning(const shared_ptr<const Object> object, string const& message) const noexcept
-        {
-#if defined(DEBUG) || defined(NO_GUI)
-            cerr << (string)*object->name() << " : " << message << "\n";
-#endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->warning(shared_from_this(), object, message);
-                ++it;
-            }
-        }
-        
-        void Instance::error(string const& message) const noexcept
-        {
-#if defined(DEBUG) || defined(NO_GUI)
-            cerr << "error : " << message << "\n";
-#endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->error(shared_from_this(), shared_ptr<Kiwi::Object>(), message);
-                ++it;
-            }
-        }
-        
-        void Instance::error(const shared_ptr<const Object> object, string const& message) const noexcept
-        {
-#if defined(DEBUG) || defined(NO_GUI)
-            cerr << (string)*object->name() << " : " << message << "\n";
-#endif
-            set<weak_ptr<InstanceListener>>::iterator it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<InstanceListener> to = (*it).lock();
-                to->error(shared_from_this(), object, message);
-                ++it;
-            }
-        }
 }
 
 

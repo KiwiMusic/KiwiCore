@@ -22,19 +22,15 @@
 */
 
 #include "Dico.h"
-#include "Object.h"
-#include "Instance.h"
+#include "Box.h"
 
 namespace Kiwi
-{
-    sTag tagBox = make_shared<Tag>("box");
-    
+{    
     // ================================================================================ //
     //                                      DICO                                        //
     // ================================================================================ //
     
-    Dico::Dico(weak_ptr<Instance> kiwi) noexcept :
-    m_kiwi(kiwi)
+    Dico::Dico() noexcept
     {
         ;
     }
@@ -44,22 +40,9 @@ namespace Kiwi
         clear();
     }
     
-    sTag Dico::createTag(string const& name) const
+    shared_ptr<Dico> Dico::create()
     {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createTag(name);
-        else
-            return nullptr;
-    }
-    
-    sDico Dico::createDico() const
-    {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createDico();
-        else
-            return nullptr;
+        return make_shared<Dico>();
     }
     
     void Dico::clear() noexcept
@@ -75,7 +58,7 @@ namespace Kiwi
     void Dico::keys(ElemVector& elements) const noexcept
     {
         elements.clear();
-        for(map<const sTag, ElemVector>::const_iterator it = m_entries.begin(); it != m_entries.end(); ++it)
+        for(auto it = m_entries.begin(); it != m_entries.end(); ++it)
         {
             elements.push_back(it->first);
         }
@@ -88,7 +71,7 @@ namespace Kiwi
     
     Element::Type Dico::type(sTag key) const noexcept
     {
-        map<const sTag, ElemVector>::const_iterator it = m_entries.find(key);
+        auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
             if(it->second.size() == 1)
@@ -106,7 +89,7 @@ namespace Kiwi
     
     Element Dico::get(sTag key) const noexcept
     {
-        map<const sTag, ElemVector>::const_iterator it = m_entries.find(key);
+        auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
             if(it->second.size())
@@ -119,18 +102,20 @@ namespace Kiwi
     
     void Dico::get(sTag key, ElemVector& elements) const noexcept
     {
-        map<const sTag, ElemVector>::const_iterator it = m_entries.find(key);
+        auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
             elements = it->second;
+        }
+        else
+        {
+            elements.clear();
         }
     }
     
     void Dico::set(sTag key, Element const& element) noexcept
     {
-        ElemVector elements;
-        elements.push_back(element);
-        m_entries[key] = elements;
+        m_entries[key] = {element};
     }
     
     void Dico::set(sTag key, ElemVector const& elements) noexcept
@@ -142,7 +127,7 @@ namespace Kiwi
 
     void Dico::append(sTag key, Element const& element) noexcept
     {
-        map<const sTag, vector<Element> >::iterator it = m_entries.find(key);
+        auto it = m_entries.find(key);
         if(it != m_entries.end())
             it->second.push_back(element);
         else
@@ -151,7 +136,7 @@ namespace Kiwi
     
     void Dico::append(sTag key, ElemVector const& elements) noexcept
     {
-        map<const sTag, ElemVector>::iterator it = m_entries.find(key);
+        auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
             for(int i = 0; i < elements.size(); i++)
@@ -161,6 +146,19 @@ namespace Kiwi
         }
         else
             set(key, elements);
+    }
+    
+    void Dico::read(string const& text)
+    {
+        size_t pos = 0;
+        if(getType(text, pos) == Element::DICO)
+        {
+            fromJson(shared_from_this(), text, pos);
+        }
+        else
+        {
+            fromText(shared_from_this(), text);
+        }
     }
     
     void Dico::read(string const& filename, string const& directoryname)
@@ -186,32 +184,26 @@ namespace Kiwi
         if(file.is_open())
         {
             clear();
+            string text;
             string line;
-            doread(static_pointer_cast<Dico>(shared_from_this()), file, line);
+            while (getline(file, line))
+            {
+                text += line + "\n";
+            }
+            string::size_type pos = 0;
+            fromJson(shared_from_this(), text, pos);
         }
         
         file.close();
     }
-    
-    
-    void Dico::post()
-    {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-        {
-            string text;
-            toJson(shared_from_this(), text);
-            kiwi->post(text);
-        }
-    }
-    
-    void Dico::write(string& text)
+
+    void Dico::write(string& text) const
     {
         text.clear();
         toJson(shared_from_this(), text);
     }
     
-    void Dico::write(string const& filename, string const& directoryname)
+    void Dico::write(string const& filename, string const& directoryname) const
     {
         ofstream file;
         if(directoryname.size() && filename.size())
@@ -243,115 +235,6 @@ namespace Kiwi
         file.close();
     }
     
-    void Dico::doread(sDico dico, ifstream& file, string& line)
-    {
-        while(getline(file, line))
-        {
-            if(line.find('}') != string::npos)
-                return;
-            
-            size_t pos1;
-            sTag key;
-            
-            // Find the key of the dico
-            pos1 = line.find('"');
-            if(pos1 != string::npos)
-            {
-                pos1++;
-                size_t next = line.find('"', pos1);
-                if(next != string::npos)
-                {
-                    string text;
-                    text.assign(line, pos1, next-pos1);
-                    key = createTag(text);
-                    pos1 = next;
-                }
-            }
-            
-            if(pos1 != string::npos)
-            {
-                pos1 = line.find(':', pos1);
-                if(pos1 != string::npos && pos1 < line.size()-1)
-                {
-                    pos1 = line.find_first_not_of(' ', pos1+1);
-                    if(pos1 != string::npos)
-                    {
-                        if(line[pos1] == '{')
-                        {
-                            sDico subdico = createDico();
-                            doread(subdico, file, line);
-                            dico->set(key, subdico);
-                        }
-                        else if(line[pos1] == '[')
-                        {
-                            vector<Element> elements;
-                            while(pos1 < line.size()-1)
-                            {
-                                pos1 = line.find_first_not_of(' ', ++pos1);
-                                if(line[pos1] == '{')
-                                {
-                                    sDico subdico = createDico();
-                                    doread(subdico, file, line);
-                                    elements.push_back(subdico);
-                                }
-                                else if(line[pos1] == '"')
-                                {
-                                    size_t next = line.find('"', pos1+1);
-                                    if(next != string::npos)
-                                    {
-                                        string text;
-                                        text.assign(line, pos1, next-pos1);
-                                        elements.push_back(createTag(text));
-                                    }
-                                    pos1 = next;
-                                }
-                                else if(isdigit(line[pos1]))
-                                {
-                                    if(line.find('.', pos1) != string::npos)
-                                    {
-                                        elements.push_back(atof(line.c_str()+pos1));
-                                    }
-                                    else
-                                    {
-                                        elements.push_back(atol(line.c_str()+pos1));
-                                    }
-                                    if(pos1 < line.size()-1)
-                                        pos1 = line.find_first_not_of(' ', pos1+1);
-                                    
-                                }
-                            }
-                            if(elements.size())
-                            {
-                                dico->set(key, elements);
-                            }
-                        }
-                        else if(line[pos1] == '"')
-                        {
-                            size_t next = line.find('"', pos1+1);
-                            if(next != string::npos)
-                            {
-                                string text;
-                                text.assign(line, pos1+1, next-pos1-1);
-                                dico->set(key, createTag(text));
-                            }
-                        }
-                        else if(isdigit(line[pos1]))
-                        {
-                            if(line.find('.', pos1) != string::npos)
-                            {
-                                dico->set(key, atof(line.c_str()+pos1));
-                            }
-                            else
-                            {
-                                dico->set(key, atol(line.c_str()+pos1));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
     string Dico::jsonEscape(string const& text)
     {
         ostringstream ss;
@@ -373,41 +256,6 @@ namespace Kiwi
         return "\"" + ss.str() + "\"";
     }
     
-    string Dico::jsonUnescape(string const& text)
-    {
-        bool state = false;
-        ostringstream ss;
-        for(auto iter = text.cbegin()++; iter != text.cend(); iter++)
-        {
-            if(state)
-            {
-                switch(*iter)
-                {
-                    case '"': ss << '\"'; break;
-                    case '/': ss << '/'; break;
-                    case 'b': ss << '\b'; break;
-                    case 'f': ss << '\f'; break;
-                    case 'n': ss << '\n'; break;
-                    case 'r': ss << '\r'; break;
-                    case 't': ss << '\t'; break;
-                    case '\\': ss << '\\'; break;
-                    default: ss << *iter; break;
-                }
-                state = false;
-            }
-            else
-            {
-                switch(*iter)
-                {
-                    case '"': return ss.str();
-                    case '\\': state = true; break;
-                    default: ss << *iter; break;
-                }
-            }
-        }
-        return ss.str();
-    }
-    
     void Dico::toJson(Element const& element, string& text, string line)
     {
         switch(element.type())
@@ -427,24 +275,26 @@ namespace Kiwi
                     text.append("null");
                 break;
             }
-            case Element::OBJECT:
+            case Element::BOX:
             {
-                sObject obj = element;
+                sBox obj = element;
                 if(obj)
-                {
-                    sDico ndico = createDico();
-                    obj->write(ndico);
-                    sDico box = createDico();
-                    box->set(tagBox, ndico);
-                    toJson(box, text, line + "    ");
-                }
+                    text.append(toString(obj->getName()));
+                else
+                    text.append("null");
                 break;
             }
             case Element::DICO:
-                toJson((sDico)element, text, line + "    ");
+            {
+                sDico dico = element;
+                if(dico)
+                    toJson((shared_ptr<const Dico>)dico, text, line + "    ");
+                else
+                    text.append("null");
                 break;
+            }
             default:
-                return ;
+                text.append("null");
                 break;
         }
     }
@@ -468,7 +318,7 @@ namespace Kiwi
         }
     }
     
-    void Dico::toJson(shared_ptr<Dico> dico, string& text, string line)
+    void Dico::toJson(shared_ptr<const Dico> dico, string& text, string line)
     {
         ElemVector _keys;
         dico->keys(_keys);
@@ -504,38 +354,240 @@ namespace Kiwi
         }
     }
     
-    void Dico::fromJson(Element& element, string const& text)
+    string Dico::jsonUnescape(string const& text, string::size_type& pos)
     {
-        size_t start = text.find_first_not_of(' ');
-        if(isdigit(text[start]))
+        bool state = false;
+        ostringstream ss;
+        pos++;
+        for(auto iter = text.cbegin()+pos; iter != text.cend(); iter++)
         {
-            size_t end = text.find_first_not_of("-0123456789", start);
-            switch(text[end])
+            ++pos;
+            if(state)
             {
-                case '.':
-                    element = stod(text.c_str()+start);
-                    break;
-                default:
-                    element = stol(text.c_str()+start);
-                    break;
+                switch(*iter)
+                {
+                    case '"': ss << '\"'; break;
+                    case '/': ss << '/'; break;
+                    case 'b': ss << '\b'; break;
+                    case 'f': ss << '\f'; break;
+                    case 'n': ss << '\n'; break;
+                    case 'r': ss << '\r'; break;
+                    case 't': ss << '\t'; break;
+                    case '\\': ss << '\\'; break;
+                    default: ss << *iter; break;
+                }
+                state = false;
+            }
+            else
+            {
+                switch(*iter)
+                {
+                    case '"': return ss.str();
+                    case '\\': state = true; break;
+                    default: ss << *iter; break;
+                }
             }
         }
-        else if(text[start] == '"')
+        return ss.str();
+    }
+    
+    Element::Type Dico::getType(string const& text, string::size_type pos)
+    {
+        if(isdigit(text[pos]))
         {
-            element = createTag(jsonUnescape(text));
+            pos = text.find_first_not_of("-0123456789", pos);
+            if(text[pos] == '.')
+                return Element::DOUBLE;
+            else
+                return Element::LONG;
+        }
+        else if(text[pos] == '"')
+        {
+            return Element::TAG;
+        }
+        else if(text[pos] == '{')
+        {
+            return Element::DICO;
+        }
+        else if(text[pos] == '[')
+        {
+            return Element::VECTOR;
+        }
+        else
+        {
+            return Element::NOTHING;
         }
     }
     
-    void fromJson(ElemVector& element, string const& text)
+    bool getNextPosition(string const& text, string::size_type& pos, Element::Type type)
     {
-        ;
+        char start = '{', end = '}';
+        if(type == Element::VECTOR)
+        {
+            start = '['; end = ']';
+        }
+        
+        if(pos == string::npos)
+        {
+            return false;
+        }
+        else
+        {
+            pos = text.find_first_not_of(' ', pos+1);
+            if(pos == string::npos || text[pos] == end)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
     
-    void fromJson(shared_ptr<Dico> dico, string const& text)
+    void Dico::fromJson(ElemVector& elements, string const& text, string::size_type& pos)
     {
-        string ntext;
-        size_t pos = 0;
-        
+        pos = text.find_first_not_of(' ', pos);
+        switch(getType(text, pos))
+        {
+            case Element::LONG:
+            {
+                elements.push_back(stol(text.c_str()+pos));
+                pos = text.find_first_not_of("-0123456789", pos);
+            }
+                break;
+            case Element::DOUBLE:
+            {
+                elements.push_back(stod(text.c_str()+pos));
+                pos = text.find_first_not_of("-0123456789.", pos);
+            }
+                break;
+            case Element::TAG:
+            {
+                elements.push_back(Tag::create(jsonUnescape(text, pos)));
+            }
+                break;
+            case Element::DICO:
+            {
+                sDico dico = createDico();
+                if(dico)
+                {
+                    fromJson(dico, text, pos);
+                    elements.push_back(dico);
+                }
+            }
+                break;
+            case Element::VECTOR:
+            {
+                while(getNextPosition(text, pos, Element::VECTOR))
+                {
+                    switch(getType(text, pos))
+                    {
+                        case Element::LONG:
+                        {
+                            elements.push_back(stol(text.c_str()+pos));
+                            pos = text.find_first_not_of("-0123456789", pos);
+                        }
+                            break;
+                        case Element::DOUBLE:
+                        {
+                            elements.push_back(stod(text.c_str()+pos));
+                            pos = text.find_first_not_of("-0123456789.", pos);
+                        }
+                            break;
+                        case Element::TAG:
+                        {
+                            elements.push_back(Tag::create(jsonUnescape(text, pos)));
+                        }
+                            break;
+                        case Element::DICO:
+                        {
+                            sDico dico = createDico();
+                            if(dico)
+                            {
+                                fromJson(dico, text, pos);
+                                elements.push_back(dico);
+                            }
+                        }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+                break;
+            default:
+                pos = text.find_first_not_of(' ', ++pos);
+                break;
+        }
+    }
+
+    void Dico::fromJson(shared_ptr<Dico> dico, string const& text, string::size_type& pos)
+    {
+        pos = text.find('{', pos);
+        while(getNextPosition(text, pos, Element::DICO))
+        {
+            if(getType(text, pos) == Element::TAG)
+            {
+                sTag key = Tag::create(jsonUnescape(text, pos));
+                if(pos != string::npos)
+                {
+                    pos = text.find(':', pos);
+                    if(pos != string::npos)
+                    {
+                        ElemVector values;
+                        fromJson(values, text, ++pos);
+                        dico->set(key, values);
+                    }
+                }
+            }
+        }
+    }
+    
+    void Dico::fromText(shared_ptr<Dico> dico, string const& text)
+    {
+        bool mode = false;
+        string word;
+        string key = "name";
+        ElemVector elements;
+        istringstream iss(text);
+        while(iss >> word)
+        {
+            if(mode)
+            {
+                if(word[0] == '@')
+                {
+                    dico->set(Tag::create(key), elements);
+                    elements.clear();
+                    key = word.c_str()+1;
+                }
+                else
+                {                    
+                    if(isdigit(word[0]))
+                    {
+                        if(word.find('.') != string::npos)
+                        {
+                            elements.push_back(atof(word.c_str()));
+                        }
+                        else
+                        {
+                            elements.push_back(atol(word.c_str()));
+                        }
+                    }
+                    else
+                    {
+                        elements.push_back(Tag::create(word));
+                    }
+                }
+            }
+            else
+            {
+                dico->set(Tag::create(key), Tag::create(word));
+                key = "arguments";
+                mode = true;
+            }
+        }
+        dico->set(Tag::create(key), elements);
     }
 }
 

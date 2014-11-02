@@ -23,7 +23,6 @@
 
 #include "DspContext.h"
 #include "../KiwiBase/Box.h"
-#include "../KiwiBase/Connection.h"
 
 namespace Kiwi
 {
@@ -68,10 +67,12 @@ namespace Kiwi
     
     void DspContext::addBox(shared_ptr<Box> box)
     {
-        if(box->type() == Object::DSPBOX)
+        /*
+        if(box->type() == Box::DSPBOX)
         {
             m_nodes.push_back(make_shared<DspNode>(box));
         }
+         */
     }
     
     void DspContext::removeBox(shared_ptr<Box> box)

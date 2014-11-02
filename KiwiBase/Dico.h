@@ -24,13 +24,10 @@
 #ifndef __DEF_KIWI_DICO__
 #define __DEF_KIWI_DICO__
 
-#include "Defs.h"
-#include "Tag.h"
 #include "Element.h"
 
 namespace Kiwi
 {
-    class Instance;
     // ================================================================================ //
     //                                      DICO                                        //
     // ================================================================================ //
@@ -41,86 +38,25 @@ namespace Kiwi
      */
     class Dico : public enable_shared_from_this<Dico>
     {        
-    public:
-        const weak_ptr<Instance>    m_kiwi;
-        map<const sTag, ElemVector> m_entries;
-        
-        void doread(shared_ptr<Dico> dico, ifstream& file, string& line);
-        
-        //! Tag creator.
-        /** This function uses the kiwi instance to create a tag.
-         @param name The name of the tag to retrieve.
-         @return    The tag that match with the name.
-         */
-        sTag createTag(string const& name) const;
-        
-        //! Dico creator.
-        /** This function uses the kiwi instance to create a dico.
-         @return    The dico.
-         */
-        shared_ptr<Dico> createDico() const;
-        
-        //! Escape a string for json.
-        /** This function escapes a string for json.
-         @param     text The string.
-         @return    The escaped string.
-         */
-        static string jsonEscape(string const& text);
-        
-        //! Unescape a json string.
-        /** This function unescapes a json string.
-         @param     text The string.
-         @return    The unescaped string.
-         */
-        static string jsonUnescape(string const& input);
-        
-        //! Write an element in a string with the json format .
-        /** This function writes an element in a string with the json format .
-         @param     element The element.
-         @param     text The string.
-         @param     line The indetation.
-         @return    The unescaped string.
-         */
-        void toJson(Element const& element, string& text, string indetation = "");
-        
-        //! Get an element from a string in the json format .
-        /** This function gets an element from a string in the json format .
-         @param     element The element.
-         @param     text The string.
-         @param     line The indetation.
-         @return    The unescaped string.
-         */
-        void fromJson(Element& element, string const& text);
-        
-        //! Write elements in a string with the json format .
-        /** This function writes elements in a string with the json format .
-         @param     elements The elements.
-         @param     text The string.
-         @param     line The indetation.
-         @return    The unescaped string.
-         */
-        void toJson(ElemVector const& elements, string& text, string indetation = "");
-        
-        //! Write a dico in a string with the json format .
-        /** This function writes dico in a string with the json format .
-         @param     dico The dico.
-         @param     text The string.
-         @param     line The indetation.
-         @return    The unescaped string.
-         */
-        void toJson(shared_ptr<Dico> dico, string& text, string indetation = "");
+    private:
+        map<sTag, ElemVector> m_entries;
         
     public:
         
         //! Constructor.
         /** Create a new dictionary.
          */
-        Dico(weak_ptr<Instance> kiwi) noexcept;
+        Dico() noexcept;
         
         //! Destructor.
         /** Free the dictionary.
          */
         ~Dico();
+        
+        //! The dico creation method.
+        /** The function allocates a dico.
+         */
+        static shared_ptr<Dico> create();
         
         //! Clear the dico.
         /** The function clears the dico.
@@ -190,7 +126,7 @@ namespace Kiwi
          */
         inline bool isObject(sTag key) const noexcept
         {
-            return type(key) == Element::OBJECT;
+            return type(key) == Element::BOX;
         }
         
         //! Check if an entry is of type object.
@@ -273,26 +209,103 @@ namespace Kiwi
          @param file The name of the file.
          @param directory The name of the directory.
          */
-        void write(string const& filename, string const& directoryname);
+        void write(string const& filename, string const& directoryname) const;
         
         //! Write the dico in a string.
         /** The function writes the dico in a string.
          @param text The string.
          */
-        void write(string& text);
-        
-        //! Post the content of the dico.
-        /** The posts the content of the dico.
-         */
-        void post();
+        void write(string& text) const;
     
+    private:
+        
+        //! Escape a string for json.
+        /** This function escapes a string for json.
+         @param     text The string.
+         @return    The escaped string.
+         */
+        static string jsonEscape(string const& text);
+        
+        //! Write an element in a string with the json format .
+        /** This function writes an element in a string with the json format .
+         @param     element The element.
+         @param     text The string.
+         @param     line The indetation.
+         @return    The unescaped string.
+         */
+        static void toJson(Element const& element, string& text, string indetation = "");
+        
+        //! Write elements in a string with the json format .
+        /** This function writes elements in a string with the json format .
+         @param     elements The elements.
+         @param     text The string.
+         @param     line The indetation.
+         @return    The unescaped string.
+         */
+        static void toJson(ElemVector const& elements, string& text, string indetation = "");
+        
+        //! Write a dico in a string with the json format .
+        /** This function writes dico in a string with the json format .
+         @param     dico The dico.
+         @param     text The string.
+         @param     line The indetation.
+         @return    The unescaped string.
+         */
+        static void toJson(shared_ptr<const Dico> dico, string& text, string indetation = "");
+        
+        //! Unescape a json string.
+        /** This function unescapes a json string.
+         @param     text The string.
+         @return    The unescaped string.
+         */
+        static string jsonUnescape(string const& text, size_t& pos);
+        
+        //! Get the element type of a string.
+        /** This function gets the element type of a string.
+         @param     text The string.
+         @param     pos The position in the string.
+         @return    The type of the string.
+         */
+        static Element::Type getType(string const& text, string::size_type pos);
+        
+        //! Get a vector of elements from a string in the json format .
+        /** This function gets a vector of elements from a string in the json format .
+         @param     elements The vector of elements.
+         @param     text The string.
+         @param     pos The position in the string.
+         */
+        static void fromJson(ElemVector& elements, string const& text, string::size_type& pos);
+        
+        //! Get a dico from a string in the json format .
+        /** This function gets dico from a string in the json format .
+         @param     dico The dico.
+         @param     text The string.
+         @param     pos The position in the string.
+         */
+        static void fromJson(shared_ptr<Dico> dico, string const& text, string::size_type& pos);
+        
+        //! Get a dico from a string in the page format .
+        /** This function gets dico from a string in the page format .
+         @param     dico The dico.
+         @param     text The string.
+         */
+        static void fromText(shared_ptr<Dico> dico, string const& text);
     };
     
     typedef shared_ptr<Dico>        sDico;
     
-    inline string toString(const shared_ptr<Dico> __val)
+    typedef weak_ptr<Dico>          wDico;
+    
+    inline string toString(const shared_ptr<Dico> dico)
     {
-        return to_string((size_t)__val.get());
+        string text;
+        dico->write(text);
+        return text;
+    }
+    
+    static inline sDico createDico() 
+    {
+        return make_shared<Dico>();
     }
 }
 

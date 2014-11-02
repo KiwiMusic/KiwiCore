@@ -22,55 +22,159 @@
 */
 
 #include "Box.h"
-#include "Connection.h"
 #include "Page.h"
-#include "Dico.h"
+#include "Instance.h"
 
 namespace Kiwi
 {
-    sTag tagNinlets     = make_shared<Tag>("ninlets");
-    sTag tagNoutlets    = make_shared<Tag>("noutlets");
-    sTag tagId          = make_shared<Tag>("id");
+    map<sTag, unique_ptr<Box>>  Box::m_prototypes;
     
     // ================================================================================ //
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(shared_ptr<Instance> kiwi, string const& name) : Object(kiwi, name), AttributeFactory(),
-    m_last_inlet(0)
+    Box::Box(weak_ptr<Page> page, string const& name) :
+    AttributeFactory(),
+    m_page(page),
+    m_name(Tag::create(name)),
+    m_stack_count(0)
     {
-        addAttribute(make_shared<AttributeTag>(createTag("fontname"), "Font Name", "Tag", "Appearance", Attribute::Visible | Attribute::Saved | Attribute::Notify));
+        createAttribute<AttributeTag>(Tag::create("fontname"), "Font Name", "Tag", "Appearance", Attribute::Visible | Attribute::Saved | Attribute::Notify);
+        createAttribute<AttributeLong>(Tag::create("fontsize"), "Font Size", "Long", "Appearance", Attribute::Visible | Attribute::Saved | Attribute::Notify);
     }
     
     Box::~Box()
     {
         m_outlets.clear();
         m_inlets.clear();
+        m_listeners.clear();
     }
     
-    Object::Type Box::type() const noexcept
+    shared_ptr<Box> Box::create(sPage page, sDico dico)
     {
-        return Object::BOX;
+        sTag name = dico->get(Tag::name);
+        if(name)
+        {
+            auto it = m_prototypes.find(name);
+            if(it != m_prototypes.end())
+            {
+                sTag text = dico->get(Tag::text);
+                if(text)
+                {
+                    sDico other = Dico::create();
+                    other->read(toString(text));
+                    ElemVector keys;
+                    other->keys(keys);
+                    for(size_t i = 0; i < keys.size(); i++)
+                    {
+                        ElemVector values;
+                        other->get(keys[i], values);
+                        dico->set(keys[i], values);
+                    }
+                }
+                
+                sBox box = it->second->allocate(page, dico);
+                if(box)
+                {
+                    box->m_text = dico->get(Tag::text);
+                    box->load(dico);
+                    box->AttributeFactory::read(dico);
+                    return box;
+                }
+            }
+            else
+            {
+                Console::error("The box " + toString(name) + " doesn't exist !");
+                return nullptr;
+            }
+        }
+        Console::error("The dico isn't valid for box creation !");
+        return nullptr;
     }
     
-    void Box::write(shared_ptr<Dico> dico) const noexcept
+    sPage Box::getPage() const noexcept
     {
-        Object::write(dico);
+        return m_page.lock();
+    }
+    
+    sInstance Box::getInstance() const noexcept
+    {
+        sPage page = m_page.lock();
+        if(page)
+        {
+            return page->getInstance();
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    
+    sTag Box::getName() const noexcept
+    {
+        return m_name;
+    }
+    
+    sTag Box::getText() const noexcept
+    {
+        return m_text;
+    }
+    
+    void Box::save(shared_ptr<Dico> dico) const
+    {
+        ;
+    }
+    
+    void Box::load(shared_ptr<const Dico> dico)
+    {
+        ;
+    }
+    
+    bool Box::receive(size_t index, ElemVector const& elements)
+    {
+        return false;
+    }
+
+    void Box::write(sDico dico) const
+    {
+        save(dico);
         AttributeFactory::write(dico);
-        dico->set(tagNinlets, (long)m_inlets.size());
-        dico->set(tagNoutlets, (long)m_outlets.size());
-        dico->set(tagId, (long)m_id);
+        dico->set(Tag::name, m_name);
+        dico->set(Tag::ninlets, m_inlets.size());
+        dico->set(Tag::noutlets, m_outlets.size());
+        dico->set(Tag::text, m_text);
     }
     
-    void Box::read(shared_ptr<const Dico> dico) noexcept
+    void Box::send(size_t index, ElemVector const& elements) const noexcept
     {
-        Object::read(dico);
-        AttributeFactory::read(dico);
-    }
-    
-    void Box::receive(ElemVector const& elements)
-    {
-        AttributeFactory::receive(elements);
+        if(index < m_outlets.size())
+        {
+            for(size_t i = 0; i < m_outlets[index]->m_conns.size(); i++)
+            {
+                sBox receiver   = m_outlets[index]->m_conns[i].m_box;
+                size_t inlet    = m_outlets[index]->m_conns[i].m_index;
+                if(++receiver->m_stack_count < 256)
+                {
+                    if(!receiver->receive(inlet, elements))
+                    {
+                        receiver->AttributeFactory::receive(elements);
+                    }
+                }
+                else if(receiver->m_stack_count  == 256)
+                {
+                    Console::error(receiver, string("Stack overflow"));
+                    if(!receiver->receive(inlet, elements))
+                    {
+                        receiver->AttributeFactory::receive(elements);
+                    }
+                }
+                else
+                {
+                    Console::error(receiver, string("Stack overflow"));
+                }
+                receiver->m_stack_count--;
+            }
+        }
     }
     
     // ================================================================================ //
@@ -79,43 +183,38 @@ namespace Kiwi
     
     void Box::addInlet(Inlet::Type type, string const& description)
     {
-        shared_ptr<Inlet> inlet = make_shared<Inlet>(type);
-        inlet->setIndex(m_inlets.size());
-        m_inlets.push_back(inlet);
+        m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
     }
     
-    shared_ptr<Inlet> Box::getInlet(size_t index) const noexcept
+    void Box::insertInlet(size_t index, Inlet::Type type, string const& description)
     {
-        if(index < m_inlets.size())
+        if(index >= m_inlets.size())
         {
-            return m_inlets[index];
+            m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
         }
         else
         {
-            return nullptr;
+            m_inlets.insert(m_inlets.begin()+index, unique_ptr<Inlet>(new Inlet(type, description)));
         }
-    }
-    
-    size_t Box::getInletIndex()
-    {
-        return m_last_inlet;
     }
     
     void Box::removeInlet(size_t index)
     {
         if(index < m_inlets.size())
         {
-            shared_ptr<Page> page = m_page.lock();
-            if(page)
-                page->disconnect(nullptr, 0, static_pointer_cast<Box>(shared_from_this()), (int)index);
-            
-            for(size_t i = index+1; i < m_inlets.size(); i++)
-            {
-                shared_ptr<Inlet> inlet = m_inlets[i];
-                if(inlet)
-                    inlet->setIndex(i-1);
-            }
             m_inlets.erase(m_inlets.begin()+index);
+        }
+    }
+    
+    string Box::getInletDescription(size_t index) const noexcept
+    {
+        if(index < m_inlets.size())
+        {
+            return m_inlets[index]->m_description;
+        }
+        else
+        {
+            return "";
         }
     }
     
@@ -123,24 +222,6 @@ namespace Kiwi
     {
         return m_inlets.size();
     }
-
-    void Box::receive(size_t index, ElemVector const& values)
-    {
-        ++m_stack_count;
-        if(m_stack_count < 256)
-        {
-            m_last_inlet = index;
-            Box::receive(values);
-        }
-        else if(m_stack_count == 256)
-        {
-            error(shared_from_this(), string("Stack overflow"));
-            m_last_inlet = index;
-            Box::receive(values);
-        }
-        --m_stack_count;
-    }
-
     
     // ================================================================================ //
     //                                      OUTLETS                                     //
@@ -148,20 +229,18 @@ namespace Kiwi
     
     void Box::addOutlet(Outlet::Type type, string const& description)
     {
-        sOutlet outlet = make_shared<Outlet>(type);
-        outlet->setIndex(m_outlets.size());
-        m_outlets.push_back(outlet);
+        m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
     }
     
-    sOutlet Box::getOutlet(size_t index) const noexcept
+    void Box::insertOutlet(size_t index, Outlet::Type type, string const& description)
     {
-        if(index < m_outlets.size())
+        if(index >= m_outlets.size())
         {
-            return m_outlets[index];
+            m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
         }
         else
         {
-            return nullptr;
+            m_outlets.insert(m_outlets.begin()+index, unique_ptr<Outlet>(new Outlet(type, description)));
         }
     }
     
@@ -169,31 +248,96 @@ namespace Kiwi
     {
         if(index < m_outlets.size())
         {
-            shared_ptr<Page> page = m_page.lock();
-            if(page)
-                page->disconnect(static_pointer_cast<Box>(shared_from_this()), (int)index, nullptr, 0);
-            
-            for(size_t i = index+1; i < m_outlets.size(); i++)
-                m_outlets[i]->setIndex(i-1);
             m_outlets.erase(m_outlets.begin()+index);
         }
     }
 
-    void Box::send(size_t index, ElemVector const& value) const noexcept
+    string Box::getOutletDescription(size_t index) const noexcept
     {
         if(index < m_outlets.size())
         {
-            sOutlet outlet = m_outlets[index];
-            for(map<sInlet, sBox>::iterator it = outlet->m_inlets.begin(); it != outlet->m_inlets.end(); ++it)
-            {
-                it->second->receive(it->first->index(), value);
-            }
+            return m_outlets[index]->m_description;
+        }
+        else
+        {
+            return "";
         }
     }
     
     size_t Box::getNumberOfOutlets() const noexcept
     {
         return m_outlets.size();
+    }
+    
+    bool Box::compatible(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept
+    {
+        if(from
+           && to
+           && from != to
+           && outlet < from->m_outlets.size()
+           && inlet < to->m_inlets.size()
+           && from->m_page.lock() == to->m_page.lock())
+        {
+            for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
+            {
+                if(from->m_outlets[outlet]->m_conns[i].m_box == to
+                   && from->m_outlets[outlet]->m_conns[i].m_index == inlet)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    bool Box::connect(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept
+    {
+        if(compatible(from, outlet, to, inlet))
+        {
+            from->m_outlets[outlet]->m_conns.push_back({to, inlet});
+            return true;
+        }
+        return false;
+    }
+    
+    bool Box::disconnect(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept
+    {
+        if(from && outlet < from->getNumberOfOutlets())
+        {
+            for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
+            {
+                if(from->m_outlets[outlet]->m_conns[i].m_box == to && from->m_outlets[outlet]->m_conns[i].m_index == inlet)
+                {
+                    from->m_outlets[outlet]->m_conns.erase(from->m_outlets[outlet]->m_conns.begin()+i);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    void Box::bind(weak_ptr<Box::Listener> listener)
+    {
+        m_listeners.insert(listener);
+    }
+    
+    void Box::unbind(weak_ptr<Box::Listener> listener)
+    {
+        m_listeners.erase(listener);
+    }
+    
+    void Box::addPrototype(unique_ptr<Box> box)
+    {
+        auto it = m_prototypes.find(box->getName());
+        if(it != m_prototypes.end())
+        {
+            Console::error("The box " + toString(box->getName()) + " already exist !");
+        }
+        else
+        {
+            m_prototypes[box->getName()] = move(box);
+        }
     }
 }
 

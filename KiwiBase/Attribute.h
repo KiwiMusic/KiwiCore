@@ -32,99 +32,7 @@
 namespace Kiwi
 {
     class Instance;
-    class Attribute;
-    
-    //! The shared pointer of a attribute.
-    /**
-     The sAttribute is shared pointer of a attribute.
-     */
-    typedef shared_ptr<Attribute>         sAttribute;
-    
-    // ================================================================================ //
-    //                                  ATTRIBUTE FACTORY                               //
-    // ================================================================================ //
-    
-    //! The attribute factory creates attributes.
-    /**
-     The attribute factory manages attributes.
-     @see Tag
-     */
-    class AttributeFactory
-    {
-    private:
-        map<sTag, sAttribute>       m_attributes;
-        
-    public:
-        
-        //! Constructor.
-        /** Set up the default pointers and tags.
-         @param kiwi    A pointer to the instance.
-         @param name    A name for the object.
-         */
-        AttributeFactory() noexcept;
-        
-        //! Descrutor.
-        /** Free the attributes.
-         */
-        virtual ~AttributeFactory();
-        
-        //! Write the object in a dico.
-        /** The function writes the name of the object in a dico.
-         @param dico The dico.
-         */
-        void write(shared_ptr<Dico> dico) const noexcept;
-        
-        //! Retrieve an attribute.
-        /** The function retrieves an attribute.
-         @param name The name of the attribute.
-         @return The attribute.
-         */
-        sAttribute getAttribute(sTag name) const noexcept;
-        
-        //! The receive method that set the values of the attributes.
-        /** The function looks for the names of that match with the attributes and call the set methods if necessary. 
-         @param elements    A list of elements to pass.
-         */
-        void receive(ElemVector const& elements);
-        
-    protected:
-        
-        //! Read a dico.
-        /** The function reads a dico but doesn't do anything.
-         @param dico The dico.
-         */
-        void read(shared_ptr<const Dico> dico) noexcept;
-        
-        //! Receive a notification from an attribute.
-        /** The function receives the notifications from the attribute.
-         @param attr The attribute that notify.
-         */
-        virtual void notify(sAttribute attr);
-        
-        //! Add a new attribute.
-        /** The function adds a new attribute to the object.
-         @param name    A name for the attribute.
-         */
-        void addAttribute(sAttribute attr);
-        
-        //! Set the label, the style and the category of an attribute.
-        /** The function set the label, the style and the category of an attribute.
-         @param name The name of the attribute.
-         @param label The label of the attribute.
-         @param style The style of the attribute.
-         @param category The category of the attribute.
-         */
-        void setAttributeAppearance(sTag name, string const& label, string const& style, string const& category);
-        
-        //! Set the attribute opaque, visible and save states of an attribute.
-        /** The function sets the attribute opaque, visible and save states of an attribute.
-         @param name The name of the attribute.
-         @param opaque Opaque or not.
-         @param visible Visible or not.
-         @param save Saved or not.
-         */
-        void setAttributeBehavior(sTag name, long behavior);
-    };
+    class AttributeFactory;
     
     // ================================================================================ //
     //                                      ATTRIBUTE                                   //
@@ -154,18 +62,6 @@ namespace Kiwi
         string          m_style;    ///< The style of the attribute
         string          m_category; ///< The category of the attribute
         long            m_behavior; ///< The behavior of the attribute
-        
-        //! Read the attribute in a dico.
-        /** The function reads the attribute in a dico.
-         @param dico The dico.
-         */
-        virtual void read(shared_ptr<const Dico> dico);
-        
-        //! Set the values with a vector of elements.
-        /** The function sets the values with a vector of elements and resize the values if necessary.
-         @param elements The vector of elements.
-         */
-        virtual void set(ElemVector const& elements) = 0;
         
     public:
         
@@ -230,44 +126,163 @@ namespace Kiwi
          @param dico The dico.
          */
         virtual void write(shared_ptr<Dico> dico) const noexcept;
+        
+        //! Set the values with a vector of elements.
+        /** The function sets the values with a vector of elements and resize the values if necessary.
+         @param elements The vector of elements.
+         */
+        virtual void set(ElemVector const& elements) = 0;
+        
+        //! Read the attribute in a dico.
+        /** The function reads the attribute in a dico.
+         @param dico The dico.
+         */
+        virtual void read(shared_ptr<const Dico> dico);
+    };
+    
+    //! The shared pointer of a attribute.
+    /**
+     The sAttribute is shared pointer of a attribute.
+     */
+    typedef shared_ptr<Attribute>         sAttribute;
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTE FACTORY                               //
+    // ================================================================================ //
+    
+    //! The attribute factory creates attributes.
+    /**
+     The attribute factory manages attributes.
+     @see Tag
+     */
+    class AttributeFactory
+    {
+    private:
+        map<sTag, sAttribute>       m_attributes;
+        
+    public:
+        
+        //! Constructor.
+        /** Set up the default pointers and tags.
+         @param kiwi    A pointer to the instance.
+         @param name    A name for the object.
+         */
+        AttributeFactory() noexcept;
+        
+        //! Descrutor.
+        /** Free the attributes.
+         */
+        virtual ~AttributeFactory();
+        
+        //! Write the object in a dico.
+        /** The function writes the name of the object in a dico.
+         @param dico The dico.
+         */
+        void write(shared_ptr<Dico> dico) const noexcept;
+        
+        //! Retrieve an attribute.
+        /** The function retrieves an attribute.
+         @param name The name of the attribute.
+         @return The attribute.
+         */
+        sAttribute getAttribute(sTag name) const noexcept;
+        
+        //! The receive method that set the values of the attributes.
+        /** The function looks for the names of that match with the attributes and call the set methods if necessary.
+         @param elements    A list of elements to pass.
+         */
+        void receive(ElemVector const& elements);
+        
+    protected:
+        
+        //! Read a dico.
+        /** The function reads a dico but doesn't do anything.
+         @param dico The dico.
+         */
+        void read(shared_ptr<const Dico> dico) noexcept;
+        
+        //! Receive a notification from an attribute.
+        /** The function receives the notifications from the attribute.
+         @param attr The attribute that notify.
+         */
+        virtual void notify(sAttribute attr);
+        
+        //! Attribute maker.
+        /** This function add an attribute to the attribute factory.
+         */
+        template<class ObjectClass, class ...Args> void createAttribute(Args&& ...arguments)
+        {
+            sAttribute attr = make_shared<ObjectClass>(forward<Args>(arguments)...);
+            m_attributes[attr->name()] = attr;
+        }
+        
+        //! Set the label, the style and the category of an attribute.
+        /** The function set the label, the style and the category of an attribute.
+         @param name The name of the attribute.
+         @param label The label of the attribute.
+         @param style The style of the attribute.
+         @param category The category of the attribute.
+         */
+        void setAttributeAppearance(sTag name, string const& label, string const& style, string const& category);
+        
+        //! Set the attribute opaque, visible and save states of an attribute.
+        /** The function sets the attribute opaque, visible and save states of an attribute.
+         @param name The name of the attribute.
+         @param opaque Opaque or not.
+         @param visible Visible or not.
+         @param save Saved or not.
+         */
+        void setAttributeBehavior(sTag name, long behavior);
     };
     
     // ================================================================================ //
     //                                      ATTRIBUTE TYPED                             //
     // ================================================================================ //
     
+    class AttributeLong : public Attribute
+    {
+    private:
+        long m_value;
+    public:
+        AttributeLong(sTag name, string const& label, string const& style, string const& category, long behavior);
+        virtual ~AttributeLong();
+        void get(ElemVector& elements) const noexcept;
+        void set(ElemVector const& elements) override;
+    };
+    
     class AttributeDouble : public Attribute
     {
     private:
         double m_value;
-        void set(ElemVector const& elements) override;
     public:
         AttributeDouble(sTag name, string const& label, string const& style, string const& category, long behavior);
         virtual ~AttributeDouble();
         void get(ElemVector& elements) const noexcept;
+        void set(ElemVector const& elements) override;
     };
     
     class AttributeTag : public Attribute
     {
     private:
-        shared_ptr<Tag> m_value;
-        void set(ElemVector const& elements) override;
+        sTag m_value;
     public:
         AttributeTag(sTag name, string const& label, string const& style, string const& category, long behavior);
         virtual ~AttributeTag();
         void get(ElemVector& elements) const noexcept;
+        void set(ElemVector const& elements) override;
     };
     
     class AttributeObject : public Attribute
     {
     private:
-        shared_ptr<Object> m_value;
-        void set(ElemVector const& elements) override;
+        shared_ptr<Box> m_value;
     public:
         AttributeObject(sTag name, string const& label, string const& style, string const& category, long behavior);
         virtual ~AttributeObject();
         void get(ElemVector& elements) const noexcept;
+        void set(ElemVector const& elements) override;
     };
+
 }
 
 

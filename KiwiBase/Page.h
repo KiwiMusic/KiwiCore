@@ -24,18 +24,13 @@
 #ifndef __DEF_KIWI_PAGE__
 #define __DEF_KIWI_PAGE__
 
-#include "Defs.h"
-#include "Tag.h"
-#include "Element.h"
-#include "Object.h"
 #include "Box.h"
-
-// Later figure out if we use connection pointer or not
 
 namespace Kiwi
 {
     class DspContext;
     class Connection;
+    typedef shared_ptr<Connection> sConnection;
     // ================================================================================ //
     //                                      PAGE                                        //
     // ================================================================================ //
@@ -44,125 +39,287 @@ namespace Kiwi
     /**
      The page is the counterpart of the max patcher or the pd canvas.
      */
-    class Page : public enable_shared_from_this<Page>
+    class Page : public Box::Listener, public enable_shared_from_this<Page>
     {
+    public:
+        class Listener;
     private:
-        const weak_ptr<Instance>    m_kiwi;
-        string                      m_file;
-        string                      m_directory;
-        
-        set<sBox>                   m_boxes;
-        set<shared_ptr<Connection>> m_connections;
+        const weak_ptr<Instance>    m_instance;
+        vector<sBox>                m_boxes;
+        vector<sConnection>         m_connections;
         shared_ptr<DspContext>      m_dsp_context;
+        unordered_set<weak_ptr<Listener>,
+        weak_ptr_hash<Listener>,
+        weak_ptr_equal<Listener>>   m_listeners;
         
-        sDico toDico(string const& text);
-        
-        //! Tag creator.
-        /** This function uses the kiwi instance to create a tag.
-         @param name The name of the tag to retrieve.
-         @return    The tag that match with the name.
-         */
-        sTag createTag(string const& name) const;
-        
-        //! Object creator.
-        /** This function uses the kiwi instance to create an object with a dico.
-         @param dico The dico that defines the object.
-         @return    The object.
-         */
-        shared_ptr<Object> createObject(sDico dico) const;
-        
-        //! Dico creator.
-        /** This function uses the kiwi instance to create a dico.
-         @return    The dico.
-         */
-        sDico createDico() const;
-        
+        static bool sortBoxes(Element first, Element second);
     public:
         
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Page(shared_ptr<Instance> kiwi, string file, string directory);
+        Page(shared_ptr<Instance> instance);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
          */
         ~Page();
         
-        void write();
-		
-		//! Get the dico of the page
-		/** Get the dico of the page
-		 @return The dico of the page.
-		 */
-		sDico getDico();
+        //! The page creation method.
+        /** The function allocates a page and initialize the defaults boxes.
+         */
+        static shared_ptr<Page> create(shared_ptr<Instance> instance, sDico dico);
+        
+        //! Retrieve the instance that manages the page.
+        /** The function retrieves the instance that manages the page.
+         @return The instance that manages the page.
+         */
+        shared_ptr<Instance> getInstance() const noexcept;
         
         //! Create a box.
-        /** The function instantiates a box in the page.
-         @param name        The name of the box.
+        /** The function instantiates a box with a dico.
+         @param dico        The dico that defines a box.
          @return A pointer to the box.
          */
-        sBox createBox(string const& text);
-
+        sBox createBox(sDico dico);
+        
         //! Free a box.
         /** The function removes a box from the page.
          @param box        The pointer to the box.
          */
-        void freeBox(sBox box);
+        void removeBox(sBox box);
         
-        //! Check if an inlet is compatible with an outlet.
-        /** The function checks if the inlet is compatible with the outlet.
-         @param from        The outlet owner.
-         @param outlet      The outlet index.
-         @param to          The inlet owner.
-         @param inlet       The inlet index.
-         @return True if the inlet is compatible otherwise false.
+        //! Get the boxes.
+        /** The function retrieves the boxes from the page.
+         @param boxes   A vector of elements.
          */
-        bool compatible(sBox from, int outletIndex, sBox to, int inletIndex);
+        void getBoxes(vector<sBox>& boxes);
         
-        //! Create a connection between an outlet to an inlet.
-        /** The function connects an inlet to the outlet.
-         @param from        The outlet owner.
-         @param outlet      The outlet index.
-         @param to          The inlet owner.
-         @param inlet       The inlet index.
-         @return True if the inlet has been connected otherwise false.
+        //! Create a connection.
+        /** The function creates a connection with a dico.
+         @param dico        The dico that defines a connection.
+         @return A pointer to the box.
          */
-        bool connect(sBox from, int outlet, sBox to, int inlet);
+        sConnection createConnection(sDico dico);
         
-        //! Delete a connection or a set of connection.
-        /** The function disconnects an inlet from an outlet if all the arguments are specified, an inlet from all the outlets if the outlet's box is null, an outlet from all the inlets if the inlet's box is null, all the inlets of a box if only the inlet's box is specified and the inlet index is negative and all the outlets if only the outlet's box is specified and the outlet index is negative.
-         @param from        The outlet owner.
-         @param outlet      The outlet index.
-         @param to          The inlet owner.
-         @param inlet       The inlet index.
+        //! Free a connection.
+        /** The function removes a connection from the page.
+         @param connection        The pointer to the connection.
          */
-        void disconnect(shared_ptr<Box> from, int outlet, shared_ptr<Box> to, int inlet);
+        void removeConnection(sConnection connection);
         
+        //! Get the connections.
+        /** The function retrieves the connections from the page.
+         @param connections   A vector of connections.
+         */
+        void getConnections(vector<sConnection>& connections);
+        
+        //! Read a dico.
+        /** The function reads a dico that initializes the page.
+         @param dico The dico.
+         */
+        void read(sDico dico);
+        
+        //! Write the page in a dico.
+        /** The function writes the pagein a dico.
+         @param dico The dico.
+         */
+        void write(sDico dico);
+        
+        //! Start the dsp.
+        /** The function start the dsp chain.
+         @param samplerate The sample rate.
+         @param vectorsize The vector size of the signal.
+         */
         void startDsp(double samplerate, long vectorsize);
         
-        void tickDsp();
+        //! Perform a tick on the dsp.
+        /** The function calls once the dsp chain.
+         */
+        void tickDsp() const noexcept;
         
+        //! Stop the dsp.
+        /** The function stop the dsp chain.
+         */
         void stopDsp();
         
-        //! Retrieve the file name of the page.
-        /** The function retrieves the file name of the page.
-         @return The file name as a string.
+        //! Receive the notification that an inlet has been created.
+        /** The function is called by the box when a inlet has been created.
+         @param box    The box.
+         @param index  The inlet index.
          */
-		inline string getFileName() const noexcept
+        void inletHasBeenCreated(shared_ptr<Box> box, size_t index) override;
+        
+        //! Receive the notification that an inlet has been removed.
+        /** The function is called by the box when an inlet has been removed.
+         @param box    The box.
+         @param index  The inlet index.
+         */
+        void inletHasBeenRemoved(shared_ptr<Box> box, size_t index) override;
+        
+        //! Receive the notification that an outlet has been created.
+        /** The function is called by the box when a outlet has been created.
+         @param box    The box.
+         @param index  The outlet index.
+         */
+        void outletHasBeenCreated(shared_ptr<Box> box, size_t index) override;
+        
+        //! Receive the notification that an outlet has been removed.
+        /** The function is called by the box when an outlet has been removed.
+         @param box    The box.
+         @param index  The outlet index.
+         */
+        void outletHasBeenRemoved(shared_ptr<Box> box, size_t index) override;
+        
+        //! Add a page listener in the binding list of the page.
+        /** The function adds a page listener in the binding list of the page. If the page listener is already in the binding list, the function doesn't do anything.
+         @param listener  The pointer of the page listener.
+         @see              unbind()
+         */
+        void bind(weak_ptr<Listener> listener);
+        
+        //! Remove a page listener from the binding list of the page.
+        /** The function removes a page listener from the binding list of the page. If the page listener isn't in the binding list, the function doesn't do anything.
+         @param listener  The pointer of the page listener.
+         @see           bind()
+         */
+        void unbind(weak_ptr<Listener> listener);
+        
+        // ================================================================================ //
+        //                                  PAGE LISTENER                                   //
+        // ================================================================================ //
+        
+        //! The page listener is a virtual class that can bind itself to a page and be notified of the several changes.
+        /**
+         The page listener is a very light class with methods that receive the notifications of the pages.
+         @see Instance
+         */
+        class Listener
         {
-            return m_file;
+        public:
+            //! The constructor.
+            /** The constructor does nothing.
+             */
+            Listener()
+            {
+                ;
+            }
+            
+            //! The destructor.
+            /** The destructor does nothing.
+             */
+            virtual ~Listener()
+            {
+                ;
+            }
+            
+            //! Receive the notification that a page has been created.
+            /** The function is called by the instance when a page has been created.
+             @param instance    The instance.
+             @param page        The page.
+             */
+            virtual void boxHasBeenCreated(shared_ptr<Page> page, sBox box){};
+            
+            //! Receive the notification that a page has been closed.
+            /** The function is called by the instance when a page has been closed.
+             @param instance    The instance.
+             @param page        The page.
+             */
+            virtual void boxHasBeenRemoved(shared_ptr<Page> page, sBox box){};
+            
+            //! Receive the notification that a page has been created.
+            /** The function is called by the instance when a page has been created.
+             @param instance    The instance.
+             @param page        The page.
+             */
+            virtual void connectionHasBeenCreated(shared_ptr<Page> page, sConnection box){};
+            
+            //! Receive the notification that a page has been closed.
+            /** The function is called by the instance when a page has been closed.
+             @param instance    The instance.
+             @param page        The page.
+             */
+            virtual void connectionHasBeenRemoved(shared_ptr<Page> page, sConnection box){};
+        };
+    };
+    
+    typedef shared_ptr<Page>    sPage;
+    
+    typedef weak_ptr<Page>      wPage;
+    
+    //! The connection owns to a page and is used to create a patch lines.
+    /**
+     The connection is opaque, you shouldn't have to use it at all.
+     */
+    class Connection
+    {
+    private:
+        
+        const sBox     m_from;
+        const sBox     m_to;
+        const size_t   m_outlet;
+        const size_t   m_inlet;
+        
+    public:
+        
+        //! The constructor.
+        /** You should never use this method except if you really know what you're doing.
+         */
+        Connection(const sBox from, const size_t outlet, const sBox to, const size_t inlet) noexcept :
+        m_from(from),
+        m_to(to),
+        m_outlet(outlet),
+        m_inlet(inlet)
+        {
+            ;
         }
         
-        //! Retrieve the directory name of the page.
-        /** The function retrieves the directory name of the page.
-         @return The directory name as a string.
+        //! The destructor.
+        /** You should never use this method except if you really know what you're doing.
          */
-        inline string getDirectoryName() const noexcept
+        ~Connection()
         {
-            return m_directory;
+            ;
+        }
+        
+        //! Retrieve the output box.
+        /** The function retrieves the output box of the connection.
+         @return The output box.
+         */
+        inline sBox getFrom() const noexcept
+        {
+            return m_from;
+        }
+        
+        //! Retrieve the input box.
+        /** The function retrieves the input box of the connection.
+         @return The input box.
+         */
+        inline sBox getTo() const noexcept
+        {
+            return m_to;
+        }
+        
+        //! Retrieve the outlet of the connection.
+        /** The function retrieves the outlet of the connection.
+         @return The outlet of the connection.
+         */
+        inline size_t getOutletIndex() const noexcept
+        {
+            return m_outlet;
+        }
+        
+        //! Retrieve the inlet of the connection.
+        /** The function retrieves the inlet of the connection.
+         @return The inlet of the connection.
+         */
+        inline size_t getInletIndex() const noexcept
+        {
+            return m_inlet;
         }
     };
+    
+    typedef shared_ptr<Connection> sConnection;
 }
 
 

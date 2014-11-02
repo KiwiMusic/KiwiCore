@@ -14,41 +14,36 @@ using namespace Kiwi;
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    shared_ptr<Instance> kiwi = Instance::create();
+    sInstance kiwi = Instance::create();
     {
-        kiwi->post("---------");
-        shared_ptr<Page> page = kiwi->createPage("test.kiwi", "/Users/Pierre/Desktop");
+        Console::post("---------");
+        sDico dico = Dico::create();
+        sDico dico2 = Dico::create();
+        dico->read("test2.kiwi", "/Users/Pierre/Desktop");
+        sPage page = kiwi->createPage(dico);
         {
+            vector<sBox> boxes;
+            page->getBoxes(boxes);
+            if(boxes.size())
+            {
+                sBox box = boxes[0];
+                box->receive(1, {1});
+                box->receive(0, {2});
+            }
+            
+            /*
             sBox obj1 = page->createBox("+");
             sBox obj2 = page->createBox("+ 2");
             sBox obj3 = page->createBox("+ 1");
             page->connect(obj1, 0, obj2, 0);
             page->connect(obj3, 0, obj2, 1);
-            page->write();
-            
-            sTag ftf = kiwi->createTag("tttt");
-            sDico tata = kiwi->createDico();
-            tata->append(kiwi->createTag("zaza"), {1, 1.2, 360, kiwi->createTag("zaza~ \n \""), 12});
-            sDico zozo = kiwi->createDico();
-            zozo->append(ftf, 1);
-            zozo->append(kiwi->createTag("jjjj"), 2);
-            zozo->append(kiwi->createTag("llll"), 3);
-            sDico zizi = kiwi->createDico();
-            zizi->append(ftf, kiwi->createTag("mm"));
-            zizi->append(kiwi->createTag("jjjj"), kiwi->createTag("pp"));
-            zizi->append(kiwi->createTag("llll"), kiwi->createTag("ff"));
-            zozo->append(kiwi->createTag("oooo"), zizi);
-            tata->append(kiwi->createTag("z°oz,,o"), {zozo, 1.2, 360, kiwi->createTag("zaza"), 12});
-            tata->write("Testt.kiwi", "/Users/Pierre/Desktop");
-            
-            sDico tre = kiwi->createDico();
-            tre->read("Testt.kiwi", "/Users/Pierre/Desktop");
-            tre->write("Testt2.kiwi", "/Users/Pierre/Desktop");
-            
-            cout << stod("2.3e-3") << " " << stod("1.2.2") << "\n";
-            string nana("zaza~ \n \\\"\" 23 zazazazazaz");
-            cout << tre->jsonUnescape(nana) << "\n";
+             */
+            //obj1->receive(1, {12});
+            //obj1->receive(0, {1});
+            page->write(dico2);
+            dico2->write("test.kiwi", "/Users/Pierre/Desktop");
         }
+        
     }
     return 0;
 }

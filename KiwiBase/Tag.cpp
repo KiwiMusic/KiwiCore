@@ -26,56 +26,18 @@
 
 namespace Kiwi
 {
-    // ================================================================================ //
-    //                                      TAG                                         //
-    // ================================================================================ //
-    
-    Tag::Tag(string const& name) noexcept : m_name(name)
-    {
-        
-    }
-    
-    Tag::~Tag()
-    {
-        m_objects.clear();
-    }
-    
-    void Tag::bind(weak_ptr<Object> object)
-    {
-        m_objects.insert(object);
-    }
-    
-    void Tag::unbind(weak_ptr<Object> object)
-    {
-        m_objects.erase(object);
-    }
-    
-    // ================================================================================ //
-    //                                      TAG FACTORY                                 //
-    // ================================================================================ //
-    
-    TagFactory::TagFactory() noexcept
-    {
-        
-    }
-    
-    TagFactory::~TagFactory()
-    {
-        m_tags.clear();
-    }
-    
-    shared_ptr<Tag> TagFactory::createTag(string const& name)
-    {
-        map<string, shared_ptr<Tag>>::const_iterator it = m_tags.find(name);
-        if(it != m_tags.end())
-            return it->second;
-        else
-        {
-            shared_ptr<Tag> newTag = make_shared<Tag>(name);
-            m_tags[name] = newTag;
-            return newTag;
-        }
-    }
+    map<string, shared_ptr<const Tag>> Tag::m_tags;
+    sTag Tag::text        = Tag::create("text");
+    sTag Tag::box         = Tag::create("box");
+    sTag Tag::boxes       = Tag::create("boxes");
+    sTag Tag::connection  = Tag::create("connection");
+    sTag Tag::connections = Tag::create("connections");
+    sTag Tag::id          = Tag::create("id");
+    sTag Tag::from        = Tag::create("from");
+    sTag Tag::to          = Tag::create("to");
+    sTag Tag::name        = Tag::create("name");
+    sTag Tag::ninlets     = Tag::create("ninlets");
+    sTag Tag::noutlets    = Tag::create("noutlets");
 }
 
 

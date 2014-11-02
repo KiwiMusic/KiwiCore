@@ -46,7 +46,7 @@ namespace Kiwi
     {
         if(elements.size() && elements[0].isTag())
         {
-            map<sTag, sAttribute>::const_iterator it = m_attributes.find((sTag)elements[0]);
+            auto it = m_attributes.find((sTag)elements[0]);
             if(it != m_attributes.end())
             {
                 ElemVector nelements;
@@ -94,11 +94,6 @@ namespace Kiwi
     void AttributeFactory::notify(sAttribute attr)
     {
         ;
-    }
-    
-    void AttributeFactory::addAttribute(shared_ptr<Attribute> attr)
-    {
-        m_attributes[attr->name()] = attr;
     }
     
     void AttributeFactory::setAttributeAppearance(sTag name, string const& label, string const& style, string const& category)
@@ -162,6 +157,27 @@ namespace Kiwi
     // ================================================================================ //
     //                                      ATTRIBUTE TYPED                             //
     // ================================================================================ //
+    
+    AttributeLong::AttributeLong(sTag name, string const& label, string const& style, string const& category, long behavior) : Attribute(name, label, style, category, behavior)
+    {
+    }
+    
+    AttributeLong::~AttributeLong()
+    {
+    }
+    
+    void AttributeLong::set(ElemVector const& elements)
+    {
+        if(elements.size() && (elements[0].isLong() || elements[0].isDouble()))
+        {
+            m_value = elements[0];
+        }
+    }
+    
+    void AttributeLong::get(ElemVector& elements) const noexcept
+    {
+        elements = {m_value};
+    }
     
     AttributeDouble::AttributeDouble(sTag name, string const& label, string const& style, string const& category, long behavior) : Attribute(name, label, style, category, behavior)
     {

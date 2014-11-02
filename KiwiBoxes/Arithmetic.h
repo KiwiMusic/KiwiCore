@@ -44,25 +44,17 @@ namespace Kiwi
         double          m_augend;
         double          m_addend;
     public:
-        Plus(sInstance kiwi, ElemVector const& elements = {0});
+        Plus(sPage page, Element const& element = 0);
         ~Plus();
-        void receive(ElemVector const& elements) override;
-        sObject create(sDico dico) const override;
+    private:
+        bool receive(size_t index, ElemVector const& elements) override;
+        sBox allocate(sPage page, sDico dico) const override;
     };
     
-    // ================================================================================ //
-    //                              ARITHMETIC LOADER                                   //
-    // ================================================================================ //
-    
-    class Arithmetic
+    inline void arithmetic()
     {
-    public:
-        static void load(sInstance kiwi)
-        {
-            kiwi->addObjectPrototype(unique_ptr<Box>(new Plus(kiwi)));
-        }
-    };
-    
+        Box::addPrototype(unique_ptr<Box>(new Plus(nullptr, 0)));
+    }
 }
 
 #endif

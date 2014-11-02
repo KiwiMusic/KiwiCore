@@ -24,25 +24,14 @@
 #include "Page.h"
 #include "Instance.h"
 #include "../KiwiDsp/DspContext.h"
-#include "../KiwiBase/Connection.h"
 
 namespace Kiwi
-{
-    Page::Page(shared_ptr<Instance> kiwi, string file, string directory) :
-    m_kiwi(kiwi)
+{    
+    Page::Page(shared_ptr<Instance> instance) :
+    m_instance(instance),
+    m_dsp_context(make_shared<DspContext>())
     {
-        m_file = file;
-        m_directory = directory;
-        m_dsp_context = make_shared<DspContext>();
-        
-        shared_ptr<Dico> main = createDico();
-        main->read(m_file, m_directory);
-
-        if(main->has(createTag("boxes")))
-        {
-            vector<Element> boxes;
-            main->get(createTag("boxes"), boxes);
-        }
+        ;
     }
     
     Page::~Page()
@@ -50,117 +39,204 @@ namespace Kiwi
         m_connections.clear();
         m_boxes.clear();
     }
-
-    sTag Page::createTag(string const& name) const
+    
+    shared_ptr<Instance> Page::getInstance() const noexcept
     {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createTag(name);
-        else
-            return nullptr;
+        return m_instance.lock();
     }
     
-    sObject Page::createObject(sDico dico) const
+    sPage Page::create(shared_ptr<Instance> instance, sDico dico)
     {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createObject(dico);
-        else
-            return nullptr;
+        sPage page = make_shared<Page>(instance);
+        page->read(dico);
+        return page;
     }
     
-    sDico Page::createDico() const
+    sBox Page::createBox(sDico dico)
     {
-        shared_ptr<Instance> kiwi = m_kiwi.lock();
-        if(kiwi)
-            return kiwi->createDico();
-        else
-            return nullptr;
-    }
-    
-    sBox Page::createBox(string const& text)
-    {
-        sDico dico = toDico(text);
         if(dico)
         {
-            sObject object = createObject(dico);
-            if(object)
+            sBox box = Box::create(shared_from_this(), dico);
+            if(box)
             {
-                if(object->type() == Object::BOX)
+                m_boxes.push_back(box);
+                box->bind(shared_from_this());
+                return box;
+            }
+        }
+        return nullptr;
+    }
+    
+    void Page::removeBox(shared_ptr<Box> box)
+    {
+        auto it = find(m_boxes.begin(), m_boxes.end(), box);
+        if(it != m_boxes.end())
+        {
+            m_boxes.erase(it);
+            box->unbind(shared_from_this());
+        }
+    }
+    
+    void Page::getBoxes(vector<sBox>& boxes)
+    {
+        boxes = m_boxes;
+    }
+    
+    sConnection Page::createConnection(sDico dico)
+    {
+        if(dico)
+        {
+            sBox from, to;
+            size_t outlet, inlet;
+            
+            ElemVector elements;
+            dico->get(Tag::from, elements);
+            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
+            {
+                long index = (long)elements[0] - 1;
+                outlet = elements[1];
+                if(index >= 0 && index < m_boxes.size())
                 {
-                    sBox box = static_pointer_cast<Box>(object);
-                    box->setId(m_boxes.size()+1);
-                    box->read(dico);
-                    m_boxes.insert(box);
-                    //box->setPage(shared_from_this());
-                    return box;
+                    from = m_boxes[index];
+                }
+            }
+            
+            elements.clear();
+            dico->get(Tag::to, elements);
+            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
+            {
+                long index = (long)elements[0] - 1;
+                inlet  = elements[1];
+                if(index >= 0 && index < m_boxes.size())
+                {
+                    to = m_boxes[index];
+                }
+            }
+            if(Box::connect(from, outlet, to, inlet))
+            {
+                sConnection connection = make_shared<Connection>(from, outlet, to, inlet);
+                if(connection)
+                {
+                    m_connections.push_back(connection);
+                    return connection;
                 }
                 else
                 {
-                    //error(string("The object " + (string)*object->name() + " isn't patchable !"));
+                    Box::disconnect(from, outlet, to, inlet);
                 }
             }
         }
         return nullptr;
     }
     
-    void Page::freeBox(shared_ptr<Box> box)
+    void Page::removeConnection(sConnection connection)
     {
-        if(m_boxes.find(box) != m_boxes.end())
+        auto it = find(m_connections.begin(), m_connections.end(), connection);
+        if(it != m_connections.end())
         {
-            disconnect(box, -1, nullptr, 0);
-            disconnect(nullptr, 0, box, -1);
-            m_boxes.erase(box);
+            m_connections.erase(it);
         }
     }
     
-    bool Page::compatible(shared_ptr<Box> from, int outletIndex, shared_ptr<Box> to, int inletIndex)
+    void Page::getConnections(vector<sConnection>& connections)
     {
-        if(from != to && m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
-        {
-            shared_ptr<Inlet>   inlet   = to->getInlet(inletIndex);
-            shared_ptr<Outlet>  outlet  = from->getOutlet(outletIndex);
-            if(inlet && outlet && !outlet->has(inlet))
-            {
-                return true;
-            }
-        }
-        return false;
+        connections = m_connections;
     }
     
-    bool Page::connect(shared_ptr<Box> from, int outletIndex, shared_ptr<Box> to, int inletIndex)
+    void Page::read(sDico dico)
     {
-        if(m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
+        m_connections.clear();
+        m_boxes.clear();
+        if(dico)
         {
-            shared_ptr<Inlet>   inlet   = to->getInlet(inletIndex);
-            shared_ptr<Outlet>  outlet  = from->getOutlet(outletIndex);
-            if(inlet && outlet && !outlet->has(inlet))
+            ElemVector boxes;
+            dico->get(Tag::boxes, boxes);
+            sort(m_boxes.begin(), m_boxes.end(), sortBoxes);
+            for(size_t i = 0; i < boxes.size(); i++)
             {
-                shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
-                outlet->connect(inlet, to);
-                m_connections.insert(connect);
-                return true;
-            }
-            return false;
-        }
-        return false;
-    }
-    
-    void Page::disconnect(shared_ptr<Box> from, int outletIndex, shared_ptr<Box> to, int inletIndex)
-    {
-        if(m_boxes.find(from) != m_boxes.end() && m_boxes.find(to) != m_boxes.end())
-        {
-            shared_ptr<Inlet>   inlet   = to->getInlet(inletIndex);
-            shared_ptr<Outlet>  outlet  = from->getOutlet(outletIndex);
-            for(set<shared_ptr<Connection>>::const_iterator it = m_connections.begin(); it != m_connections.end(); ++it)
-            {
-                if((*it)->inlet() == inlet && (*it)->outlet() == outlet)
+                sDico subdico = boxes[i];
+                if(subdico)
                 {
-                    m_connections.erase(it);
-                    outlet->disconnect(inlet);
-                    return;
+                    subdico = subdico->get(Tag::box);
+                    if(subdico)
+                    {
+                        createBox(subdico);
+                    }
                 }
             }
+            
+            ElemVector connections;
+            dico->get(Tag::connections, connections);
+            for(size_t i = 0; i < connections.size(); i++)
+            {
+                sDico subdico = connections[i];
+                if(subdico)
+                {
+                    subdico = subdico->get(Tag::connection);
+                    if(subdico)
+                    {
+                        createConnection(subdico);
+                    }
+                }
+            }
+        }
+    }
+    
+    void Page::write(sDico dico)
+    {
+        if(dico)
+        {
+            ElemVector boxes;
+            long index = 0;
+            for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
+            {
+                sDico box = createDico();
+                sDico subbox = createDico();
+                if(box && subbox)
+                {
+                    (*it)->write(subbox);
+                    subbox->set(Tag::id, ++index);
+                    box->set(Tag::box, subbox);
+                    boxes.push_back(box);
+                }
+            }
+            dico->set(Tag::boxes, boxes);
+      
+            ElemVector connections;
+            for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+            {
+                sDico connection = createDico();
+                sDico subconnect = createDico();
+                if(connection && subconnect)
+                {
+                    shared_ptr<Box>     from    = (*it)->getFrom();
+                    shared_ptr<Box>     to      = (*it)->getTo();
+                    
+                    if(from && to)
+                    {
+                        long indexFrom = 0, indexTo = 0, index = 1;
+                        for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it, ++index)
+                        {
+                            if((*it) == from)
+                            {
+                                indexFrom = index;
+                            }
+                            else if((*it) == to)
+                            {
+                                indexTo = index;
+                            }
+                        }
+                        if(indexFrom && indexTo)
+                        {
+                            subconnect->set(Tag::from, {indexFrom, (*it)->getOutletIndex()});
+                            subconnect->set(Tag::to, {indexTo, (*it)->getInletIndex()});
+                            connection->set(Tag::connection, subconnect);
+                        }
+                    }
+                    connections.push_back(connection);
+                }
+            }
+            dico->set(Tag::connections, connections);
         }
     }
     
@@ -170,11 +246,15 @@ namespace Kiwi
         m_dsp_context->setSamplerate(samplerate);
         m_dsp_context->setVectorsize(vectorsize);
         
-        for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
+        for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
+        {
             m_dsp_context->addBox((*it));
+        }
         
-        for(set<shared_ptr<Connection>>::iterator it = m_connections.begin(); it != m_connections.end(); ++it)
+        for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        {
             m_dsp_context->addConnection((*it));
+        }
         
         try
         {
@@ -182,11 +262,11 @@ namespace Kiwi
         }
         catch(shared_ptr<Box> box)
         {
-            box->error(box, "something appened with me... sniff !");
+            Console::error(box, "something appened with me... sniff !");
         }
     }
     
-    void Page::tickDsp()
+    void Page::tickDsp() const noexcept
     {
         m_dsp_context->tick();
     }
@@ -196,96 +276,50 @@ namespace Kiwi
         m_dsp_context->clear();
     }
     
-    void Page::write()
+    void Page::inletHasBeenCreated(shared_ptr<Box> box, size_t index)
     {
-        sDico main = createDico();
         
-        ElemVector boxes;
-        for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
-        {
-            boxes.push_back(static_pointer_cast<Object>(*it));
-        }
-        main->set(createTag("boxes"), boxes);
-        
-        ElemVector connections;
-        for(set<shared_ptr<Connection>>::iterator it = m_connections.begin(); it != m_connections.end(); ++it)
-        {
-            sDico connection = createDico();
-            sDico subconnect = createDico();
-            (*it)->write(subconnect);
-            connection->set(createTag("connection"), subconnect);
-            connections.push_back(connection);
-        }
-        main->set(createTag("connections"), connections);
-        
-        main->write(m_file, m_directory);
     }
-	
-	sDico Page::getDico()
-	{
-		sDico main = createDico();
-		ElemVector elements;
-		
-		for(set<shared_ptr<Box>>::iterator it = m_boxes.begin(); it != m_boxes.end(); ++it)
-		{
-			sDico box = createDico();
-			(*it)->write(box);
-			elements.push_back(box);
-		}
-		main->set(createTag("boxes"), elements);
-		return main;
-	}
-	
-    sDico Page::toDico(string const& text)
+    
+    void Page::inletHasBeenRemoved(shared_ptr<Box> box, size_t index)
     {
-        sDico dico = createDico();
-        if(dico && text.size())
+        
+    }
+    
+    void Page::outletHasBeenCreated(shared_ptr<Box> box, size_t index)
+    {
+        
+    }
+    
+    void Page::outletHasBeenRemoved(shared_ptr<Box> box, size_t index)
+    {
+        
+    }
+    
+    void Page::bind(weak_ptr<Page::Listener> listener)
+    {
+        m_listeners.insert(listener);
+    }
+    
+    void Page::unbind(weak_ptr<Page::Listener> listener)
+    {
+        m_listeners.erase(listener);
+    }
+    
+    bool Page::sortBoxes(Element first, Element second)
+    {
+        sDico firstdico = first;
+        sDico seconddico = second;
+        if(firstdico && seconddico)
         {
-            bool mode = false;
-            string word;
-            string key = "name";
-            ElemVector elements;
-            istringstream iss(text);
-            while(iss >> word)
+            firstdico = firstdico->get(Tag::box);
+            seconddico = seconddico->get(Tag::box);
+            if(firstdico && seconddico)
             {
-                if(mode)
-                {
-                    if(word[0] == '@')
-                    {
-                        dico->set(createTag(key), elements);
-                        elements.clear();
-                        key = word.c_str()+1;
-                    }
-                    else
-                    {
-                        if(isdigit(word[0]))
-                        {
-                            if(word.find('.'))
-                            {
-                                elements.push_back(atof(word.c_str()));
-                            }
-                            else
-                            {
-                                elements.push_back(atol(word.c_str()));
-                            }
-                        }
-                        else
-                        {
-                            elements.push_back(createTag(word));
-                        }
-                    }
-                }
-                else
-                {
-                    dico->set(createTag(key), createTag(word));
-                    key = "arguments";
-                    mode = true;
-                }
+                return (long)firstdico->get(Tag::id) < (long) seconddico->get(Tag::id);
             }
-            dico->set(createTag(key), elements);
-            dico->set(createTag("text"), createTag(text));
         }
-        return dico;
+        return false;
     }
 }
 

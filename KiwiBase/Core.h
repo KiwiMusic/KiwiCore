@@ -24,20 +24,7 @@
 #ifndef __DEF_KIWI_CORE__
 #define __DEF_KIWI_CORE__
 
-#include "Defs.h"
-#include "Tag.h"
-#include "Element.h"
-#include "Attribute.h"
-#include "Box.h"
 #include "Instance.h"
-#include "DspNode.h"
-#include "DspContext.h"
-
-namespace Kiwi
-{
-    ;
-};
-
 
 #endif
 

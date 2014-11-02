@@ -25,7 +25,7 @@
 #define __DEF_KIWI_DSP_NODE__
 
 #include "../KiwiBase/Defs.h"
-#include "../KiwiBase/Object.h"
+#include "../KiwiBase/Box.h"
 #include "Signal.h"
 #include "DspProcess.h"
 

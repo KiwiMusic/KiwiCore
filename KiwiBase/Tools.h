@@ -106,6 +106,24 @@ namespace Kiwi
         return stream.str();
     }
     
+    template<typename T>
+    struct weak_ptr_hash : public std::unary_function<std::weak_ptr<T>, size_t> {
+        size_t operator()(const std::weak_ptr<T>& wp)
+        {
+            auto sp = wp.lock();
+            return std::hash<decltype(sp)>()(sp);
+        }
+    };
+    
+    template<typename T>
+    struct weak_ptr_equal : public std::unary_function<std::weak_ptr<T>, bool> {
+        
+        bool operator()(const std::weak_ptr<T>& left, const std::weak_ptr<T>& right)
+        {
+            return !left.owner_before(right) && !right.owner_before(left);
+        }
+    };
+    
     inline void signalAddSignal(const sample* in1, const sample* in2, sample* out1, long vectorsize)
     {
 #ifdef __APPLE__

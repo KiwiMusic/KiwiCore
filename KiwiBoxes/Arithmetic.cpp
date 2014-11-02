@@ -30,19 +30,17 @@ namespace Kiwi
     //                                      PLUS                                        //
     // ================================================================================ //
     
-    Plus::Plus(sInstance kiwi, ElemVector const& elements) : Box(kiwi, "+"),
-    m_double(elements.size() && elements[0].isDouble()),
+    Plus::Plus(sPage page, Element const& element) : Box(page, "+"),
+    m_double(element.isDouble()),
     m_augend(0),
-    m_addend(0)
+    m_addend(element)
     {
-        if(elements.size() && m_double)
-            m_addend = (double)elements[0];
-        else if(elements.size())
-            m_addend = (long)elements[0];
-        
-        addInlet(Inlet::Type::DataHot, "Augend");
-        addInlet(Inlet::Type::DataCold, "Addend");
-        addOutlet(Outlet::Type::Data, "Sum");
+        addInlet(Inlet::DataHot, "Augend (int or double)");
+        addInlet(Inlet::DataCold, "Addend (int or double)");
+        if(m_double)
+            addOutlet(Outlet::Data, "Sum (double)");
+        else
+            addOutlet(Outlet::Data, "Sum (int)");
     }
     
     Plus::~Plus()
@@ -50,28 +48,35 @@ namespace Kiwi
         
     }
     
-    sObject Plus::create(sDico dico) const
+    sBox Plus::allocate(sPage page, sDico dico) const
     {
-        ElemVector elements;
-        dico->get(createTag("arguments"), elements);
-        return makeObject<Plus>(elements);
+        Element element = dico->get(Tag::create("arguments"));
+        shared_ptr<Plus> plus = make_shared<Plus>(page, element);
+        return plus;
     }
     
-    void Plus::receive(ElemVector const& elements)
+    bool Plus::receive(size_t index, ElemVector const& elements)
     {
-        if(elements.size())
+        Console::post("Receive inlet " + toString(index) + " : " + toString(elements));
+        if(!elements.empty() && (elements[0].type() == Element::LONG || elements[0].type() == Element::DOUBLE))
         {
-            switch (elements[1].type())
+            if(index)
             {
-                case Element::LONG:
-                    ;
-                    break;
-                    
-                default:
-                    break;
+                m_addend = elements[0];
             }
+            else if(m_double)
+            {
+                Console::post("Send : " + toString({(double)elements[0] + m_addend}));
+                send(0, {(double)elements[0] + m_addend});
+            }
+            else
+            {
+                Console::post("Send : " + toString({(long)elements[0] + (long)m_addend}));
+                send(0, {(long)elements[0] + (long)m_addend});
+            }
+            return true;
         }
-        Box::receive(elements);
+        return false;
     }
 }
 

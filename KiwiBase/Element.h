@@ -24,12 +24,10 @@
 #ifndef __DEF_KIWI_ELEMENT__
 #define __DEF_KIWI_ELEMENT__
 
-#include "Defs.h"
 #include "Tag.h"
 
 namespace Kiwi
 {
-    class Object;
     class Box;
     class Dico;
     class Element;
@@ -47,7 +45,7 @@ namespace Kiwi
     
     //! The element holds variables of different kinds.
     /**
-     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and an object but can receives an int, a long, a float, a double, a tag (weak or shared) or an object (weak or shared).
+     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and a box but can receives an int, a long, a float, a double, a tag (weak or shared) or a box (weak or shared).
      */
     class Element
     {
@@ -60,7 +58,7 @@ namespace Kiwi
             LONG      = 1,
             DOUBLE    = 2,
             TAG       = 3,
-            OBJECT    = 4,
+            BOX       = 4,
             DICO      = 5,
             VECTOR    = 6
         };
@@ -70,8 +68,8 @@ namespace Kiwi
         {
             long                m_long      = 0;
             double              m_double    = 0;
-            shared_ptr<Tag>     m_tag       = nullptr;
-            shared_ptr<Object>  m_object    = nullptr;
+            sTag                m_tag       = nullptr;
+            shared_ptr<Box>     m_box       = nullptr;
             shared_ptr<Dico>    m_dico      = nullptr;
         };
         
@@ -109,30 +107,20 @@ namespace Kiwi
          */
         Element(double value) noexcept;
         
-        //! Constructor with a tag.
-        /** The function allocates the element with a tag.
+        //! Constructor with a string.
+        /** The function allocates the element with a string.
          */
-        Element(weak_ptr<Tag> tag) noexcept;
+        Element(string const& tag) noexcept;
         
         //! Constructor with a tag.
         /** The function allocates the element with a tag.
          */
-        Element(shared_ptr<Tag> tag) noexcept;
+        Element(sTag tag) noexcept;
         
-        //! Constructor with an object.
-        /** The function allocates the element with an object.
+        //! Constructor with a box.
+        /** The function allocates the element with a box.
          */
-        Element(weak_ptr<Object> object) noexcept;
-        
-        //! Constructor with an object.
-        /** The function allocates the element with an object.
-         */
-        Element(shared_ptr<Object> object) noexcept;
-        
-        //! Constructor with a dico.
-        /** The function allocates the element with a dico.
-         */
-        Element(weak_ptr<Dico> dico) noexcept;
+        Element(shared_ptr<Box> box) noexcept;
         
         //! Constructor with a dico.
         /** The function allocates the element with a dico.
@@ -180,13 +168,13 @@ namespace Kiwi
             return m_type == Element::TAG;
         }
         
-        //! Check if the element is of type object.
-        /** The function checks if the element is of type object.
-         @return    true if the element is a object.
+        //! Check if the element is of type box.
+        /** The function checks if the element is of type box.
+         @return    true if the element is a box.
          */
         inline bool isObject() const noexcept
         {
-            return m_type == Element::OBJECT;
+            return m_type == Element::BOX;
         }
         
         //! Check if the element is of type dico.
@@ -209,6 +197,12 @@ namespace Kiwi
          @return A long value if the element is a digit otherwise 0.
          */
         operator long() const noexcept;
+        
+        //! Cast the element to a long.
+        /** The function casts the element to a long.
+         @return A long value if the element is a digit otherwise 0.
+         */
+        operator size_t() const noexcept;
 
         //! Cast the element to a float.
         /** The function casts the element to a float.
@@ -226,31 +220,13 @@ namespace Kiwi
         /** The function casts the element to a tag.
          @return A tag if the element is a tag otherwise a nullptr.
          */
-        operator weak_ptr<Tag>() const noexcept;
+        operator sTag() const noexcept;
         
-        //! Cast the element to a tag.
-        /** The function casts the element to a tag.
-         @return A tag if the element is a tag otherwise a nullptr.
+        //! Cast the element to a box.
+        /** The function casts the element to a box.
+         @return An box if the element is a box otherwise a nullptr.
          */
-        operator shared_ptr<Tag>() const noexcept;
-        
-        //! Cast the element to an object.
-        /** The function casts the element to an object.
-         @return An object if the element is an object otherwise a nullptr.
-         */
-        operator weak_ptr<Object>() const noexcept;
-        
-        //! Cast the element to an object.
-        /** The function casts the element to an object.
-         @return An object if the element is an object otherwise a nullptr.
-         */
-        operator shared_ptr<Object>() const noexcept;
-        
-        //! Cast the element to a dico.
-        /** The function casts the element to a dico.
-         @return An dico if the element is a dico otherwise a nullptr.
-         */
-        operator weak_ptr<Dico>() const noexcept;
+        operator shared_ptr<Box>() const noexcept;
         
         //! Cast the element to a dico.
         /** The function casts the element to a dico.
@@ -293,40 +269,26 @@ namespace Kiwi
          */
         Element& operator=(const double value) noexcept;
         
-        //! Set up the element with a tag.
-        /** The function sets up the element with a tag.
-         @param tag   The tag.
+        //! Set up the element with a string.
+        /** The function sets up the element with string.
+         @param tag   The string.
          @return An element.
          */
-        Element& operator=(weak_ptr<Tag> tag) noexcept;
+        Element& operator=(string const& tag) noexcept;
         
         //! Set up the element with a tag.
         /** The function sets up the element with a tag.
          @param tag   The tag.
          @return An element.
          */
-        Element& operator=(shared_ptr<Tag> tag) noexcept;
+        Element& operator=(sTag tag) noexcept;
         
-        //! Set up the element with an object.
-        /** The function sets up the element with an object.
-         @param object   The object.
+        //! Set up the element with a box.
+        /** The function sets up the element with a box.
+         @param box   The box.
          @return An element.
          */
-        Element& operator=(weak_ptr<Object> object) noexcept;
-        
-        //! Set up the element with an object.
-        /** The function sets up the element with an object.
-         @param object   The object.
-         @return An element.
-         */
-        Element& operator=(shared_ptr<Object> object) noexcept;
-        
-        //! Set up the element with a dico.
-        /** The function sets up the element with a dico.
-         @param dico   The dico.
-         @return An element.
-         */
-        Element& operator=(weak_ptr<Dico> dico) noexcept;
+        Element& operator=(shared_ptr<Box> box) noexcept;
         
         //! Set up the element with a dico.
         /** The function sets up the element with a dico.
@@ -370,40 +332,26 @@ namespace Kiwi
          */
         bool operator==(const double value) const noexcept;
         
-        //! Compare the element with a tag.
-        /** The function compares the element with a tag.
-         @param value   The tag.
-         @return true if the element hold the tag otherwise false.
+        //! Compare the element with a string.
+        /** The function compares the element with a string.
+         @param tag   The string.
+         @return true if the element hold the tag create with the string otherwise false.
          */
-        bool operator==(weak_ptr<Tag> tag) const noexcept;
+        bool operator==(string const& tag) const noexcept;
         
         //! Compare the element with a tag.
         /** The function compares the element with a tag.
          @param value   The tag.
          @return true if the element hold the tag otherwise false.
          */
-        bool operator==(shared_ptr<Tag> tag) const noexcept;
+        bool operator==(sTag tag) const noexcept;
         
-        //! Compare the element with an object.
-        /** The function compares the element with an object.
-         @param object   The object.
-         @return true if the element hold the object otherwise false.
+        //! Compare the element with a box.
+        /** The function compares the element with a box.
+         @param box   The box.
+         @return true if the element hold the box otherwise false.
          */
-        bool operator==(weak_ptr<Object> object) const noexcept;
-        
-        //! Compare the element with an object.
-        /** The function compares the element with an object.
-         @param object   The object.
-         @return true if the element hold the object otherwise false.
-         */
-        bool operator==(shared_ptr<Object> object) const noexcept;
-        
-        //! Compare the element with a dico.
-        /** The function compares the element with a dico.
-         @param dico   The dico.
-         @return true if the element hold the dico otherwise false.
-         */
-        bool operator==(weak_ptr<Dico> dico) const noexcept;
+        bool operator==(shared_ptr<Box> box) const noexcept;
         
         //! Compare the element with a dico.
         /** The function compares the element with a dico.
