@@ -47,12 +47,6 @@ namespace Kiwi
         
     protected:
         
-        struct Connection
-        {
-            shared_ptr<Box> m_box;
-            size_t          m_index;
-        };
-        
         class Inlet
         {
         public:
@@ -83,6 +77,12 @@ namespace Kiwi
         class Outlet
         {
         public:
+            struct Connection
+            {
+                shared_ptr<Box> m_box;
+                size_t          m_index;
+            };
+            
             enum Type
             {
                 Data    = 0,
@@ -114,9 +114,11 @@ namespace Kiwi
         vector<unique_ptr<Outlet>>  m_outlets;
         vector<unique_ptr<Inlet>>   m_inlets;
         size_t                      m_stack_count;
+        
         unordered_set<weak_ptr<Listener>,
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>   m_listeners;
+        
     public:
         
         //! Constructor.
@@ -166,33 +168,38 @@ namespace Kiwi
          */
         void write(shared_ptr<Dico> dico) const;
 
-    private:
-        
-        //! The virtual constructor called by the page to create an instance of box.
-        /** The function retrieves an instance of the box.
-         @param dico        The dico that defines the box.
-         */
-        virtual shared_ptr<Box> allocate(shared_ptr<Page> page, sDico dico) const = 0;
-        
-        //! The write method that should be override.
-        /** The function writes the box in a dico.
-         @param dico The dico.
-         */
-        virtual void save(shared_ptr<Dico> dico) const;
-        
-        //! The read method that should be override.
-        /** The function read a dico to initalize the boxe.
-         @param dico The dico.
-         */
-        virtual void load(shared_ptr<const Dico> dico);
-        
-    public:
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
          @param elements    A list of elements to pass.
          */
         virtual bool receive(size_t index, ElemVector const& elements);
-    
+        
+        //! Retrieve the number of inlets of the box.
+        /** The functions retrieves the number of inlets of the box.
+         @return The number of inlets.
+         */
+        size_t getNumberOfInlets() const noexcept;
+        
+        //! Retrieve the description of an inlet.
+        /** The functions retrieves the description of an inlet.
+         @param index The inlet index.
+         @return The description.
+         */
+        string getInletDescription(size_t index) const noexcept;
+        
+        //! Retrieve the number of outlets of the box.
+        /** The functions retrieves the number of outlets of the box.
+         @return The number of outlets.
+         */
+        size_t  getNumberOfOutlets() const noexcept;
+        
+        //! Retrieve the description of an outlet.
+        /** The functions retrieves the description of an outlet.
+         @param index The index of the outlet.
+         @return The descrition.
+         */
+        string getOutletDescription(size_t index) const noexcept;
+        
     protected:
         
         //! Send a vector of elements via an outlet.
@@ -201,12 +208,6 @@ namespace Kiwi
          @param elements A list of elements to pass.
          */
         void    send(size_t index, ElemVector const& elements) const noexcept;
-    
-        // ================================================================================ //
-        //                                      INLETS                                      //
-        // ================================================================================ //
-        
-    protected:
         
         //! Add a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -229,27 +230,6 @@ namespace Kiwi
          */
         void    removeInlet(size_t index);
         
-    public:
-        
-        //! Retrieve the number of inlets of the box.
-        /** The functions retrieves the number of inlets of the box.
-         @return The number of inlets.
-         */
-        size_t getNumberOfInlets() const noexcept;
-        
-        //! Retrieve the description of an inlet.
-        /** The functions retrieves the description of an inlet.
-         @param index The inlet index.
-         @return The description.
-         */
-        string getInletDescription(size_t index) const noexcept;
-        
-        // ================================================================================ //
-        //                                      OUTLETS                                     //
-        // ================================================================================ //
-    
-    protected:
-        
         //! Add a new outlet the the box.
         /** The function adds a new outlet the the box.
          @param type The type of the outlet.
@@ -270,21 +250,28 @@ namespace Kiwi
          @param index The index of the outlet.
          */
         void    removeOutlet(size_t index);
+
+    private:
+        
+        //! The virtual constructor called by the page to create an instance of box.
+        /** The function retrieves an instance of the box.
+         @param dico        The dico that defines the box.
+         */
+        virtual shared_ptr<Box> allocate(shared_ptr<Page> page, sDico dico) const = 0;
+        
+        //! The write method that should be override.
+        /** The function writes the box in a dico.
+         @param dico The dico.
+         */
+        virtual void save(shared_ptr<Dico> dico) const;
+        
+        //! The read method that should be override.
+        /** The function read a dico to initalize the boxe.
+         @param dico The dico.
+         */
+        virtual void load(shared_ptr<const Dico> dico);
         
     public:
-        
-        //! Retrieve the number of outlets of the box.
-        /** The functions retrieves the number of outlets of the box.
-         @return The number of outlets.
-         */
-        size_t  getNumberOfOutlets() const noexcept;
-        
-        //! Retrieve the description of an outlet.
-        /** The functions retrieves the description of an outlet.
-         @param index The index of the outlet.
-         @return The descrition.
-         */
-        virtual string getOutletDescription(size_t index) const noexcept;
         
         static bool compatible(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept;
         

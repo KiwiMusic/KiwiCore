@@ -162,7 +162,7 @@ namespace Kiwi
                 }
                 else if(receiver->m_stack_count  == 256)
                 {
-                    Console::error(receiver, string("Stack overflow"));
+                    Console::error(receiver, "Stack overflow");
                     if(!receiver->receive(inlet, elements))
                     {
                         receiver->AttributeFactory::receive(elements);
@@ -170,7 +170,7 @@ namespace Kiwi
                 }
                 else
                 {
-                    Console::error(receiver, string("Stack overflow"));
+                    Console::error(receiver, "Stack overflow");
                 }
                 receiver->m_stack_count--;
             }

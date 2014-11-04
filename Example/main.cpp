@@ -18,10 +18,21 @@ int main (int argc, char* argv[])
     {
         Console::post("---------");
         sDico dico = Dico::create();
-        sDico dico2 = Dico::create();
         dico->read("test2.kiwi", "/Users/Pierre/Desktop");
         sPage page = kiwi->createPage(dico);
         {
+            dico->read("- 1.2");
+            page->createBox(dico);
+            dico->clear();
+            dico->set(Tag::from, {3, 0});
+            dico->set(Tag::to, {4, 0});
+            page->createConnection(dico);
+            /*
+            dico->set(Tag::from, {4, 0});
+            dico->set(Tag::to, {1, 0});
+            if(page->createConnection(dico))
+                cout << "aki";
+            */
             vector<sBox> boxes;
             page->getBoxes(boxes);
             if(boxes.size())
@@ -30,18 +41,8 @@ int main (int argc, char* argv[])
                 box->receive(1, {1});
                 box->receive(0, {2});
             }
-            
-            /*
-            sBox obj1 = page->createBox("+");
-            sBox obj2 = page->createBox("+ 2");
-            sBox obj3 = page->createBox("+ 1");
-            page->connect(obj1, 0, obj2, 0);
-            page->connect(obj3, 0, obj2, 1);
-             */
-            //obj1->receive(1, {12});
-            //obj1->receive(0, {1});
-            page->write(dico2);
-            dico2->write("test.kiwi", "/Users/Pierre/Desktop");
+            page->write(dico);
+            dico->write("test.kiwi", "/Users/Pierre/Desktop");
         }
         
     }

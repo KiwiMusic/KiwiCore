@@ -26,19 +26,15 @@
 
 namespace Kiwi
 {
-    // ================================================================================ //
-    //                                      PLUS                                        //
-    // ================================================================================ //
-    
     Plus::Plus(sPage page, Element const& element) : Box(page, "+"),
     m_double(element.isDouble()),
     m_augend(0),
     m_addend(element)
     {
-        addInlet(Inlet::DataHot, "Augend (int or double)");
-        addInlet(Inlet::DataCold, "Addend (int or double)");
+        addInlet(Inlet::DataHot, "Augend (int or float)");
+        addInlet(Inlet::DataCold, "Addend (int or float)");
         if(m_double)
-            addOutlet(Outlet::Data, "Sum (double)");
+            addOutlet(Outlet::Data, "Sum (float)");
         else
             addOutlet(Outlet::Data, "Sum (int)");
     }
@@ -48,16 +44,9 @@ namespace Kiwi
         
     }
     
-    sBox Plus::allocate(sPage page, sDico dico) const
-    {
-        Element element = dico->get(Tag::create("arguments"));
-        shared_ptr<Plus> plus = make_shared<Plus>(page, element);
-        return plus;
-    }
-    
     bool Plus::receive(size_t index, ElemVector const& elements)
     {
-        Console::post("Receive inlet " + toString(index) + " : " + toString(elements));
+        Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
         if(!elements.empty() && (elements[0].type() == Element::LONG || elements[0].type() == Element::DOUBLE))
         {
             if(index)
@@ -66,13 +55,59 @@ namespace Kiwi
             }
             else if(m_double)
             {
-                Console::post("Send : " + toString({(double)elements[0] + m_addend}));
-                send(0, {(double)elements[0] + m_addend});
+                m_augend = elements[0];
+                Console::post(shared_from_this(), "Send : " + toString({m_augend + m_addend}));
+                send(0, {m_augend + m_addend});
             }
             else
             {
-                Console::post("Send : " + toString({(long)elements[0] + (long)m_addend}));
-                send(0, {(long)elements[0] + (long)m_addend});
+                m_augend = (long)elements[0];
+                Console::post(shared_from_this(), "Send : " + toString({(long)m_augend + (long)m_addend}));
+                send(0, {(long)m_augend + (long)m_addend});
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    Minus::Minus(sPage page, Element const& element) : Box(page, "-"),
+    m_double(element.isDouble()),
+    m_minuend(0),
+    m_subtrahend(element)
+    {
+        addInlet(Inlet::DataHot, "Minuend (int or float)");
+        addInlet(Inlet::DataCold, "Subtrahend (int or float)");
+        if(m_double)
+            addOutlet(Outlet::Data, "Difference (float)");
+        else
+            addOutlet(Outlet::Data, "Difference (int)");
+    }
+    
+    Minus::~Minus()
+    {
+        
+    }
+    
+    bool Minus::receive(size_t index, ElemVector const& elements)
+    {
+        Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
+        if(!elements.empty() && (elements[0].type() == Element::LONG || elements[0].type() == Element::DOUBLE))
+        {
+            if(index)
+            {
+                m_subtrahend = elements[0];
+            }
+            else if(m_double)
+            {
+                m_minuend = elements[0];
+                Console::post(shared_from_this(), "Send : " + toString({m_minuend - m_subtrahend}));
+                send(0, {m_minuend + m_subtrahend});
+            }
+            else
+            {
+                m_minuend = (long)elements[0];
+                Console::post(shared_from_this(), "Send : " + toString({(long)m_minuend - (long)m_subtrahend}));
+                send(0, {(long)m_minuend + (long)m_subtrahend});
             }
             return true;
         }

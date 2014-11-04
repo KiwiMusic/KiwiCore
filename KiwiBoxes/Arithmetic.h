@@ -32,13 +32,9 @@ namespace Kiwi
     //                                  ARITHMETIC                                      //
     // ================================================================================ //
     
-    // ================================================================================ //
-    //                                      PLUS                                        //
-    // ================================================================================ //
     class Plus : public Box
     {
     private:
-        typedef shared_ptr<Plus> sPlus;
         friend class Arithmetic;
         const bool      m_double;
         double          m_augend;
@@ -48,12 +44,28 @@ namespace Kiwi
         ~Plus();
     private:
         bool receive(size_t index, ElemVector const& elements) override;
-        sBox allocate(sPage page, sDico dico) const override;
+        AllocateElement(Plus);
+    };
+    
+    class Minus : public Box
+    {
+    private:
+        friend class Arithmetic;
+        const bool      m_double;
+        double          m_minuend;
+        double          m_subtrahend;
+    public:
+        Minus(sPage page, Element const& element = 0);
+        ~Minus();
+    private:
+        bool receive(size_t index, ElemVector const& elements) override;
+        AllocateElement(Minus);
     };
     
     inline void arithmetic()
     {
         Box::addPrototype(unique_ptr<Box>(new Plus(nullptr, 0)));
+        Box::addPrototype(unique_ptr<Box>(new Minus(nullptr, 0)));
     }
 }
 

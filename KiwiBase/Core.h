@@ -26,6 +26,9 @@
 
 #include "Instance.h"
 
+#define AllocateElement(boxclass) \
+sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, dico->get(Tag::create("arguments"))); }
+
 #endif
 
 

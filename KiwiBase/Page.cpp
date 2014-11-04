@@ -72,6 +72,13 @@ namespace Kiwi
         auto it = find(m_boxes.begin(), m_boxes.end(), box);
         if(it != m_boxes.end())
         {
+            for(auto it2 = m_connections.begin(); it2 != m_connections.end(); ++it2)
+            {
+                if((*it2)->getFrom() == box || (*it2)->getTo() == box)
+                {
+                    removeConnection(*it2);
+                }
+            }
             m_boxes.erase(it);
             box->unbind(shared_from_this());
         }
@@ -134,6 +141,7 @@ namespace Kiwi
         auto it = find(m_connections.begin(), m_connections.end(), connection);
         if(it != m_connections.end())
         {
+            Box::disconnect(connection->getFrom(), connection->getOutletIndex(), connection->getTo(), connection->getInletIndex());
             m_connections.erase(it);
         }
     }
@@ -283,7 +291,13 @@ namespace Kiwi
     
     void Page::inletHasBeenRemoved(shared_ptr<Box> box, size_t index)
     {
-        
+        for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        {
+            if((*it)->getTo() == box && (*it)->getInletIndex() == index)
+            {
+                removeConnection(*it);
+            }
+        }
     }
     
     void Page::outletHasBeenCreated(shared_ptr<Box> box, size_t index)
@@ -293,7 +307,13 @@ namespace Kiwi
     
     void Page::outletHasBeenRemoved(shared_ptr<Box> box, size_t index)
     {
-        
+        for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        {
+            if((*it)->getFrom() == box || (*it)->getOutletIndex() == index)
+            {
+                removeConnection(*it);
+            }
+        }
     }
     
     void Page::bind(weak_ptr<Page::Listener> listener)

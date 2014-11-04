@@ -99,7 +99,7 @@ namespace Kiwi
         void Console::warning(shared_ptr<const Box> box, string const& message) noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << toString(box) << " : " << message << "\n";
+            cerr << "warning : " << toString(box) << " : " << message << "\n";
 #endif
             auto it = m_listeners.begin();
             while(it != m_listeners.end())
@@ -133,7 +133,7 @@ namespace Kiwi
         void Console::error(shared_ptr<const Box> box, string const& message) noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << toString(box) << " : " << message << "\n";
+            cerr << "error : " << toString(box) << " : " << message << "\n";
 #endif
             auto it = m_listeners.begin();
             while(it != m_listeners.end())

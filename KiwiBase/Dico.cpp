@@ -150,6 +150,7 @@ namespace Kiwi
     
     void Dico::read(string const& text)
     {
+        clear();
         size_t pos = 0;
         if(getType(text, pos) == Element::DICO)
         {
@@ -163,6 +164,7 @@ namespace Kiwi
     
     void Dico::read(string const& filename, string const& directoryname)
     {
+        clear();
         ifstream file;
         if(directoryname.size() && filename.size())
         {
@@ -588,6 +590,7 @@ namespace Kiwi
             }
         }
         dico->set(Tag::create(key), elements);
+        dico->set(Tag::text, Tag::create(text));
     }
 }
 
