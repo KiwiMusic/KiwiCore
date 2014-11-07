@@ -54,6 +54,7 @@ namespace Kiwi
         static unordered_set<weak_ptr<Listener>,
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>> m_listeners;
+        static mutex              m_mutex;
     public:
         
         // ================================================================================ //
@@ -65,14 +66,14 @@ namespace Kiwi
          @param listener  The pointer of the console listener.
          @see              unbind()
          */
-        static void bind(weak_ptr<Listener> listener);
+        static void bind(shared_ptr<Listener> listener);
         
         //! Remove an console listener from the binding list of the console.
         /** The function removes an console listener from the binding list of the console. If the console listener isn't in the binding list, the function doesn't do anything.
          @param box  The pointer of the console listener.
          @see           bind()
          */
-        static void unbind(weak_ptr<Listener> listener);
+        static void unbind(shared_ptr<Listener> listener);
         
         //! Post a standard message.
         /** The function post a message and notify the console listeners that a message has been received.
@@ -285,9 +286,12 @@ namespace Kiwi
         public:
             
             //! The constructor.
-            /** The constructor does nothing.
+            /** The constructor bind itself to the console.
              */
-            History();
+            History()
+            {
+                ;
+            }
             
             //! The destructor.
             /** The destructor clear all the messages.
@@ -295,6 +299,16 @@ namespace Kiwi
             ~History()
             {
                 m_messages.clear();
+            }
+            
+            //! The console history creation method.
+            /** The function allocates a console history and bind it to the console.
+             */
+            static shared_ptr<History> create()
+            {
+                shared_ptr<History> history = make_shared<History>();
+                Console::bind(history);
+                return history;
             }
             
             //! Receive the messages.

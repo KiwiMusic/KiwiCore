@@ -35,14 +35,22 @@ namespace Kiwi
     //                                      CONSOLE                                     //
     // ================================================================================ //
     
-    void Console::bind(weak_ptr<Console::Listener> listener)
+    void Console::bind(shared_ptr<Console::Listener> listener)
     {
-        m_listeners.insert(listener);
+        if(listener)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            m_listeners.insert(listener);
+        }
     }
     
-    void Console::unbind(weak_ptr<Console::Listener> listener)
+    void Console::unbind(shared_ptr<Console::Listener> listener)
     {
-        m_listeners.erase(listener);
+        if(listener)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            m_listeners.erase(listener);
+        }
     }
     
     void Console::post(string const& message) noexcept
@@ -51,6 +59,7 @@ namespace Kiwi
         cout << message << "\n";
 #endif
         Console::Message mess(nullptr, nullptr, nullptr, Message::Post, message);
+        lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             
@@ -58,6 +67,11 @@ namespace Kiwi
             if(to)
             {
                 to->receive(mess);
+            }
+            else
+            {
+                ++it;
+                m_listeners.erase(to);
             }
         }
     }
@@ -75,12 +89,18 @@ namespace Kiwi
             page        = box->getPage();
         }
         Console::Message mess(instance, page, box, Message::Post, message);
+        lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             shared_ptr<Console::Listener> to = (*it).lock();
             if(to)
             {
                 to->receive(mess);
+            }
+            else
+            {
+                ++it;
+                m_listeners.erase(to);
             }
         }
     }
@@ -91,6 +111,7 @@ namespace Kiwi
         cerr << "warning : " << message << "\n";
 #endif
         Console::Message mess(nullptr, nullptr, nullptr, Message::Warning, message);
+        lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             
@@ -98,6 +119,11 @@ namespace Kiwi
             if(to)
             {
                 to->receive(mess);
+            }
+            else
+            {
+                ++it;
+                m_listeners.erase(to);
             }
         }
     }
@@ -115,12 +141,18 @@ namespace Kiwi
             page        = box->getPage();
         }
         Console::Message mess(instance, page, box, Message::Warning, message);
+        lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             shared_ptr<Console::Listener> to = (*it).lock();
             if(to)
             {
                 to->receive(mess);
+            }
+            else
+            {
+                ++it;
+                m_listeners.erase(to);
             }
         }
     }
@@ -131,6 +163,7 @@ namespace Kiwi
         cerr << "error : " << message << "\n";
 #endif
         Console::Message mess(nullptr, nullptr, nullptr, Message::Error, message);
+        lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             
@@ -138,6 +171,11 @@ namespace Kiwi
             if(to)
             {
                 to->receive(mess);
+            }
+            else
+            {
+                ++it;
+                m_listeners.erase(to);
             }
         }
     }
@@ -155,12 +193,18 @@ namespace Kiwi
             page        = box->getPage();
         }
         Console::Message mess(instance, page, box, Message::Error, message);
+        lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             shared_ptr<Console::Listener> to = (*it).lock();
             if(to)
             {
                 to->receive(mess);
+            }
+            else
+            {
+                ++it;
+                m_listeners.erase(to);
             }
         }
     }
