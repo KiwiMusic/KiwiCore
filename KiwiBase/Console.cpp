@@ -233,7 +233,7 @@ namespace Kiwi
     
     void Console::History::receive(shared_ptr<const Message> message)
     {
-        lock_guard<mutex> guard(m_mutex);
+        lock_guard<mutex> guard(m_hmutex);
         size_t index = m_messages.size() + 1;
         m_messages.push_back({message, index});
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
@@ -253,7 +253,7 @@ namespace Kiwi
     
     void Console::History::clear()
     {
-        lock_guard<mutex> guard(m_mutex);
+        lock_guard<mutex> guard(m_hmutex);
         m_messages.clear();
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
@@ -272,13 +272,13 @@ namespace Kiwi
     
     size_t Console::History::size()
     {
-        lock_guard<mutex> guard(m_mutex);
+        //lock_guard<mutex> guard(m_hmutex);
         return m_messages.size();
     }
     
     shared_ptr<const Console::Message> Console::History::get(size_t index)
     {
-        lock_guard<mutex> guard(m_mutex);
+        lock_guard<mutex> guard(m_hmutex);
         if(index < m_messages.size())
         {
             return m_messages[index].m_message;
@@ -291,7 +291,7 @@ namespace Kiwi
     
     void Console::History::erase(size_t index)
     {
-        lock_guard<mutex> guard(m_mutex);
+        lock_guard<mutex> guard(m_hmutex);
         if(index < m_messages.size())
         {
             m_messages.erase(m_messages.begin()+index);
@@ -318,7 +318,7 @@ namespace Kiwi
     
     void Console::History::erase(size_t begin, size_t last)
     {
-        lock_guard<mutex> guard(m_mutex);
+        lock_guard<mutex> guard(m_hmutex);
         if(begin < last && last < m_messages.size())
         {
             m_messages.erase(m_messages.begin()+begin, m_messages.begin()+last);
@@ -386,7 +386,7 @@ namespace Kiwi
     {
         if(listener)
         {
-            lock_guard<mutex> guard(m_mutex);
+            lock_guard<mutex> guard(m_hmutex);
             m_listeners.insert(listener);
         }
     }
@@ -396,7 +396,7 @@ namespace Kiwi
     {
         if(listener)
         {
-            lock_guard<mutex> guard(m_mutex);
+            lock_guard<mutex> guard(m_hmutex);
             m_listeners.erase(listener);
         }
     }

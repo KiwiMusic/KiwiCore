@@ -185,7 +185,7 @@ namespace Kiwi
                 shared_ptr<const Console::Message> m_message;
                 size_t                             m_index;
             };
-            mutex                  m_mutex;
+            mutex                  m_hmutex;
             vector<MessageHolder>  m_messages;
             unordered_set<weak_ptr<Listener>,
             weak_ptr_hash<Listener>,
