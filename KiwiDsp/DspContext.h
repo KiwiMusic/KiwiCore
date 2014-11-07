@@ -47,9 +47,9 @@ namespace Kiwi
         double                          m_samplerate;
         long                            m_vectorsize;
         
-        vector<shared_ptr<DspNode>> m_nodes;
-        set<shared_ptr<DspNode>>    m_nodes_temp;
-        int                         m_index;
+        vector<shared_ptr<DspNode>>     m_nodes;
+        set<shared_ptr<DspNode>>        m_nodes_temp;
+        int                             m_index;
         
         void indexNode(shared_ptr<DspNode> node);
         static bool compareNode(shared_ptr<DspNode> node1, shared_ptr<DspNode> node2);
@@ -93,7 +93,7 @@ namespace Kiwi
         /** The function retrieves the number of process.
          @return The number of process.
          */
-        int getNumberOfProcess() const noexcept;
+        size_t getNumberOfProcess() const noexcept;
         
         //! Add a box to the dsp context.
         /** The function adds a box to the dsp context.

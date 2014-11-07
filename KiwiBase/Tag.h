@@ -106,6 +106,9 @@ namespace Kiwi
         static shared_ptr<const Tag> name;
         static shared_ptr<const Tag> ninlets;
         static shared_ptr<const Tag> noutlets;
+        static shared_ptr<const Tag> set;
+        static shared_ptr<const Tag> null;
+        static shared_ptr<const Tag> arguments;
     };
     
     typedef shared_ptr<const Tag> sTag;

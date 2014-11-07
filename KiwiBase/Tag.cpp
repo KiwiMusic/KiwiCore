@@ -38,6 +38,9 @@ namespace Kiwi
     sTag Tag::name        = Tag::create("name");
     sTag Tag::ninlets     = Tag::create("ninlets");
     sTag Tag::noutlets    = Tag::create("noutlets");
+    sTag Tag::set         = Tag::create("set");
+    sTag Tag::null        = Tag::create("null");
+    sTag Tag::arguments   = Tag::create("arguments");
 }
 
 

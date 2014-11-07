@@ -43,9 +43,15 @@ namespace Kiwi
         m_listeners.clear();
     }
     
+    bool libraries_loaded = false;
+    
     shared_ptr<Instance> Instance::create()
     {
-        arithmetic();
+        if(!libraries_loaded)
+        {
+            arithmetic();
+            libraries_loaded= true;
+        }
         return make_shared<Instance>();
     }
     

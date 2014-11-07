@@ -65,7 +65,7 @@ namespace Kiwi
         void Console::post(shared_ptr<const Box> box, string const& message) noexcept
         {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << toString(box) << " : " << message << "\n";
+            cerr << toString(box->getText()) << " : " << message << "\n";
 #endif
             auto it = m_listeners.begin();
             while(it != m_listeners.end())

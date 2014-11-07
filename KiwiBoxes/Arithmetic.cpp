@@ -26,92 +26,138 @@
 
 namespace Kiwi
 {
-    Plus::Plus(sPage page, Element const& element) : Box(page, "+"),
-    m_double(element.isDouble()),
-    m_augend(0),
-    m_addend(element)
+    Arithmetic::Arithmetic(sPage page, string const& name, ElemVector const& elements, string const& input1, string const& input2,string const& output) :
+    Box(page, name)
     {
-        addInlet(Inlet::DataHot, "Augend (int or float)");
-        addInlet(Inlet::DataCold, "Addend (int or float)");
-        if(m_double)
-            addOutlet(Outlet::Data, "Sum (float)");
+        m_first     = 0.;
+        m_second    = 0.;
+        addInlet(Inlet::DataHot, input1 + " (int or float)");
+        if(!elements.empty() && (elements[0].isDouble() || elements[0].isLong()))
+        {
+            m_second = elements[0];
+        }
         else
-            addOutlet(Outlet::Data, "Sum (int)");
+        {
+            addInlet(Inlet::DataCold, input2 + " (int or float)");
+        }
+        addOutlet(Outlet::Data, output + " (float)");
     }
     
-    Plus::~Plus()
+    Arithmetic::~Arithmetic()
     {
-        
+        ;
     }
     
-    bool Plus::receive(size_t index, ElemVector const& elements)
+    bool Arithmetic::receive(size_t index, ElemVector const& elements)
     {
         Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
-        if(!elements.empty() && (elements[0].type() == Element::LONG || elements[0].type() == Element::DOUBLE))
+        if(!elements.empty())
         {
-            if(index)
+            if(elements.size() == 1 && (elements[0].isLong() || elements[0].isDouble()))
             {
-                m_addend = elements[0];
+                if(elements[0].isLong() || elements[0].isDouble())
+                {
+                    if(!index)
+                    {
+                        m_first = elements[0];
+                        Console::post(shared_from_this(), "Send : " + toString({compute()}));
+                        send(0, {compute()});
+                    }
+                    else
+                    {
+                        m_second = elements[0];
+                    }
+                }
+                else if(elements[0] == Tag::set)
+                {
+                    if(!index)
+                    {
+                        m_first = elements[0];
+                        Console::post(shared_from_this(), "Send : " + toString({compute()}));
+                        send(0, {compute()});
+                    }
+                    else
+                    {
+                        m_second = elements[0];
+                    }
+                }
+                return true;
             }
-            else if(m_double)
-            {
-                m_augend = elements[0];
-                Console::post(shared_from_this(), "Send : " + toString({m_augend + m_addend}));
-                send(0, {m_augend + m_addend});
-            }
-            else
-            {
-                m_augend = (long)elements[0];
-                Console::post(shared_from_this(), "Send : " + toString({(long)m_augend + (long)m_addend}));
-                send(0, {(long)m_augend + (long)m_addend});
-            }
-            return true;
         }
         return false;
     }
     
-    Minus::Minus(sPage page, Element const& element) : Box(page, "-"),
-    m_double(element.isDouble()),
-    m_minuend(0),
-    m_subtrahend(element)
+    string Arithmetic::getExpression() const noexcept
     {
-        addInlet(Inlet::DataHot, "Minuend (int or float)");
-        addInlet(Inlet::DataCold, "Subtrahend (int or float)");
-        if(m_double)
-            addOutlet(Outlet::Data, "Difference (float)");
+        if(getNumberOfInlets() == 1)
+        {
+            return "i1" + toString(getName()) + toString(m_second);
+        }
         else
-            addOutlet(Outlet::Data, "Difference (int)");
+        {
+            return "i1" + toString(getName()) + "i2";
+        }
     }
     
-    Minus::~Minus()
+    
+    Expression::Expression(sPage page, ElemVector const& elements) : Box(page, "expr")
+    {
+        long   max = 0;
+        string word;
+        string expr = toString(elements);
+        istringstream iss(expr);
+        while(iss >> word)
+        {
+            if(word[0] == 'i')
+            {
+                if(isdigit(word[1]))
+                {
+                    long num = atol(word.c_str()+1);
+                    if(max < num)
+                    {
+                        max = num;
+                    }
+                }
+            }
+        }
+        m_values.resize(max, 0.);
+        for(size_t i = 0; i < m_values.size(); i++)
+        {
+            m_parser.DefineVar("i" + toString(i+1), &m_values[i]);
+            addInlet(Inlet::DataHot, "i" + toString(i+1) + " (int or float)");
+        }
+        m_parser.SetExpr(expr);
+    }
+    
+    Expression::~Expression()
     {
         
     }
     
-    bool Minus::receive(size_t index, ElemVector const& elements)
+    bool Expression::receive(size_t index, ElemVector const& elements)
     {
-        Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
-        if(!elements.empty() && (elements[0].type() == Element::LONG || elements[0].type() == Element::DOUBLE))
+        if(index < m_values.size() && !elements.empty())
         {
-            if(index)
+            if(elements[0].isLong() || elements[0].isDouble())
             {
-                m_subtrahend = elements[0];
+                double result;
+                m_values[index] = elements[0];
+                try
+                {
+                    result = m_parser.Eval();
+                }
+                catch (mu::Parser::exception_type &e)
+                {
+                    std::cout << e.GetMsg() << std::endl;
+                }
+                
+                send(0, {result});
+                Console::post(shared_from_this(), " = " + toString(result));
+                return true;
             }
-            else if(m_double)
-            {
-                m_minuend = elements[0];
-                Console::post(shared_from_this(), "Send : " + toString({m_minuend - m_subtrahend}));
-                send(0, {m_minuend + m_subtrahend});
-            }
-            else
-            {
-                m_minuend = (long)elements[0];
-                Console::post(shared_from_this(), "Send : " + toString({(long)m_minuend - (long)m_subtrahend}));
-                send(0, {(long)m_minuend + (long)m_subtrahend});
-            }
-            return true;
         }
         return false;
     }
+    
 }
 
