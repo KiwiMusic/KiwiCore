@@ -334,87 +334,27 @@ namespace Kiwi
                 Warning = 3
             };
             
-            enum Sender
-            {
-                Unknown = 0,
-                Box     = 1,
-                Page    = 2,
-                Instance= 3
-            };
+            const string                          content;
+            const Kind                            kind;
+            const weak_ptr<const Kiwi::Box>       box;
+            const weak_ptr<const Kiwi::Page>      page;
+            const weak_ptr<const Kiwi::Instance>  instance;
             
-        private:
-            const string                          m_message;
-            const Kind                            m_kind;
-            const weak_ptr<const Kiwi::Box>       m_box;
-            const weak_ptr<const Kiwi::Page>      m_page;
-            const weak_ptr<const Kiwi::Instance>  m_instance;
-            
-        public:
             //! The constructor.
             /** The constructor initialize the members.
              */
-            Message(shared_ptr<const Kiwi::Instance> instance, shared_ptr<const Kiwi::Page> page, shared_ptr<const Kiwi::Box> box, Kind kind, string const& message) noexcept;
+            Message(shared_ptr<const Kiwi::Instance> instance, shared_ptr<const Kiwi::Page> page, shared_ptr<const Kiwi::Box> box, Kind kind, string const& content) noexcept :
+            content(content), kind(kind), box(box), page(page), instance(instance)
+            {
+                ;
+            }
             
             //! The destructor.
             /** The destructor free the members.
              */
-            ~Message();
-            
-            //! Retrieve the content of the message.
-            /** The function retrieves the content of the message as a string.
-             @return The content of the message.
-             */
-            inline string getContent() const noexcept
+            ~Message()
             {
-                return m_message;
-            }
-            
-            //! Retrieve the type of the message.
-            /** The function retrieves the type of the message. It could a post, a warning or an error.
-             @return The type of the message.
-             */
-            inline Kind getKind() const noexcept
-            {
-                return m_kind;
-            }
-            
-            //! Retrieve the name of the sender.
-            /** The function retrieves the name of the sender if it exists.
-             @return The name of the sender.
-             */
-            string getName() const noexcept;
-            
-            //! Retrieve the class of the sender.
-            /** The function retrieves the class of the sender of the message. It could a box, a page, an instance or unknown. If the sender is a box, you should also be able to retrieve the page and and the instance and if the sender is a page, you should be able to retrieve the instance.
-             @return The class of the sender of the message.
-             */
-            Sender getSenderClass() const noexcept;
-            
-            //! Retrieve the box of the message.
-            /** The function retrieves the box that has sent the message. If the sender wasn't a box or if the box has been deleted it will returns null.
-             @return The box of the message.
-             */
-            inline weak_ptr<const Kiwi::Box> getBox() const noexcept
-            {
-                return m_box;
-            }
-            
-            //! Retrieve the page of the message.
-            /** The function retrieves the page that has sent the message or the page of the box that has sent the message. If the sender wasn't a page or a box or if the page has been deleted it will returns null.
-             @return The page of the message.
-             */
-            inline weak_ptr<const Kiwi::Page> getPage() const noexcept
-            {
-                return m_page;
-            }
-            
-            //! Retrieve the instance that of the message.
-            /** The function retrieves the instance that has sent the message or the instance of the  page or the box that has sent the message. If the sender is unkown or if the instance has been deleted it will returns null.
-             @return The instance that of the message.
-             */
-            inline weak_ptr<const Kiwi::Instance> getInstance() const noexcept
-            {
-                return m_instance;
+                ;
             }
         };
     };

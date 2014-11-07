@@ -350,17 +350,61 @@ namespace Kiwi
         
     bool Console::History::compareName(Console::History::MessageHolder const& i, Console::History::MessageHolder const& j)
     {
-        return i.m_message->getName().compare(j.m_message->getName());
+        string text1, text2;
+        shared_ptr<const Message> mess;
+        mess = i.m_message;
+        if(mess)
+        {
+            shared_ptr<const Box> box = mess->box.lock();
+            if(box)
+            {
+                text1 = toString(box);
+            }
+        }
+        mess = j.m_message;
+        if(mess)
+        {
+            shared_ptr<const Box> box = mess->box.lock();
+            if(box)
+            {
+                text2 = toString(box);
+            }
+        }
+        return text1.compare(text2);
     }
     
     bool Console::History::compareContent(Console::History::MessageHolder const& i, Console::History::MessageHolder const& j)
     {
-        return i.m_message->getContent().compare(j.m_message->getContent());
+        string text1, text2;
+        shared_ptr<const Message> mess;
+        mess = i.m_message;
+        if(mess)
+        {
+            text1 = mess->content;
+        }
+        mess = j.m_message;
+        if(mess)
+        {
+            text2 = mess->content;
+        }
+        return text1.compare(text2);
     }
         
     bool Console::History::compareKind(Console::History::MessageHolder const& i, Console::History::MessageHolder const& j)
     {
-        return (i.m_message->getKind() < j.m_message->getKind());
+        Console::Message::Kind kind1, kind2;
+        shared_ptr<const Message> mess;
+        mess = i.m_message;
+        if(mess)
+        {
+            kind1 = mess->kind;
+        }
+        mess = j.m_message;
+        if(mess)
+        {
+            kind2 = mess->kind;
+        }
+        return kind1 < kind2;
     }
     
     void Console::History::sort(Sort type)
@@ -400,44 +444,7 @@ namespace Kiwi
             m_listeners.erase(listener);
         }
     }
-    // ================================================================================ //
-    //                                  CONSOLE MESSAGE                                 //
-    // ================================================================================ //
-        
-    Console::Message::Message(shared_ptr<const Kiwi::Instance> instance, shared_ptr<const Kiwi::Page> page, shared_ptr<const Kiwi::Box> box, Kind kind, string const& message) noexcept : m_message(message), m_kind(kind), m_box(box), m_page(page), m_instance(instance)
-    {
-        ;
-    }
     
-    Console::Message::~Message()
-    {
-        ;
-    }
-    
-    string Console::Message::getName() const noexcept
-    {
-        shared_ptr<const Kiwi::Box> box = m_box.lock();
-        if(box)
-        {
-            return toString(box);
-        }
-        else
-        {
-            return "";
-        }
-    }
-    
-    Console::Message::Sender Console::Message::getSenderClass() const noexcept
-    {
-        if(m_box.lock())
-            return Box;
-        else if(m_page.lock())
-            return Page;
-        else if(m_instance.lock())
-            return Instance;
-        else
-            return Unknown;
-    }
 }
 
 
