@@ -364,7 +364,7 @@ namespace Kiwi
             /** The function retrieves the content of the message as a string.
              @return The content of the message.
              */
-            inline string getMessage() const noexcept
+            inline string getContent() const noexcept
             {
                 return m_message;
             }

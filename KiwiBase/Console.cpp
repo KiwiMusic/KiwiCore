@@ -355,7 +355,7 @@ namespace Kiwi
     
     bool Console::History::compareContent(Console::History::MessageHolder const& i, Console::History::MessageHolder const& j)
     {
-        return i.m_message->getMessage().compare(j.m_message->getMessage());
+        return i.m_message->getContent().compare(j.m_message->getContent());
     }
         
     bool Console::History::compareKind(Console::History::MessageHolder const& i, Console::History::MessageHolder const& j)
