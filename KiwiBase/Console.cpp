@@ -50,103 +50,121 @@ namespace Kiwi
 #if defined(DEBUG) || defined(NO_GUI)
         cout << message << "\n";
 #endif
-        auto it = m_listeners.begin();
-        while(it != m_listeners.end())
+        Console::Message mess(nullptr, nullptr, nullptr, Message::Post, message);
+        for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
+        {
+            
+            shared_ptr<Console::Listener> to = (*it).lock();
+            if(to)
+            {
+                to->receive(mess);
+            }
+        }
+    }
+        
+    void Console::post(shared_ptr<const Box> box, string const& message) noexcept
+    {
+#if defined(DEBUG) || defined(NO_GUI)
+        cerr << toString(box->getText()) << " : " << message << "\n";
+#endif
+        shared_ptr<const Kiwi::Instance> instance = nullptr;
+        shared_ptr<const Kiwi::Page> page = nullptr;
+        if(box)
+        {
+            instance    = box->getInstance();
+            page        = box->getPage();
+        }
+        Console::Message mess(instance, page, box, Message::Post, message);
+        for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             shared_ptr<Console::Listener> to = (*it).lock();
             if(to)
             {
-                to->post(nullptr, nullptr, message);
+                to->receive(mess);
             }
-            ++it;
         }
-        }
+    }
         
-        void Console::post(shared_ptr<const Box> box, string const& message) noexcept
-        {
+    void Console::warning(string const& message) noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << toString(box->getText()) << " : " << message << "\n";
+        cerr << "warning : " << message << "\n";
 #endif
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+        Console::Message mess(nullptr, nullptr, nullptr, Message::Warning, message);
+        for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
+        {
+            
+            shared_ptr<Console::Listener> to = (*it).lock();
+            if(to)
             {
-                shared_ptr<Console::Listener> to = (*it).lock();
-                if(to)
-                {
-                    to->post(nullptr, box, message);
-                }
-                ++it;
+                to->receive(mess);
             }
         }
+    }
         
-        void Console::warning(string const& message) noexcept
-        {
+    void Console::warning(shared_ptr<const Box> box, string const& message) noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << "warning : " << message << "\n";
+        cerr << "warning : " << toString(box) << " : " << message << "\n";
 #endif
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+        shared_ptr<const Kiwi::Instance> instance = nullptr;
+        shared_ptr<const Kiwi::Page> page = nullptr;
+        if(box)
+        {
+            instance    = box->getInstance();
+            page        = box->getPage();
+        }
+        Console::Message mess(instance, page, box, Message::Warning, message);
+        for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
+        {
+            shared_ptr<Console::Listener> to = (*it).lock();
+            if(to)
             {
-                shared_ptr<Console::Listener> to = (*it).lock();
-                if(to)
-                {
-                    to->warning(nullptr, nullptr, message);
-                }
-                ++it;
+                to->receive(mess);
             }
         }
+    }
         
-        void Console::warning(shared_ptr<const Box> box, string const& message) noexcept
-        {
+    void Console::error(string const& message) noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << "warning : " << toString(box) << " : " << message << "\n";
+        cerr << "error : " << message << "\n";
 #endif
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+        Console::Message mess(nullptr, nullptr, nullptr, Message::Error, message);
+        for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
+        {
+            
+            shared_ptr<Console::Listener> to = (*it).lock();
+            if(to)
             {
-                shared_ptr<Console::Listener> to = (*it).lock();
-                if(to)
-                {
-                    to->warning(nullptr, box, message);
-                }
-                ++it;
+                to->receive(mess);
             }
         }
+    }
         
-        void Console::error(string const& message) noexcept
-        {
+    void Console::error(shared_ptr<const Box> box, string const& message) noexcept
+    {
 #if defined(DEBUG) || defined(NO_GUI)
-            cerr << "error : " << message << "\n";
+        cerr << "error : " << toString(box) << " : " << message << "\n";
 #endif
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+        shared_ptr<const Kiwi::Instance> instance = nullptr;
+        shared_ptr<const Kiwi::Page> page = nullptr;
+        if(box)
+        {
+            instance    = box->getInstance();
+            page        = box->getPage();
+        }
+        Console::Message mess(instance, page, box, Message::Error, message);
+        for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
+        {
+            shared_ptr<Console::Listener> to = (*it).lock();
+            if(to)
             {
-                shared_ptr<Console::Listener> to = (*it).lock();
-                if(to)
-                {
-                    to->error(nullptr, nullptr, message);
-                }
-                ++it;
+                to->receive(mess);
             }
         }
+    }
         
-        void Console::error(shared_ptr<const Box> box, string const& message) noexcept
-        {
-#if defined(DEBUG) || defined(NO_GUI)
-            cerr << "error : " << toString(box) << " : " << message << "\n";
-#endif
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                shared_ptr<Console::Listener> to = (*it).lock();
-                if(to)
-                {
-                    to->error(nullptr, box, message);
-                }
-                ++it;
-            }
-        }
-
 }
 
 

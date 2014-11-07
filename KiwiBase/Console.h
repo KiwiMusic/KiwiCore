@@ -30,7 +30,8 @@ namespace Kiwi
 {
     class Box;
     class Page;
-
+    class Instance;
+    
     // ================================================================================ //
     //                                      CONSOLE                                     //
     // ================================================================================ //
@@ -38,12 +39,16 @@ namespace Kiwi
     //! The console is an interface that receives messages and dispatches them to console listeners.
     /**
      The console is created with a kiwi instance then retrieve it and bind a console listener to get the posts, warnings and errors.
-     @see ConsoleListener
+     @see Console::Message
+     @see Console::Listener
+     @see Console::History
      */
     class Console : public enable_shared_from_this<Console>
     {
     public:
         class Listener;
+        class Message;
+            
     private:
         
         static unordered_set<weak_ptr<Listener>,
@@ -109,13 +114,131 @@ namespace Kiwi
         static void error(const shared_ptr<const Box> box, string const& message) noexcept;
         
         // ================================================================================ //
+        //                                  CONSOLE MESSAGE                                 //
+        // ================================================================================ //
+        
+        //! The console message owns all the informations of a message posted via a console.
+        /**
+         The console message is used to send the content, the type and the sender of a message posted via a console to the console listeners.
+         @see Console
+         @see Console::Listener
+         @see Console::History
+         */
+        class Message
+        {
+        public:
+            enum Type
+            {
+                Empty   = 0,
+                Post    = 1,
+                Error   = 2,
+                Warning = 3
+            };
+            
+            enum Sender
+            {
+                Unknown = 0,
+                Box     = 1,
+                Page    = 2,
+                Instance= 3
+            };
+            
+        private:
+            string                          m_message;
+            Type                            m_type;
+            weak_ptr<const Kiwi::Box>       m_box;
+            weak_ptr<const Kiwi::Page>      m_page;
+            weak_ptr<const Kiwi::Instance>  m_instance;
+            
+        public:
+            //! The constructor.
+            /** The constructor initialize the members.
+             */
+            Message(shared_ptr<const Kiwi::Instance> instance, shared_ptr<const Kiwi::Page> page, shared_ptr<const Kiwi::Box> box, Type type, string const& message) noexcept : m_message(message),m_type(type), m_box(box), m_page(page), m_instance(instance)
+            {
+                ;
+            }
+            
+            //! The destructor.
+            /** The destructor free the members.
+             */
+            ~Message()
+            {
+                ;
+            }
+            
+            //! Retrieve the content of the message.
+            /** The function retrieves the content of the message as a string.
+             @return The content of the message.
+             */
+            inline string getMessage() const noexcept
+            {
+                return m_message;
+            }
+            
+            //! Retrieve the type of the message.
+            /** The function retrieves the type of the message. It could a post, a warning or an error.
+             @return The type of the message.
+             */
+            inline Type getType() const noexcept
+            {
+                return m_type;
+            }
+            
+            //! Retrieve the class of the sender.
+            /** The function retrieves the class of the sender of the message. It could a box, a page, an instance or unknown. If the sender is a box, you should also be able to retrieve the page and and the instance and if the sender is a page, you should be able to retrieve the instance.
+             @return The class of the sender of the message.
+             */
+            inline Sender getSenderClass() const noexcept
+            {
+                if(m_box.lock())
+                    return Box;
+                else if(m_page.lock())
+                    return Page;
+                else if(m_instance.lock())
+                    return Instance;
+                else
+                    return Unknown;
+            }
+            
+            //! Retrieve the box of the message.
+            /** The function retrieves the box that has sent the message. If the sender wasn't a box or if the box has been deleted it will returns null.
+             @return The box of the message.
+             */
+            inline weak_ptr<const Kiwi::Box> getBox() const noexcept
+            {
+                return m_box;
+            }
+            
+            //! Retrieve the page of the message.
+            /** The function retrieves the page that has sent the message or the page of the box that has sent the message. If the sender wasn't a page or a box or if the page has been deleted it will returns null.
+             @return The page of the message.
+             */
+            inline weak_ptr<const Kiwi::Page> getPage() const noexcept
+            {
+                return m_page;
+            }
+            
+            //! Retrieve the instance that of the message.
+            /** The function retrieves the instance that has sent the message or the instance of the  page or the box that has sent the message. If the sender is unkown or if the instance has been deleted it will returns null.
+             @return The instance that of the message.
+             */
+            inline weak_ptr<const Kiwi::Instance> getInstance() const noexcept
+            {
+                return m_instance;
+            }
+        };
+        
+        // ================================================================================ //
         //                                  INSTANCE LISTENER                               //
         // ================================================================================ //
         
         //! The console listener is a virtual class that can bind itself to a console and be notified of the sevreal messages.
         /**
-         The console is a very light class with three methods that can receive the post, warning and error messages with the pointer of the box sender if it exists.
-         @see Instance
+         The console listener is a very light class with three methods that can receive the post, warning and error messages notifications from consoles.
+         @see Console
+         @see Console::Message
+         @see Console::History
          */
         class Listener
         {
@@ -137,30 +260,119 @@ namespace Kiwi
                 ;
             }
             
-            //! Receive the post messages.
-            /** The function is called by the console when a message has been post.
-             @param page    The page.
-             @param box     The box.
-             @param message The message in the string format.
+            //! Receive the messages.
+            /** The function is called by the console when a message has been received.
+             @param console The console that received the message.
+             @param message The message.
              */
-            virtual void post(shared_ptr<const Page> page, const shared_ptr<const Box> box, string const& message) {};
-            
-            //! Receive the warning messages.
-            /** The function is called by the console when a warning has been post.
-             @param page    The page.
-             @param box     The box.
-             @param message The warning in the string format.
-             */
-            virtual void warning(shared_ptr<const Page> page, const shared_ptr<const Box> box, string const& message) {};
-            
-            //! Receive the error messages.
-            /** The function is called by the console when a error has been post.
-             @param page    The page.
-             @param box     The box.
-             @param message The error in the string format.
-             */
-            virtual void error(shared_ptr<const Page> page, const shared_ptr<const Box> box, string const& message) {};
+            virtual void receive(Message const& message) {};
         };
+        
+        // ================================================================================ //
+        //                                  CONSOLE HISTORY                                 //
+        // ================================================================================ //
+        
+        //! The console history is a console listener that keeps an history of the messages.
+        /**
+         The console is a very light class with three methods that can receive the post, warning and error messages with the pointer of the box sender if it exists.
+         @see Instance
+         */
+        class History : public Console::Listener
+        {
+        private:
+            mutex           m_mutex;
+            vector<Message> m_messages;
+        public:
+            
+            //! The constructor.
+            /** The constructor does nothing.
+             */
+            History();
+            
+            //! The destructor.
+            /** The destructor clear all the messages.
+             */
+            ~History()
+            {
+                m_messages.clear();
+            }
+            
+            //! Receive the messages.
+            /** The function is called by the console when a message has been received.
+             @param console The console that received the message.
+             @param message The message.
+             */
+            void receive(Message const& message) override
+            {
+                lock_guard<mutex> guard(m_mutex);
+                m_messages.push_back(message);
+            }
+        
+            //! Clear the messages.
+            /** The function clears the history of messages.
+             */
+            inline void clear()
+            {
+                lock_guard<mutex> guard(m_mutex);
+                m_messages.clear();
+            }
+            
+            //! Retreives the number of messages in the history.
+            /** The function retreives the number of messages in the history.
+             @return The number of messages.
+             */
+            inline size_t size()
+            {
+                lock_guard<mutex> guard(m_mutex);
+                return m_messages.size();
+            }
+            
+            //! Retreives a message from the history.
+            /** The function retreives a message from the history.
+             @param index The index of the message.
+             @return The number of messages.
+             */
+            inline Message get(size_t index)
+            {
+                lock_guard<mutex> guard(m_mutex);
+                if(index < m_messages.size())
+                {
+                    return m_messages[index];
+                }
+                else
+                {
+                    return Message(nullptr, nullptr, nullptr, Message::Type::Empty, "");
+                }
+            }
+            
+            //! Erase a message from the history.
+            /** The function erases a message from the history.
+             @param index The index of the message.
+             */
+            inline void erase(size_t index)
+            {
+                lock_guard<mutex> guard(m_mutex);
+                if(index < m_messages.size())
+                {
+                    m_messages.erase(m_messages.begin()+index);
+                }
+            }
+            
+            //! Erase a range of messages from the history.
+            /** The function a range of messages from the history.
+             @param begin The index of the message of the first message.
+             @param last The index of the message of the last message.
+             */
+            inline void erase(size_t begin, size_t last)
+            {
+                lock_guard<mutex> guard(m_mutex);
+                if(begin < last && last < m_messages.size())
+                {
+                    m_messages.erase(m_messages.begin()+begin, m_messages.begin()+last);
+                }
+            }
+        };
+    
     };    
 };
 
