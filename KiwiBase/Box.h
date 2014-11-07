@@ -376,7 +376,7 @@ namespace Kiwi
     
     typedef weak_ptr<Box>       wBox;
     
-    inline string toString(const shared_ptr<const Box> box)
+    inline string toString(shared_ptr<const Box> box)
     {
         return toString(box->getName());
     }

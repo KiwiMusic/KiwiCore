@@ -72,10 +72,6 @@ int main (int argc, char* argv[])
             
             std::cout << p.Eval() << std::endl;
              */
-            cout << nbox.get() << endl;
-            nbox.reset();
-            cout << nbox.get() << endl;
-            nbox->receive(0, {});
         }
         
     }
