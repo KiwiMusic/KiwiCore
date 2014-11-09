@@ -32,7 +32,6 @@
 namespace Kiwi
 {
     class Instance;
-    class AttributeFactory;
     
     // ================================================================================ //
     //                                      ATTRIBUTE                                   //
@@ -47,7 +46,7 @@ namespace Kiwi
     public:
 		
 		/** Flags describing the behavior of the attribute.
-		 @see setInvisible, setOpaque, setDisabled, setSaved, setNotify
+		 @see setInvisible, setOpaque, setDisabled, setSaveable, setNotifyChanges
 		 */
         enum Behavior
         {
@@ -60,29 +59,29 @@ namespace Kiwi
 			 An opaque attribute will not be displayed in the Kiwi properties inspector
 			 @see Attribute::setOpaque
 			 */
-            Opaque			= (1<<1),
+            Opaque				= (1<<1),
 			
 			/** Indicates that the attribute is disabled
 			 When the Disabled flag of an attribute is set it should be displayed in the Kiwi properties inspector,
 			 but any changes are not allowed
 			 @see Attribute::setOpaque
 			 */
-			Disabled		= (1<<2),
+			Disabled			= (1<<2),
 			
 			/** Indicates that the attribute can not be frozen
 			 @see Attribute::freeze
 			 */
-			NotFreezable	= (1<<3),
+			NotFreezable		= (1<<3),
 			
-			/** Indicates that the attribute is saved
-			 @see Attribute::setSaved
+			/** Indicates that the attribute is not saveable
+			 @see Attribute::setSaveable
 			 */
-            NotSaved		= (1<<4),
+            NotSaveable			= (1<<4),
 			
-			/** Indicates that the attribute should broadcast a notify message when it is modified.
-			 @see Attribute::setNotify
+			/** Indicates that the attribute should not broadcast a notify message when it is modified.
+			 @see Attribute::setNotifyChanges
 			 */
-            NotNotify		= (1<<5)
+            NotNotifyChanges	= (1<<5)
         };
 		
 		/** Flags describing the type of the attribute.
@@ -114,8 +113,6 @@ namespace Kiwi
 			Color,			///< Indicates that the attribute should be displayed in a color style
 			Filepath		///< Indicates that the attribute should be displayed in a filepath style
 		};
-		
-        friend class AttributeFactory;
 		
     private:
         sTag            m_name;				///< The name of the attribute.
@@ -157,77 +154,123 @@ namespace Kiwi
          @return The name of the attribute.
 		 @see label, style, category
          */
-        inline sTag name()
-        {
-            return m_name;
-        }
+        inline sTag name() const noexcept							{return m_name;}
         
         //! Retrieve the attribute label.
         /** The function retrieves the attribute label.
          @return The attribute label.
 		 @see name, style, category
          */
-        inline string label() const noexcept
-        {
-            return m_label;
-        }
-        
+        inline string label() const noexcept						{return m_label;}
+		
+		//! Sets the attribute label.
+		/** The function sets the attribute label.
+		 @param newLabel The new label of the attribute.
+		 @see label
+		 */
+		inline void setLabel(const string& newLabel) noexcept		{m_label = newLabel;}
+		
         //! Retrieve the attribute style.
         /** The function retrieves the attribute style.
          @return The attribute style.
 		 @see name, label, category
          */
-        inline Style style() const noexcept
-        {
-            return m_style;
-        }
+        inline Style style() const noexcept							{return m_style;}
+		
+		//! Sets the attribute style.
+		/** The function sets the attribute style.
+		 @param newStyle The new style of the attribute.
+		 @see style
+		 */
+		inline void setStyle(Style newStyle) noexcept				{m_style = newStyle;}
         
         //! Retrieve the attribute category.
         /** The function retrieves the attribute category.
          @return The attribute category.
 		 @see name, label, style
          */
-        inline string category() const noexcept
-        {
-            return m_category;
-        }
+        inline string category() const noexcept						{return m_category;}
 		
-		/** An easy way to set or remove the Visible bit in the attribute behavior flags field.
-		 @param isVisible If true, the attribute will be visible, if false it will not.
-		 @see setOpaque, setDisabled, setSaved, setNotify, setBehavior
+		//! Sets the attribute category.
+		/** The function sets the attribute category.
+		 @param Category The new category of the attribute.
+		 @see style
 		 */
-		void setInvisible (const bool isInvisible) noexcept;
+		inline void setCategory(const string& newCategory) noexcept	{m_category = newCategory;}
+		
+		/** An easy way to set or remove the Invisible bit in the attribute behavior flags field.
+		 @param isVisible If true, the attribute will be invisible, if false it will be visible.
+		 @see setOpaque, setDisabled, setSaveable, setNotifyChanges, setBehavior
+		 */
+		void setInvisible(const bool isInvisible) noexcept;
+		
+		/** Is the attribute Invisible ?
+		 @return True if the attribute is invisible, false if it is visible.
+		 @see setInvisible, isOpaque, isDisabled, isSaveable, shouldNotifyChanges, getBehavior
+		 */
+		inline bool isInvisible() const noexcept					{return (m_behavior & Invisible);}
 		
 		/** An easy way to set or remove the Opaque bit in the attribute behavior flags field.
 		 @param isOpaque If true, the attribute will be opaque, if false it will not.
-		 @see setInvisible, setDisabled, setSaved, setNotify, setBehavior
+		 @see setInvisible, setDisabled, setSaveable, setNotifyChanges, setBehavior
 		 */
-		void setOpaque (const bool isOpaque) noexcept;
+		void setOpaque(const bool isOpaque) noexcept;
+		
+		/** Is the attribute opaque ?
+		 @return True if the attribute is opaque, false if not.
+		 @see setOpaque, isInvisible, isDisabled, isSaveable, shouldNotifyChanges, getBehavior
+		 */
+		inline bool isOpaque() const noexcept						{return (m_behavior & Opaque);}
 		
 		/** An easy way to set or remove the Disabled bit in the attribute behavior flags field.
 		 @param isDisabled If true, the attribute will be disabled, if false it will not.
-		 @see setInvisible, setSaved, setNotify, setBehavior
+		 @see setInvisible, setSaveable, setNotifyChanges, setBehavior
 		 */
-		void setDisabled (const bool isDisabled) noexcept;
+		void setDisabled(const bool isDisabled) noexcept;
 		
-		/** An easy way to set or remove the Saved bit in the attribute behavior flags field.
-		 @param isSaved If true, the attribute will be saved, if false it will not.
-		 @see setInvisible, setOpaque, setDisabled, setNotify, setBehavior
+		/** Is the attribute disabled ?
+		 @return True if the attribute is disabled, false if it is not.
+		 @see setDisabled, isInvisible, isOpaque, isSaveable, shouldNotifyChanges, getBehavior
 		 */
-		void setSaved (const bool isSaved) noexcept;
+		inline bool isDisabled() const noexcept						{return (m_behavior & Disabled);}
 		
-		/** An easy way to set or remove the Notify bit in the attribute behavior flags field.
+		/** An easy way to set or remove the NotSaveable bit in the attribute behavior flags field.
+		 @param saveable If true, the attribute will be saved, if false it will not.
+		 @see setInvisible, setOpaque, setDisabled, setNotifyChanges, setBehavior
+		 */
+		void setSaveable(const bool saveable) noexcept;
+		
+		/** Is the attribute isSaveable ?
+		 @return True if the attribute is saveable, false if it is not.
+		 @see setDisabled, isInvisible, isOpaque, isSaveable, shouldNotifyChanges, getBehavior
+		 */
+		inline bool isSaveable() const noexcept						{return !(m_behavior & NotSaveable);}
+		
+		/** An easy way to set or remove the NotNotifyChanges bit in the attribute behavior flags field.
 		 @param shouldNotify If true, the attribute will broadcast a notify message to its listeners when changed, if false it will not.
-		 @see setInvisible, setOpaque, setDisabled, setSaved, setBehavior
+		 @see setInvisible, setOpaque, setDisabled, setSaveable, setBehavior
 		 */
-		void setNotify (const bool triggerNotify) noexcept;
+		void setNotifyChanges(const bool shouldNotify) noexcept;
+		
+		/** Should the attribute notify its changes ?
+		 @return True if the attribute should notify its changes, false if it should not.
+		 @see setDisabled, isInvisible, isOpaque, isSaveable, shouldNotifyChanges, getBehavior
+		 */
+		inline bool shouldNotifyChanges() const noexcept			{return !(m_behavior & NotNotifyChanges);}
 		
 		/** An easy way to set the whole behavior flags field of the attribute.
 		 @param behavior	A combination of the flags specified in the Attribute::Behavior enum,
 							which define the attribute's behaviors.
-		 @see setInvisible, setOpaque, setDisabled, setSaved, setNotify
+		 @see setInvisible, setOpaque, setDisabled, setSaveable, setNotifyChanges
 		 */
 		void setBehavior(Behavior behavior);
+		
+		/** Retrieves the whole behavior flags field of the attribute.
+		 @param behavior	A combination of the flags specified in the Attribute::Behavior enum,
+		 which define the attribute's behaviors.
+		 @see setInvisible, setOpaque, setDisabled, setSaveable, setNotifyChanges
+		 */
+		inline Behavior getBehavior() const noexcept				{return (Behavior)m_behavior;}
 		
         //! Retrieves the values.
         /** The Attribute subclasses must implement this function to retrieve the values.
@@ -271,7 +314,7 @@ namespace Kiwi
 		 @param elements A vector of Element to be replaced by the frozen value.
 		 @see freeze, isFrozen
 		 */
-		void getFrozenValue(ElemVector& elements) const noexcept {elements = m_frozen_value;}
+		void getFrozenValue(ElemVector& elements) const noexcept	{elements = m_frozen_value;}
 		
         //! Attempts to write the attribute in a dico.
         /** The function attempts to write the attribute in a dico.
@@ -381,7 +424,7 @@ namespace Kiwi
          @param visible Visible or not.
          @param save Saved or not.
          */
-        void setAttributeBehavior(sTag name, long behavior);
+        void setAttributeBehavior(sTag name, Attribute::Behavior behavior);
     };
     
     // ================================================================================ //

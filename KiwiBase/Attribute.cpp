@@ -44,30 +44,34 @@ namespace Kiwi
     
     void AttributeFactory::receive(ElemVector const& elements)
     {
-        if(elements.size() && elements[0].isTag())
-        {
-            auto it = m_attributes.find((sTag)elements[0]);
-            if(it != m_attributes.end())
-            {
-                ElemVector nelements;
-                nelements.assign(elements.begin()+1, elements.end());
-                if(!(it->second->m_behavior & Attribute::Opaque))
-                {
-                    it->second->set(nelements);
-                    if(!(it->second->m_behavior & Attribute::NotNotify))
-                    {
-                        notify(it->second);
-                    }
-                }
-            }
-        }
+		if(elements.size() && elements[0].isTag())
+		{
+			auto it = m_attributes.find((sTag)elements[0]);
+			if(it != m_attributes.end())
+			{
+				ElemVector nelements;
+				nelements.assign(elements.begin()+1, elements.end());
+				
+				sAttribute attr = it->second;
+				
+				if(!attr->isOpaque())
+				{
+					attr->set(nelements);
+					
+					if(attr->shouldNotifyChanges())
+					{
+						notify(attr);
+					}
+				}
+			}
+		}
     }
     
     void AttributeFactory::write(shared_ptr<Dico> dico) const noexcept
     {
         for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
         {
-            if(!(it->second->m_behavior & Attribute::NotSaved))
+            if(it->second->isSaveable())
             {
                 it->second->write(dico);
             }
@@ -85,7 +89,7 @@ namespace Kiwi
     sAttribute AttributeFactory::getAttribute(sTag name) const noexcept
     {
         auto it = m_attributes.find(name);
-        if(it != m_attributes.end() && !(it->second->m_behavior & Attribute::Invisible))
+        if(it != m_attributes.end() && !(it->second->isInvisible()))
             return it->second;
         else
             return nullptr;
@@ -96,18 +100,18 @@ namespace Kiwi
         auto it = m_attributes.find(name);
         if(it != m_attributes.end())
         {
-            it->second->m_label = label;
-            it->second->m_style = style;
-            it->second->m_category = category;
+            it->second->setLabel(label);
+            it->second->setStyle(style);
+            it->second->setCategory(category);
         }
     }
     
-    void AttributeFactory::setAttributeBehavior(sTag name, long behavior)
+	void AttributeFactory::setAttributeBehavior(sTag name, Attribute::Behavior behavior)
     {
         auto it = m_attributes.find(name);
         if(it != m_attributes.end())
         {
-            it->second->m_behavior = 0 | behavior;
+            it->second->setBehavior(behavior);
         }
     }
     
@@ -165,26 +169,26 @@ namespace Kiwi
 	
 	void Attribute::setDisabled(const bool b) noexcept
 	{
-		if (b)
+		if (!b)
 			m_behavior &= ~Disabled;
 		else
 			m_behavior |= Disabled;
 	}
 
-	void Attribute::setSaved(const bool b) noexcept
+	void Attribute::setSaveable(const bool b) noexcept
 	{
-		if (b)
-			m_behavior &= ~NotSaved;
+		if (!b)
+			m_behavior &= ~NotSaveable;
 		else
-			m_behavior |= NotSaved;
+			m_behavior |= NotSaveable;
 	}
 	
-	void Attribute::setNotify(const bool b) noexcept
+	void Attribute::setNotifyChanges(const bool b) noexcept
 	{
-		if (b)
-			m_behavior &= ~NotNotify;
+		if (!b)
+			m_behavior &= ~NotNotifyChanges;
 		else
-			m_behavior |= NotNotify;
+			m_behavior |= NotNotifyChanges;
 	}
 	
 	void Attribute::freeze(const bool frozen)
@@ -204,7 +208,7 @@ namespace Kiwi
 	
     void Attribute::write(shared_ptr<Dico> dico) const noexcept
     {
-		if(!(m_behavior & Behavior::NotSaved) || m_frozen)
+		if(!(m_behavior & Behavior::NotSaveable) || m_frozen)
 		{
 			ElemVector elements;
 			
