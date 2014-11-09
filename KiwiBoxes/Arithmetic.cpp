@@ -47,7 +47,7 @@ namespace Kiwi
     bool Plus::receive(size_t index, ElemVector const& elements)
     {
         Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
-        if(!elements.empty() && (elements[0].type() == Element::LONG || elements[0].type() == Element::DOUBLE))
+        if(!elements.empty() && elements[0].isNumber())
         {
             if(index)
             {
@@ -91,7 +91,7 @@ namespace Kiwi
     bool Minus::receive(size_t index, ElemVector const& elements)
     {
         Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
-        if(!elements.empty() && (elements[0].type() == Element::LONG || elements[0].type() == Element::DOUBLE))
+        if(!elements.empty() && elements[0].isNumber())
         {
             if(index)
             {

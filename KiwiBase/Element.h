@@ -144,6 +144,7 @@ namespace Kiwi
         //! Check if the element is of type long.
         /** The function checks if the element is of type long.
          @return    true if the element is a long.
+		 @see isDouble, isNumber
          */
         inline bool isLong() const noexcept
         {
@@ -153,12 +154,33 @@ namespace Kiwi
         //! Check if the element is of type double.
         /** The function checks if the element is of type double.
          @return    true if the element is a double.
+		 @see isLong, isNumber
          */
         inline bool isDouble() const noexcept
         {
             return m_type == Element::DOUBLE;
         }
-        
+		
+		//! Checks if the element is of type long or double.
+		/** Handy method for checking if an element is of type long or double.
+		 
+		 This is just so you can write things like:
+		 @code
+		 myElement.isNumber();
+		 @endcode
+		 instead of
+		 @code
+		 ((myElement.isLong() || (myElement.isDouble());
+		 @endcode
+		 
+		 @return    true if the element is a long or a double, false otherwise.
+		 @see isLong, isDouble
+		 */
+		inline bool isNumber() const noexcept
+		{
+			return (m_type == Element::DOUBLE) || (m_type == Element::LONG);
+		}
+		
         //! Check if the element is of type tag.
         /** The function checks if the element is of type tag.
          @return    true if the element is a tag.
