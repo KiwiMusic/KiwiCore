@@ -250,6 +250,12 @@ namespace Kiwi
              */
             void erase(size_t begin, size_t last);
             
+            //! Erase a set of messages from the history.
+            /** The function a set of messages from the history.
+             @param indices The indices of the messages
+             */
+            void erase(vector<size_t> const& indices);
+            
             //! Sort the message.
             /** The function sorts the message by index, name, kind or content.
              @param sort The type of sorting.
@@ -358,6 +364,9 @@ namespace Kiwi
             }
         };
     };
+    
+    typedef shared_ptr<const Console::Message> sMessage;
+
 };
 
 

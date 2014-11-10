@@ -272,7 +272,7 @@ namespace Kiwi
     
     size_t Console::History::size()
     {
-        //lock_guard<mutex> guard(m_hmutex);
+        lock_guard<mutex> guard(m_hmutex);
         return m_messages.size();
     }
     
@@ -339,6 +339,37 @@ namespace Kiwi
                     ++it;
                     m_listeners.erase(to);
                 }
+            }
+        }
+    }
+        
+    void Console::History::erase(vector<size_t> const& indices)
+    {
+        lock_guard<mutex> guard(m_hmutex);
+        size_t max = m_messages.size();
+        for(size_t i = 0; i < indices.size(); i++)
+        {
+            if(indices[i] < max)
+            {
+                m_messages.erase(m_messages.begin()+indices[i]);
+            }
+        }
+        std::sort(m_messages.begin(), m_messages.end(), compareIndex);
+        for(size_t i = 0; i < m_messages.size(); i++)
+        {
+            m_messages[i].m_index = i+1;
+        }
+        for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
+        {
+            shared_ptr<Console::History::Listener> to = (*it).lock();
+            if(to)
+            {
+                to->historyHasChanged(shared_from_this());
+            }
+            else
+            {
+                ++it;
+                m_listeners.erase(to);
             }
         }
     }
