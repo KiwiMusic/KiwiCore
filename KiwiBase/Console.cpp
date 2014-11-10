@@ -349,9 +349,10 @@ namespace Kiwi
         size_t max = m_messages.size();
         for(size_t i = 0; i < indices.size(); i++)
         {
-            if(indices[i] < max)
+            if(indices[i] < m_messages.size())
             {
                 m_messages.erase(m_messages.begin()+indices[i]);
+                --max;
             }
         }
         std::sort(m_messages.begin(), m_messages.end(), compareIndex);
