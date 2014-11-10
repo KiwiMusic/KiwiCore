@@ -60,9 +60,9 @@ namespace Kiwi
         return m_vectorsize;
     }
     
-    int DspContext::getNumberOfProcess() const noexcept
+    size_t DspContext::getNumberOfProcess() const noexcept
     {
-        return (int)m_processes.size();
+        return m_processes.size();
     }
     
     void DspContext::addBox(shared_ptr<Box> box)

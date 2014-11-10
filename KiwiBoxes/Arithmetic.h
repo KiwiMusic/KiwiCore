@@ -25,6 +25,7 @@
 #define __DEF_KIWI_ARITHMETIC__
 
 #include "../KiwiBase/Core.h"
+#include "../ThirdParty/muParser/include/muParser.h"
 
 namespace Kiwi
 {
@@ -32,40 +33,114 @@ namespace Kiwi
     //                                  ARITHMETIC                                      //
     // ================================================================================ //
     
-    class Plus : public Box
+    class Arithmetic : public Box
     {
-    private:
-        friend class Arithmetic;
-        const bool      m_double;
-        double          m_augend;
-        double          m_addend;
+    protected:
+        double          m_first;
+        double          m_second;
     public:
-        Plus(sPage page, Element const& element = 0);
-        ~Plus();
+        Arithmetic(sPage page, string const& name, ElemVector const& elements, string const& input1, string const& input2,string const& output);
+        virtual ~Arithmetic();
+        virtual string getExpression() const noexcept override;
     private:
         bool receive(size_t index, ElemVector const& elements) override;
-        AllocateElement(Plus);
+        virtual inline double compute() = 0;
+        virtual sBox allocate(sPage page, sDico dico) const = 0;
     };
     
-    class Minus : public Box
+    class Plus : public Arithmetic
+    {
+    public:
+        Plus(sPage page = nullptr, ElemVector const& elements = {}) :
+        Arithmetic(page, "+", elements, "Augend", "Addend", "Sum"){}
+        ~Plus(){}
+    private:
+        inline double compute() override{return m_first + m_second;}
+        AllocateElemVector(Plus);
+    };
+    
+    class Minus : public Arithmetic
+    {
+    public:
+        Minus(sPage page = nullptr, ElemVector const& elements = {}) :
+        Arithmetic(page, "-", elements, "Minuend", "Subtrahend", "Difference"){}
+        ~Minus(){}
+    private:
+        inline double compute() override{return m_first - m_second;}
+        AllocateElemVector(Minus);
+    };
+    
+    class Times : public Arithmetic
+    {
+    public:
+        Times(sPage page = nullptr, ElemVector const& elements = {}) :
+        Arithmetic(page, "*", elements, "Multiplicand", "Multiplier", "Product"){}
+        ~Times(){}
+    private:
+        inline double compute() override{return m_first * m_second;}
+        AllocateElemVector(Times);
+    };
+    
+    class Divide : public Arithmetic
+    {
+    public:
+        Divide(sPage page = nullptr, ElemVector const& elements = {}) :
+        Arithmetic(page, "/", elements, "Dividend", "Divisor", "Quotient"){}
+        ~Divide(){}
+    private:
+        inline double compute() override{return m_first / m_second;}
+        AllocateElemVector(Divide);
+    };
+    
+    class Modulo : public Arithmetic
+    {
+    public:
+        Modulo(sPage page = nullptr, ElemVector const& elements = {}) :
+        Arithmetic(page, "%", elements, "Dividend", "Divisor", "Remainder"){}
+        ~Modulo(){}
+    private:
+        inline double compute() override{return fmod(m_first, m_second);}
+        AllocateElemVector(Modulo);
+    };
+    
+    class Power : public Arithmetic
+    {
+    public:
+        Power(sPage page = nullptr, ElemVector const& elements = {}) :
+        Arithmetic(page, "^", elements, "Base", "Exponent", "Power"){}
+        ~Power(){}
+    private:
+        inline double compute() override{return pow(m_first, m_second);}
+        AllocateElemVector(Power);
+    };
+    
+    class Expression : public Box
     {
     private:
-        friend class Arithmetic;
-        const bool      m_double;
-        double          m_minuend;
-        double          m_subtrahend;
+        mu::Parser      m_parser;
+        vector<double>  m_values;
     public:
-        Minus(sPage page, Element const& element = 0);
-        ~Minus();
+        Expression(sPage page, ElemVector const& elements);
+        ~Expression();
     private:
         bool receive(size_t index, ElemVector const& elements) override;
-        AllocateElement(Minus);
+        sBox allocate(sPage page, sDico dico) const override
+        {
+            ElemVector elements;
+            dico->get(Tag::create("arguments"), elements);
+            return make_shared<Expression>(page, elements);
+        }
     };
     
     inline void arithmetic()
     {
-        Box::addPrototype(unique_ptr<Box>(new Plus(nullptr, 0)));
-        Box::addPrototype(unique_ptr<Box>(new Minus(nullptr, 0)));
+        Box::addPrototype(unique_ptr<Box>(new Plus()));
+        Box::addPrototype(unique_ptr<Box>(new Minus()));
+        Box::addPrototype(unique_ptr<Box>(new Times()));
+        Box::addPrototype(unique_ptr<Box>(new Divide()));
+        Box::addPrototype(unique_ptr<Box>(new Modulo()));
+        Box::addPrototype(unique_ptr<Box>(new Power()));
+        Box::addPrototype(unique_ptr<Box>(new Expression(nullptr, {})));
     }
 }
 

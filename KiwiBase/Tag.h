@@ -33,8 +33,9 @@ namespace Kiwi
     //                                      TAG                                         //
     // ================================================================================ //
     
-    //! The tag is an unique object that matchs to a "unique" string.
-    /** Tags are never destroyed until the deletion of the program. If you create a tag with a string already used that already matchs to a tag the tag factory will return it, otherwise it will create a new tag.
+    //! The tag is an unique object that matchs to a "unique" string (in the scope of a tag factory).
+    /**
+     The tag can be created only by the tag factory class and are never destroyed until the deletion of the it. If you create a tag with a string already used that already matchs to a tag the tag factory will return this tag, otherwise it will create a new tag.
      @see TagFactory
      */
     class Tag
@@ -93,7 +94,7 @@ namespace Kiwi
                 return tag;
             }
         }
-		
+        
         static shared_ptr<const Tag> text;
         static shared_ptr<const Tag> box;
         static shared_ptr<const Tag> boxes;
@@ -105,7 +106,9 @@ namespace Kiwi
         static shared_ptr<const Tag> name;
         static shared_ptr<const Tag> ninlets;
         static shared_ptr<const Tag> noutlets;
-		static shared_ptr<const Tag> frozen_attributes;
+        static shared_ptr<const Tag> set;
+        static shared_ptr<const Tag> null;
+        static shared_ptr<const Tag> arguments;
     };
     
     typedef shared_ptr<const Tag> sTag;

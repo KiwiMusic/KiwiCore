@@ -162,6 +162,12 @@ namespace Kiwi
          */
         sTag getText() const noexcept;
         
+        //! Retrieve the expression of the box.
+        /** The function retrieves the expression of the object as a string.
+         @return The expression of the object as a string.
+         */
+        virtual string getExpression() const noexcept;
+        
         //! Write the box in a dico.
         /** The function writes the box in a dico.
          @param dico The dico.
@@ -363,14 +369,14 @@ namespace Kiwi
         /** This function adds a new prototype of a box. If the prototype already exists, the function doesn't do anything otherwise the box is added to the prototype list.
          @param     box The prototype of the box.
          */
-        static void addPrototype(unique_ptr<Box> box);
+        static void addPrototype(unique_ptr<Box> box, string const& name = "");
     };
     
     typedef shared_ptr<Box>     sBox;
     
     typedef weak_ptr<Box>       wBox;
     
-    inline string toString(const shared_ptr<const Box> box)
+    inline string toString(shared_ptr<const Box> box)
     {
         return toString(box->getName());
     }

@@ -8,6 +8,7 @@
 
 #include "../Kiwi.h"
 #include <time.h>
+#include "muParser.h"
 
 using namespace Kiwi;
 
@@ -32,7 +33,7 @@ int main (int argc, char* argv[])
             dico->set(Tag::to, {1, 0});
             if(page->createConnection(dico))
                 cout << "aki";
-            */
+            
             vector<sBox> boxes;
             page->getBoxes(boxes);
             if(boxes.size())
@@ -43,8 +44,38 @@ int main (int argc, char* argv[])
             }
             page->write(dico);
             dico->write("test.kiwi", "/Users/Pierre/Desktop");
+            */
+            sBox nbox;
+            dico->clear();
+            dico->read("expr rint( i1 ) + rint( i2 )");
+            nbox = page->createBox(dico);
+            nbox->receive(1, {2.3});
+            nbox->receive(0, {3});
+            
+            dico->clear();
+            dico->read("expr i1 + 2");
+            nbox = page->createBox(dico);
+            nbox->receive(0, {3.2});
+            /*
+            double fVal = 3.8;
+            mu::Parser p;
+            p.DefineVar("a", &fVal);
+            try
+            {
+                p.SetExpr("1 - rint(a-0.5)");
+                cout << p.GetExpr()<< "\n";
+            }
+            catch(mu::ParserError &exc)
+            {
+                ;
+            }
+            
+            std::cout << p.Eval() << std::endl;
+             */
         }
         
     }
+    kiwi = Instance::create();
+    
     return 0;
 }

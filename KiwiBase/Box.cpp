@@ -120,6 +120,11 @@ namespace Kiwi
         return m_text;
     }
     
+    string Box::getExpression() const noexcept
+    {
+        return "error";
+    }
+    
     void Box::save(shared_ptr<Dico> dico) const
     {
         ;
@@ -327,16 +332,25 @@ namespace Kiwi
         m_listeners.erase(listener);
     }
     
-    void Box::addPrototype(unique_ptr<Box> box)
+    void Box::addPrototype(unique_ptr<Box> box, string const& name)
     {
-        auto it = m_prototypes.find(box->getName());
+        sTag tname;
+        if (name.empty())
+        {
+            tname = box->getName();
+        }
+        else
+        {
+            tname = Tag::create(name);
+        }
+        auto it = m_prototypes.find(tname);
         if(it != m_prototypes.end())
         {
             Console::error("The box " + toString(box->getName()) + " already exist !");
         }
         else
         {
-            m_prototypes[box->getName()] = move(box);
+            m_prototypes[tname] = move(box);
         }
     }
 }
