@@ -26,6 +26,7 @@
 
 #include "Attribute.h"
 #include "Events.h"
+#include "Doodle.h"
 
 namespace Kiwi
 {
@@ -186,6 +187,11 @@ namespace Kiwi
          @param events    An event.
          */
         virtual bool receive(Events const& events);
+        
+        virtual void paint()
+        {
+            ;
+        }
         
         //! Retrieve the number of inlets of the box.
         /** The functions retrieves the number of inlets of the box.
