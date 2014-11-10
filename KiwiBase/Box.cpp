@@ -140,7 +140,12 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::receive(Events const& events)
+    bool Box::receive(Events::Mouse const& events)
+    {
+        return false;
+    }
+    
+    bool Box::receive(Events::Keyboard const& events)
     {
         return false;
     }
