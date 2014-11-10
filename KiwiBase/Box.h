@@ -25,6 +25,7 @@
 #define __DEF_KIWI_BOX__
 
 #include "Attribute.h"
+#include "Events.h"
 
 namespace Kiwi
 {
@@ -179,6 +180,12 @@ namespace Kiwi
          @param elements    A list of elements to pass.
          */
         virtual bool receive(size_t index, ElemVector const& elements);
+        
+        //! The receive method that should be override.
+        /** The function shoulds perform some stuff.
+         @param events    An event.
+         */
+        virtual bool receive(Events const& events);
         
         //! Retrieve the number of inlets of the box.
         /** The functions retrieves the number of inlets of the box.

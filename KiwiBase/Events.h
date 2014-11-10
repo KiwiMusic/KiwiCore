@@ -53,6 +53,16 @@ namespace Kiwi
         const int       y;
         const long      modifiers;
         const double    wheel;
+        
+        Events(Type _type, int _x, int _y, long _mod, double _wheel) : type(_type), x(_x), y(_y), modifiers(_mod), wheel(_wheel)
+        {
+            ;
+        }
+        
+        ~Events()
+        {
+            ;
+        }
     };
 }
 #endif /* defined(__KiwiCore__Events__) */
