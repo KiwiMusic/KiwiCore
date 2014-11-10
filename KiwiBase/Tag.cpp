@@ -41,6 +41,7 @@ namespace Kiwi
     sTag Tag::set         = Tag::create("set");
     sTag Tag::null        = Tag::create("null");
     sTag Tag::arguments   = Tag::create("arguments");
+	sTag Tag::frozen_attributes   = Tag::create("frozen_attributes");
 }
 
 

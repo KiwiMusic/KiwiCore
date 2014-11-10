@@ -109,6 +109,7 @@ namespace Kiwi
         static shared_ptr<const Tag> set;
         static shared_ptr<const Tag> null;
         static shared_ptr<const Tag> arguments;
+		static shared_ptr<const Tag> frozen_attributes;
     };
     
     typedef shared_ptr<const Tag> sTag;

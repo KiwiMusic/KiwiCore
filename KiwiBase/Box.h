@@ -285,20 +285,6 @@ namespace Kiwi
         
         static bool disconnect(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept;
         
-        //! Add a box listener in the binding list of the box.
-        /** The function adds a box listener in the binding list of the box. If the box listener is already in the binding list, the function doesn't do anything.
-         @param listener  The pointer of the box listener.
-         @see              unbind()
-         */
-        void bind(weak_ptr<Listener> listener);
-        
-        //! Remove a box listener from the binding list of the box.
-        /** The function removes a box listener from the binding list of the box. If the box listener isn't in the binding list, the function doesn't do anything.
-         @param listener  The pointer of the box listener.
-         @see           bind()
-         */
-        void unbind(weak_ptr<Listener> listener);
-        
         // ================================================================================ //
         //                                  BOX LISTENER                                    //
         // ================================================================================ //
@@ -355,9 +341,23 @@ namespace Kiwi
              */
             virtual void outletHasBeenRemoved(shared_ptr<Box> box, size_t index){};
         };
-        
+		
+		//! Add a box listener in the binding list of the box.
+		/** The function adds a box listener in the binding list of the box. If the box listener is already in the binding list, the function doesn't do anything.
+		 @param listener  The pointer of the box listener.
+		 @see              unbind()
+		 */
+		void bind(weak_ptr<Listener> listener);
+		
+		//! Remove a box listener from the binding list of the box.
+		/** The function removes a box listener from the binding list of the box. If the box listener isn't in the binding list, the function doesn't do anything.
+		 @param listener  The pointer of the box listener.
+		 @see           bind()
+		 */
+		void unbind(weak_ptr<Listener> listener);
+		
     private:
-        
+		
         // ================================================================================ //
         //                                      BOX FACTORY                                 //
         // ================================================================================ //
