@@ -185,11 +185,14 @@ namespace Kiwi
                 shared_ptr<const Console::Message> m_message;
                 size_t                             m_index;
             };
+            
             mutex                  m_hmutex;
             vector<MessageHolder>  m_messages;
+            Sort                   m_sort;
             unordered_set<weak_ptr<Listener>,
             weak_ptr_hash<Listener>,
             weak_ptr_equal<Listener>> m_listeners;
+            
             
             static bool compareIndex(MessageHolder const& i, MessageHolder const& j);
             static bool compareName(MessageHolder const& i, MessageHolder const& j);
@@ -254,7 +257,7 @@ namespace Kiwi
             /** The function a set of messages from the history.
              @param indices The indices of the messages
              */
-            void erase(vector<size_t> const& indices);
+            void erase(vector<size_t>& indices);
             
             //! Sort the message.
             /** The function sorts the message by index, name, kind or content.
@@ -365,7 +368,7 @@ namespace Kiwi
         };
     };
     
-    typedef shared_ptr<const Console::Message> sMessage;
+    typedef shared_ptr<const Console::Message> sConsoleMessage;
 
 };
 
