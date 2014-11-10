@@ -83,22 +83,7 @@ namespace Kiwi
 			 */
             NotNotifyChanges	= (1<<5)
         };
-		
-		/** Flags describing the type of the attribute.
-		 */
-		enum Type
-		{
-			Long = 0,			///< Indicates that the attribute stores a value of type long.
-			LongArray,			///< Indicates that the attribute stores an array of long values.
-			Double,				///< Indicates that the attribute stores a value of type double.
-			DoubleArray,		///< Indicates that the attribute stores an array of double values.
-			Tag,				///< Indicates that the attribute stores a value of type Tag.
-			TagArray,			///< Indicates that the attribute stores an array of tag values.
-			BoxPointer,			///< Indicates that the attribute stores a Box pointer.
-			BoxPointerArray,	///< Indicates that the attribute stores an array of Box pointer.
-			ElemArray,			///< Indicates that the attribute stores an array of Element
-		};
-		
+        
 		/** Flags describing the display style of the attribute.
 		 @see setStyle
 		 */
@@ -118,7 +103,6 @@ namespace Kiwi
 		
     private:
         sTag            m_name;				///< The name of the attribute.
-		const Type		m_type;				///< The type of the attribute.
 		ElemVector		m_default_value;	///< The default value of the attribute.
         string          m_label;			///< The label of the attribute.
 		Style			m_style;			///< The style of the attribute.
@@ -139,7 +123,6 @@ namespace Kiwi
 							which define the attribute's behavior.
          */
         Attribute(sTag name,
-				  Type type,
 				  ElemVector defaultValue = {},
                   string const& label = string(),
 				  Style style = Style::Default,
@@ -433,6 +416,25 @@ namespace Kiwi
     //                                      ATTRIBUTE TYPED                             //
     // ================================================================================ //
 	
+    //! The AttributeBool is an Attribute that holds a boolean value.
+	/** Holds a boolean value, its default display style will be a Attribute::Style::Toggle
+	 */
+	class AttributeBool : public Attribute
+	{
+	private:
+		bool m_value;
+	public:
+		AttributeBool(sTag name,
+					  int defaultValue = 0,
+					  string const& label = string(),
+					  string const& category = string(),
+					  Attribute::Style style = Attribute::Style::Toggle,
+					  long behavior = 0);
+		virtual ~AttributeBool() {};
+		void get(ElemVector& elements) const noexcept;
+		void set(ElemVector const& elements) override;
+	};
+    
 	//! The AttributeLong is an Attribute that holds a long value.
 	/** Holds a long value, its default display style will be a Attribute::Style::Number
 	 */
@@ -451,25 +453,6 @@ namespace Kiwi
         void get(ElemVector& elements) const noexcept;
         void set(ElemVector const& elements) override;
     };
-	
-	//! The AttributeBool is an Attribute that holds a boolean value.
-	/** Holds a boolean value, its default display style will be a Attribute::Style::Toggle
-	 */
-	class AttributeBool : public Attribute
-	{
-	private:
-		bool m_value;
-	public:
-		AttributeBool(sTag name,
-					  int defaultValue = 0,
-					  string const& label = string(),
-					  string const& category = string(),
-					  Attribute::Style style = Attribute::Style::Toggle,
-					  long behavior = 0);
-		virtual ~AttributeBool() {};
-		void get(ElemVector& elements) const noexcept;
-		void set(ElemVector const& elements) override;
-	};
 	
 	//! The AttributeDouble is an Attribute that holds a double value.
 	/** Holds a double value, its default display style will be a Attribute::Style::Number
@@ -509,25 +492,6 @@ namespace Kiwi
         void set(ElemVector const& elements) override;
     };
 	
-	//! The AttributeBox is an Attribute that holds a shared pointer to a Box value.
-	/** Holds a shared pointer to a Box value.
-	 */
-    class AttributeBox : public Attribute
-    {
-    private:
-        shared_ptr<Box> m_value;
-    public:
-		AttributeBox(sTag name,
-					 shared_ptr<Box> defaultValue = shared_ptr<Box>(),
-					 string const& label = string(),
-					 string const& category = string(),
-					 Attribute::Style style = Attribute::Style::Default,
-					 long behavior = 0);
-		virtual ~AttributeBox() {};
-        void get(ElemVector& elements) const noexcept;
-        void set(ElemVector const& elements) override;
-    };
-	
 	//! The AttributeColor is an Attribute that holds a color value.
 	/** Holds a vector of double values suitable to represent a RGBA type color, \n
 	 its default display style will obviously be a Attribute::Style::Color.
@@ -536,14 +500,14 @@ namespace Kiwi
 	class AttributeColor : public Attribute
 	{
 	private:
-		ElemVector m_value;
+		double m_value[4];
 	public:
 		AttributeColor(sTag name,
-					   ElemVector defaultValue = {0.f, 0.f, 0.f, 1.f},
+					   ElemVector defaultValue = {0., 0., 0., 1.},
 					   string const& label = string(),
 					   string const& category = string(),
 					   long behavior = 0);
-		virtual ~AttributeColor();
+		virtual ~AttributeColor(){};
 		void get(ElemVector& elements) const noexcept;
 		void set(ElemVector const& elements) override;
 	};
@@ -555,14 +519,14 @@ namespace Kiwi
 	class AttributeRect : public Attribute
 	{
 	private:
-		ElemVector m_value;
+		double m_value[4];
 	public:
 		AttributeRect(sTag name,
-					  ElemVector defaultValue = {0.f, 0.f, 0.f, 0.f},
+					  ElemVector defaultValue = {0., 0., 0., 0.},
 					  string const& label = string(),
 					  string const& category = string(),
 					  long behavior = 0);
-		virtual ~AttributeRect();
+		virtual ~AttributeRect() {};
 		void get(ElemVector& elements) const noexcept;
 		void set(ElemVector const& elements) override;
 	};

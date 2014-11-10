@@ -41,7 +41,6 @@ namespace Kiwi
     /**
      The box is a graphical object that aims to be instantiate in a page.
      */
-    
     class Box : public AttributeFactory, public enable_shared_from_this<Box>
     {
     public:
@@ -184,9 +183,15 @@ namespace Kiwi
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
-         @param events    An event.
+         @param events    A mouse event.
          */
-        virtual bool receive(Events const& events);
+        virtual bool receive(Events::Mouse const& events);
+        
+        //! The receive method that should be override.
+        /** The function shoulds perform some stuff.
+         @param events    A keyboard event.
+         */
+        virtual bool receive(Events::Keyboard const& events);
         
         virtual void paint()
         {
@@ -393,48 +398,6 @@ namespace Kiwi
     {
         return toString(box->getName());
     }
-    
-    class Mouse
-    {
-    public:
-        enum Type
-        {
-            Unknown     = 0,
-            Enter       = 1,
-            Leave       = 2,
-            Move        = 3,
-            Drag        = 4,
-            Down        = 5,
-            Up          = 6,
-            DoubleClick = 7,
-            Wheel       = 8
-        };
-        
-        enum Modifier
-        {
-            Nothing     = 0,
-            Shift       = 1,
-            Ctrl        = 2,
-            Alt         = 4,
-            Left        = 16,
-            Right       = 32,
-            Middle      = 64,
-            
-#ifdef __APPLE__
-            Cmd          = 8,
-            Popup        = Right | Ctrl,
-#else
-            Cmd          = Ctrl,
-            Popup        = Right
-#endif
-        };
-        
-        const Type      type;
-        const int       x;
-        const int       y;
-        const long      modifiers;
-        const double    wheel;
-    };
 }
 
 

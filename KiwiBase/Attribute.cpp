@@ -120,14 +120,12 @@ namespace Kiwi
     // ================================================================================ //
     
 	Attribute::Attribute(sTag name,
-						 Type type,
 						 ElemVector defaultValue,
 						 string const& label,
 						 Style style,
 						 string const& category,
 						 long behavior) :
     m_name(name),
-	m_type(type),
 	m_default_value(defaultValue),
     m_label(label),
     m_style(style),
@@ -238,7 +236,7 @@ namespace Kiwi
 								 string const& category,
 								 Attribute::Style style,
 								 long behavior)
-		: Attribute(name, Attribute::Type::Long, {defaultValue}, label, style, category, behavior)
+		: Attribute(name, {defaultValue}, label, style, category, behavior)
     {
     }
     
@@ -261,7 +259,7 @@ namespace Kiwi
 									 string const& category,
 									 Attribute::Style style,
 									 long behavior) :
-		Attribute(name, Attribute::Type::Double, {defaultValue}, label, style, category, behavior)
+		Attribute(name, {defaultValue}, label, style, category, behavior)
     {
     }
     
@@ -285,7 +283,7 @@ namespace Kiwi
 								 string const& category,
 								 Attribute::Style style,
 								 long behavior) :
-	Attribute(name, Attribute::Type::Long, {defaultValue}, label, style, category, behavior)
+	Attribute(name, {defaultValue}, label, style, category, behavior)
 	{
 		
 	}
@@ -309,7 +307,7 @@ namespace Kiwi
 							   string const& category,
 							   Attribute::Style style,
 							   long behavior) :
-		Attribute(name, Attribute::Type::Tag, {defaultValue}, label, style, category, behavior)
+		Attribute(name, {defaultValue}, label, style, category, behavior)
     {
     }
     
@@ -326,52 +324,22 @@ namespace Kiwi
         elements = {m_value};
     }
 	
-	
-	AttributeBox::AttributeBox(sTag name,
-							   shared_ptr<Box> defaultValue,
-							   string const& label,
-							   string const& category,
-							   Attribute::Style style,
-							   long behavior) :
-		Attribute(name, Attribute::Type::BoxPointer, {defaultValue}, label, style, category, behavior)
-    {
-    }
-    
-    void AttributeBox::set(ElemVector const& elements)
-    {
-        if(elements.size() && elements[0].isObject())
-            m_value = elements[0];
-    }
-    
-    void AttributeBox::get(ElemVector& elements) const noexcept
-    {
-        elements = {m_value};
-    }
-	
-	
-	
 	AttributeColor::AttributeColor(sTag name,
 								   ElemVector defaultValue,
 								   string const& label,
 								   string const& category,
 								   long behavior)
-	: Attribute(name, Attribute::Type::DoubleArray, defaultValue, label, Attribute::Style::Color, category, behavior)
+	: Attribute(name, defaultValue, label, Attribute::Style::Color, category, behavior)
 	{
-	}
-	
-	AttributeColor::~AttributeColor()
-	{
-		m_value.clear();
 	}
 	
 	void AttributeColor::set(ElemVector const& elements)
 	{
 		const size_t nelems = elements.size();
-		
-		for (unsigned int i = 0; i < 4; i++)
+		for(size_t i = 0; i < 4; i++)
 		{
 			if (nelems > i && elements[i].isNumber())
-				m_value[i] = clip((double)elements[i], (double)0.f, (double)1.f);
+				m_value[i] = clip((double)elements[i], 0., 1.);
 			else
 				m_value[i] = (i < 3) ? 0.f : 1.f; // default is black with full alpha color
 		}
@@ -379,7 +347,7 @@ namespace Kiwi
 	
 	void AttributeColor::get(ElemVector& elements) const noexcept
 	{
-		elements = {m_value};
+		elements = {m_value[0], m_value[1], m_value[2], m_value[3]};
 	}
 	
 	
@@ -388,20 +356,15 @@ namespace Kiwi
 								 string const& label,
 								 string const& category,
 								 long behavior)
-	: Attribute(name, Attribute::Type::DoubleArray, defaultValue, label, Attribute::Style::NumberList, category, behavior)
+	: Attribute(name, defaultValue, label, Attribute::Style::NumberList, category, behavior)
 	{
-	}
-	
-	AttributeRect::~AttributeRect()
-	{
-		m_value.clear();
 	}
 	
 	void AttributeRect::set(ElemVector const& elements)
 	{
 		const size_t nelems = elements.size();
 		
-		for (unsigned int i = 0; i < 4; i++)
+		for(size_t i = 0; i < 4; i++)
 		{
 			if (nelems > i && elements[i].isNumber())
 				m_value[i] = (double)elements[i];
@@ -412,7 +375,7 @@ namespace Kiwi
 	
 	void AttributeRect::get(ElemVector& elements) const noexcept
 	{
-		elements = {m_value};
+		elements = {m_value[0], m_value[1], m_value[2], m_value[3]};
 	}
 }
 
