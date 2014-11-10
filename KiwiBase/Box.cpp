@@ -139,6 +139,11 @@ namespace Kiwi
     {
         return false;
     }
+    
+    bool Box::receive(Events const& events)
+    {
+        return false;
+    }
 
     void Box::write(sDico dico) const
     {
