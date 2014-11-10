@@ -40,7 +40,7 @@ namespace Kiwi
     m_stack_count(0)
     {
         createAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Appearance");
-        createAttribute<AttributeLong>(Tag::create("fontsize"), 12, "Font Size", "Appearance");
+        createAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Appearance");
     }
     
     Box::~Box()

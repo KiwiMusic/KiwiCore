@@ -354,9 +354,8 @@ namespace Kiwi
 								   ElemVector defaultValue,
 								   string const& label,
 								   string const& category,
-								   Attribute::Style style,
 								   long behavior)
-	: Attribute(name, Attribute::Type::DoubleArray, defaultValue, label, style, category, behavior)
+	: Attribute(name, Attribute::Type::DoubleArray, defaultValue, label, Attribute::Style::Color, category, behavior)
 	{
 	}
 	
@@ -379,6 +378,39 @@ namespace Kiwi
 	}
 	
 	void AttributeColor::get(ElemVector& elements) const noexcept
+	{
+		elements = {m_value};
+	}
+	
+	
+	AttributeRect::AttributeRect(sTag name,
+								 ElemVector defaultValue,
+								 string const& label,
+								 string const& category,
+								 long behavior)
+	: Attribute(name, Attribute::Type::DoubleArray, defaultValue, label, Attribute::Style::NumberList, category, behavior)
+	{
+	}
+	
+	AttributeRect::~AttributeRect()
+	{
+		m_value.clear();
+	}
+	
+	void AttributeRect::set(ElemVector const& elements)
+	{
+		const size_t nelems = elements.size();
+		
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			if (nelems > i && elements[i].isNumber())
+				m_value[i] = (double)elements[i];
+			else
+				m_value[i] = 0.f;
+		}
+	}
+	
+	void AttributeRect::get(ElemVector& elements) const noexcept
 	{
 		elements = {m_value};
 	}

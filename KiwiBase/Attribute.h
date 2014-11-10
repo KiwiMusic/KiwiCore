@@ -106,7 +106,9 @@ namespace Kiwi
 		{
 			Default = 0,	///< Indicates that the attribute should be displayed in a default style depending on its Type.
 			Text,			///< Indicates that the attribute should be displayed in a text style
-			List,			///< Indicates that the attribute should be displayed in a list style
+			List,			///< Indicates that the attribute should be displayed in a list of mixed elements style
+			NumberList,		///< Indicates that the attribute should be displayed in a list of number style
+			TagList,		///< Indicates that the attribute should be displayed in a list of tag style
 			Enum,			///< Indicates that the attribute should be displayed in an enum style
 			Number,			///< Indicates that the attribute should be displayed in a number style
 			Toggle,			///< Indicates that the attribute should be displayed in a onoff toggle style
@@ -148,7 +150,28 @@ namespace Kiwi
         /** Clear the attribute.
          */
         virtual ~Attribute();
-        
+		
+		//! Retrieves the values.
+		/** The Attribute subclasses must implement this function to retrieve the values.
+		 @param elements The vector of elements to fill.
+		 @see set
+		 */
+		virtual void get(ElemVector& elements) const noexcept = 0;
+		
+		//! Sets the values with a vector of elements.
+		/** The function sets the values with a vector of elements and resize the values if necessary.
+		 Attribute subclasses must implement this function
+		 @param elements The vector of elements.
+		 @see get
+		 */
+		virtual void set(ElemVector const& elements) = 0;
+		
+		//! Resets the attribute value to default.
+		/** Resets the attribute value to its default value.
+		 @see set
+		 */
+		void reset();
+		
         //! Retrieve the name of the attribute.
         /** The function retrieves the name of the attribute.
          @return The name of the attribute.
@@ -272,27 +295,6 @@ namespace Kiwi
 		 */
 		inline Behavior getBehavior() const noexcept				{return (Behavior)m_behavior;}
 		
-        //! Retrieves the values.
-        /** The Attribute subclasses must implement this function to retrieve the values.
-         @param elements The vector of elements to fill.
-		 @see set
-         */
-        virtual void get(ElemVector& elements) const noexcept = 0;
-		
-		//! Sets the values with a vector of elements.
-		/** The function sets the values with a vector of elements and resize the values if necessary.
-		 Attribute subclasses must implement this function
-		 @param elements The vector of elements.
-		 @see get
-		 */
-		virtual void set(ElemVector const& elements) = 0;
-		
-		//! Resets the attribute value to default.
-		/** Resets the attribute value to its default value.
-		 @see set
-		 */
-		void reset();
-		
 		//! Freezes or unfreezes the attribute.
 		/** If you freeze an attribute, it will stores its current value as the saved value.
 		 When an attribute is frozen it can still be changed,
@@ -381,7 +383,7 @@ namespace Kiwi
         
         //! The receive method that set the values of the attributes.
         /** The function looks for the names of that match with the attributes and call the set methods if necessary.
-         @param elements    A list of elements to pass.
+         @param elements    A list of elements to pass, first element must be the name of the attribute.
          */
         void receive(ElemVector const& elements);
         
@@ -430,7 +432,10 @@ namespace Kiwi
     // ================================================================================ //
     //                                      ATTRIBUTE TYPED                             //
     // ================================================================================ //
-    
+	
+	//! The AttributeLong is an Attribute that holds a long value.
+	/** Holds a long value, its default display style will be a Attribute::Style::Number
+	 */
     class AttributeLong : public Attribute
     {
     private:
@@ -447,6 +452,9 @@ namespace Kiwi
         void set(ElemVector const& elements) override;
     };
 	
+	//! The AttributeBool is an Attribute that holds a boolean value.
+	/** Holds a boolean value, its default display style will be a Attribute::Style::Toggle
+	 */
 	class AttributeBool : public Attribute
 	{
 	private:
@@ -463,6 +471,9 @@ namespace Kiwi
 		void set(ElemVector const& elements) override;
 	};
 	
+	//! The AttributeDouble is an Attribute that holds a double value.
+	/** Holds a double value, its default display style will be a Attribute::Style::Number
+	 */
     class AttributeDouble : public Attribute
     {
     private:
@@ -478,7 +489,10 @@ namespace Kiwi
         void get(ElemVector& elements) const noexcept;
         void set(ElemVector const& elements) override;
     };
-    
+	
+	//! The AttributeTag is an Attribute that holds a Tag value.
+	/** Holds a Tag value, its default display style will be a Attribute::Style::Text
+	 */
     class AttributeTag : public Attribute
     {
     private:
@@ -494,7 +508,10 @@ namespace Kiwi
         void get(ElemVector& elements) const noexcept;
         void set(ElemVector const& elements) override;
     };
-    
+	
+	//! The AttributeBox is an Attribute that holds a shared pointer to a Box value.
+	/** Holds a shared pointer to a Box value.
+	 */
     class AttributeBox : public Attribute
     {
     private:
@@ -511,6 +528,11 @@ namespace Kiwi
         void set(ElemVector const& elements) override;
     };
 	
+	//! The AttributeColor is an Attribute that holds a color value.
+	/** Holds a vector of double values suitable to represent a RGBA type color, \n
+	 its default display style will obviously be a Attribute::Style::Color.
+	 Each value of the vector will be clipped between 0. and 1.
+	 */
 	class AttributeColor : public Attribute
 	{
 	private:
@@ -520,9 +542,27 @@ namespace Kiwi
 					   ElemVector defaultValue = {0.f, 0.f, 0.f, 1.f},
 					   string const& label = string(),
 					   string const& category = string(),
-					   Attribute::Style style = Attribute::Style::Color,
 					   long behavior = 0);
 		virtual ~AttributeColor();
+		void get(ElemVector& elements) const noexcept;
+		void set(ElemVector const& elements) override;
+	};
+	
+	//! The AttributeRect is an Attribute that is particulary suitable to represent a position and a size.
+	/** Holds a vector of double values suitable to represent a rectangle, \n
+	 its default display style will obviously be a Attribute::Style::NumberList.
+	 */
+	class AttributeRect : public Attribute
+	{
+	private:
+		ElemVector m_value;
+	public:
+		AttributeRect(sTag name,
+					  ElemVector defaultValue = {0.f, 0.f, 0.f, 0.f},
+					  string const& label = string(),
+					  string const& category = string(),
+					  long behavior = 0);
+		virtual ~AttributeRect();
 		void get(ElemVector& elements) const noexcept;
 		void set(ElemVector const& elements) override;
 	};

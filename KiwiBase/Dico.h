@@ -293,7 +293,7 @@ namespace Kiwi
     };
     
     typedef shared_ptr<Dico>        sDico;
-    
+	typedef shared_ptr<const Dico>  scDico;
     typedef weak_ptr<Dico>          wDico;
     
     inline string toString(const shared_ptr<Dico> dico)

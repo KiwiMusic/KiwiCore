@@ -27,17 +27,18 @@
 namespace Kiwi
 {
     map<string, shared_ptr<const Tag>> Tag::m_tags;
-    sTag Tag::text        = Tag::create("text");
-    sTag Tag::box         = Tag::create("box");
-    sTag Tag::boxes       = Tag::create("boxes");
-    sTag Tag::connection  = Tag::create("connection");
-    sTag Tag::connections = Tag::create("connections");
-    sTag Tag::id          = Tag::create("id");
-    sTag Tag::from        = Tag::create("from");
-    sTag Tag::to          = Tag::create("to");
-    sTag Tag::name        = Tag::create("name");
-    sTag Tag::ninlets     = Tag::create("ninlets");
-    sTag Tag::noutlets    = Tag::create("noutlets");
+    sTag Tag::text				= Tag::create("text");
+    sTag Tag::box				= Tag::create("box");
+    sTag Tag::boxes				= Tag::create("boxes");
+    sTag Tag::connection		= Tag::create("connection");
+    sTag Tag::connections		= Tag::create("connections");
+    sTag Tag::id				= Tag::create("id");
+    sTag Tag::from				= Tag::create("from");
+    sTag Tag::to				= Tag::create("to");
+    sTag Tag::name				= Tag::create("name");
+    sTag Tag::ninlets			= Tag::create("ninlets");
+    sTag Tag::noutlets			= Tag::create("noutlets");
+	sTag Tag::frozen_attributes = Tag::create("frozen_attributes");
 }
 
 
