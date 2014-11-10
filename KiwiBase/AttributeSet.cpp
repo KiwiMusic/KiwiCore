@@ -55,8 +55,12 @@ namespace Kiwi
 			m_attributes[attrname] = attr;
 			
 			for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
-				if (!it->expired())
+            {
+				if(!it->expired())
+                {
 					it->lock()->attributeAdded(attr);
+                }
+            }
 		}
 	}
 	
@@ -92,7 +96,6 @@ namespace Kiwi
 		if (attr != nullptr && !attr->isOpaque())
 		{
 			attr->set(elements);
-			
 			if(attr->shouldNotifyChanges())
 				notify(attr);
 			

@@ -12,6 +12,8 @@
 		8F1E2B8B19DA9E3700F904B9 /* Box.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F1E2B8919DA9E3700F904B9 /* Box.cpp */; };
 		8F1E2B9419DB2D3C00F904B9 /* Page.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F1E2B9219DB2D3C00F904B9 /* Page.cpp */; };
 		8F1E2B9719DBB72500F904B9 /* Dico.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F1E2B9519DBB72500F904B9 /* Dico.cpp */; };
+		8F50D3541A10CC1800A1647B /* AttributeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F50D3521A10CC1800A1647B /* AttributeSet.cpp */; };
+		8F50D3571A10F44300A1647B /* Events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F50D3551A10F44300A1647B /* Events.cpp */; };
 		8F73C78219B9C81E0041C577 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C77019B9C81E0041C577 /* main.cpp */; };
 		8F73C78419B9C8370041C577 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F73C78319B9C8370041C577 /* Accelerate.framework */; };
 		8F73C7DA19B9DB110041C577 /* Arithmetic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7B319B9DB110041C577 /* Arithmetic.cpp */; };
@@ -57,6 +59,10 @@
 		8F1E2B9319DB2D3C00F904B9 /* Page.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Page.h; sourceTree = "<group>"; };
 		8F1E2B9519DBB72500F904B9 /* Dico.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dico.cpp; sourceTree = "<group>"; };
 		8F1E2B9619DBB72500F904B9 /* Dico.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dico.h; sourceTree = "<group>"; };
+		8F50D3521A10CC1800A1647B /* AttributeSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AttributeSet.cpp; sourceTree = "<group>"; };
+		8F50D3531A10CC1800A1647B /* AttributeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AttributeSet.h; sourceTree = "<group>"; };
+		8F50D3551A10F44300A1647B /* Events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Events.cpp; sourceTree = "<group>"; };
+		8F50D3561A10F44300A1647B /* Events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Events.h; sourceTree = "<group>"; };
 		8F73C77019B9C81E0041C577 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		8F73C78319B9C8370041C577 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		8F73C78519B9C84F0041C577 /* KiwiCore.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = KiwiCore.1; sourceTree = "<group>"; };
@@ -308,6 +314,8 @@
 				8FC8A32819C3243E0028F321 /* Element.h */,
 				8F1E2B9519DBB72500F904B9 /* Dico.cpp */,
 				8F1E2B9619DBB72500F904B9 /* Dico.h */,
+				8F50D3521A10CC1800A1647B /* AttributeSet.cpp */,
+				8F50D3531A10CC1800A1647B /* AttributeSet.h */,
 				8FC8A32119C3243E0028F321 /* Attribute.cpp */,
 				8FC8A32219C3243E0028F321 /* Attribute.h */,
 				8F1E2B8919DA9E3700F904B9 /* Box.cpp */,
@@ -316,6 +324,8 @@
 				8F1E2B9319DB2D3C00F904B9 /* Page.h */,
 				8FC8A32B19C3243E0028F321 /* Instance.cpp */,
 				8FC8A32C19C3243E0028F321 /* Instance.h */,
+				8F50D3551A10F44300A1647B /* Events.cpp */,
+				8F50D3561A10F44300A1647B /* Events.h */,
 			);
 			name = KiwiBase;
 			path = ../KiwiBase;
@@ -416,6 +426,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F50D3571A10F44300A1647B /* Events.cpp in Sources */,
 				8F73C78219B9C81E0041C577 /* main.cpp in Sources */,
 				8FCE3DDF19C2EDD200DEAA7F /* DspContext.cpp in Sources */,
 				8FC8A33619C3243E0028F321 /* Element.cpp in Sources */,
@@ -436,6 +447,7 @@
 				8FBE76DE1A0B802B008A7B56 /* muParser.cpp in Sources */,
 				8F73C7DB19B9DB110041C577 /* ArithmeticTilde.cpp in Sources */,
 				8F73C7DA19B9DB110041C577 /* Arithmetic.cpp in Sources */,
+				8F50D3541A10CC1800A1647B /* AttributeSet.cpp in Sources */,
 				8F158E811A01582500F6D72E /* Console.cpp in Sources */,
 				8FBE76E01A0B802B008A7B56 /* muParserBytecode.cpp in Sources */,
 				8FBE76E41A0B802B008A7B56 /* muParserInt.cpp in Sources */,
