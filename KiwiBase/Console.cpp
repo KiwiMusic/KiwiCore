@@ -214,7 +214,8 @@ namespace Kiwi
     //                                  CONSOLE HISTORY                                 //
     // ================================================================================ //
         
-    Console::History::History()
+    Console::History::History() :
+    m_sort(Console::History::Index)
     {
         ;
     }
@@ -272,7 +273,7 @@ namespace Kiwi
     
     size_t Console::History::size()
     {
-        lock_guard<mutex> guard(m_hmutex);
+        //lock_guard<mutex> guard(m_hmutex);
         return m_messages.size();
     }
     
@@ -300,6 +301,7 @@ namespace Kiwi
             {
                 m_messages[i].m_index = i+1;
             }
+            sort(m_sort);
             for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
             {
                 shared_ptr<Console::History::Listener> to = (*it).lock();
@@ -327,6 +329,7 @@ namespace Kiwi
             {
                 m_messages[i].m_index = i+1;
             }
+            sort(m_sort);
             for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
             {
                 shared_ptr<Console::History::Listener> to = (*it).lock();
@@ -343,15 +346,18 @@ namespace Kiwi
         }
     }
         
-    void Console::History::erase(vector<size_t> const& indices)
+    void Console::History::erase(vector<size_t>& indices)
     {
         lock_guard<mutex> guard(m_hmutex);
         size_t max = m_messages.size();
+        std::sort(indices.begin(), indices.end());
+        std::reverse(indices.begin(), indices.end());
         for(size_t i = 0; i < indices.size(); i++)
         {
             if(indices[i] < max)
             {
                 m_messages.erase(m_messages.begin()+indices[i]);
+                --max;
             }
         }
         std::sort(m_messages.begin(), m_messages.end(), compareIndex);
@@ -359,6 +365,7 @@ namespace Kiwi
         {
             m_messages[i].m_index = i+1;
         }
+        sort(m_sort);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
             shared_ptr<Console::History::Listener> to = (*it).lock();
@@ -440,7 +447,8 @@ namespace Kiwi
     
     void Console::History::sort(Sort type)
     {
-        switch(type)
+        m_sort = type;
+        switch(m_sort)
         {
             case Index:
                 std::sort(m_messages.begin(), m_messages.end(), compareIndex);
