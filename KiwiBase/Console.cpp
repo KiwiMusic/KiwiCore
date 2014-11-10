@@ -354,7 +354,7 @@ namespace Kiwi
         std::reverse(indices.begin(), indices.end());
         for(size_t i = 0; i < indices.size(); i++)
         {
-            if(indices[i] < m_messages.size())
+            if(indices[i] < max)
             {
                 m_messages.erase(m_messages.begin()+indices[i]);
                 --max;
