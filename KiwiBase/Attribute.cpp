@@ -357,7 +357,7 @@ namespace Kiwi
 		for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
 			it->second->read(dico);
 			
-		if(dico->has(Tag::frozen_attributes));
+		if(dico->has(Tag::frozen_attributes))
 		{
 			ElemVector frozenAttrs;
 			dico->get(Tag::frozen_attributes, frozenAttrs);

@@ -26,6 +26,12 @@
 
 #include "Page.h"
 
+// TODO :
+// - Make everything thread-safe (no need multi-thread ofr tick I guess).
+// - See how to stop & restart DSP chain when adding a new page (save the samplerate and vectorsize).
+// - See how to set the input and output vector for DSP.
+// - See how to manage some unique id to communicate between object with tag (old behavior).
+
 namespace Kiwi
 {
     class InstanceListener;
