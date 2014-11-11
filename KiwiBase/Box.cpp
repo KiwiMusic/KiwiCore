@@ -34,13 +34,44 @@ namespace Kiwi
     // ================================================================================ //
     
     Box::Box(weak_ptr<Page> page, string const& name) :
-    AttributeFactory(),
+	Attribute::Manager(),
     m_page(page),
     m_name(Tag::create(name)),
     m_stack_count(0)
     {
-        createAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Appearance");
-        createAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Appearance");
+		//getInstance()->getBoxDefaultAttributes();
+		
+		// Font attributes
+        addAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Font");
+        addAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Font");
+		
+		ElemVector elems = {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")};
+		addAttribute<AttributeEnum>(Tag::create("fontface"), elems, 0, "Font Style", "Font");
+		
+		elems = {Tag::create("left"), Tag::create("center"), Tag::create("right")};
+		addAttribute<AttributeEnum>(Tag::create("textjustification"), elems, 0, "Justification", "Font");
+		
+		// Appearance attributes
+		addAttribute<AttributeBool>(Tag::create("hidden"), false, "Hide on Lock", "Appearance");
+		addAttribute<AttributeBool>(Tag::create("presentation"), false, "Include in Presentation", "Appearance");
+		
+		elems = {0., 0.};
+		addAttribute<AttributePoint>(Tag::create("position"), elems, "Position", "Appearance");
+		elems = {100., 20.};
+		addAttribute<AttributePoint>(Tag::create("page_size"), elems, "Size", "Appearance");
+		
+		elems = {0., 0.};
+		addAttribute<AttributePoint>(Tag::create("presentation_pos"), elems, "Presentation Position", "Appearance");
+		elems = {0., 0.};
+		addAttribute<AttributePoint>(Tag::create("presentation_size"), elems, "Presentation Size", "Appearance");
+		
+		// Color attributes
+		elems = {1., 1., 1, 1.};
+		addAttribute<AttributePoint>(Tag::create("bgcolor"), elems, "Background Color", "Color");
+		elems = {0., 0., 0, 1.};
+		addAttribute<AttributePoint>(Tag::create("bdcolor"), elems, "Border Color", "Color");
+		elems = {0., 0., 0, 1.};
+		addAttribute<AttributePoint>(Tag::create("textcolor"), elems, "Text Color", "Color");
     }
     
     Box::~Box()
@@ -78,7 +109,7 @@ namespace Kiwi
                 {
                     box->m_text = dico->get(Tag::text);
                     box->load(dico);
-                    box->AttributeFactory::read(dico);
+					box->Attribute::Manager::read(dico);
                     return box;
                 }
             }
@@ -148,7 +179,7 @@ namespace Kiwi
     void Box::write(sDico dico) const
     {
         save(dico);
-        AttributeFactory::write(dico);
+        Attribute::Manager::write(dico);
         dico->set(Tag::name, m_name);
         dico->set(Tag::ninlets, m_inlets.size());
         dico->set(Tag::noutlets, m_outlets.size());
@@ -167,7 +198,7 @@ namespace Kiwi
                 {
                     if(!receiver->receive(inlet, elements))
                     {
-                        receiver->AttributeFactory::receive(elements);
+                        receiver->Attribute::Manager::receive(elements);
                     }
                 }
                 else if(receiver->m_stack_count  == 256)
@@ -175,7 +206,7 @@ namespace Kiwi
                     Console::error(receiver, "Stack overflow");
                     if(!receiver->receive(inlet, elements))
                     {
-                        receiver->AttributeFactory::receive(elements);
+                        receiver->Attribute::Manager::receive(elements);
                     }
                 }
                 else

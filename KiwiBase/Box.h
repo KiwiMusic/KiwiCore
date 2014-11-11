@@ -41,7 +41,7 @@ namespace Kiwi
      The box is a graphical object that aims to be instantiate in a page.
      */
     
-    class Box : public AttributeFactory, public enable_shared_from_this<Box>
+	class Box : public Attribute::Manager, public enable_shared_from_this<Box>
     {
     public:
         class Listener;
