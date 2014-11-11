@@ -171,14 +171,70 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::receive(Events::Mouse const& events)
+    bool Box::receive(Event::Mouse const& events)
     {
         return false;
     }
     
-    bool Box::receive(Events::Keyboard const& events)
+    bool Box::receive(Event::Keyboard const& events)
     {
         return false;
+    }
+    
+    bool Box::paint(Doodle& d) const
+    {
+        return false;
+    }
+    
+    void Box::draw(Doodle& d, bool edit) const
+    {
+        d.setColor({1., 1., 1., 1.});
+        d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
+        if(!paint(d))
+        {
+            d.setColor({0.3, 0.3, 0.3, 1.});
+            d.drawText(toString(m_text), 3, 0, d.getWidth(), d.getHeight(), Doodle::Justification::CentredLeft);
+        }
+        d.setColor({0.4, 0.4, 0.4, 1.});
+        d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1., 2.5);
+        
+        if(edit)
+        {
+            size_t ninlet = m_inlets.size();
+            size_t noutlet = m_outlets.size();
+            d.setColor({0.3, 0.3, 0.3, 1.});
+            if(ninlet)
+            {
+                d.fillRectangle(0., 0., 5, 3, 2.5);
+            }
+            if(ninlet > 1)
+            {
+                double ratio = (d.getWidth() - 5.) / (double)(ninlet - 1);
+                for(size_t i = ninlet; i; i--)
+                {
+                    d.fillRectangle(ratio * i, 0., 5, 3, 2.5);
+                }
+            }
+            
+            if(noutlet)
+            {
+                d.fillRectangle(0., d.getHeight() - 3., 5, 3, 2.5);
+            }
+            if(noutlet > 1)
+            {
+                double ratio = (d.getWidth() - 5.) / (double)(noutlet - 1);
+                for(size_t i = noutlet; i; i--)
+                {
+                    d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 2.5);
+                }
+            }
+            
+        }
+    }
+    
+    void Box::redraw() const
+    {
+        
     }
 
     void Box::write(sDico dico) const
