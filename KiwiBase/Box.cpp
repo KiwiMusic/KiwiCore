@@ -34,12 +34,44 @@ namespace Kiwi
     // ================================================================================ //
     
     Box::Box(weak_ptr<Page> page, string const& name) :
+	Attribute::Manager(),
     m_page(page),
     m_name(Tag::create(name)),
     m_stack_count(0)
     {
-        createAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Appearance");
-        createAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Appearance");
+		//getInstance()->getBoxDefaultAttributes();
+		
+		// Font attributes
+        addAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Font");
+        addAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Font");
+		
+		ElemVector elems = {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")};
+		addAttribute<AttributeEnum>(Tag::create("fontface"), elems, 0, "Font Style", "Font");
+		
+		elems = {Tag::create("left"), Tag::create("center"), Tag::create("right")};
+		addAttribute<AttributeEnum>(Tag::create("textjustification"), elems, 0, "Justification", "Font");
+		
+		// Appearance attributes
+		addAttribute<AttributeBool>(Tag::create("hidden"), false, "Hide on Lock", "Appearance");
+		addAttribute<AttributeBool>(Tag::create("presentation"), false, "Include in Presentation", "Appearance");
+		
+		elems = {0., 0.};
+		addAttribute<AttributePoint>(Tag::create("position"), elems, "Position", "Appearance");
+		elems = {100., 20.};
+		addAttribute<AttributePoint>(Tag::create("page_size"), elems, "Size", "Appearance");
+		
+		elems = {0., 0.};
+		addAttribute<AttributePoint>(Tag::create("presentation_pos"), elems, "Presentation Position", "Appearance");
+		elems = {0., 0.};
+		addAttribute<AttributePoint>(Tag::create("presentation_size"), elems, "Presentation Size", "Appearance");
+		
+		// Color attributes
+		elems = {1., 1., 1, 1.};
+		addAttribute<AttributePoint>(Tag::create("bgcolor"), elems, "Background Color", "Color");
+		elems = {0., 0., 0, 1.};
+		addAttribute<AttributePoint>(Tag::create("bdcolor"), elems, "Border Color", "Color");
+		elems = {0., 0., 0, 1.};
+		addAttribute<AttributePoint>(Tag::create("textcolor"), elems, "Text Color", "Color");
     }
     
     Box::~Box()
@@ -77,7 +109,7 @@ namespace Kiwi
                 {
                     box->m_text = dico->get(Tag::text);
                     box->load(dico);
-                    box->AttributeFactory::read(dico);
+					box->Attribute::Manager::read(dico);
                     return box;
                 }
             }
@@ -139,77 +171,20 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::receive(Event::Mouse const& event)
+    bool Box::receive(Events::Mouse const& events)
     {
-        Console::post(shared_from_this(), toString(event));
         return false;
     }
     
-    bool Box::receive(Event::Keyboard const& event)
+    bool Box::receive(Events::Keyboard const& events)
     {
         return false;
     }
 
-    bool Box::paint(Doodle& d) const
-    {
-        return false;
-    }
-    
-    void Box::draw(Doodle& d, bool edit) const
-    {
-        d.setColor({1., 1., 1., 1.});
-        d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
-        if(!paint(d))
-        {
-            d.setColor({0.3, 0.3, 0.3, 1.});
-            d.drawText(toString(m_text), 3, 0, d.getWidth(), d.getHeight(), Doodle::Justification::CentredLeft);
-        }
-        d.setColor({0.4, 0.4, 0.4, 1.});
-        d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1., 2.5);
-        
-        if(edit)
-        {
-            size_t ninlet = m_inlets.size();
-            size_t noutlet = m_outlets.size();
-            d.setColor({0.3, 0.3, 0.3, 1.});
-            if(ninlet)
-            {
-                d.fillRectangle(0., 0., 5, 3, 2.5);
-            }
-            if(ninlet > 1)
-            {
-                double ratio = (d.getWidth() - 5.) / (double)(ninlet - 1);
-                for(size_t i = ninlet; i; i--)
-                {
-                    d.fillRectangle(ratio * i, 0., 5, 3, 2.5);
-                }
-            }
-            
-            if(noutlet)
-            {
-                d.fillRectangle(0., d.getHeight() - 3., 5, 3, 2.5);
-            }
-            if(noutlet > 1)
-            {
-                double ratio = (d.getWidth() - 5.) / (double)(noutlet - 1);
-                for(size_t i = noutlet; i; i--)
-                {
-                    d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 2.5);
-                }
-            }
-
-        }
-    }
-    
-    void Box::redraw() const
-    {
-        
-    }
-    
     void Box::write(sDico dico) const
     {
         save(dico);
-        AttributeFactory::write(dico);
+        Attribute::Manager::write(dico);
         dico->set(Tag::name, m_name);
         dico->set(Tag::ninlets, m_inlets.size());
         dico->set(Tag::noutlets, m_outlets.size());
@@ -228,7 +203,7 @@ namespace Kiwi
                 {
                     if(!receiver->receive(inlet, elements))
                     {
-                        receiver->AttributeFactory::receive(elements);
+                        receiver->Attribute::Manager::receive(elements);
                     }
                 }
                 else if(receiver->m_stack_count  == 256)
@@ -236,7 +211,7 @@ namespace Kiwi
                     Console::error(receiver, "Stack overflow");
                     if(!receiver->receive(inlet, elements))
                     {
-                        receiver->AttributeFactory::receive(elements);
+                        receiver->Attribute::Manager::receive(elements);
                     }
                 }
                 else

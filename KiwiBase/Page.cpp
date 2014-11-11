@@ -63,7 +63,7 @@ namespace Kiwi
             if(box)
             {
                 m_boxes.push_back(box);
-                box->bind(shared_from_this());
+				box->bind(shared_from_this());
                 return box;
             }
         }
