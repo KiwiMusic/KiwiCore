@@ -26,6 +26,7 @@
 
 #include "Attribute.h"
 #include "Events.h"
+#include "Doodle.h"
 
 namespace Kiwi
 {
@@ -40,8 +41,7 @@ namespace Kiwi
     /**
      The box is a graphical object that aims to be instantiate in a page.
      */
-    
-	class Box : public Attribute::Manager, public enable_shared_from_this<Box>
+    class Box : public AttributeFactory, public enable_shared_from_this<Box>
     {
     public:
         class Listener;
@@ -183,9 +183,20 @@ namespace Kiwi
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
-         @param events    An event.
+         @param events    A mouse event.
          */
-        virtual bool receive(Events const& events);
+        virtual bool receive(Events::Mouse const& events);
+        
+        //! The receive method that should be override.
+        /** The function shoulds perform some stuff.
+         @param events    A keyboard event.
+         */
+        virtual bool receive(Events::Keyboard const& events);
+        
+        virtual void paint()
+        {
+            ;
+        }
         
         //! Retrieve the number of inlets of the box.
         /** The functions retrieves the number of inlets of the box.
