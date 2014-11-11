@@ -44,7 +44,8 @@ namespace Kiwi
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>           m_listeners;
         bool                                m_dsp_running;
-        
+        mutable mutex                       m_pages_mutex;
+        mutex                               m_listeners_mutex;
     public:
         
         //! The constructor.

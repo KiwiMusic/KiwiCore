@@ -213,33 +213,33 @@ namespace Kiwi
                 ;
             }
             
-            //! Receive the notification that a page has been created.
-            /** The function is called by the instance when a page has been created.
-             @param instance    The instance.
-             @param page        The page.
+            //! Receive the notification that a box has been created.
+            /** The function is called by the instance when a box has been created.
+             @param page    The page.
+             @param box     The box.
              */
             virtual void boxHasBeenCreated(shared_ptr<Page> page, sBox box){};
             
-            //! Receive the notification that a page has been closed.
-            /** The function is called by the instance when a page has been closed.
-             @param instance    The instance.
-             @param page        The page.
+            //! Receive the notification that a box has been removed.
+            /** The function is called by the instance when a box has been removed.
+             @param page    The page.
+             @param box     The box.
              */
             virtual void boxHasBeenRemoved(shared_ptr<Page> page, sBox box){};
             
-            //! Receive the notification that a page has been created.
-            /** The function is called by the instance when a page has been created.
-             @param instance    The instance.
+            //! Receive the notification that a connection has been created.
+            /** The function is called by the instance when a connection has been created.
              @param page        The page.
+             @param connection  The box.
              */
-            virtual void connectionHasBeenCreated(shared_ptr<Page> page, sConnection box){};
+            virtual void connectionHasBeenCreated(shared_ptr<Page> page, sConnection connection){};
             
-            //! Receive the notification that a page has been closed.
-            /** The function is called by the instance when a page has been closed.
-             @param instance    The instance.
+            //! Receive the notification that a connection has been removed.
+            /** The function is called by the instance when a connection has been removed.
              @param page        The page.
+             @param connection  The connection.
              */
-            virtual void connectionHasBeenRemoved(shared_ptr<Page> page, sConnection box){};
+            virtual void connectionHasBeenRemoved(shared_ptr<Page> page, sConnection connection){};
         };
     };
     
