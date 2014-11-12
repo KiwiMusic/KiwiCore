@@ -64,6 +64,14 @@ namespace Kiwi
             {
                 m_boxes.push_back(box);
 				box->bind(shared_from_this());
+                for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+                {
+                    Page::sListener listener = (*it).lock();
+                    if(listener)
+                    {
+                        listener->boxHasBeenCreated(shared_from_this(), box);
+                    }
+                }
                 return box;
             }
         }

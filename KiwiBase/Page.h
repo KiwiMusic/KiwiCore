@@ -241,6 +241,8 @@ namespace Kiwi
              */
             virtual void connectionHasBeenRemoved(shared_ptr<Page> page, sConnection connection){};
         };
+        
+        typedef shared_ptr<Listener>    sListener;
     };
     
     typedef shared_ptr<Page>    sPage;
