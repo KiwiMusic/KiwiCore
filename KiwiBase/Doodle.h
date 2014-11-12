@@ -32,9 +32,8 @@ namespace Kiwi
     class Doodle
     {
     public:
-        class Color
+        struct Color
         {
-        public:
             double red;
             double green;
             double blue;
@@ -46,13 +45,32 @@ namespace Kiwi
             ;
         };
         
-        class Rectangle
+        struct Rectangle
         {
-        public:
             double x;
             double y;
             double width;
             double height;
+        };
+        
+        enum Justification
+        {
+            Left                    = 1,
+            Right                   = 2,
+            HorizontallyCentered    = 4,
+            Top                     = 8,
+            Bottom                  = 16,
+            VerticallyCentred       = 32,
+            HorizontallyJustified   = 64,
+            Centred                 = 36,
+            CentredLeft             = 33,
+            CentredRight            = 34,
+            CentredTop              = 12,
+            CentredBottom           = 20,
+            TopLeft                 = 9,
+            TopRight                = 10,
+            BottomLeft              = 17,
+            BottomRight             = 18
         };
 
         Doodle()
@@ -75,9 +93,16 @@ namespace Kiwi
         
         virtual inline void fillAll() = 0;
         
-        virtual inline void setColour(Color newColour) = 0;
+        virtual inline void setColor(Color const& color) = 0;
         
         virtual inline void setFont(const Font& newFont) = 0;
+        
+        virtual inline void drawText(string const& text, double x, double y, double w, double h, Justification j, bool wrap = true) = 0;
+        
+        virtual inline void drawText(string const& text, Rectangle const& rect, Justification j, bool wrap = true)
+        {
+            drawText(text, rect.x, rect.y, rect.width, rect.height, j, wrap);
+        }
         
         virtual inline void drawRectangle(double x, double y, double w, double h, double thickness, double rounded = 0.) = 0;
         

@@ -25,7 +25,7 @@
 #define __DEF_KIWI_BOX__
 
 #include "Attribute.h"
-#include "Events.h"
+#include "Event.h"
 #include "Doodle.h"
 
 namespace Kiwi
@@ -46,6 +46,11 @@ namespace Kiwi
     public:
         class Listener;
         
+        enum Type
+        {
+            WantMouseFocus      = 1<<1,
+            WantKeyboardFocus   = 1<<2
+        };
     protected:
         
         class Inlet
@@ -183,20 +188,27 @@ namespace Kiwi
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
-         @param events    A mouse event.
+         @param event    A mouse event.
          */
-        virtual bool receive(Events::Mouse const& events);
+        virtual bool receive(Event::Mouse const& event);
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
-         @param events    A keyboard event.
+         @param event    A keyboard event.
          */
-        virtual bool receive(Events::Keyboard const& events);
+        virtual bool receive(Event::Keyboard const& event);
         
-        virtual void paint()
-        {
-            ;
-        }
+        //! The paint method that should be override.
+        /** The function shoulds draw some stuff in the doodle.
+         @param doodle    A doodle to draw.
+         */
+        virtual bool paint(Doodle& doodle) const;
+        
+        //! The draw method.
+        /** The function performs some stuff before to call the paint method.
+         @param paper    A doodle to draw.
+         */
+        void draw(Doodle& d, bool edit = 0) const;
         
         //! Retrieve the number of inlets of the box.
         /** The functions retrieves the number of inlets of the box.
@@ -225,6 +237,11 @@ namespace Kiwi
         string getOutletDescription(size_t index) const noexcept;
         
     protected:
+        
+        //! Send a notification to the page that the box should be redraw.
+        /** The function sends a notification to the page that the box should be redraw.
+         */
+        void    redraw() const;
         
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
@@ -393,6 +410,10 @@ namespace Kiwi
     typedef shared_ptr<Box>     sBox;
     
     typedef weak_ptr<Box>       wBox;
+    
+    typedef shared_ptr<const Box> scBox;
+    
+    typedef weak_ptr<const Box>   wcBox;
     
     inline string toString(shared_ptr<const Box> box)
     {

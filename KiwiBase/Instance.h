@@ -26,6 +26,12 @@
 
 #include "Page.h"
 
+// TODO :
+// - Make everything thread-safe (no need multi-thread ofr tick I guess).
+// - See how to stop & restart DSP chain when adding a new page (save the samplerate and vectorsize).
+// - See how to set the input and output vector for DSP.
+// - See how to manage some unique id to communicate between object with tag (old behavior).
+
 namespace Kiwi
 {
     class InstanceListener;
@@ -44,7 +50,8 @@ namespace Kiwi
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>           m_listeners;
         bool                                m_dsp_running;
-        
+        mutable mutex                       m_pages_mutex;
+        mutex                               m_listeners_mutex;
     public:
         
         //! The constructor.
@@ -67,7 +74,7 @@ namespace Kiwi
          @param dico The dico that defines of the page.
          @return The page.
          */
-        sPage createPage(sDico dico);
+        sPage createPage(sDico dico = nullptr);
         
         //! Close a page.
         /** The function closes page.

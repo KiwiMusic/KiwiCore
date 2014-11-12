@@ -25,6 +25,7 @@
 #define __DEF_KIWI_EVENTS__
 
 #include "Defs.h"
+#include "Tools.h"
 
 namespace Kiwi
 {
@@ -36,7 +37,7 @@ namespace Kiwi
     /**
      The evennts
      */
-    class Events
+    class Event
     {
     public:
         
@@ -89,7 +90,8 @@ namespace Kiwi
             const long      modifiers;
             const double    wheel;
             
-            Mouse(Type _type, int _x, int _y, long _mod, double _wheel) : type(_type), x(_x), y(_y), modifiers(_mod), wheel(_wheel)
+            Mouse(Type _type, int _x, int _y, long _mod, double _wheel) noexcept
+            : type(_type), x(_x), y(_y), modifiers(_mod), wheel(_wheel)
             {
                 ;
             }
@@ -114,6 +116,76 @@ namespace Kiwi
         };
     
     };
+    
+    inline string toString(Event::Mouse const& event)
+    {
+        string text = "Mouse ";
+        switch(event.type)
+        {
+            case Event::Mouse::Unknown:
+                text += "Unknown ";
+                break;
+            case Event::Mouse::Enter:
+                text += "Enter ";
+                break;
+            case Event::Mouse::Leave:
+                text += "Leave ";
+                break;
+            case Event::Mouse::Move:
+                text += "Move ";
+                break;
+            case Event::Mouse::Drag:
+                text += "Drag ";
+                break;
+            case Event::Mouse::Down:
+                text += "Down ";
+                break;
+            case Event::Mouse::Up:
+                text += "Up ";
+                break;
+            case Event::Mouse::DoubleClick:
+                text += "DoubleClick ";
+                break;
+            default:
+                text += "Wheel (" + toString(event.wheel) + ") ";
+                break;
+        }
+        text += "[" + toString(event.x) + " " + toString(event.y) + "] ";
+        if(event.modifiers & Event::Mouse::Shift)
+        {
+            text += "Shift ";
+        }
+        if(event.modifiers & Event::Mouse::Ctrl)
+        {
+            text += "Ctrl ";
+        }
+        if(event.modifiers & Event::Mouse::Alt)
+        {
+            text += "Alt ";
+        }
+        if(event.modifiers & Event::Mouse::Left)
+        {
+            text += "Left ";
+        }
+        if(event.modifiers & Event::Mouse::Right)
+        {
+            text += "Right ";
+        }
+        if(event.modifiers & Event::Mouse::Middle)
+        {
+            text += "Middle ";
+        }
+        if(event.modifiers & Event::Mouse::Cmd)
+        {
+            text += "Cmd ";
+        }
+        if(event.modifiers & Event::Mouse::Popup)
+        {
+            text += "Popup ";
+        }
+        return text;
+    }
+
 }
 
 #endif

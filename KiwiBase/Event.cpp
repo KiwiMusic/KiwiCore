@@ -6,4 +6,3 @@
 //  Copyright (c) 2014 PierreGuillot. All rights reserved.
 //
 
-#include "Events.h"
