@@ -112,7 +112,39 @@ namespace Kiwi
          */
         class Keyboard
         {
+            enum Modifier
+            {
+                Nothing     = 0,
+                Shift       = 1,
+                Ctrl        = 2,
+                Alt         = 4,
+                Left        = 16,
+                Right       = 32,
+                Middle      = 64,
+                
+#ifdef __APPLE__
+                Cmd          = 8,
+                Popup        = Right | Ctrl,
+#else
+                Cmd          = Ctrl,
+                Popup        = Right
+#endif
+            };
             
+            //const Type      type;
+            const char      letter;
+            const long      modifiers;
+            
+            Keyboard(char _letter, long _mod) noexcept
+            : letter(_letter), modifiers(_mod)
+            {
+                ;
+            }
+            
+            ~Keyboard()
+            {
+                ;
+            }
         };
     
     };

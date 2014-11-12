@@ -33,10 +33,10 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(weak_ptr<Page> page, string const& name) :
-	Attribute::Manager(),
+    Box::Box(weak_ptr<Page> page, string const& name, long type) :
     m_page(page),
     m_name(Tag::create(name)),
+    m_type(0 | type),
     m_stack_count(0)
     {
 		//getInstance()->getBoxDefaultAttributes();
@@ -149,6 +149,11 @@ namespace Kiwi
     sTag Box::getText() const noexcept
     {
         return m_text;
+    }
+    
+    long Box::getType() const noexcept
+    {
+        return m_type;
     }
     
     string Box::getExpression() const noexcept
