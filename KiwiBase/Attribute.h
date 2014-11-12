@@ -364,6 +364,8 @@ namespace Kiwi
 		weak_ptr_hash<Listener>,
 		weak_ptr_equal<Listener>>   m_listeners;
 		
+		typedef shared_ptr<Attribute::Manager> sAttributeManager;
+		
 	public:
 		
 		//! Constructor.
@@ -463,6 +465,18 @@ namespace Kiwi
 		//								ATRIBUTESET::LISTENER                               //
 		// ================================================================================ //
 		
+		/** Flags describing the type of the notification
+		 @see Attribute::Manager::Listener
+		 */
+		enum NotificationType
+		{
+			AttrAdded = 0,		///< Indicates that an attribute has been added.
+			AttrRemoved,		///< Indicates that an attribute has been removed.
+			ValueChanged,		///< Indicates that an attribute value has changed.
+			AppearanceChanged,	///< Indicates that the appearance of the attribute has changed (style, category, label..).
+			BehaviorChanged		///< Indicates that the behavior of an attribute has changed.
+		};
+		
 		//! The attribute listener is a virtual class that can be binded to an AttributeSet to be notified of the attributes changes.
 		/** The attribute listener is a very light class that allows to be notified of the attributes modification.
 			To
@@ -472,40 +486,13 @@ namespace Kiwi
 		public:
 			virtual ~Listener() {}
 			
-			//! Receive the notification that an attribute has been added to the set.
-			/** This method is called when an attribute has been added to the set.
-			 @param attr   The newly added attribute.
-			 @see attributeRemoved
+			//! Receive the notification that an attribute has changed.
+			/** Sublass of Attribute::Manager::Listener must implement this virtual method to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+			 @param manager		The Attribute::Manager that manages the attribute.
+			 @param attr		The attribute that has been modified.
+			 @param type		The type of notification as specified in the Attribute::Manager::NotificationType enum,
 			 */
-			virtual void attributeAdded(sAttribute attr) {};
-			
-			//! Receive the notification that an attribute has been removed from the set.
-			/** This method is called when an attribute has been removed from the set.
-			 @param attr   The attribute that has been removed.
-			 @see attributeAdded
-			 */
-			virtual void attributeRemoved(sAttribute attr) {};
-			
-			//! Receive the notification that an attribute of the set has been modified.
-			/** This method is called when an attribute of the set has been modified.
-			 @param attr   The attribute that has been modified.
-			 @see attributeBehaviorChanges
-			 */
-			virtual void attributeValueChanged(sAttribute attr) {};
-			
-			//! Receive the notification that the behavior of an attribute of the set has been changed.
-			/** This method is called when the behavior of an attribute of the set has been changed.
-			 @param attr   The attribute that has its behavior been changed.
-			 @see attributeModified
-			 */
-			virtual void attributeAppearanceChanged(sAttribute attr) {};
-			
-			//! Receive the notification that the behavior of an attribute of the set has been changed.
-			/** This method is called when the behavior of an attribute of the set has been changed.
-			 @param attr   The attribute that has its behavior been changed.
-			 @see attributeModified
-			 */
-			virtual void attributeBehaviorChanged(sAttribute attr) {};
+			virtual void attributeChanged(Manager* manager, sAttribute attr, NotificationType type) = 0;
 		};
 		
 		//! Adds a listener to be called when this AttributeSet changes.
@@ -526,17 +513,18 @@ namespace Kiwi
 		
 	protected:
 		
+		//! Receive the notification that an attribute has changed.
+		/** Sublass of Attribute::Manager can implement this virtual method to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+		 @param attr		The attribute that has been modified.
+		 @param type		The type of notification as specified in the Attribute::Manager::NotificationType enum,
+		 */
+		virtual void attributeChanged(sAttribute attr, NotificationType type) {};
+		
 		//! Sets the attributes value with a dico.
 		/** This method sets the attributes value with a dico.
 		 @param dico The dico.
 		 */
 		void read(scDico dico) noexcept;
-		
-		//! Receive a notification from an attribute.
-		/** The function receives the notifications from the attribute.
-		 @param attr The attribute that notify.
-		 */
-		virtual void notify(sAttribute attr) {};
 		
 		//! Attribute maker.
 		/** This function creates and adds an attribute to the attribute factory.
@@ -585,6 +573,11 @@ namespace Kiwi
 		 @param behavior The behavior of the attribute.
 		 */
 		void setAttributeBehavior(sTag name, Attribute::Behavior behavior);
+		
+	private:
+		
+		//! @internal Trigger notification to subclasses and listeners.
+		void triggerNotification(sAttribute attr, NotificationType type);
 	};
 	
 	//! The shared pointer of an attribute set.
