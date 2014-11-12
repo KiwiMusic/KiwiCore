@@ -85,7 +85,7 @@ namespace Kiwi
     void Instance::removePage(sPage page)
     {
         m_pages_mutex.lock();
-        if(binary_search(m_pages.begin(), m_pages.end(), page))
+        if(m_pages.find(page) != m_pages.end())
         {
             m_pages.erase(page);
             m_pages_mutex.unlock();
