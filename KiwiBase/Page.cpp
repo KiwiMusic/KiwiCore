@@ -48,7 +48,7 @@ namespace Kiwi
     sPage Page::create(shared_ptr<Instance> instance, sDico dico)
     {
         sPage page = make_shared<Page>(instance);
-        if(page)
+        if(page && dico)
         {
             page->read(dico);
         }

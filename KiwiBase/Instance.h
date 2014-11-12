@@ -74,7 +74,7 @@ namespace Kiwi
          @param dico The dico that defines of the page.
          @return The page.
          */
-        sPage createPage(sDico dico);
+        sPage createPage(sDico dico = nullptr);
         
         //! Close a page.
         /** The function closes page.
