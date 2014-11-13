@@ -52,6 +52,8 @@ namespace Kiwi
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>   m_listeners;
         
+        bool                         m_dsp_running;
+        
         static bool sortBoxes(Element first, Element second);
     public:
         
@@ -130,8 +132,9 @@ namespace Kiwi
         /** The function start the dsp chain.
          @param samplerate The sample rate.
          @param vectorsize The vector size of the signal.
+         @return true if the page can process signal.
          */
-        void startDsp(double samplerate, long vectorsize);
+        bool startDsp(double samplerate, long vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain.
@@ -142,6 +145,11 @@ namespace Kiwi
         /** The function stop the dsp chain.
          */
         void stopDsp();
+        
+        //! Check if the dsp is running.
+        /** The function checks if the dsp is running
+         */
+        bool isDspRunning() const noexcept;
         
         //! Receive the notification that an inlet has been created.
         /** The function is called by the box when a inlet has been created.

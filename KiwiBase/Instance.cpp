@@ -26,13 +26,17 @@
 #include "../KiwiBoxes/ArithmeticTilde.h"
 
 namespace Kiwi
-{    
+{
+    bool libraries_loaded = false;
+    
     // ================================================================================ //
     //                                      INSTANCE                                    //
     // ================================================================================ //
     
     Instance::Instance() noexcept :
-    m_dsp_running(0)
+    m_dsp_running(false),
+    m_sample_rate(0),
+    m_vector_size(0)
     {
         
     }
@@ -41,16 +45,15 @@ namespace Kiwi
     {
         m_pages.clear();
         m_listeners.clear();
+        m_dsp_pages.clear();
     }
-    
-    bool libraries_loaded = false;
     
     shared_ptr<Instance> Instance::create()
     {
         if(!libraries_loaded)
         {
             arithmetic();
-            libraries_loaded= true;
+            libraries_loaded = true;
         }
         return make_shared<Instance>();
     }
@@ -67,6 +70,16 @@ namespace Kiwi
             m_pages_mutex.lock();
             m_pages.insert(page);
             m_pages_mutex.unlock();
+            
+            if(m_dsp_running)
+            {
+                if(page->startDsp(m_sample_rate, m_vector_size))
+                {
+                    m_dsp_mutex.lock();
+                    m_dsp_pages.push_back(page);
+                    m_dsp_mutex.unlock();
+                }
+            }
             
             m_listeners_mutex.lock();
             for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
@@ -87,6 +100,18 @@ namespace Kiwi
         m_pages_mutex.lock();
         if(m_pages.find(page) != m_pages.end())
         {
+            if(m_dsp_running && page->isDspRunning())
+            {
+                m_dsp_mutex.lock();
+                page->stopDsp();
+                auto it  = find(m_dsp_pages.begin(), m_dsp_pages.end(), page);
+                if(it != m_dsp_pages.end())
+                {
+                    m_dsp_pages.erase(it);
+                }
+                m_dsp_mutex.unlock();
+            }
+            
             m_pages.erase(page);
             m_pages_mutex.unlock();
             
@@ -107,55 +132,91 @@ namespace Kiwi
         }
     }
     
-    void Instance::startDsp(double samplerate, long vectorsize)
+    void Instance::startDsp(long samplerate, long vectorsize)
     {
-        m_dsp_running   = true;
+        if(m_dsp_running)
+        {
+            stopDsp();
+        }
+        m_sample_rate   = samplerate;
+        m_vector_size   = vectorsize;
+        
+        m_dsp_mutex.lock();
         m_pages_mutex.lock();
         for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
         {
-            (*it)->startDsp(samplerate, vectorsize);
+            if((*it)->startDsp(m_sample_rate, m_vector_size))
+            {
+                m_dsp_pages.push_back((*it));
+            }
         }
         m_pages_mutex.unlock();
-    }
-    
-    void Instance::tickDsp() const noexcept
-    {
-        m_pages_mutex.lock();
-        for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
+        
+        if(!m_dsp_pages.empty())
         {
-            (*it)->tickDsp();
+            m_dsp_running   = true;
+            m_dsp_mutex.unlock();
+            
+            m_listeners_mutex.lock();
+            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            {
+                Instance::sListener listener = (*it).lock();
+                if(listener)
+                {
+                    listener->dspHasBeenStarted(shared_from_this());
+                }
+            }
+            m_listeners_mutex.unlock();
         }
-        m_pages_mutex.unlock();
+        else
+        {
+            m_dsp_mutex.unlock();
+        }
     }
     
     void Instance::stopDsp()
     {
-        m_pages_mutex.lock();
-        for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
+        if(m_dsp_running)
         {
-            (*it)->stopDsp();
+            m_dsp_mutex.lock();
+            for(vector<sPage>::size_type i = 0; i < m_dsp_pages.size(); i++)
+            {
+                m_dsp_pages[i]->stopDsp();
+            }
+            m_dsp_pages.clear();
+            m_dsp_mutex.unlock();
+            
+            m_dsp_running = false;
+            
+            m_listeners_mutex.lock();
+            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            {
+                Instance::sListener listener = (*it).lock();
+                if(listener)
+                {
+                    listener->dspHasBeenStopped(shared_from_this());
+                }
+            }
+            m_listeners_mutex.unlock();
         }
-        m_pages_mutex.unlock();
-        m_dsp_running = false;
+    }    
+    
+    void Instance::bind(shared_ptr<Instance::Listener> listener)
+    {
+        if(listener)
+        {
+            lock_guard<mutex> guard(m_listeners_mutex);
+            m_listeners.insert(listener);
+        }
     }
     
-    bool Instance::isDspRunning() const noexcept
+    void Instance::unbind(shared_ptr<Instance::Listener> listener)
     {
-        return m_dsp_running;
-    }
-    
-    void Instance::bind(weak_ptr<Instance::Listener> listener)
-    {
-        m_listeners_mutex.lock();
-        m_listeners.insert(listener);
-        m_listeners_mutex.unlock();
-    }
-    
-    void Instance::unbind(weak_ptr<Instance::Listener> listener)
-    {
-        m_listeners_mutex.lock();
-        m_listeners.erase(listener);
-        m_listeners_mutex.unlock();
+        if(listener)
+        {
+            lock_guard<mutex> guard(m_listeners_mutex);
+            m_listeners.erase(listener);
+        }
     }
 }
 

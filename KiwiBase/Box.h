@@ -217,7 +217,7 @@ namespace Kiwi
         /** The function performs some stuff before to call the paint method.
          @param paper    A doodle to draw.
          */
-        void draw(Doodle& d, bool edit = 0) const;
+        void draw(Doodle& d, bool edit = 0, bool selected = 0) const;
         
         //! Retrieve the number of inlets of the box.
         /** The functions retrieves the number of inlets of the box.
@@ -250,7 +250,7 @@ namespace Kiwi
         //! Send a notification to the page that the box should be redraw.
         /** The function sends a notification to the page that the box should be redraw.
          */
-        void    redraw() const;
+        void    redraw();
         
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
@@ -357,6 +357,12 @@ namespace Kiwi
                 ;
             }
             
+            //! Receive the notification that the box should be repainted
+            /** The function is called by the box when it should be repainted.
+             @param box    The box.
+             */
+            virtual void shouldBeRepainted(shared_ptr<Box> box){};
+            
             //! Receive the notification that an inlet has been created.
             /** The function is called by the box when a inlet has been created.
              @param box    The box.
@@ -400,6 +406,8 @@ namespace Kiwi
 		 */
 		void unbind(weak_ptr<Listener> listener);
 		
+        typedef shared_ptr<Listener>    sListener;
+        
     private:
 		
         // ================================================================================ //

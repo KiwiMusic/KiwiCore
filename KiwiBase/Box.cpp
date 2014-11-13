@@ -191,17 +191,27 @@ namespace Kiwi
         return false;
     }
     
-    void Box::draw(Doodle& d, bool edit) const
+    void Box::draw(Doodle& d, bool edit, bool selected) const
     {
-        d.setColor({1., 1., 1., 1.});
+        d.setFont(Font("Menelo", 13, Font::Normal));
+        d.setColor(Color(1., 1., 1., 1.));
         d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
         if(!paint(d))
         {
             d.setColor({0.3, 0.3, 0.3, 1.});
-            d.drawText(toString(m_text), 3, 0, d.getWidth(), d.getHeight(), Doodle::Justification::CentredLeft);
+            d.drawText(toString(m_text), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
         }
-        d.setColor({0.4, 0.4, 0.4, 1.});
-        d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1., 2.5);
+        if(selected)
+        {
+            d.setColor({0., 0., 1., 1.});
+            d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 2., 2.5);
+        }
+        else
+        {
+            d.setColor({0.4, 0.4, 0.4, 1.});
+            d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1., 2.5);
+        }
+        
         
         if(edit)
         {
@@ -237,9 +247,16 @@ namespace Kiwi
         }
     }
     
-    void Box::redraw() const
+    void Box::redraw()
     {
-        
+        for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+        {
+            Box::sListener listener = (*it).lock();
+            if(listener)
+            {
+                listener->shouldBeRepainted(shared_from_this());
+            }
+        }
     }
 
     void Box::write(sDico dico) const
@@ -437,7 +454,7 @@ namespace Kiwi
     void Box::addPrototype(unique_ptr<Box> box, string const& name)
     {
         sTag tname;
-        if (name.empty())
+        if(name.empty())
         {
             tname = box->getName();
         }

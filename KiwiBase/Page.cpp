@@ -259,7 +259,7 @@ namespace Kiwi
         }
     }
     
-    void Page::startDsp(double samplerate, long vectorsize)
+    bool Page::startDsp(double samplerate, long vectorsize)
     {
         m_dsp_context->clear();
         m_dsp_context->setSamplerate(samplerate);
@@ -283,6 +283,7 @@ namespace Kiwi
         {
             Console::error(box, "something appened with me... sniff !");
         }
+        return true;
     }
     
     void Page::tickDsp() const noexcept
@@ -293,6 +294,11 @@ namespace Kiwi
     void Page::stopDsp()
     {
         m_dsp_context->clear();
+    }
+    
+    bool Page::isDspRunning() const noexcept
+    {
+        return m_dsp_running;
     }
     
     void Page::inletHasBeenCreated(shared_ptr<Box> box, size_t index)

@@ -27,11 +27,10 @@
 #include "Page.h"
 
 // TODO :
-// - Make everything thread-safe (no need multi-thread ofr tick I guess).
-// - See how to stop & restart DSP chain when adding a new page (save the samplerate and vectorsize).
 // - See how to set the input and output vector for DSP.
 // - See how to manage some unique id to communicate between object with tag (old behavior).
-
+// - Exception (load page and dsp)
+// - Add the attributes
 namespace Kiwi
 {
     class InstanceListener;
@@ -40,27 +39,37 @@ namespace Kiwi
     //                                      INSTANCE                                    //
     // ================================================================================ //
     
+    //! The instance manages pages.
+    /**
+     The instance...
+     */
     class Instance : public enable_shared_from_this<Instance>
     {
     public:
         class Listener;
     private:
+        vector<sPage>                       m_dsp_pages;
+        mutable mutex                       m_dsp_mutex;
+        atomic_bool                         m_dsp_running;
+        atomic_long                         m_sample_rate;
+        atomic_long                         m_vector_size;
+        
         unordered_set<sPage>                m_pages;
+        mutex                               m_pages_mutex;
+        
         unordered_set<weak_ptr<Listener>,
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>           m_listeners;
-        bool                                m_dsp_running;
-        mutable mutex                       m_pages_mutex;
         mutex                               m_listeners_mutex;
     public:
         
         //! The constructor.
-        /** You should never use this method except if you really know what you do.
+        /** You should never use this method.
          */
         Instance() noexcept;
         
         //! The constructor.
-        /** You should never use this method except if you really know what you do.
+        /** You should never use this method.
          */
         ~Instance();
         
@@ -87,12 +96,20 @@ namespace Kiwi
          @param samplerate The sample rate.
          @param vectorsize The vector size of the signal.
          */
-        void startDsp(double samplerate, long vectorsize);
+        void startDsp(long samplerate, long vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain of all the pages.
          */
-        void tickDsp() const noexcept;
+        inline void tickDsp() const noexcept
+        {
+            m_dsp_mutex.lock();
+            for(vector<sPage>::size_type i = 0; i < m_dsp_pages.size(); i++)
+            {
+                m_dsp_pages[i]->tickDsp();
+            }
+            m_dsp_mutex.unlock();
+        }
         
         //! Stop the dsp.
         /** The function stop the dsp chain of all the pages.
@@ -101,30 +118,52 @@ namespace Kiwi
         
         //! Check if the dsp is running.
         /** The function checks if the dsp is running
+         @return true if the dsp can be ticked otherwise false.
          */
-        bool isDspRunning() const noexcept;
+        inline bool isDspRunning() const noexcept
+        {
+            return m_dsp_running;
+        }
+        
+        //! Retrieve the current sample rate.
+        /** The function retrieve the current or the last sample rate used for dsp.
+         @return the sample rate.
+         */
+        inline long getSampleRate() const noexcept
+        {
+            return m_sample_rate;
+        }
+        
+        //! Retrieve the current vector size of the signal.
+        /** The function retrieve the current or the last vector size of the signal.
+         @return the vector size of the signal.
+         */
+        inline long getVectorSize() const noexcept
+        {
+            return m_vector_size;
+        }
         
         //! Add an instance listener in the binding list of the instance.
         /** The function adds an instance listener in the binding list of the instance. If the instance listener is already in the binding list, the function doesn't do anything.
          @param listener  The pointer of the instance listener.
          @see              unbind()
          */
-        void bind(weak_ptr<Listener> listener);
+        void bind(shared_ptr<Listener> listener);
         
         //! Remove an instance listener from the binding list of the instance.
         /** The function removes an instance listener from the binding list of the instance. If the instance listener isn't in the binding list, the function doesn't do anything.
          @param listener  The pointer of the instance listener.
          @see           bind()
          */
-        void unbind(weak_ptr<Listener> listener);
+        void unbind(shared_ptr<Listener> listener);
         
         // ================================================================================ //
         //                              INSTANCE LISTENER                                   //
         // ================================================================================ //
         
-        //! The instance listener is a virtual class that can bind itself to an instance and be notified of the several changes.
+        //! The instance listener is a virtual class that can bind itself to an instance and be notified of several changes.
         /**
-         The instance listener is a very light class with methods that receive the notifications of the creation and the deletion of pages.
+         The instance listener is a very light class with methods that receive the notifications of the creation and deletion of pages and from dsp changes. An instance listener must create a shared pointer to be binded to an instance.
          @see Instance
          */
         class Listener
@@ -159,6 +198,18 @@ namespace Kiwi
              @param page        The page.
              */
             virtual void pageHasBeenRemoved(shared_ptr<Instance> instance, sPage page){};
+            
+            //! Receive the notification that the dsp has been started.
+            /** The function is called by the instance when the dsp has been started.
+             @param instance    The instance.
+             */
+            virtual void dspHasBeenStarted(shared_ptr<Instance> instance){};
+            
+            //! Receive the notification that the dsp has been stopped.
+            /** The function is called by the instance when the dsp has been stopped.
+             @param instance    The instance.
+             */
+            virtual void dspHasBeenStopped(shared_ptr<Instance> instance){};
         };
         
         typedef shared_ptr<Listener>    sListener;
