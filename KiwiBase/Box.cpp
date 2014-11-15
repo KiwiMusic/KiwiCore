@@ -34,44 +34,25 @@ namespace Kiwi
     // ================================================================================ //
     
     Box::Box(weak_ptr<Page> page, string const& name) :
-	Attribute::Manager(),
     m_page(page),
     m_name(Tag::create(name)),
     m_stack_count(0)
     {
-		//getInstance()->getBoxDefaultAttributes();
-		
-		// Font attributes
-        addAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Font");
-        addAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Font");
-		
-		ElemVector elems = {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")};
-		addAttribute<AttributeEnum>(Tag::create("fontface"), elems, 0, "Font Style", "Font");
-		
-		elems = {Tag::create("left"), Tag::create("center"), Tag::create("right")};
-		addAttribute<AttributeEnum>(Tag::create("textjustification"), elems, 0, "Justification", "Font");
-		
-		// Appearance attributes
-		addAttribute<AttributeBool>(Tag::create("hidden"), false, "Hide on Lock", "Appearance");
-		addAttribute<AttributeBool>(Tag::create("presentation"), false, "Include in Presentation", "Appearance");
-		
-		elems = {0., 0.};
-		addAttribute<AttributePoint>(Tag::create("position"), elems, "Position", "Appearance");
-		elems = {100., 20.};
-		addAttribute<AttributePoint>(Tag::create("page_size"), elems, "Size", "Appearance");
-		
-		elems = {0., 0.};
-		addAttribute<AttributePoint>(Tag::create("presentation_pos"), elems, "Presentation Position", "Appearance");
-		elems = {0., 0.};
-		addAttribute<AttributePoint>(Tag::create("presentation_size"), elems, "Presentation Size", "Appearance");
-		
-		// Color attributes
-		elems = {1., 1., 1, 1.};
-		addAttribute<AttributePoint>(Tag::create("bgcolor"), elems, "Background Color", "Color");
-		elems = {0., 0., 0, 1.};
-		addAttribute<AttributePoint>(Tag::create("bdcolor"), elems, "Border Color", "Color");
-		elems = {0., 0., 0, 1.};
-		addAttribute<AttributePoint>(Tag::create("textcolor"), elems, "Text Color", "Color");
+        addAttribute<AttributeFont::Name>();
+        addAttribute<AttributeFont::Size>();
+        addAttribute<AttributeFont::Face>();
+        addAttribute<AttributeFont::Justification>();
+        
+        addAttribute<AttributeAppearance::Hidden>();
+        addAttribute<AttributeAppearance::Presentation>();
+        addAttribute<AttributeAppearance::Position>();
+        addAttribute<AttributeAppearance::Size>();
+        addAttribute<AttributeAppearance::PresentationPosition>();
+        addAttribute<AttributeAppearance::PresentationSize>();
+
+		addAttribute<AttributeColor>(Tag::create("bgcolor"), ElemVector{1., 1., 1, 1.}, "Background Color", "Color");
+		addAttribute<AttributeColor>(Tag::create("bdcolor"), ElemVector{0., 0., 0, 1.}, "Border Color", "Color");
+		addAttribute<AttributeColor>(Tag::create("textcolor"), ElemVector{0., 0., 0, 1.}, "Text Color", "Color");
     }
     
     Box::~Box()

@@ -419,6 +419,85 @@ namespace Kiwi
     {
         return toString(box->getName());
     }
+    
+    class AttributeFont
+    {
+    public:
+        class Name : public AttributeTag
+        {
+        public:
+            Name() : AttributeTag(Tag::create("fontname"), "Arial", "Font Name", "Font"){};
+            ~Name(){};
+        };
+        
+        class Size : public AttributeDouble
+        {
+        public:
+            Size() : AttributeDouble(Tag::create("fontsize"), 12, "Font Size", "Font"){};
+            ~Size(){};
+        };
+        
+        class Face : public AttributeEnum
+        {
+        public:
+            Face() : AttributeEnum(Tag::create("fontface"), {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")}, 0, "Font Style", "Font"){};
+            ~Face(){};
+        };
+        
+        class Justification : public AttributeEnum
+        {
+        public:
+            Justification() : AttributeEnum(Tag::create("fontjustification"), {Tag::create("left"), Tag::create("center"), Tag::create("right")}, 0, "Justification", "Font"){};
+            ~Justification(){};
+        };
+    };
+    
+    class AttributeAppearance
+    {
+    public:
+        class Hidden : public AttributeBool
+        {
+        public:
+            Hidden() : AttributeBool(Tag::create("hidden"), false, "Hide on Lock", "Appearance"){};
+            ~Hidden(){};
+        };
+        
+        class Presentation : public AttributeBool
+        {
+        public:
+            Presentation() : AttributeBool(Tag::create("presentation"), false, "Include in Presentation", "Appearance"){};
+            ~Presentation(){};
+        };
+        
+        class Position : public AttributePoint
+        {
+        public:
+            Position() : AttributePoint(Tag::create("position"), {0., 0.}, "Position", "Appearance"){};
+            ~Position(){};
+        };
+        
+        class Size : public AttributePoint
+        {
+        public:
+            Size() : AttributePoint(Tag::create("size"), {100., 20.}, "Size", "Appearance"){};
+            ~Size(){};
+        };
+        
+        class PresentationPosition : public AttributePoint
+        {
+        public:
+            PresentationPosition() : AttributePoint(Tag::create("presentation_pos"), {0., 0.}, "Presentation Position", "Appearance"){};
+            ~PresentationPosition(){};
+        };
+        
+        class PresentationSize : public AttributePoint
+        {
+        public:
+            PresentationSize() : AttributePoint(Tag::create("presentation_size"), {0., 0.}, "Presentation Size", "Appearance"){};
+            ~PresentationSize(){};
+        };
+    };
+    
 }
 
 

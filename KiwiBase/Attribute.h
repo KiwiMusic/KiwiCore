@@ -735,7 +735,7 @@ namespace Kiwi
 		ElemVector	m_enum_values;
 	public:
 		AttributeEnum(sTag name,
-					  ElemVector enumValues = {},
+					  ElemVector const& enumValues = {},
 					  long defaultValue = 0,
 					  string const& label = string(),
 					  string const& category = string(),
@@ -767,7 +767,7 @@ namespace Kiwi
 		double m_value[4];
 	public:
 		AttributeColor(sTag name,
-					   ElemVector defaultValue = {0., 0., 0., 1.},
+					   ElemVector const& defaultValue = {0., 0., 0., 1.},
 					   string const& label = string(),
 					   string const& category = string(),
 					   long behavior = 0);
@@ -796,7 +796,7 @@ namespace Kiwi
 		double m_value[4];
 	public:
 		AttributeRect(sTag name,
-					  ElemVector defaultValue = {0., 0., 0., 0.},
+					  ElemVector const& defaultValue = {0., 0., 0., 0.},
 					  string const& label = string(),
 					  string const& category = string(),
 					  long behavior = 0);
@@ -825,7 +825,7 @@ namespace Kiwi
 		double m_value[2];
 	public:
 		AttributePoint(sTag name,
-					   ElemVector defaultValue = {0., 0.},
+					   ElemVector const& defaultValue = {0., 0.},
 					   string const& label = string(),
 					   string const& category = string(),
 					   long behavior = 0);

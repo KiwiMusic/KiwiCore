@@ -515,7 +515,7 @@ namespace Kiwi
 	// ================================================================================ //
 	
 	AttributeEnum::AttributeEnum(sTag name,
-								 ElemVector enumValues,
+								 ElemVector const& enumValues,
 								 long defaultValue,
 								 string const& label,
 								 string const& category,
@@ -559,7 +559,7 @@ namespace Kiwi
 	// ================================================================================ //
 	
 	AttributeColor::AttributeColor(sTag name,
-								   ElemVector defaultValue,
+								   ElemVector const& defaultValue,
 								   string const& label,
 								   string const& category,
 								   long behavior)
@@ -590,7 +590,7 @@ namespace Kiwi
 	// ================================================================================ //
 	
 	AttributeRect::AttributeRect(sTag name,
-								 ElemVector defaultValue,
+								 ElemVector const& defaultValue,
 								 string const& label,
 								 string const& category,
 								 long behavior)
@@ -622,7 +622,7 @@ namespace Kiwi
 	// ================================================================================ //
 	
 	AttributePoint::AttributePoint(sTag name,
-								 ElemVector defaultValue,
+								 ElemVector const& defaultValue,
 								 string const& label,
 								 string const& category,
 								 long behavior)
