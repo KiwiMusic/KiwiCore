@@ -170,13 +170,7 @@ namespace Kiwi
 			
 			m_attributes[attrname] = attr;
 			
-			for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
-			{
-				if(!it->expired())
-				{
-					it->lock()->attributeAdded(attr);
-				}
-			}
+			triggerNotification(attr, NotificationType::AttrAdded);
 		}
 	}
 	
@@ -215,7 +209,7 @@ namespace Kiwi
 		{
 			attr->set(elements);
 			if(attr->shouldNotifyChanges())
-				notify(attr);
+				triggerNotification(attr, NotificationType::ValueChanged);
 			
 			return true;
 		}
@@ -257,11 +251,18 @@ namespace Kiwi
 					attr->set(nelements);
 					
 					if(attr->shouldNotifyChanges())
-					{
-						notify(attr);
-					}
+						triggerNotification(attr, NotificationType::ValueChanged);
 				}
 			}
+		}
+	}
+	
+	void Attribute::Manager::triggerNotification(sAttribute attr, NotificationType type)
+	{
+		for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+		{
+			if(!it->expired())
+				it->lock()->attributeChanged(this, attr, type);
 		}
 	}
 	

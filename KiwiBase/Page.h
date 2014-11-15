@@ -52,6 +52,8 @@ namespace Kiwi
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>   m_listeners;
         
+        bool                         m_dsp_running;
+        
         static bool sortBoxes(Element first, Element second);
     public:
         
@@ -82,6 +84,14 @@ namespace Kiwi
          @return A pointer to the box.
          */
         sBox createBox(sDico dico);
+        
+        //! Replace a box with another one.
+        /** The function instantiates a box with a dico that will replace an old box.
+         @param box        The box to replace.
+         @param dico       The dico that defines a box.
+         @return A pointer to the box.
+         */
+        sBox replaceBox(sBox box, sDico dico);
         
         //! Free a box.
         /** The function removes a box from the page.
@@ -130,8 +140,9 @@ namespace Kiwi
         /** The function start the dsp chain.
          @param samplerate The sample rate.
          @param vectorsize The vector size of the signal.
+         @return true if the page can process signal.
          */
-        void startDsp(double samplerate, long vectorsize);
+        bool startDsp(double samplerate, long vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain.
@@ -142,6 +153,11 @@ namespace Kiwi
         /** The function stop the dsp chain.
          */
         void stopDsp();
+        
+        //! Check if the dsp is running.
+        /** The function checks if the dsp is running
+         */
+        bool isDspRunning() const noexcept;
         
         //! Receive the notification that an inlet has been created.
         /** The function is called by the box when a inlet has been created.
@@ -214,33 +230,43 @@ namespace Kiwi
             }
             
             //! Receive the notification that a box has been created.
-            /** The function is called by the instance when a box has been created.
+            /** The function is called by the page when a box has been created.
              @param page    The page.
              @param box     The box.
              */
             virtual void boxHasBeenCreated(shared_ptr<Page> page, sBox box){};
             
+            //! Receive the notification that a box has been replaced by another one.
+            /** The function is called by the page when a box has been replaced by another one.
+             @param page    The page.
+             @param oldbox  The box that has been replaced.
+             @param newbox  The box that has replaced.
+             */
+            virtual void boxHasBeenReplaced(shared_ptr<Page> page, sBox oldbox, sBox newbox){};
+            
             //! Receive the notification that a box has been removed.
-            /** The function is called by the instance when a box has been removed.
+            /** The function is called by the page when a box has been removed.
              @param page    The page.
              @param box     The box.
              */
             virtual void boxHasBeenRemoved(shared_ptr<Page> page, sBox box){};
             
             //! Receive the notification that a connection has been created.
-            /** The function is called by the instance when a connection has been created.
+            /** The function is called by the page when a connection has been created.
              @param page        The page.
              @param connection  The box.
              */
             virtual void connectionHasBeenCreated(shared_ptr<Page> page, sConnection connection){};
             
             //! Receive the notification that a connection has been removed.
-            /** The function is called by the instance when a connection has been removed.
+            /** The function is called by the page when a connection has been removed.
              @param page        The page.
              @param connection  The connection.
              */
             virtual void connectionHasBeenRemoved(shared_ptr<Page> page, sConnection connection){};
         };
+        
+        typedef shared_ptr<Listener>    sListener;
     };
     
     typedef shared_ptr<Page>    sPage;

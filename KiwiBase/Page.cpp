@@ -48,7 +48,7 @@ namespace Kiwi
     sPage Page::create(shared_ptr<Instance> instance, sDico dico)
     {
         sPage page = make_shared<Page>(instance);
-        if(page)
+        if(page && dico)
         {
             page->read(dico);
         }
@@ -64,6 +64,42 @@ namespace Kiwi
             {
                 m_boxes.push_back(box);
 				box->bind(shared_from_this());
+                for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+                {
+                    Page::sListener listener = (*it).lock();
+                    if(listener)
+                    {
+                        listener->boxHasBeenCreated(shared_from_this(), box);
+                    }
+                }
+                return box;
+            }
+        }
+        return nullptr;
+    }
+    
+    sBox Page::replaceBox(sBox box, sDico dico)
+    {
+        auto it = find(m_boxes.begin(), m_boxes.end(), box);
+        if(it != m_boxes.end())
+        {
+            if(dico)
+            {
+                sBox box2 = Box::create(shared_from_this(), dico);
+                if(box2)
+                {
+                    m_boxes[distance(m_boxes.begin(), it)] = box2;
+                }
+                int zaza; // Check the connections
+                box->unbind(shared_from_this());
+                for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+                {
+                    Page::sListener listener = (*it).lock();
+                    if(listener)
+                    {
+                        listener->boxHasBeenReplaced(shared_from_this(), box, box2);
+                    }
+                }
                 return box;
             }
         }
@@ -80,6 +116,14 @@ namespace Kiwi
                 if((*it2)->getFrom() == box || (*it2)->getTo() == box)
                 {
                     removeConnection(*it2);
+                }
+            }
+            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            {
+                Page::sListener listener = (*it).lock();
+                if(listener)
+                {
+                    listener->boxHasBeenRemoved(shared_from_this(), box);
                 }
             }
             m_boxes.erase(it);
@@ -251,7 +295,7 @@ namespace Kiwi
         }
     }
     
-    void Page::startDsp(double samplerate, long vectorsize)
+    bool Page::startDsp(double samplerate, long vectorsize)
     {
         m_dsp_context->clear();
         m_dsp_context->setSamplerate(samplerate);
@@ -275,6 +319,7 @@ namespace Kiwi
         {
             Console::error(box, "something appened with me... sniff !");
         }
+        return true;
     }
     
     void Page::tickDsp() const noexcept
@@ -285,6 +330,11 @@ namespace Kiwi
     void Page::stopDsp()
     {
         m_dsp_context->clear();
+    }
+    
+    bool Page::isDspRunning() const noexcept
+    {
+        return m_dsp_running;
     }
     
     void Page::inletHasBeenCreated(shared_ptr<Box> box, size_t index)

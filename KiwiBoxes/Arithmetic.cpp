@@ -50,7 +50,7 @@ namespace Kiwi
     
     bool Arithmetic::receive(size_t index, ElemVector const& elements)
     {
-        Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
+		Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
         if(!elements.empty())
         {
             if(elements.size() == 1 && (elements[0].isLong() || elements[0].isDouble()))
@@ -126,6 +126,7 @@ namespace Kiwi
             m_parser.DefineVar("i" + toString(i+1), &m_values[i]);
             addInlet(Inlet::DataHot, "i" + toString(i+1) + " (int or float)");
         }
+        addOutlet(Outlet::Data, "result (float)");
         m_parser.SetExpr(expr);
     }
     

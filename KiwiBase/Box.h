@@ -37,9 +37,9 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    //! The box is a graphical object.
+    //! The box is a graphical box.
     /**
-     The box is a graphical object that aims to be instantiate in a page.
+     The box is a graphical box that aims to be instantiate in a page.
      */
 	class Box : public Attribute::Manager, public enable_shared_from_this<Box>
     {
@@ -48,8 +48,10 @@ namespace Kiwi
         
         enum Type
         {
-            WantMouseFocus      = 1<<1,
-            WantKeyboardFocus   = 1<<2
+            SignalProcessor         = 1<<1,
+            MouseListener           = 1<<2,
+            KeyboardMouseListener   = 1<<3,
+            Drawer                  = 1<<4
         };
     protected:
         
@@ -116,6 +118,7 @@ namespace Kiwi
             
         const weak_ptr<Page>        m_page;
         const sTag                  m_name;
+        const long                  m_type;
         sTag                        m_text;
         vector<unique_ptr<Outlet>>  m_outlets;
         vector<unique_ptr<Inlet>>   m_inlets;
@@ -130,9 +133,9 @@ namespace Kiwi
         //! Constructor.
         /** Set up the default pointers and tags.
          @param kiwi    A pointer to the instance.
-         @param name    A name for the object.
+         @param name    A name for the box.
          */
-        Box(weak_ptr<Page> page, string const& name);
+        Box(weak_ptr<Page> page, string const& name, long type = 1<<0);
         
         //! Destructor.
         /** Free the members.
@@ -157,20 +160,26 @@ namespace Kiwi
         shared_ptr<Instance> getInstance() const noexcept;
         
         //! Retrieve the name of the box.
-        /** The function retrieves the name of the object as a tag.
-         @return The name of the object as a tag.
+        /** The function retrieves the name of the box as a tag.
+         @return The name of the box as a tag.
          */
         sTag getName() const noexcept;
         
         //! Retrieve the text of the box.
-        /** The function retrieves the text of the object as a tag.
-         @return The text of the object as a tag.
+        /** The function retrieves the text of the box as a tag.
+         @return The text of the box as a tag.
          */
         sTag getText() const noexcept;
         
+        //! Retrieve the type of the box.
+        /** The function retrieves the type of the box.
+         @return The type of the box as a tag.
+         */
+        long getType() const noexcept;
+        
         //! Retrieve the expression of the box.
-        /** The function retrieves the expression of the object as a string.
-         @return The expression of the object as a string.
+        /** The function retrieves the expression of the box as a string.
+         @return The expression of the box as a string.
          */
         virtual string getExpression() const noexcept;
         
@@ -202,13 +211,13 @@ namespace Kiwi
         /** The function shoulds draw some stuff in the doodle.
          @param doodle    A doodle to draw.
          */
-        virtual bool paint(Doodle& doodle) const;
+        virtual bool draw(Doodle& doodle) const;
         
         //! The draw method.
         /** The function performs some stuff before to call the paint method.
          @param paper    A doodle to draw.
          */
-        void draw(Doodle& d, bool edit = 0) const;
+        void paint(Doodle& d, bool edit = 0, bool selected = 0) const;
         
         //! Retrieve the number of inlets of the box.
         /** The functions retrieves the number of inlets of the box.
@@ -241,7 +250,7 @@ namespace Kiwi
         //! Send a notification to the page that the box should be redraw.
         /** The function sends a notification to the page that the box should be redraw.
          */
-        void    redraw() const;
+        void    redraw();
         
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
@@ -348,6 +357,12 @@ namespace Kiwi
                 ;
             }
             
+            //! Receive the notification that the box should be repainted
+            /** The function is called by the box when it should be repainted.
+             @param box    The box.
+             */
+            virtual void shouldBeRedrawn(shared_ptr<Box> box){};
+            
             //! Receive the notification that an inlet has been created.
             /** The function is called by the box when a inlet has been created.
              @param box    The box.
@@ -391,6 +406,8 @@ namespace Kiwi
 		 */
 		void unbind(weak_ptr<Listener> listener);
 		
+        typedef shared_ptr<Listener>    sListener;
+        
     private:
 		
         // ================================================================================ //

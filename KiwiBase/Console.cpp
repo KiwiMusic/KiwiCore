@@ -57,7 +57,7 @@ namespace Kiwi
     void Console::post(string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cout << message << "\n";
+        cout << message << endl;
 #endif
         shared_ptr<const Message> mess = make_shared<Message>(nullptr, nullptr, nullptr, Message::Post, message);
         lock_guard<mutex> guard(m_mutex);
@@ -80,7 +80,7 @@ namespace Kiwi
     void Console::post(shared_ptr<const Box> box, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << toString(box->getText()) << " : " << message << "\n";
+        cerr << toString(box->getText()) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
         shared_ptr<const Kiwi::Page> page = nullptr;
@@ -109,7 +109,7 @@ namespace Kiwi
     void Console::warning(string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << "warning : " << message << "\n";
+        cerr << "warning : " << message << endl;
 #endif
         shared_ptr<const Message> mess = make_shared<Message>(nullptr, nullptr, nullptr, Message::Warning, message);
         lock_guard<mutex> guard(m_mutex);
@@ -132,7 +132,7 @@ namespace Kiwi
     void Console::warning(shared_ptr<const Box> box, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << "warning : " << toString(box) << " : " << message << "\n";
+        cerr << "warning : " << toString(box) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
         shared_ptr<const Kiwi::Page> page = nullptr;
@@ -161,7 +161,7 @@ namespace Kiwi
     void Console::error(string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << "error : " << message << "\n";
+        cerr << "error : " << message << endl;
 #endif
         shared_ptr<const Message> mess = make_shared<Message>(nullptr, nullptr, nullptr, Message::Error, message);
         lock_guard<mutex> guard(m_mutex);
@@ -184,7 +184,7 @@ namespace Kiwi
     void Console::error(shared_ptr<const Box> box, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << "error : " << toString(box) << " : " << message << "\n";
+        cerr << "error : " << toString(box) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
         shared_ptr<const Kiwi::Page> page = nullptr;
