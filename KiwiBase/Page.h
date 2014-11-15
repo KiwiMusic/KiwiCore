@@ -85,6 +85,14 @@ namespace Kiwi
          */
         sBox createBox(sDico dico);
         
+        //! Replace a box with another one.
+        /** The function instantiates a box with a dico that will replace an old box.
+         @param box        The box to replace.
+         @param dico       The dico that defines a box.
+         @return A pointer to the box.
+         */
+        sBox replaceBox(sBox box, sDico dico);
+        
         //! Free a box.
         /** The function removes a box from the page.
          @param box        The pointer to the box.
@@ -222,28 +230,36 @@ namespace Kiwi
             }
             
             //! Receive the notification that a box has been created.
-            /** The function is called by the instance when a box has been created.
+            /** The function is called by the page when a box has been created.
              @param page    The page.
              @param box     The box.
              */
             virtual void boxHasBeenCreated(shared_ptr<Page> page, sBox box){};
             
+            //! Receive the notification that a box has been replaced by another one.
+            /** The function is called by the page when a box has been replaced by another one.
+             @param page    The page.
+             @param oldbox  The box that has been replaced.
+             @param newbox  The box that has replaced.
+             */
+            virtual void boxHasBeenReplaced(shared_ptr<Page> page, sBox oldbox, sBox newbox){};
+            
             //! Receive the notification that a box has been removed.
-            /** The function is called by the instance when a box has been removed.
+            /** The function is called by the page when a box has been removed.
              @param page    The page.
              @param box     The box.
              */
             virtual void boxHasBeenRemoved(shared_ptr<Page> page, sBox box){};
             
             //! Receive the notification that a connection has been created.
-            /** The function is called by the instance when a connection has been created.
+            /** The function is called by the page when a connection has been created.
              @param page        The page.
              @param connection  The box.
              */
             virtual void connectionHasBeenCreated(shared_ptr<Page> page, sConnection connection){};
             
             //! Receive the notification that a connection has been removed.
-            /** The function is called by the instance when a connection has been removed.
+            /** The function is called by the page when a connection has been removed.
              @param page        The page.
              @param connection  The connection.
              */

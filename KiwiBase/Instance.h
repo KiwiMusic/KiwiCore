@@ -28,7 +28,7 @@
 
 // TODO :
 // - See how to set the input and output vector for DSP.
-// - See how to manage some unique id to communicate between object with tag (old behavior).
+// - See how to manage some unique id to communicate between object with tag (old behavior) : beacon.
 // - Exception (load page and dsp)
 // - Add the attributes
 namespace Kiwi
@@ -41,7 +41,7 @@ namespace Kiwi
     
     //! The instance manages pages.
     /**
-     The instance...
+     The instance manages a set a top-level pages. You can use the insance::listener to be receive the notifications of the the creation, the deletion of pages and the changes of the dsp states. All the methods should be threadsafe but, of course, you should call the dsp tick method from one thread.
      */
     class Instance : public enable_shared_from_this<Instance>
     {
@@ -74,7 +74,8 @@ namespace Kiwi
         ~Instance();
         
         //! The instance creation method.
-        /** The function allocates an instance and initialize the defaults boxes.
+        /** The function allocates an instance and initialize the prototypes of boxes.
+         @return The instance.
          */
         static shared_ptr<Instance> create();
         

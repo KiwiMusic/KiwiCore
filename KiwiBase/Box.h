@@ -48,10 +48,10 @@ namespace Kiwi
         
         enum Type
         {
-            
             SignalProcessor         = 1<<1,
             MouseListener           = 1<<2,
-            KeyboardMouseListener   = 1<<3
+            KeyboardMouseListener   = 1<<3,
+            Drawer                  = 1<<4
         };
     protected:
         
@@ -211,13 +211,13 @@ namespace Kiwi
         /** The function shoulds draw some stuff in the doodle.
          @param doodle    A doodle to draw.
          */
-        virtual bool paint(Doodle& doodle) const;
+        virtual bool draw(Doodle& doodle) const;
         
         //! The draw method.
         /** The function performs some stuff before to call the paint method.
          @param paper    A doodle to draw.
          */
-        void draw(Doodle& d, bool edit = 0, bool selected = 0) const;
+        void paint(Doodle& d, bool edit = 0, bool selected = 0) const;
         
         //! Retrieve the number of inlets of the box.
         /** The functions retrieves the number of inlets of the box.
@@ -361,7 +361,7 @@ namespace Kiwi
             /** The function is called by the box when it should be repainted.
              @param box    The box.
              */
-            virtual void shouldBeRepainted(shared_ptr<Box> box){};
+            virtual void shouldBeRedrawn(shared_ptr<Box> box){};
             
             //! Receive the notification that an inlet has been created.
             /** The function is called by the box when a inlet has been created.

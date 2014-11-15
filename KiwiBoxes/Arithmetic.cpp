@@ -126,6 +126,7 @@ namespace Kiwi
             m_parser.DefineVar("i" + toString(i+1), &m_values[i]);
             addInlet(Inlet::DataHot, "i" + toString(i+1) + " (int or float)");
         }
+        addOutlet(Outlet::Data, "result (float)");
         m_parser.SetExpr(expr);
     }
     

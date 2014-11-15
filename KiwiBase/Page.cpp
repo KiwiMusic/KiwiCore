@@ -78,6 +78,34 @@ namespace Kiwi
         return nullptr;
     }
     
+    sBox Page::replaceBox(sBox box, sDico dico)
+    {
+        auto it = find(m_boxes.begin(), m_boxes.end(), box);
+        if(it != m_boxes.end())
+        {
+            if(dico)
+            {
+                sBox box2 = Box::create(shared_from_this(), dico);
+                if(box2)
+                {
+                    m_boxes[distance(m_boxes.begin(), it)] = box2;
+                }
+                int zaza; // Check the connections
+                box->unbind(shared_from_this());
+                for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+                {
+                    Page::sListener listener = (*it).lock();
+                    if(listener)
+                    {
+                        listener->boxHasBeenReplaced(shared_from_this(), box, box2);
+                    }
+                }
+                return box;
+            }
+        }
+        return nullptr;
+    }
+    
     void Page::removeBox(shared_ptr<Box> box)
     {
         auto it = find(m_boxes.begin(), m_boxes.end(), box);
@@ -88,6 +116,14 @@ namespace Kiwi
                 if((*it2)->getFrom() == box || (*it2)->getTo() == box)
                 {
                     removeConnection(*it2);
+                }
+            }
+            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            {
+                Page::sListener listener = (*it).lock();
+                if(listener)
+                {
+                    listener->boxHasBeenRemoved(shared_from_this(), box);
                 }
             }
             m_boxes.erase(it);

@@ -58,7 +58,7 @@ namespace Kiwi
 		elems = {0., 0.};
 		addAttribute<AttributePoint>(Tag::create("position"), elems, "Position", "Appearance");
 		elems = {100., 20.};
-		addAttribute<AttributePoint>(Tag::create("page_size"), elems, "Size", "Appearance");
+		addAttribute<AttributePoint>(Tag::create("size"), elems, "Size", "Appearance");
 		
 		elems = {0., 0.};
 		addAttribute<AttributePoint>(Tag::create("presentation_pos"), elems, "Presentation Position", "Appearance");
@@ -186,17 +186,17 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::paint(Doodle& d) const
+    bool Box::draw(Doodle& d) const
     {
         return false;
     }
     
-    void Box::draw(Doodle& d, bool edit, bool selected) const
+    void Box::paint(Doodle& d, bool edit, bool selected) const
     {
         d.setFont(Font("Menelo", 13, Font::Normal));
         d.setColor(Color(1., 1., 1., 1.));
         d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
-        if(!paint(d))
+        if(!draw(d))
         {
             d.setColor({0.3, 0.3, 0.3, 1.});
             d.drawText(toString(m_text), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
@@ -212,7 +212,6 @@ namespace Kiwi
             d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1., 2.5);
         }
         
-        
         if(edit)
         {
             size_t ninlet = m_inlets.size();
@@ -220,30 +219,29 @@ namespace Kiwi
             d.setColor({0.3, 0.3, 0.3, 1.});
             if(ninlet)
             {
-                d.fillRectangle(0., 0., 5, 3, 2.5);
+                d.fillRectangle(0., 0., 5, 3, 1.5);
             }
             if(ninlet > 1)
             {
                 double ratio = (d.getWidth() - 5.) / (double)(ninlet - 1);
                 for(size_t i = ninlet; i; i--)
                 {
-                    d.fillRectangle(ratio * i, 0., 5, 3, 2.5);
+                    d.fillRectangle(ratio * i, 0., 5, 3, 1.5);
                 }
             }
             
             if(noutlet)
             {
-                d.fillRectangle(0., d.getHeight() - 3., 5, 3, 2.5);
+                d.fillRectangle(0., d.getHeight() - 3., 5, 3, 1.5);
             }
             if(noutlet > 1)
             {
                 double ratio = (d.getWidth() - 5.) / (double)(noutlet - 1);
                 for(size_t i = noutlet; i; i--)
                 {
-                    d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 2.5);
+                    d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 1.5);
                 }
-            }
-            
+            } 
         }
     }
     
@@ -254,7 +252,7 @@ namespace Kiwi
             Box::sListener listener = (*it).lock();
             if(listener)
             {
-                listener->shouldBeRepainted(shared_from_this());
+                listener->shouldBeRedrawn(shared_from_this());
             }
         }
     }
