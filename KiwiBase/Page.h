@@ -26,33 +26,45 @@
 
 #include "Box.h"
 
+// - Clear and add the connections and boxes managemennt
+// - Add the attributes
+// - Make everything threadsafe
+// - Mutex for Dsp
+// - Clear the listeners
+// - See how to manage connection
 namespace Kiwi
 {
     class DspContext;
-    class Connection;
-    typedef shared_ptr<Connection> sConnection;
+    
     // ================================================================================ //
     //                                      PAGE                                        //
     // ================================================================================ //
     
     //! The page manages boxes and connections.
     /**
-     The page is the counterpart of the max patcher or the pd canvas.
+     The page is the counterpart of the max patcher or the pd canvas...
      */
     class Page : public Box::Listener, public enable_shared_from_this<Page>
     {
     public:
         class Listener;
     private:
-        const weak_ptr<Instance>    m_instance;
-        vector<sBox>                m_boxes;
-        vector<sConnection>         m_connections;
+        const wInstance             m_instance;
+        
         shared_ptr<DspContext>      m_dsp_context;
+        atomic_bool                 m_dsp_running;
+        
+        vector<sBox>                m_boxes;
+        mutable mutex               m_boxes_mutex;
+        atomic_ulong                m_boxes_id;
+        
+        vector<sConnection>         m_connections;
+        mutable mutex               m_connections_mutex;
+        
         unordered_set<weak_ptr<Listener>,
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>   m_listeners;
-        
-        bool                         m_dsp_running;
+        mutex                       m_listeners_mutex;
         
         static bool sortBoxes(Element first, Element second);
     public:
@@ -60,7 +72,7 @@ namespace Kiwi
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Page(shared_ptr<Instance> instance);
+        Page(sInstance instance);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
@@ -69,14 +81,36 @@ namespace Kiwi
         
         //! The page creation method.
         /** The function allocates a page and initialize the defaults boxes.
+         @param instance The instance that will manage the page.
+         @param dico The dico that will initialize the page.
+         @return The page.
          */
-        static shared_ptr<Page> create(shared_ptr<Instance> instance, sDico dico);
+        static sPage create(sInstance instance, scDico dico = nullptr);
         
         //! Retrieve the instance that manages the page.
         /** The function retrieves the instance that manages the page.
          @return The instance that manages the page.
          */
-        shared_ptr<Instance> getInstance() const noexcept;
+        inline sInstance getInstance() const noexcept
+        {
+            return m_instance.lock();
+        }
+        
+        //! Retrieve the current id to intialize a boxe.
+        /** This function retrieves the current id to intialize a boxe.
+         @return    The id.
+         */
+        inline unsigned long getCurrentId() const noexcept
+        {
+            return m_boxes_id;
+        }
+        
+        //! Create a beacon.
+        /** This function retrieves a beacon in the scope of the instance.
+         @param     The name of the beacon to retrieve.
+         @return    The beacon that match with the name.
+         */
+        sBeacon createBeacon(string const& name);
         
         //! Create a box.
         /** The function instantiates a box with a dico.
@@ -103,14 +137,35 @@ namespace Kiwi
         /** The function retrieves the boxes from the page.
          @param boxes   A vector of elements.
          */
-        void getBoxes(vector<sBox>& boxes);
+        void getBoxes(vector<sBox>& boxes) const
+        {
+            lock_guard<mutex> guard(m_boxes_mutex);
+            boxes = m_boxes;
+        }
+        
+        //! Get the number of boxes.
+        /** The function retrieves the number of boxes in the page.
+         @return The number of boxes in the page.
+         */
+        inline unsigned long getNumberOfBoxes() const noexcept
+        {
+            lock_guard<mutex> guard(m_boxes_mutex);
+            return m_boxes.size();
+        }
+        
+        //! Add a connection.
+        /** The function add a connection.
+         @param connection The connection to add.
+         @return A pointer to the connection.
+         */
+        sConnection addConnection(sConnection connection);
         
         //! Create a connection.
         /** The function creates a connection with a dico.
          @param dico        The dico that defines a connection.
-         @return A pointer to the box.
+         @return A pointer to the connection.
          */
-        sConnection createConnection(sDico dico);
+        sConnection createConnection(scDico dico);
         
         //! Free a connection.
         /** The function removes a connection from the page.
@@ -122,19 +177,39 @@ namespace Kiwi
         /** The function retrieves the connections from the page.
          @param connections   A vector of connections.
          */
-        void getConnections(vector<sConnection>& connections);
+        void getConnections(vector<sConnection>& connections) const
+        {
+            lock_guard<mutex> guard(m_connections_mutex);
+            connections = m_connections;
+        }
+        
+        //! Get the number of connections.
+        /** The function retrieves the number of connections in the page.
+         @return The number of connections in the page.
+         */
+        inline unsigned long getNumberOfConnections() const noexcept
+        {
+            lock_guard<mutex> guard(m_connections_mutex);
+            return m_connections.size();
+        }
+        
+        //! Append a dico.
+        /** The function reads a dico and add the boxes and connections to the page.
+         @param dico The dico.
+         */
+        void append(scDico dico);
         
         //! Read a dico.
         /** The function reads a dico that initializes the page.
          @param dico The dico.
          */
-        void read(sDico dico);
+        void read(scDico dico);
         
         //! Write the page in a dico.
         /** The function writes the pagein a dico.
          @param dico The dico.
          */
-        void write(sDico dico);
+        void write(sDico dico) const;
         
         //! Start the dsp.
         /** The function start the dsp chain.
@@ -142,7 +217,7 @@ namespace Kiwi
          @param vectorsize The vector size of the signal.
          @return true if the page can process signal.
          */
-        bool startDsp(double samplerate, long vectorsize);
+        bool startDsp(long samplerate, long vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain.
@@ -164,42 +239,42 @@ namespace Kiwi
          @param box    The box.
          @param index  The inlet index.
          */
-        void inletHasBeenCreated(shared_ptr<Box> box, size_t index) override;
+        void inletHasBeenCreated(sBox box, unsigned long index) override;
         
         //! Receive the notification that an inlet has been removed.
         /** The function is called by the box when an inlet has been removed.
          @param box    The box.
          @param index  The inlet index.
          */
-        void inletHasBeenRemoved(shared_ptr<Box> box, size_t index) override;
+        void inletHasBeenRemoved(sBox box, unsigned long index) override;
         
         //! Receive the notification that an outlet has been created.
         /** The function is called by the box when a outlet has been created.
          @param box    The box.
          @param index  The outlet index.
          */
-        void outletHasBeenCreated(shared_ptr<Box> box, size_t index) override;
+        void outletHasBeenCreated(sBox box, unsigned long index) override;
         
         //! Receive the notification that an outlet has been removed.
         /** The function is called by the box when an outlet has been removed.
          @param box    The box.
          @param index  The outlet index.
          */
-        void outletHasBeenRemoved(shared_ptr<Box> box, size_t index) override;
+        void outletHasBeenRemoved(sBox box, unsigned long index) override;
         
         //! Add a page listener in the binding list of the page.
         /** The function adds a page listener in the binding list of the page. If the page listener is already in the binding list, the function doesn't do anything.
          @param listener  The pointer of the page listener.
          @see              unbind()
          */
-        void bind(weak_ptr<Listener> listener);
+        void bind(shared_ptr<Listener> listener);
         
         //! Remove a page listener from the binding list of the page.
         /** The function removes a page listener from the binding list of the page. If the page listener isn't in the binding list, the function doesn't do anything.
          @param listener  The pointer of the page listener.
          @see           bind()
          */
-        void unbind(weak_ptr<Listener> listener);
+        void unbind(shared_ptr<Listener> listener);
         
         // ================================================================================ //
         //                                  PAGE LISTENER                                   //
@@ -234,7 +309,7 @@ namespace Kiwi
              @param page    The page.
              @param box     The box.
              */
-            virtual void boxHasBeenCreated(shared_ptr<Page> page, sBox box){};
+            virtual void boxHasBeenCreated(sPage page, sBox box){};
             
             //! Receive the notification that a box has been replaced by another one.
             /** The function is called by the page when a box has been replaced by another one.
@@ -242,110 +317,40 @@ namespace Kiwi
              @param oldbox  The box that has been replaced.
              @param newbox  The box that has replaced.
              */
-            virtual void boxHasBeenReplaced(shared_ptr<Page> page, sBox oldbox, sBox newbox){};
+            virtual void boxHasBeenReplaced(sPage page, sBox oldbox, sBox newbox){};
             
             //! Receive the notification that a box has been removed.
             /** The function is called by the page when a box has been removed.
              @param page    The page.
              @param box     The box.
              */
-            virtual void boxHasBeenRemoved(shared_ptr<Page> page, sBox box){};
+            virtual void boxHasBeenRemoved(sPage page, sBox box){};
             
             //! Receive the notification that a connection has been created.
             /** The function is called by the page when a connection has been created.
              @param page        The page.
              @param connection  The box.
              */
-            virtual void connectionHasBeenCreated(shared_ptr<Page> page, sConnection connection){};
+            virtual void connectionHasBeenCreated(sPage page, sConnection connection){};
             
             //! Receive the notification that a connection has been removed.
             /** The function is called by the page when a connection has been removed.
              @param page        The page.
              @param connection  The connection.
              */
-            virtual void connectionHasBeenRemoved(shared_ptr<Page> page, sConnection connection){};
+            virtual void connectionHasBeenRemoved(sPage page, sConnection connection){};
+            
+            //! Receive the notification that a connection has been replaced by another one.
+            /** The function is called by the page when a connection has been replaced by another one.
+             @param page            The page.
+             @param oldconnection   The connection that has been replaced.
+             @param newconnection   The connection that has replaced.
+             */
+            virtual void connectionHasBeenReplaced(sPage page, sConnection oldconnection, sConnection newconnection){};
         };
         
         typedef shared_ptr<Listener>    sListener;
     };
-    
-    typedef shared_ptr<Page>    sPage;
-    
-    typedef weak_ptr<Page>      wPage;
-    
-    //! The connection owns to a page and is used to create a patch lines.
-    /**
-     The connection is opaque, you shouldn't have to use it at all.
-     */
-    class Connection
-    {
-    private:
-        
-        const sBox     m_from;
-        const sBox     m_to;
-        const size_t   m_outlet;
-        const size_t   m_inlet;
-        
-    public:
-        
-        //! The constructor.
-        /** You should never use this method except if you really know what you're doing.
-         */
-        Connection(const sBox from, const size_t outlet, const sBox to, const size_t inlet) noexcept :
-        m_from(from),
-        m_to(to),
-        m_outlet(outlet),
-        m_inlet(inlet)
-        {
-            ;
-        }
-        
-        //! The destructor.
-        /** You should never use this method except if you really know what you're doing.
-         */
-        ~Connection()
-        {
-            ;
-        }
-        
-        //! Retrieve the output box.
-        /** The function retrieves the output box of the connection.
-         @return The output box.
-         */
-        inline sBox getFrom() const noexcept
-        {
-            return m_from;
-        }
-        
-        //! Retrieve the input box.
-        /** The function retrieves the input box of the connection.
-         @return The input box.
-         */
-        inline sBox getTo() const noexcept
-        {
-            return m_to;
-        }
-        
-        //! Retrieve the outlet of the connection.
-        /** The function retrieves the outlet of the connection.
-         @return The outlet of the connection.
-         */
-        inline size_t getOutletIndex() const noexcept
-        {
-            return m_outlet;
-        }
-        
-        //! Retrieve the inlet of the connection.
-        /** The function retrieves the inlet of the connection.
-         @return The inlet of the connection.
-         */
-        inline size_t getInletIndex() const noexcept
-        {
-            return m_inlet;
-        }
-    };
-    
-    typedef shared_ptr<Connection> sConnection;
 }
 
 

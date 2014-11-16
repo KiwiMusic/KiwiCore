@@ -26,12 +26,12 @@
 
 #include "Tag.h"
 
+// TODO
+// - See if ElemVector shouldn't be in the Element class.
+// - Make it threadsafe
 namespace Kiwi
 {
-    class Box;
-    class Dico;
     class Element;
-
     
     //! The vector of elements
     /**
@@ -66,11 +66,11 @@ namespace Kiwi
     private:
         struct Ele
         {
-            long                m_long      = 0;
-            double              m_double    = 0;
-            sTag                m_tag       = nullptr;
-            shared_ptr<Box>     m_box       = nullptr;
-            shared_ptr<Dico>    m_dico      = nullptr;
+            long    m_long      = 0;
+            double  m_double    = 0;
+            sTag    m_tag       = nullptr;
+            sBox    m_box       = nullptr;
+            sDico   m_dico      = nullptr;
         };
         
         Element::Type   m_type;
@@ -95,7 +95,7 @@ namespace Kiwi
         //! Constructor with a long value.
         /** The function allocates the element with a long value.
          */
-        Element(size_t value) noexcept;
+        Element(unsigned long value) noexcept;
         
         //! Constructor with a float value.
         /** The function allocates the element with a double value from a casted float value.
@@ -120,12 +120,12 @@ namespace Kiwi
         //! Constructor with a box.
         /** The function allocates the element with a box.
          */
-        Element(shared_ptr<Box> box) noexcept;
+        Element(sBox box) noexcept;
         
         //! Constructor with a dico.
         /** The function allocates the element with a dico.
          */
-        Element(shared_ptr<Dico> dico) noexcept;
+        Element(sDico dico) noexcept;
         
         //! Destructor.
         /** Doesn't perform anything.
@@ -224,7 +224,7 @@ namespace Kiwi
         /** The function casts the element to a long.
          @return A long value if the element is a digit otherwise 0.
          */
-        operator size_t() const noexcept;
+        operator unsigned long() const noexcept;
 
         //! Cast the element to a float.
         /** The function casts the element to a float.
@@ -248,13 +248,13 @@ namespace Kiwi
         /** The function casts the element to a box.
          @return An box if the element is a box otherwise a nullptr.
          */
-        operator shared_ptr<Box>() const noexcept;
+        operator sBox() const noexcept;
         
         //! Cast the element to a dico.
         /** The function casts the element to a dico.
          @return An dico if the element is a dico otherwise a nullptr.
          */
-        operator shared_ptr<Dico>() const noexcept;
+        operator sDico() const noexcept;
         
         //! Set up the element with another element.
         /** The function sets up the element with another element.
@@ -310,14 +310,14 @@ namespace Kiwi
          @param box   The box.
          @return An element.
          */
-        Element& operator=(shared_ptr<Box> box) noexcept;
+        Element& operator=(sBox box) noexcept;
         
         //! Set up the element with a dico.
         /** The function sets up the element with a dico.
          @param dico   The dico.
          @return An element.
          */
-        Element& operator=(shared_ptr<Dico> dico) noexcept;
+        Element& operator=(sDico dico) noexcept;
         
         //! Compare the element with another.
         /** The function compares the element with another.
@@ -373,14 +373,14 @@ namespace Kiwi
          @param box   The box.
          @return true if the element hold the box otherwise false.
          */
-        bool operator==(shared_ptr<Box> box) const noexcept;
+        bool operator==(sBox box) const noexcept;
         
         //! Compare the element with a dico.
         /** The function compares the element with a dico.
          @param dico   The dico.
          @return true if the element hold the dico otherwise false.
          */
-        bool operator==(shared_ptr<Dico> dico) const noexcept;
+        bool operator==(sDico dico) const noexcept;
     };
     
     string toString(Element const& __val);

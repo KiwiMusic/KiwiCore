@@ -99,13 +99,13 @@ namespace Kiwi
         /** The function adds a box to the dsp context.
          @param box The box to add.
          */
-        void addBox(shared_ptr<Box> box);
+        void addBox(sBox box);
         
         //! Remove a box from the dsp context.
         /** The function removes a box from the dsp context.
          @param box The box to remove.
          */
-        void removeBox(shared_ptr<Box> box);
+        void removeBox(sBox box);
         
         //! Add a connection to the dsp context.
         /** The function adds a connection to the dsp context.

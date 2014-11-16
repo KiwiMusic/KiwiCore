@@ -32,7 +32,7 @@ namespace Kiwi
     //                                      DSP PROCESS                                 //
     // ================================================================================ //
     
-    DspProcess::DspProcess(MethodProcess process, shared_ptr<Box> box, int nins, int nouts, long vectorsize) :
+    DspProcess::DspProcess(MethodProcess process, sBox box, int nins, int nouts, long vectorsize) :
     m_process(process),
     m_box(box),
     m_nins(nins),
@@ -75,7 +75,7 @@ namespace Kiwi
             m_outs[i] = outputs[i]->getVector();
     }
     
-    void DspProcess::copy(shared_ptr<Box> none, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize)
+    void DspProcess::copy(sBox none, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize)
     {
         signalAddSignal(ins[0], outs[0], vectorsize);
     }

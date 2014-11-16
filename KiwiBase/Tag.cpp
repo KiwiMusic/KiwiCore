@@ -26,7 +26,9 @@
 
 namespace Kiwi
 {
-    map<string, shared_ptr<const Tag>> Tag::m_tags;
+    map<string, sTag> Tag::m_tags;
+    mutex Tag::m_mutex;
+    
     sTag Tag::text        = Tag::create("text");
     sTag Tag::box         = Tag::create("box");
     sTag Tag::boxes       = Tag::create("boxes");

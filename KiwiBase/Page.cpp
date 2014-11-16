@@ -27,9 +27,10 @@
 
 namespace Kiwi
 {    
-    Page::Page(shared_ptr<Instance> instance) :
+    Page::Page(sInstance instance) :
     m_instance(instance),
-    m_dsp_context(make_shared<DspContext>())
+    m_dsp_context(make_shared<DspContext>()),
+    m_boxes_id(1)
     {
         ;
     }
@@ -40,12 +41,20 @@ namespace Kiwi
         m_boxes.clear();
     }
     
-    shared_ptr<Instance> Page::getInstance() const noexcept
+    sBeacon Page::createBeacon(string const& name)
     {
-        return m_instance.lock();
+        sInstance instance = m_instance.lock();
+        if(instance)
+        {
+            return instance->createBeacon(name);
+        }
+        else
+        {
+            return nullptr;
+        }
     }
     
-    sPage Page::create(shared_ptr<Instance> instance, sDico dico)
+    sPage Page::create(sInstance instance, scDico dico)
     {
         sPage page = make_shared<Page>(instance);
         if(page && dico)
@@ -59,125 +68,214 @@ namespace Kiwi
     {
         if(dico)
         {
+            m_boxes_mutex.lock();
+            m_boxes_id = m_boxes.size()+1;
             sBox box = Box::create(shared_from_this(), dico);
             if(box)
             {
                 m_boxes.push_back(box);
+                m_boxes_mutex.unlock();
+                
 				box->bind(shared_from_this());
-                for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+                
+                m_listeners_mutex.lock();
+                auto it = m_listeners.begin();
+                while(it != m_listeners.end())
                 {
-                    Page::sListener listener = (*it).lock();
-                    if(listener)
+                    if((*it).expired())
                     {
+                        it = m_listeners.erase(it);
+                    }
+                    else
+                    {
+                        Page::sListener listener = (*it).lock();
                         listener->boxHasBeenCreated(shared_from_this(), box);
+                        ++it;
                     }
                 }
+                m_listeners_mutex.unlock();
                 return box;
+            }
+            else
+            {
+                 m_boxes_mutex.unlock();
             }
         }
         return nullptr;
     }
     
-    sBox Page::replaceBox(sBox box, sDico dico)
+    sBox Page::replaceBox(sBox oldbox, sDico dico)
     {
-        auto it = find(m_boxes.begin(), m_boxes.end(), box);
-        if(it != m_boxes.end())
+        m_boxes_mutex.lock();
+        vector<sBox>::size_type position = find_position(m_boxes, oldbox);
+        if(position != m_boxes.size())
         {
             if(dico)
             {
-                sBox box2 = Box::create(shared_from_this(), dico);
-                if(box2)
+                m_boxes_id = oldbox->getId();
+                sBox newbox = Box::create(shared_from_this(), dico);
+                if(newbox)
                 {
-                    m_boxes[distance(m_boxes.begin(), it)] = box2;
+                    m_boxes[position] = newbox;
+                    m_boxes_mutex.unlock();
+                    
+                    oldbox->unbind(shared_from_this());
+                    newbox->bind(shared_from_this());
+                
+                    m_connections_mutex.lock();
+                    for(vector<sConnection>::size_type i = 0; i < m_connections.size(); i++)
+                    {
+                        sConnection newconnect = Connection::create(m_connections[i], oldbox, newbox);
+                        if(newconnect)
+                        {
+                            sConnection oldconnect  = m_connections[i];
+                            m_connections[i]        = newconnect;
+                            
+                            Box::disconnect(oldconnect);
+                            
+                            m_listeners_mutex.lock();
+                            auto it = m_listeners.begin();
+                            while(it != m_listeners.end())
+                            {
+                                if((*it).expired())
+                                {
+                                    it = m_listeners.erase(it);
+                                }
+                                else
+                                {
+                                    Page::sListener listener = (*it).lock();
+                                    listener->connectionHasBeenReplaced(shared_from_this(), oldconnect, newconnect);
+                                    ++it;
+                                }
+                            }
+                            m_listeners_mutex.unlock();
+                        }
+                    }
+                    
+                    m_listeners_mutex.lock();
+                    auto it = m_listeners.begin();
+                    while(it != m_listeners.end())
+                    {
+                        if((*it).expired())
+                        {
+                            it = m_listeners.erase(it);
+                        }
+                        else
+                        {
+                            Page::sListener listener = (*it).lock();
+                            listener->boxHasBeenReplaced(shared_from_this(), oldbox, newbox);
+                            ++it;
+                        }
+                    }
+                    m_listeners_mutex.unlock();
+                    m_connections_mutex.unlock();
                 }
-                int zaza; // Check the connections
-                box->unbind(shared_from_this());
-                for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            }
+        }
+        m_boxes_mutex.unlock();
+        return nullptr;
+    }
+    
+    void Page::removeBox(sBox box)
+    {
+        m_boxes_mutex.lock();
+        vector<sBox>::size_type position = find_position(m_boxes, box);
+        if(position != m_boxes.size())
+        {
+            m_connections_mutex.lock();
+            for(vector<sConnection>::size_type i = 0; i < m_connections.size(); i++)
+            {
+                if(m_connections[i]->getBoxFrom() == box || m_connections[i]->getBoxTo() == box)
+                {
+                    sConnection oldconnection = m_connections[i];
+                    Box::disconnect(oldconnection);
+                    m_connections.erase(m_connections.begin()+(long)i);
+                    --i;
+                    m_listeners_mutex.lock();
+                    auto it = m_listeners.begin();
+                    while(it != m_listeners.end())
+                    {
+                        if((*it).expired())
+                        {
+                            it = m_listeners.erase(it);
+                        }
+                        else
+                        {
+                            Page::sListener listener = (*it).lock();
+                            listener->connectionHasBeenRemoved(shared_from_this(), oldconnection);
+                            ++it;
+                        }
+                    }
+                    m_listeners_mutex.unlock();
+                }
+            }
+            m_connections_mutex.unlock();
+            
+            m_boxes.erase(m_boxes.begin()+(long)position);
+            m_boxes_mutex.unlock();
+            box->unbind(shared_from_this());
+            
+            m_listeners_mutex.lock();
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
+            {
+                if((*it).expired())
+                {
+                    it = m_listeners.erase(it);
+                }
+                else
                 {
                     Page::sListener listener = (*it).lock();
-                    if(listener)
-                    {
-                        listener->boxHasBeenReplaced(shared_from_this(), box, box2);
-                    }
+                    listener->boxHasBeenRemoved(shared_from_this(), box);
+                    ++it;
                 }
-                return box;
             }
+            m_listeners_mutex.unlock();
+        }
+        else
+        {
+            m_boxes_mutex.unlock();
+        }
+    }
+    
+    sConnection Page::addConnection(sConnection connection)
+    {
+        if(Box::connect(connection))
+        {
+            m_connections_mutex.lock();
+            m_connections.push_back(connection);
+            m_connections_mutex.unlock();
+            
+            m_listeners_mutex.lock();
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
+            {
+                if((*it).expired())
+                {
+                    it = m_listeners.erase(it);
+                }
+                else
+                {
+                    Page::sListener listener = (*it).lock();
+                    listener->connectionHasBeenCreated(shared_from_this(), connection);
+                    ++it;
+                }
+            }
+            m_listeners_mutex.unlock();
+            
+            return connection;
         }
         return nullptr;
     }
     
-    void Page::removeBox(shared_ptr<Box> box)
-    {
-        auto it = find(m_boxes.begin(), m_boxes.end(), box);
-        if(it != m_boxes.end())
-        {
-            for(auto it2 = m_connections.begin(); it2 != m_connections.end(); ++it2)
-            {
-                if((*it2)->getFrom() == box || (*it2)->getTo() == box)
-                {
-                    removeConnection(*it2);
-                }
-            }
-            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
-            {
-                Page::sListener listener = (*it).lock();
-                if(listener)
-                {
-                    listener->boxHasBeenRemoved(shared_from_this(), box);
-                }
-            }
-            m_boxes.erase(it);
-            box->unbind(shared_from_this());
-        }
-    }
-    
-    void Page::getBoxes(vector<sBox>& boxes)
-    {
-        boxes = m_boxes;
-    }
-    
-    sConnection Page::createConnection(sDico dico)
+    sConnection Page::createConnection(scDico dico)
     {
         if(dico)
         {
-            sBox from, to;
-            size_t outlet, inlet;
-            
-            ElemVector elements;
-            dico->get(Tag::from, elements);
-            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
+            sConnection connection = Connection::create(shared_from_this(), dico);
+            if(connection)
             {
-                long index = (long)elements[0] - 1;
-                outlet = elements[1];
-                if(index >= 0 && index < m_boxes.size())
-                {
-                    from = m_boxes[index];
-                }
-            }
-            
-            elements.clear();
-            dico->get(Tag::to, elements);
-            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
-            {
-                long index = (long)elements[0] - 1;
-                inlet  = elements[1];
-                if(index >= 0 && index < m_boxes.size())
-                {
-                    to = m_boxes[index];
-                }
-            }
-            if(Box::connect(from, outlet, to, inlet))
-            {
-                sConnection connection = make_shared<Connection>(from, outlet, to, inlet);
-                if(connection)
-                {
-                    m_connections.push_back(connection);
-                    return connection;
-                }
-                else
-                {
-                    Box::disconnect(from, outlet, to, inlet);
-                }
+                return addConnection(connection);
             }
         }
         return nullptr;
@@ -185,29 +283,40 @@ namespace Kiwi
     
     void Page::removeConnection(sConnection connection)
     {
-        auto it = find(m_connections.begin(), m_connections.end(), connection);
-        if(it != m_connections.end())
+        lock_guard<mutex> guard(m_connections_mutex);
+        vector<sConnection>::size_type position = find_position(m_connections, connection);
+        if(position != m_connections.size())
         {
-            Box::disconnect(connection->getFrom(), connection->getOutletIndex(), connection->getTo(), connection->getInletIndex());
-            m_connections.erase(it);
+            Box::disconnect(m_connections[position]);
+            m_connections.erase(m_connections.begin()+(long)position);
+            
+            m_listeners_mutex.lock();
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
+            {
+                if((*it).expired())
+                {
+                    it = m_listeners.erase(it);
+                }
+                else
+                {
+                    Page::sListener listener = (*it).lock();
+                    listener->connectionHasBeenRemoved(shared_from_this(), connection);
+                    ++it;
+                }
+            }
+            m_listeners_mutex.unlock();
         }
     }
     
-    void Page::getConnections(vector<sConnection>& connections)
+    void Page::append(scDico dico)
     {
-        connections = m_connections;
-    }
-    
-    void Page::read(sDico dico)
-    {
-        m_connections.clear();
-        m_boxes.clear();
         if(dico)
         {
             ElemVector boxes;
             dico->get(Tag::boxes, boxes);
             sort(m_boxes.begin(), m_boxes.end(), sortBoxes);
-            for(size_t i = 0; i < boxes.size(); i++)
+            for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
             {
                 sDico subdico = boxes[i];
                 if(subdico)
@@ -222,7 +331,7 @@ namespace Kiwi
             
             ElemVector connections;
             dico->get(Tag::connections, connections);
-            for(size_t i = 0; i < connections.size(); i++)
+            for(vector<sConnection>::size_type i = 0; i < connections.size(); i++)
             {
                 sDico subdico = connections[i];
                 if(subdico)
@@ -237,65 +346,54 @@ namespace Kiwi
         }
     }
     
-    void Page::write(sDico dico)
+    void Page::read(scDico dico)
+    {
+        m_connections.clear();
+        m_boxes.clear();
+        append(dico);
+    }
+    
+    void Page::write(sDico dico) const
     {
         if(dico)
         {
-            ElemVector boxes;
-            long index = 0;
-            for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
+            ElemVector elements;
+            
+            m_boxes_mutex.lock();
+            for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
             {
-                sDico box = createDico();
-                sDico subbox = createDico();
+                sDico box = Dico::create();
+                sDico subbox = Dico::create();
                 if(box && subbox)
                 {
-                    (*it)->write(subbox);
-                    subbox->set(Tag::id, ++index);
+                    m_boxes[i]->write(subbox);
                     box->set(Tag::box, subbox);
-                    boxes.push_back(box);
+                    elements.push_back(box);
                 }
             }
-            dico->set(Tag::boxes, boxes);
+            m_boxes_mutex.unlock();
+            dico->set(Tag::boxes, elements);
+            
+            elements.clear();
       
-            ElemVector connections;
-            for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+            m_connections_mutex.lock();
+            for(vector<sConnection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                sDico connection = createDico();
-                sDico subconnect = createDico();
-                if(connection && subconnect)
+                sDico connection = Dico::create();
+                sDico subconnect = Dico::create();
+                if(connection && subconnect && m_connections[i]->isValid())
                 {
-                    shared_ptr<Box>     from    = (*it)->getFrom();
-                    shared_ptr<Box>     to      = (*it)->getTo();
-                    
-                    if(from && to)
-                    {
-                        long indexFrom = 0, indexTo = 0, index = 1;
-                        for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it, ++index)
-                        {
-                            if((*it) == from)
-                            {
-                                indexFrom = index;
-                            }
-                            else if((*it) == to)
-                            {
-                                indexTo = index;
-                            }
-                        }
-                        if(indexFrom && indexTo)
-                        {
-                            subconnect->set(Tag::from, {indexFrom, (*it)->getOutletIndex()});
-                            subconnect->set(Tag::to, {indexTo, (*it)->getInletIndex()});
-                            connection->set(Tag::connection, subconnect);
-                        }
-                    }
-                    connections.push_back(connection);
+                    m_connections[i]->write(subconnect);
+                    connection->set(Tag::connection, subconnect);
+                    elements.push_back(connection);
                 }
             }
-            dico->set(Tag::connections, connections);
+            m_connections_mutex.unlock();
+            dico->set(Tag::connections, elements);
         }
     }
     
-    bool Page::startDsp(double samplerate, long vectorsize)
+    bool Page::startDsp(long samplerate, long vectorsize)
     {
         m_dsp_context->clear();
         m_dsp_context->setSamplerate(samplerate);
@@ -315,7 +413,7 @@ namespace Kiwi
         {
             m_dsp_context->compile();
         }
-        catch(shared_ptr<Box> box)
+        catch(sBox box)
         {
             Console::error(box, "something appened with me... sniff !");
         }
@@ -337,45 +435,99 @@ namespace Kiwi
         return m_dsp_running;
     }
     
-    void Page::inletHasBeenCreated(shared_ptr<Box> box, size_t index)
+    void Page::inletHasBeenCreated(sBox box, unsigned long index)
     {
-        
+        ;
     }
     
-    void Page::inletHasBeenRemoved(shared_ptr<Box> box, size_t index)
+    void Page::inletHasBeenRemoved(sBox box, unsigned long index)
     {
-        for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        lock_guard<mutex> guard(m_connections_mutex);
+        vector<Connection>::size_type max_size = m_connections.size();
+        for(vector<Connection>::size_type i = 0; i < max_size;)
         {
-            if((*it)->getTo() == box && (*it)->getInletIndex() == index)
+            if(m_connections[i]->getBoxTo() == box && m_connections[i]->getInletIndex() == index)
             {
-                removeConnection(*it);
+                sConnection oldconnect = m_connections[i];
+                Box::disconnect(oldconnect);
+                m_connections.erase(m_connections.begin()+(long)i);
+                max_size--;
+                
+                m_listeners_mutex.lock();
+                auto it = m_listeners.begin();
+                while(it != m_listeners.end())
+                {
+                    if((*it).expired())
+                    {
+                        it = m_listeners.erase(it);
+                    }
+                    else
+                    {
+                        Page::sListener listener = (*it).lock();
+                        listener->connectionHasBeenRemoved(shared_from_this(), oldconnect);
+                        ++it;
+                    }
+                }
+                m_listeners_mutex.unlock();
+            }
+            else
+            {
+                i++;
             }
         }
     }
     
-    void Page::outletHasBeenCreated(shared_ptr<Box> box, size_t index)
+    void Page::outletHasBeenCreated(sBox box, unsigned long index)
     {
-        
+        ;
     }
     
-    void Page::outletHasBeenRemoved(shared_ptr<Box> box, size_t index)
+    void Page::outletHasBeenRemoved(sBox box, unsigned long index)
     {
-        for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        lock_guard<mutex> guard(m_connections_mutex);
+        vector<Connection>::size_type max_size = m_connections.size();
+        for(vector<Connection>::size_type i = 0; i < max_size;)
         {
-            if((*it)->getFrom() == box || (*it)->getOutletIndex() == index)
+            if(m_connections[i]->getBoxFrom() == box || m_connections[i]->getOutletIndex() == index)
             {
-                removeConnection(*it);
+                sConnection oldconnect = m_connections[i];
+                Box::disconnect(oldconnect);
+                m_connections.erase(m_connections.begin()+(long)i);
+                max_size--;
+                
+                m_listeners_mutex.lock();
+                auto it = m_listeners.begin();
+                while(it != m_listeners.end())
+                {
+                    if((*it).expired())
+                    {
+                        it = m_listeners.erase(it);
+                    }
+                    else
+                    {
+                        Page::sListener listener = (*it).lock();
+                        listener->connectionHasBeenRemoved(shared_from_this(), oldconnect);
+                        ++it;
+                    }
+                }
+                m_listeners_mutex.unlock();
+            }
+            else
+            {
+                i++;
             }
         }
     }
     
-    void Page::bind(weak_ptr<Page::Listener> listener)
+    void Page::bind(shared_ptr<Page::Listener> listener)
     {
+        lock_guard<mutex> guard(m_listeners_mutex);
         m_listeners.insert(listener);
     }
     
-    void Page::unbind(weak_ptr<Page::Listener> listener)
+    void Page::unbind(shared_ptr<Page::Listener> listener)
     {
+        lock_guard<mutex> guard(m_listeners_mutex);
         m_listeners.erase(listener);
     }
     
@@ -389,7 +541,7 @@ namespace Kiwi
             seconddico = seconddico->get(Tag::box);
             if(firstdico && seconddico)
             {
-                return (long)firstdico->get(Tag::id) < (long) seconddico->get(Tag::id);
+                return (long)firstdico->get(Tag::id) < (long)seconddico->get(Tag::id);
             }
         }
         return false;

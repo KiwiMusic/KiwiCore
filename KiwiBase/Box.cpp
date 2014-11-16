@@ -33,9 +33,10 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(weak_ptr<Page> page, string const& name, long type) :
+    Box::Box(sPage page, string const& name, long type) :
     m_page(page),
     m_name(Tag::create(name)),
+    m_id(page ? page->getCurrentId() : 0),
     m_type(0 | type),
     m_stack_count(0)
     {
@@ -81,7 +82,7 @@ namespace Kiwi
         m_listeners.clear();
     }
     
-    shared_ptr<Box> Box::create(sPage page, sDico dico)
+    sBox Box::create(sPage page, sDico dico)
     {
         sTag name = dico->get(Tag::name);
         if(name)
@@ -161,12 +162,12 @@ namespace Kiwi
         return "error";
     }
     
-    void Box::save(shared_ptr<Dico> dico) const
+    void Box::save(sDico dico) const
     {
         ;
     }
     
-    void Box::load(shared_ptr<const Dico> dico)
+    void Box::load(scDico dico)
     {
         ;
     }
@@ -265,6 +266,7 @@ namespace Kiwi
         dico->set(Tag::ninlets, m_inlets.size());
         dico->set(Tag::noutlets, m_outlets.size());
         dico->set(Tag::text, m_text);
+        dico->set(Tag::id, (long)m_id);
     }
     
     void Box::send(size_t index, ElemVector const& elements) const noexcept
@@ -391,19 +393,17 @@ namespace Kiwi
         return m_outlets.size();
     }
     
-    bool Box::compatible(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept
+    bool Box::compatible(scConnection connection) noexcept
     {
-        if(from
-           && to
-           && from != to
-           && outlet < from->m_outlets.size()
-           && inlet < to->m_inlets.size()
-           && from->m_page.lock() == to->m_page.lock())
+        if(connection && connection->isValid())
         {
+            sBox from   = connection->getBoxFrom();
+            sBox to     = connection->getBoxTo();
+            size_t outlet   = connection->getOutletIndex();
+            size_t inlet    = connection->getInletIndex();
             for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
             {
-                if(from->m_outlets[outlet]->m_conns[i].m_box == to
-                   && from->m_outlets[outlet]->m_conns[i].m_index == inlet)
+                if(from->m_outlets[outlet]->m_conns[i].m_box == to && from->m_outlets[outlet]->m_conns[i].m_index == inlet)
                 {
                     return false;
                 }
@@ -413,18 +413,26 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::connect(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept
+    bool Box::connect(scConnection connection) noexcept
     {
-        if(compatible(from, outlet, to, inlet))
+        if(compatible(connection))
         {
+            sBox from   = connection->getBoxFrom();
+            sBox to     = connection->getBoxTo();
+            size_t outlet   = connection->getOutletIndex();
+            size_t inlet    = connection->getInletIndex();
             from->m_outlets[outlet]->m_conns.push_back({to, inlet});
             return true;
         }
         return false;
     }
     
-    bool Box::disconnect(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept
+    bool Box::disconnect(scConnection connection) noexcept
     {
+        sBox from   = connection->getBoxFrom();
+        sBox to     = connection->getBoxTo();
+        size_t outlet   = connection->getOutletIndex();
+        size_t inlet    = connection->getInletIndex();
         if(from && outlet < from->getNumberOfOutlets())
         {
             for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
@@ -469,6 +477,100 @@ namespace Kiwi
         {
             m_prototypes[tname] = move(box);
         }
+    }
+    
+    
+    // ================================================================================ //
+    //                                      CONNECTION                                  //
+    // ================================================================================ //
+    
+    Connection::Connection(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept :
+    m_from(from),
+    m_to(to),
+    m_outlet(outlet),
+    m_inlet(inlet)
+    {
+        ;
+    }
+    
+    Connection::~Connection()
+    {
+        ;
+    }
+    
+    shared_ptr<Connection> Connection::create(const sBox from, const size_t outlet, const sBox to, const size_t inlet)
+    {
+        shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
+        if(connect && Box::compatible(connect))
+        {
+            return connect;
+        }
+        return nullptr;
+    }
+    
+    shared_ptr<Connection> Connection::create(scPage page, scDico dico)
+    {
+        if(page && dico)
+        {
+            sBox from, to;
+            unsigned long outlet, inlet;
+            unsigned long from_id, to_id;
+            
+            ElemVector elements;
+            dico->get(Tag::from, elements);
+            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
+            {
+                from_id = elements[0];
+                outlet  = elements[1];
+            }
+            else
+            {
+                return nullptr;
+            }
+            
+            dico->get(Tag::to, elements);
+            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
+            {
+                to_id   = elements[0];
+                inlet   = elements[1];
+            }
+            else
+            {
+                return nullptr;
+            }
+        
+            if(from_id != to_id)
+            {
+                vector<sBox> boxes;
+                page->getBoxes(boxes);
+                for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
+                {
+                    if(boxes[i]->getId() == from_id)
+                    {
+                        from = boxes[i];
+                        if(from->getNumberOfOutlets() <=  outlet)
+                        {
+                            return nullptr;
+                        }
+                    }
+                    else if(boxes[i]->getId() == to_id)
+                    {
+                        to = boxes[i];
+                        if(from->getNumberOfInlets() <=  inlet)
+                        {
+                            return nullptr;
+                        }
+                    }
+                }
+                
+                if(from && to)
+                {
+                    return Connection::create(from, outlet, to, inlet);
+                }
+            }
+            
+        }
+        return nullptr;
     }
 }
 

@@ -28,6 +28,7 @@
 
 namespace Kiwi
 {
+    /*
 	template<typename T>
 	struct enable_shared_from_this_virtual;
 	
@@ -64,9 +65,21 @@ namespace Kiwi
 			std::shared_ptr<T const> result(base_type::shared_from_this(), static_cast<T const*>(this));
 			return result;
 		}
-	};
+	};*/
 	
-	
+	template <class InputContainer, class T> typename InputContainer::size_type find_position(InputContainer const& container, const T& val)
+    {
+        typename InputContainer::size_type position = 0;
+        for(; position < container.size(); position++)
+        {
+            if(container[position] == val)
+            {
+                return position;
+            }
+        }
+        return position;
+    }
+    
     template <typename Type> Type clip(const Type& n, const Type& lower, const Type& upper)
     {
         return max(lower, min(n, upper));
@@ -168,9 +181,9 @@ namespace Kiwi
 #ifdef __APPLE__
         
 #ifdef KIWI_DOUBLE
-        vDSP_vaddD(in1, 1, in2, 1, out1, 1, vectorsize);
+        vDSP_vaddD(in1, 1, in2, 1, out1, 1, (vDSP_Length)vectorsize);
 #else
-        vDSP_vadd(in1, 1, in2, 1, out1, 1, vectorsize);
+        vDSP_vadd(in1, 1, in2, 1, out1, 1, (vDSP_Length)vectorsize);
 #endif
         
 #elif __CBLAS__
@@ -210,9 +223,9 @@ namespace Kiwi
 #if defined (__APPLE__) || defined(__CBLAS__)
         
 #ifdef KIWI_DOUBLE
-        vDSP_vsaddD(in1, 1, &(in2), out1, 1, vectorsize);
+        vDSP_vsaddD(in1, 1, &(in2), out1, 1, (vDSP_Length)vectorsize);
 #else
-        vDSP_vsadd(in1, 1, &(in2), out1, 1, vectorsize);
+        vDSP_vsadd(in1, 1, &(in2), out1, 1, (vDSP_Length)vectorsize);
 #endif
         
 #elif __CBLAS__
@@ -252,9 +265,9 @@ namespace Kiwi
 #if defined (__APPLE__) || defined(__CBLAS__)
         
 #ifdef KIWI_DOUBLE
-        vDSP_vsmulD(in1, 1, &(in2), out1, 1, vectorsize);
+        vDSP_vsmulD(in1, 1, &(in2), out1, 1, (vDSP_Length)vectorsize);
 #else
-        vDSP_vsmul(in1, 1, &(in2), out1, 1, vectorsize);
+        vDSP_vsmul(in1, 1, &(in2), out1, 1, (vDSP_Length)vectorsize);
 #endif
         
 #elif __CBLAS__
@@ -309,9 +322,9 @@ namespace Kiwi
 #ifdef __APPLE__
         
 #ifdef KIWI_DOUBLE
-        vDSP_vclrD(out1, 1, vectorsize);
+        vDSP_vclrD(out1, 1, (vDSP_Length)vectorsize);
 #else
-        vDSP_vclr(out1, 1, vectorsize);
+        vDSP_vclr(out1, 1, (vDSP_Length)vectorsize);
 #endif
         
 #else
@@ -324,9 +337,9 @@ namespace Kiwi
 #ifdef __APPLE__
         
 #ifdef KIWI_DOUBLE
-        vDSP_vfillD(&(in1), out1, 1, vectorsize);
+        vDSP_vfillD(&(in1), out1, 1, (vDSP_Length)vectorsize);
 #else
-        vDSP_vfill(&(in1), out1, 1, vectorsize);
+        vDSP_vfill(&(in1), out1, 1, (vDSP_Length)vectorsize);
 #endif
         
 #elif __CATLAS__

@@ -49,10 +49,10 @@ namespace Kiwi
     private:
         friend DspContext;
         
-        typedef void (*MethodDsp)(shared_ptr<Box>, shared_ptr<DspNode> node);
-        typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
+        typedef void (*MethodDsp)(sBox, shared_ptr<DspNode> node);
+        typedef void (*MethodProcess)(sBox, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
         
-        const shared_ptr<Box>   m_box;
+        const sBox   m_box;
         const int               m_nins;
         const int               m_nouts;
         long                    m_vectorsize;
@@ -88,7 +88,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you're doing.
          */
-        DspNode(shared_ptr<Box>);
+        DspNode(sBox);
         
         //! The destructor.
         /** You should never use this method except if you really know what you're doing.

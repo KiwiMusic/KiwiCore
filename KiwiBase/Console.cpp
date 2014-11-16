@@ -77,7 +77,7 @@ namespace Kiwi
         }
     }
         
-    void Console::post(shared_ptr<const Box> box, string const& message) noexcept
+    void Console::post(scBox box, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
         cerr << toString(box->getText()) << " : " << message << endl;
@@ -129,7 +129,7 @@ namespace Kiwi
         }
     }
         
-    void Console::warning(shared_ptr<const Box> box, string const& message) noexcept
+    void Console::warning(scBox box, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
         cerr << "warning : " << toString(box) << " : " << message << endl;
@@ -181,7 +181,7 @@ namespace Kiwi
         }
     }
         
-    void Console::error(shared_ptr<const Box> box, string const& message) noexcept
+    void Console::error(scBox box, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
         cerr << "error : " << toString(box) << " : " << message << endl;
@@ -393,7 +393,7 @@ namespace Kiwi
         mess = i.m_message;
         if(mess)
         {
-            shared_ptr<const Box> box = mess->box.lock();
+            scBox box = mess->box.lock();
             if(box)
             {
                 text1 = toString(box);
@@ -402,7 +402,7 @@ namespace Kiwi
         mess = j.m_message;
         if(mess)
         {
-            shared_ptr<const Box> box = mess->box.lock();
+            scBox box = mess->box.lock();
             if(box)
             {
                 text2 = toString(box);
@@ -430,7 +430,7 @@ namespace Kiwi
         
     bool Console::History::compareKind(Console::History::MessageHolder const& i, Console::History::MessageHolder const& j)
     {
-        Console::Message::Kind kind1, kind2;
+        Console::Message::Kind kind1 = Message::Kind::Empty, kind2 =  Message::Kind::Empty;
         shared_ptr<const Message> mess;
         mess = i.m_message;
         if(mess)

@@ -18,6 +18,7 @@
 		8F73C7DA19B9DB110041C577 /* Arithmetic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7B319B9DB110041C577 /* Arithmetic.cpp */; };
 		8F73C7DB19B9DB110041C577 /* ArithmeticTilde.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C7B519B9DB110041C577 /* ArithmeticTilde.cpp */; };
 		8FA319091A06A50000A06500 /* Kiwi.cp in Sources */ = {isa = PBXBuildFile; fileRef = 8FA319081A06A50000A06500 /* Kiwi.cp */; };
+		8FA8FA6E1A181E86007A37CA /* Beacon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FA8FA6C1A181E86007A37CA /* Beacon.cpp */; };
 		8FBE76DE1A0B802B008A7B56 /* muParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBE76D51A0B802B008A7B56 /* muParser.cpp */; };
 		8FBE76DF1A0B802B008A7B56 /* muParserBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBE76D61A0B802B008A7B56 /* muParserBase.cpp */; };
 		8FBE76E01A0B802B008A7B56 /* muParserBytecode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBE76D71A0B802B008A7B56 /* muParserBytecode.cpp */; };
@@ -82,6 +83,8 @@
 		8FA319061A06A50000A06500 /* Kiwi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Kiwi.h; sourceTree = "<group>"; };
 		8FA319071A06A50000A06500 /* KiwiPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KiwiPriv.h; sourceTree = "<group>"; };
 		8FA319081A06A50000A06500 /* Kiwi.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Kiwi.cp; sourceTree = "<group>"; };
+		8FA8FA6C1A181E86007A37CA /* Beacon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Beacon.cpp; sourceTree = "<group>"; };
+		8FA8FA6D1A181E86007A37CA /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
 		8FBE76C61A0B802B008A7B56 /* muParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muParser.h; sourceTree = "<group>"; };
 		8FBE76C71A0B802B008A7B56 /* muParserBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muParserBase.h; sourceTree = "<group>"; };
 		8FBE76C81A0B802B008A7B56 /* muParserBytecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muParserBytecode.h; sourceTree = "<group>"; };
@@ -307,6 +310,8 @@
 				8F158E801A01582500F6D72E /* Console.h */,
 				8F1B7BE81A0138D500E58BBB /* Tag.cpp */,
 				8FC8A33219C3243E0028F321 /* Tag.h */,
+				8FA8FA6C1A181E86007A37CA /* Beacon.cpp */,
+				8FA8FA6D1A181E86007A37CA /* Beacon.h */,
 				8FC8A32719C3243E0028F321 /* Element.cpp */,
 				8FC8A32819C3243E0028F321 /* Element.h */,
 				8F1E2B9519DBB72500F904B9 /* Dico.cpp */,
@@ -438,6 +443,7 @@
 				8F1E2B9719DBB72500F904B9 /* Dico.cpp in Sources */,
 				8FBE76E51A0B802B008A7B56 /* muParserTest.cpp in Sources */,
 				8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */,
+				8FA8FA6E1A181E86007A37CA /* Beacon.cpp in Sources */,
 				8F1E2B8B19DA9E3700F904B9 /* Box.cpp in Sources */,
 				8FBE76DE1A0B802B008A7B56 /* muParser.cpp in Sources */,
 				8F73C7DB19B9DB110041C577 /* ArithmeticTilde.cpp in Sources */,
@@ -473,6 +479,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -511,6 +518,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;

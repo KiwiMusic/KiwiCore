@@ -27,6 +27,7 @@
 #include "Attribute.h"
 #include "Event.h"
 #include "Doodle.h"
+#include "Beacon.h"
 
 namespace Kiwi
 {
@@ -87,7 +88,7 @@ namespace Kiwi
         public:
             struct Connection
             {
-                shared_ptr<Box> m_box;
+                sBox m_box;
                 size_t          m_index;
             };
             
@@ -116,9 +117,11 @@ namespace Kiwi
         
     private:
             
-        const weak_ptr<Page>        m_page;
+        const wPage                 m_page;
         const sTag                  m_name;
-        const long                  m_type;
+        const atomic_ulong          m_id;
+        const atomic_long           m_type;
+        
         sTag                        m_text;
         vector<unique_ptr<Outlet>>  m_outlets;
         vector<unique_ptr<Inlet>>   m_inlets;
@@ -131,33 +134,31 @@ namespace Kiwi
     public:
         
         //! Constructor.
-        /** Set up the default pointers and tags.
-         @param kiwi    A pointer to the instance.
-         @param name    A name for the box.
+        /** You should never call this method except if you really know what you're doing.
          */
-        Box(weak_ptr<Page> page, string const& name, long type = 1<<0);
+        Box(sPage page, string const& name, long type = 1<<0);
         
         //! Destructor.
-        /** Free the members.
+        /** You should never call this method except if you really know what you're doing.
          */
         virtual ~Box();
         
         //! The box creation method.
         /** The function allocates a box and initialize the defaults members.
          */
-        static shared_ptr<Box> create(shared_ptr<Page> page, sDico dico);
+        static sBox create(sPage page, sDico dico);
         
         //! Retrieve the page that manages the box.
         /** The function retrieves the page that manages the box.
          @return The page that manages the box.
          */
-        shared_ptr<Page> getPage() const noexcept;
+        sPage getPage() const noexcept;
         
         //! Retrieve the instance that manages the page of the box.
         /** The function retrieves the instance that manages the page of the box.
          @return The instance that manages the page of the box.
          */
-        shared_ptr<Instance> getInstance() const noexcept;
+        sInstance getInstance() const noexcept;
         
         //! Retrieve the name of the box.
         /** The function retrieves the name of the box as a tag.
@@ -170,6 +171,15 @@ namespace Kiwi
          @return The text of the box as a tag.
          */
         sTag getText() const noexcept;
+        
+        //! Retrieve the text of the box.
+        /** The function retrieves the text of the box as a tag.
+         @return The text of the box as a tag.
+         */
+        inline unsigned long getId() const noexcept
+        {
+            return m_id;
+        }
         
         //! Retrieve the type of the box.
         /** The function retrieves the type of the box.
@@ -187,7 +197,7 @@ namespace Kiwi
         /** The function writes the box in a dico.
          @param dico The dico.
          */
-        void write(shared_ptr<Dico> dico) const;
+        void write(sDico dico) const;
 
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
@@ -307,27 +317,27 @@ namespace Kiwi
         /** The function retrieves an instance of the box.
          @param dico        The dico that defines the box.
          */
-        virtual shared_ptr<Box> allocate(shared_ptr<Page> page, sDico dico) const = 0;
+        virtual sBox allocate(sPage page, sDico dico) const = 0;
         
         //! The write method that should be override.
         /** The function writes the box in a dico.
          @param dico The dico.
          */
-        virtual void save(shared_ptr<Dico> dico) const;
+        virtual void save(sDico dico) const;
         
         //! The read method that should be override.
         /** The function read a dico to initalize the boxe.
          @param dico The dico.
          */
-        virtual void load(shared_ptr<const Dico> dico);
+        virtual void load(scDico dico);
         
     public:
         
-        static bool compatible(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept;
+        static bool compatible(scConnection connection) noexcept;
         
-        static bool connect(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept;
+        static bool connect(scConnection connection) noexcept;
         
-        static bool disconnect(shared_ptr<Box> from, size_t outlet, shared_ptr<Box> to, size_t inlet) noexcept;
+        static bool disconnect(scConnection connection) noexcept;
         
         // ================================================================================ //
         //                                  BOX LISTENER                                    //
@@ -361,35 +371,35 @@ namespace Kiwi
             /** The function is called by the box when it should be repainted.
              @param box    The box.
              */
-            virtual void shouldBeRedrawn(shared_ptr<Box> box){};
+            virtual void shouldBeRedrawn(sBox box){};
             
             //! Receive the notification that an inlet has been created.
             /** The function is called by the box when a inlet has been created.
              @param box    The box.
              @param index  The inlet index.
              */
-            virtual void inletHasBeenCreated(shared_ptr<Box> box, size_t index){};
+            virtual void inletHasBeenCreated(sBox box, unsigned long index){};
             
             //! Receive the notification that an inlet has been removed.
             /** The function is called by the box when an inlet has been removed.
              @param box    The box.
              @param index  The inlet index.
              */
-            virtual void inletHasBeenRemoved(shared_ptr<Box> box, size_t index){};
+            virtual void inletHasBeenRemoved(sBox box, unsigned long index){};
             
             //! Receive the notification that an outlet has been created.
             /** The function is called by the box when a outlet has been created.
              @param box    The box.
              @param index  The outlet index.
              */
-            virtual void outletHasBeenCreated(shared_ptr<Box> box, size_t index){};
+            virtual void outletHasBeenCreated(sBox box, unsigned long index){};
             
             //! Receive the notification that an outlet has been removed.
             /** The function is called by the box when an outlet has been removed.
              @param box    The box.
              @param index  The outlet index.
              */
-            virtual void outletHasBeenRemoved(shared_ptr<Box> box, size_t index){};
+            virtual void outletHasBeenRemoved(sBox box, unsigned long index){};
         };
 		
 		//! Add a box listener in the binding list of the box.
@@ -424,97 +434,152 @@ namespace Kiwi
         static void addPrototype(unique_ptr<Box> box, string const& name = "");
     };
     
-    typedef shared_ptr<Box>     sBox;
-    
-    typedef weak_ptr<Box>       wBox;
-    
-    typedef shared_ptr<const Box> scBox;
-    
-    typedef weak_ptr<const Box>   wcBox;
-    
-    inline string toString(shared_ptr<const Box> box)
+    inline string toString(scBox box)
     {
         return toString(box->getName());
     }
     
-    class AttributeFont
-    {
-    public:
-        class Name : public AttributeTag
-        {
-        public:
-            Name() : AttributeTag(Tag::create("fontname"), "Arial", "Font Name", "Font"){};
-            ~Name(){};
-        };
-        
-        class Size : public AttributeDouble
-        {
-        public:
-            Size() : AttributeDouble(Tag::create("fontsize"), 12, "Font Size", "Font"){};
-            ~Size(){};
-        };
-        
-        class Face : public AttributeEnum
-        {
-        public:
-            Face() : AttributeEnum(Tag::create("fontface"), {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")}, 0, "Font Style", "Font"){};
-            ~Face(){};
-        };
-        
-        class Justification : public AttributeEnum
-        {
-        public:
-            Justification() : AttributeEnum(Tag::create("fontjustification"), {Tag::create("left"), Tag::create("center"), Tag::create("right")}, 0, "Justification", "Font"){};
-            ~Justification(){};
-        };
-    };
+    // ================================================================================ //
+    //                                      CONNECTION                                  //
+    // ================================================================================ //
     
-    class AttributeAppearance
+    //! The connection owns to a page and is used to create a patch lines.
+    /**
+     The connection is opaque, you shouldn't have to use it at all.
+     */
+    class Connection
     {
+    private:
+        
+        const wBox     m_from;
+        const wBox     m_to;
+        const size_t   m_outlet;
+        const size_t   m_inlet;
+        
     public:
-        class Hidden : public AttributeBool
-        {
-        public:
-            Hidden() : AttributeBool(Tag::create("hidden"), false, "Hide on Lock", "Appearance"){};
-            ~Hidden(){};
-        };
         
-        class Presentation : public AttributeBool
-        {
-        public:
-            Presentation() : AttributeBool(Tag::create("presentation"), false, "Include in Presentation", "Appearance"){};
-            ~Presentation(){};
-        };
+        //! The constructor.
+        /** You should never use this method.
+         */
+        Connection(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept;
         
-        class Position : public AttributePoint
-        {
-        public:
-            Position() : AttributePoint(Tag::create("position"), {0., 0.}, "Position", "Appearance"){};
-            ~Position(){};
-        };
+        //! The destructor.
+        /** You should never use this method.
+         */
+        ~Connection();
         
-        class Size : public AttributePoint
-        {
-        public:
-            Size() : AttributePoint(Tag::create("size"), {100., 20.}, "Size", "Appearance"){};
-            ~Size(){};
-        };
+        //! The connection creation method.
+        /** The function allocates a connection.
+         @param from    The output box.
+         @param outlet  The outlet of the connection.
+         @param to      The input box.
+         @param inlet   The inlet of the connection.
+         @return The connection.
+         */
+        static shared_ptr<Connection> create(const sBox from, const size_t outlet, const sBox to, const size_t inlet);
         
-        class PresentationPosition : public AttributePoint
-        {
-        public:
-            PresentationPosition() : AttributePoint(Tag::create("presentation_pos"), {0., 0.}, "Presentation Position", "Appearance"){};
-            ~PresentationPosition(){};
-        };
+        //! The connection creation method.
+        /** The function allocates a connection with a page and a dico.
+         @param page    The page that owns the boxes.
+         @param dico    The dico that defines the connection.
+         @return The connection.
+         */
+        static shared_ptr<Connection> create(scPage page, scDico dico);
         
-        class PresentationSize : public AttributePoint
+        //! The connection creation method with another connection but change one of the boxes with another one.
+        /** The function allocates a connection with another connection.
+         @param connect The other connection.
+         @param oldbox  The old box to replace.
+         @param newbox  The newbox box that replace.
+         @return The connection.
+         */
+        static shared_ptr<Connection> create(const shared_ptr<Connection> connect, const sBox oldbox, const sBox newbox)
         {
-        public:
-            PresentationSize() : AttributePoint(Tag::create("presentation_size"), {0., 0.}, "Presentation Size", "Appearance"){};
-            ~PresentationSize(){};
-        };
+            if(connect->getBoxFrom() == oldbox)
+            {
+                if(connect->getOutletIndex() < newbox->getNumberOfOutlets())
+                {
+                    return create(newbox, connect->getOutletIndex(), connect->getBoxTo(), connect->getInletIndex());
+                }
+            }
+            else if(connect->getBoxTo() == oldbox)
+            {
+                if(connect->getInletIndex() < newbox->getNumberOfInlets())
+                {
+                    return create(connect->getBoxFrom(), connect->getOutletIndex(), newbox, connect->getInletIndex());
+                }
+            }
+            return nullptr;
+        }
+        
+        //! Retrieve the output box.
+        /** The function retrieves the output box of the connection.
+         @return The output box.
+         */
+        inline sBox getBoxFrom() const noexcept
+        {
+            return m_from.lock();
+        }
+        
+        //! Retrieve the input box.
+        /** The function retrieves the input box of the connection.
+         @return The input box.
+         */
+        inline sBox getBoxTo() const noexcept
+        {
+            return m_to.lock();
+        }
+        
+        //! Retrieve the outlet of the connection.
+        /** The function retrieves the outlet of the connection.
+         @return The outlet of the connection.
+         */
+        inline size_t getOutletIndex() const noexcept
+        {
+            return m_outlet;
+        }
+        
+        //! Retrieve the inlet of the connection.
+        /** The function retrieves the inlet of the connection.
+         @return The inlet of the connection.
+         */
+        inline size_t getInletIndex() const noexcept
+        {
+            return m_inlet;
+        }
+        
+        //! Retrieve the inlet of the connection.
+        /** The function retrieves the inlet of the connection.
+         @return The inlet of the connection.
+         */
+        inline bool isValid() const noexcept
+        {
+            sBox from   = m_from.lock();
+            sBox to     = m_to.lock();
+            return from && to && from != to && m_outlet  < from->getNumberOfOutlets() && m_inlet < to->getNumberOfInlets() && from->getPage() == to->getPage();
+        }
+        
+        //! Write the page in a dico.
+        /** The function writes the connection in a dico.
+         @param dico The dico.
+         */
+        void write(sDico dico) const noexcept
+        {
+            sBox     from    = getBoxFrom();
+            sBox     to      = getBoxTo();
+            if(from && to)
+            {
+                dico->set(Tag::from, {from->getId(), getOutletIndex()});
+                dico->set(Tag::to, {to->getId(), getInletIndex()});
+            }
+            else
+            {
+                dico->clear(Tag::from);
+                dico->clear(Tag::to);
+            }
+        }
+            
     };
-    
 }
 
 

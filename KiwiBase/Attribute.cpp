@@ -115,7 +115,7 @@ namespace Kiwi
 		set(m_default_value);
 	}
 	
-    void Attribute::write(shared_ptr<Dico> dico) const noexcept
+    void Attribute::write(sDico dico) const noexcept
     {
 		if(!(m_behavior & Behavior::NotSaveable) || m_frozen)
 		{
@@ -130,7 +130,7 @@ namespace Kiwi
 		}
     }
     
-    void Attribute::read(shared_ptr<const Dico> dico)
+    void Attribute::read(scDico dico)
     {
         ElemVector elements;
         dico->get(m_name, elements);
@@ -331,7 +331,7 @@ namespace Kiwi
 		m_listeners.erase(listener);
 	}
 	
-	void Attribute::Manager::write(shared_ptr<Dico> dico) const noexcept
+	void Attribute::Manager::write(sDico dico) const noexcept
 	{
 		sAttribute attr;
 		ElemVector frozen_attributes_names = {};
@@ -353,7 +353,7 @@ namespace Kiwi
 			dico->set(Tag::frozen_attributes, frozen_attributes_names);
 	}
 	
-	void Attribute::Manager::read(shared_ptr<const Dico> dico) noexcept
+	void Attribute::Manager::read(scDico dico) noexcept
 	{
 		for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
 			it->second->read(dico);

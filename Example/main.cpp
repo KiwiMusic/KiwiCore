@@ -12,9 +12,91 @@
 
 using namespace Kiwi;
 
+mutex coutmutex;
+
+class IListener : public Instance::Listener
+{
+public:
+    IListener(){};
+    ~IListener(){};
+    
+    //! Receive the notification that a page has been created.
+    /** The function is called by the instance when a page has been created.
+     @param instance    The instance.
+     @param page        The page.
+     */
+    void pageHasBeenCreated(sInstance instance, sPage page) override
+    {
+        lock_guard<mutex> guard(coutmutex);
+        cout << "Page created : "<< (long)page.get() << endl;
+    };
+    
+    //! Receive the notification that a page has been closed.
+    /** The function is called by the instance when a page has been closed.
+     @param instance    The instance.
+     @param page        The page.
+     */
+    void pageHasBeenRemoved(sInstance instance, sPage page) override
+    {
+        lock_guard<mutex> guard(coutmutex);
+        cout << "Page deleted : "<< (long)page.get() << endl;
+    }
+    
+    //! Receive the notification that the dsp has been started.
+    /** The function is called by the instance when the dsp has been started.
+     @param instance    The instance.
+     */
+    void dspHasBeenStarted(sInstance instance) override {};
+    
+    //! Receive the notification that the dsp has been stopped.
+    /** The function is called by the instance when the dsp has been stopped.
+     @param instance    The instance.
+     */
+    void dspHasBeenStopped(sInstance instance) override {};
+    
+};
+
+void createPageFomInstance(sInstance instance, int i)
+{
+    //cout << "Index : " << i << endl;
+    instance->createPage();
+}
+
+void deletePageFomInstance(sInstance instance, sPage page, int i)
+{
+    //cout << "Index : " << i << endl;
+    instance->removePage(page);
+}
+
+void tickDspFromInstance(sInstance instance, int i)
+{
+    for(int z = 0; z < i; z++)
+    {
+        instance->tickDsp();
+        lock_guard<mutex> guard(coutmutex);
+        cout << "dsp : " << z << endl;
+    }
+}
+
+void bindListFomInstance(sInstance instance, shared_ptr<Instance::Listener> list)
+{
+    instance->bind(list);
+    lock_guard<mutex> guard(coutmutex);
+    cout << "bind " << endl;
+}
+
+void unbindListFomInstance(sInstance instance, shared_ptr<Instance::Listener> list)
+{
+    instance->bind(list);
+    lock_guard<mutex> guard(coutmutex);
+    cout << "unbind : " << endl;
+}
+
 //==============================================================================
 int main (int argc, char* argv[])
 {
+    shared_ptr<IListener> lis =  make_shared<IListener>();
+
     sInstance kiwi = Instance::create();
     {
         Console::post("---------");
@@ -56,6 +138,7 @@ int main (int argc, char* argv[])
             dico->read("expr i1 + 2");
             nbox = page->createBox(dico);
             nbox->receive(0, {3.2});
+            kiwi->removePage(page);
             /*
             double fVal = 3.8;
             mu::Parser p;
@@ -72,10 +155,78 @@ int main (int argc, char* argv[])
             
             std::cout << p.Eval() << std::endl;
              */
+            
+            /*
+            const int nthread  = 6;
+            const int nliste  = 4;
+            vector<shared_ptr<Instance::Listener>> liste;
+            for(int i = 0; i < nliste; i++)
+            {
+                liste.push_back(make_shared<Instance::Listener>());
+            }
+            
+            kiwi->startDsp(44100, 1024);
+            thread tt(tickDspFromInstance, kiwi, 50);
+            
+            kiwi->bind(lis);
+            thread t[nthread];
+            thread t2[nliste];
+            for(int i = 0; i < nthread; ++i)
+            {
+                t[i] = thread(createPageFomInstance, kiwi, i);
+            }
+            
+            for(int i = 0; i < nliste; ++i)
+            {
+                t2[i] = thread(bindListFomInstance, kiwi, liste[i]);
+            }
+            
+            for (int i = 0; i < nthread; ++i)
+            {
+                t[i].join();
+            }
+            
+            for(int i = 0; i < nliste; ++i)
+            {
+                t2[i].join();
+            }
+            
+            vector<sPage> pages;
+            kiwi->getPages(pages);
+            cout << endl;
+            {
+                lock_guard<mutex> guard(coutmutex);
+                cout << "npages " << pages.size() << endl;
+                for(int i = 0; i < pages.size(); ++i)
+                {
+                    cout << "Page : "<< (long)pages[i].get() << endl;
+                }
+            }
+            
+            for(int i = 0; i < nliste; ++i)
+            {
+                t2[i] = thread(unbindListFomInstance, kiwi, liste[i]);
+            }
+            
+            for(int i = 0; i < nthread; ++i)
+            {
+                t[i] = thread(deletePageFomInstance, kiwi, pages[i], i);
+            }
+            
+            for(int i = 0; i < nliste; ++i)
+            {
+                t2[i].join();
+            }
+            
+            for (int i = 0; i < nthread; ++i)
+            {
+                t[i].join();
+            }
+            
+            tt.join();
+             */
+            
         }
-        
     }
-    kiwi = Instance::create();
-    
     return 0;
 }

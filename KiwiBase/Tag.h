@@ -33,9 +33,9 @@ namespace Kiwi
     //                                      TAG                                         //
     // ================================================================================ //
     
-    //! The tag is an unique object that matchs to a "unique" string (in the scope of a tag factory).
+    //! The tag is an unique object that matchs to a "unique" string (in the scope of all the kiwi application).
     /**
-     The tag can be created only by the tag factory class and are never destroyed until the deletion of the it. If you create a tag with a string already used that already matchs to a tag the tag factory will return this tag, otherwise it will create a new tag.
+     The tag are uniques and matchs to a string. If you create a tag with a string that already matchs to a tag, the creation function will return this tag, otherwise it will create a new tag.
      @see TagFactory
      */
     class Tag
@@ -72,7 +72,8 @@ namespace Kiwi
         
     private:
         
-        static map<string, shared_ptr<const Tag>> m_tags;
+        static map<string, sTag> m_tags;
+        static mutex             m_mutex;
     public:
         
         //! Tag creator.
@@ -80,8 +81,9 @@ namespace Kiwi
          @param  name   The name of the tag to retrieve.
          @return    The tag that match with the name.
          */
-        static inline shared_ptr<const Tag> create(string const& name)
+        static inline sTag create(string const& name)
         {
+            lock_guard<mutex> guard(m_mutex);
             auto it = m_tags.find(name);
             if(it != m_tags.end())
             {
@@ -89,32 +91,28 @@ namespace Kiwi
             }
             else
             {
-                shared_ptr<const Tag> tag = make_shared<Tag>(name);
+                sTag tag = make_shared<Tag>(name);
                 m_tags[name] = tag;
                 return tag;
             }
         }
         
-        static shared_ptr<const Tag> text;
-        static shared_ptr<const Tag> box;
-        static shared_ptr<const Tag> boxes;
-        static shared_ptr<const Tag> connection;
-        static shared_ptr<const Tag> connections;
-        static shared_ptr<const Tag> id;
-        static shared_ptr<const Tag> from;
-        static shared_ptr<const Tag> to;
-        static shared_ptr<const Tag> name;
-        static shared_ptr<const Tag> ninlets;
-        static shared_ptr<const Tag> noutlets;
-        static shared_ptr<const Tag> set;
-        static shared_ptr<const Tag> null;
-        static shared_ptr<const Tag> arguments;
-		static shared_ptr<const Tag> frozen_attributes;
+        static sTag text;
+        static sTag box;
+        static sTag boxes;
+        static sTag connection;
+        static sTag connections;
+        static sTag id;
+        static sTag from;
+        static sTag to;
+        static sTag name;
+        static sTag ninlets;
+        static sTag noutlets;
+        static sTag set;
+        static sTag null;
+        static sTag arguments;
+		static sTag frozen_attributes;
     };
-    
-    typedef shared_ptr<const Tag> sTag;
-    
-    typedef weak_ptr<const Tag> wTag;
     
     inline string toString(sTag __val)
     {

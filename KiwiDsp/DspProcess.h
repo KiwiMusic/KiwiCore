@@ -45,10 +45,10 @@ namespace Kiwi
     class DspProcess
     {
     private:
-        typedef void (*MethodProcess)(shared_ptr<Box>, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
+        typedef void (*MethodProcess)(sBox, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
         
         const MethodProcess     m_process;
-        const shared_ptr<Box>   m_box;
+        const sBox   m_box;
         const int               m_nins;
         const int               m_nouts;
         const long              m_vectorsize;
@@ -64,7 +64,7 @@ namespace Kiwi
          @param nouts       The number of output signals.
          @param vectorsize  The vector size.
          */
-        DspProcess(MethodProcess process, shared_ptr<Box> box, int nins, int nouts, long vectorsize);
+        DspProcess(MethodProcess process, sBox box, int nins, int nouts, long vectorsize);
         
         //! Destructor.
         /** This function shoulds free the matrices but we have an small error for the moment...
@@ -108,7 +108,7 @@ namespace Kiwi
         //! The copy default method.
         /** The default process method to copy a vector to another one.
          */
-        static void copy(shared_ptr<Box> none, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
+        static void copy(sBox none, long nins, sample const* const* ins, long nouts, sample** outs, long vectorsize);
     };
 }
 

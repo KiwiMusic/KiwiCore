@@ -29,7 +29,6 @@ namespace Kiwi
     // ================================================================================ //
     //                                      DICO                                        //
     // ================================================================================ //
-    
     Dico::Dico() noexcept
     {
         ;
@@ -40,7 +39,7 @@ namespace Kiwi
         clear();
     }
     
-    shared_ptr<Dico> Dico::create()
+    sDico Dico::create()
     {
         return make_shared<Dico>();
     }
@@ -290,7 +289,7 @@ namespace Kiwi
             {
                 sDico dico = element;
                 if(dico)
-                    toJson((shared_ptr<const Dico>)dico, text, line + "    ");
+                    toJson((scDico)dico, text, line + "    ");
                 else
                     text.append("null");
                 break;
@@ -320,7 +319,7 @@ namespace Kiwi
         }
     }
     
-    void Dico::toJson(shared_ptr<const Dico> dico, string& text, string line)
+    void Dico::toJson(scDico dico, string& text, string line)
     {
         ElemVector _keys;
         dico->keys(_keys);
@@ -471,7 +470,7 @@ namespace Kiwi
                 break;
             case Element::DICO:
             {
-                sDico dico = createDico();
+                sDico dico = Dico::create();
                 if(dico)
                 {
                     fromJson(dico, text, pos);
@@ -504,7 +503,7 @@ namespace Kiwi
                             break;
                         case Element::DICO:
                         {
-                            sDico dico = createDico();
+                            sDico dico = Dico::create();
                             if(dico)
                             {
                                 fromJson(dico, text, pos);
@@ -524,7 +523,7 @@ namespace Kiwi
         }
     }
 
-    void Dico::fromJson(shared_ptr<Dico> dico, string const& text, string::size_type& pos)
+    void Dico::fromJson(sDico dico, string const& text, string::size_type& pos)
     {
         pos = text.find('{', pos);
         while(getNextPosition(text, pos, Element::DICO))
@@ -546,7 +545,7 @@ namespace Kiwi
         }
     }
     
-    void Dico::fromText(shared_ptr<Dico> dico, string const& text)
+    void Dico::fromText(sDico dico, string const& text)
     {
         bool mode = false;
         string word;

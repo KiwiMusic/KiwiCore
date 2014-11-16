@@ -49,16 +49,16 @@ namespace Kiwi
         m_val.m_long = value;
     }
     
-    Element::Element(size_t value) noexcept
+    Element::Element(unsigned long value) noexcept
     {
         m_type = Element::LONG;
-        m_val.m_long = value;
+        m_val.m_long = (long)value;
     }
     
     Element::Element(float value) noexcept
     {
         m_type = Element::DOUBLE;
-        m_val.m_double = value;
+        m_val.m_double = (double)value;
     }
     
     Element::Element(double value) noexcept
@@ -79,13 +79,13 @@ namespace Kiwi
         m_val.m_tag = tag;
     }
     
-    Element::Element(shared_ptr<Box> box) noexcept
+    Element::Element(sBox box) noexcept
     {
         m_type = Element::BOX;
         m_val.m_box = box;
     }
     
-    Element::Element(shared_ptr<Dico> dico) noexcept
+    Element::Element(sDico dico) noexcept
     {
         m_type = Element::DICO;
         m_val.m_dico = dico;
@@ -116,12 +116,12 @@ namespace Kiwi
             return 0;
     }
     
-    Element::operator size_t() const noexcept
+    Element::operator unsigned long() const noexcept
     {
         if(m_type == Element::LONG)
-            return m_val.m_long;
+            return (unsigned long)m_val.m_long;
         else if(m_type == Element::DOUBLE)
-            return (long)m_val.m_double;
+            return (unsigned long)m_val.m_double;
         else
             return 0;
     }
@@ -151,12 +151,12 @@ namespace Kiwi
         return m_val.m_tag;
     }
     
-    Element::operator shared_ptr<Box>() const noexcept
+    Element::operator sBox() const noexcept
     {
         return m_val.m_box;
     }
     
-    Element::operator shared_ptr<Dico>() const noexcept
+    Element::operator sDico() const noexcept
     {
         return m_val.m_dico;
     }
@@ -217,14 +217,14 @@ namespace Kiwi
         return *this;
     }
     
-    Element& Element::operator=(shared_ptr<Box> box) noexcept
+    Element& Element::operator=(sBox box) noexcept
     {
         m_type  = Element::BOX;
         m_val.m_box = box;
         return *this;
     }
     
-    Element& Element::operator=(shared_ptr<Dico> dico) noexcept
+    Element& Element::operator=(sDico dico) noexcept
     {
         m_type  = Element::DICO;
         m_val.m_dico = dico;
@@ -289,12 +289,12 @@ namespace Kiwi
         return m_type == Element::TAG && m_val.m_tag == tag;
     }
 
-    bool Element::operator==(shared_ptr<Box> box) const noexcept
+    bool Element::operator==(sBox box) const noexcept
     {
         return m_type == Element::BOX && m_val.m_box == box;
     }
     
-    bool Element::operator==(shared_ptr<Dico> dico) const noexcept
+    bool Element::operator==(sDico dico) const noexcept
     {
         return m_type == Element::DICO && m_val.m_dico == dico;
     }
@@ -313,7 +313,7 @@ namespace Kiwi
                 return toString((sTag)__val);
                 break;
             case Element::BOX:
-                return toString(shared_ptr<const Box>((sBox)__val));
+                return toString(scBox((sBox)__val));
                 break;
             case Element::DICO:
                 return toString((sDico)__val);

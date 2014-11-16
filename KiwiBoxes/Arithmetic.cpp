@@ -102,7 +102,7 @@ namespace Kiwi
     
     Expression::Expression(sPage page, ElemVector const& elements) : Box(page, "expr")
     {
-        long   max = 0;
+        unsigned long   max = 0;
         string word;
         string expr = toString(elements);
         istringstream iss(expr);
@@ -112,7 +112,7 @@ namespace Kiwi
             {
                 if(isdigit(word[1]))
                 {
-                    long num = atol(word.c_str()+1);
+                    unsigned long num = (unsigned long)atol(word.c_str()+1);
                     if(max < num)
                     {
                         max = num;

@@ -28,9 +28,8 @@
 
 // TODO :
 // - See how to set the input and output vector for DSP.
-// - See how to manage some unique id to communicate between object with tag (old behavior) : beacon.
 // - Exception (load page and dsp)
-// - Add the attributes
+// - Add the attributes (read and write)
 namespace Kiwi
 {
     class InstanceListener;
@@ -41,9 +40,11 @@ namespace Kiwi
     
     //! The instance manages pages.
     /**
-     The instance manages a set a top-level pages. You can use the insance::listener to be receive the notifications of the the creation, the deletion of pages and the changes of the dsp states. All the methods should be threadsafe but, of course, you should call the dsp tick method from one thread.
+     The instance manages a set a top-level pages. You can use the listener to receive the notifications of the creation, the deletion of pages and the changes of the dsp state. All the methods should be threadsafe but you should, of course, call the dsp tick from one thread. The instance is also a beacon factory that can be used to bind and retrieve boxes with a specific name.
+     @see Page
+     @see Beacon
      */
-    class Instance : public enable_shared_from_this<Instance>
+    class Instance : public Beacon::Factory, public enable_shared_from_this<Instance>
     {
     public:
         class Listener;
@@ -61,6 +62,7 @@ namespace Kiwi
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>           m_listeners;
         mutex                               m_listeners_mutex;
+        
     public:
         
         //! The constructor.
@@ -77,30 +79,50 @@ namespace Kiwi
         /** The function allocates an instance and initialize the prototypes of boxes.
          @return The instance.
          */
-        static shared_ptr<Instance> create();
+        static sInstance create();
         
         //! Create a page.
         /** The function creates a page with a dico or creates an empty one if the dico is empty.
          @param dico The dico that defines of the page.
          @return The page.
+         @see removePage()
+         @see getPages()
          */
-        sPage createPage(sDico dico = nullptr);
+        sPage createPage(scDico dico = nullptr);
         
         //! Close a page.
         /** The function closes page.
          @param page The page.
+         @see createPage()
+         @see getPages()
          */
         void removePage(sPage page);
+        
+        //! Retreive all the pages of the instance.
+        /** The function retreives all the pages of the instance.
+         @param pages A vector that will be filled with the pages.
+         @see createPage()
+         @see removePage()
+         */
+        void getPages(vector<sPage>& pages);
         
         //! Start the dsp.
         /** The function start the dsp chain of all the pages.
          @param samplerate The sample rate.
          @param vectorsize The vector size of the signal.
+         @see getVectorSize()
+         @see getSampleRate()
+         @see tickDsp()
+         @see stopDsp()
          */
         void startDsp(long samplerate, long vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain of all the pages.
+         @see getVectorSize()
+         @see getSampleRate()
+         @see startDsp()
+         @see stopDsp()
          */
         inline void tickDsp() const noexcept
         {
@@ -114,6 +136,10 @@ namespace Kiwi
         
         //! Stop the dsp.
         /** The function stop the dsp chain of all the pages.
+         @see getVectorSize()
+         @see getSampleRate()
+         @see startDsp()
+         @see tickDsp()
          */
         void stopDsp();
         
@@ -129,6 +155,8 @@ namespace Kiwi
         //! Retrieve the current sample rate.
         /** The function retrieve the current or the last sample rate used for dsp.
          @return the sample rate.
+         @see getVectorSize()
+         @see startDsp()
          */
         inline long getSampleRate() const noexcept
         {
@@ -138,6 +166,8 @@ namespace Kiwi
         //! Retrieve the current vector size of the signal.
         /** The function retrieve the current or the last vector size of the signal.
          @return the vector size of the signal.
+         @see getSampleRate()
+         @see startDsp()
          */
         inline long getVectorSize() const noexcept
         {
@@ -191,34 +221,30 @@ namespace Kiwi
              @param instance    The instance.
              @param page        The page.
              */
-            virtual void pageHasBeenCreated(shared_ptr<Instance> instance, sPage page){};
+            virtual void pageHasBeenCreated(sInstance instance, sPage page){};
             
             //! Receive the notification that a page has been closed.
             /** The function is called by the instance when a page has been closed.
              @param instance    The instance.
              @param page        The page.
              */
-            virtual void pageHasBeenRemoved(shared_ptr<Instance> instance, sPage page){};
+            virtual void pageHasBeenRemoved(sInstance instance, sPage page){};
             
             //! Receive the notification that the dsp has been started.
             /** The function is called by the instance when the dsp has been started.
              @param instance    The instance.
              */
-            virtual void dspHasBeenStarted(shared_ptr<Instance> instance){};
+            virtual void dspHasBeenStarted(sInstance instance){};
             
             //! Receive the notification that the dsp has been stopped.
             /** The function is called by the instance when the dsp has been stopped.
              @param instance    The instance.
              */
-            virtual void dspHasBeenStopped(shared_ptr<Instance> instance){};
+            virtual void dspHasBeenStopped(sInstance instance){};
         };
         
         typedef shared_ptr<Listener>    sListener;
     };
-    
-    typedef shared_ptr<Instance>    sInstance;
-    
-    typedef weak_ptr<Instance>      wInstance;
 }
 
 

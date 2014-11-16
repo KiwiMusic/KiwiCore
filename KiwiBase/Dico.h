@@ -56,7 +56,7 @@ namespace Kiwi
         //! The dico creation method.
         /** The function allocates a dico.
          */
-        static shared_ptr<Dico> create();
+        static sDico create();
         
         //! Clear the dico.
         /** The function clears the dico.
@@ -251,7 +251,7 @@ namespace Kiwi
          @param     line The indetation.
          @return    The unescaped string.
          */
-        static void toJson(shared_ptr<const Dico> dico, string& text, string indetation = "");
+        static void toJson(scDico dico, string& text, string indetation = "");
         
         //! Unescape a json string.
         /** This function unescapes a json string.
@@ -282,30 +282,21 @@ namespace Kiwi
          @param     text The string.
          @param     pos The position in the string.
          */
-        static void fromJson(shared_ptr<Dico> dico, string const& text, string::size_type& pos);
+        static void fromJson(sDico dico, string const& text, string::size_type& pos);
         
         //! Get a dico from a string in the page format .
         /** This function gets dico from a string in the page format .
          @param     dico The dico.
          @param     text The string.
          */
-        static void fromText(shared_ptr<Dico> dico, string const& text);
+        static void fromText(sDico dico, string const& text);
     };
     
-    typedef shared_ptr<Dico>        sDico;
-	typedef shared_ptr<const Dico>  scDico;
-    typedef weak_ptr<Dico>          wDico;
-    
-    inline string toString(const shared_ptr<Dico> dico)
+    inline string toString(const sDico dico)
     {
         string text;
         dico->write(text);
         return text;
-    }
-    
-    static inline sDico createDico() 
-    {
-        return make_shared<Dico>();
     }
 }
 

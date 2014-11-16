@@ -86,7 +86,7 @@ namespace Kiwi
          @param box  The box sender.
          @param message The message in the string format.
          */
-        static void post(const shared_ptr<const Box> box, string const& message) noexcept;
+        static void post(const scBox box, string const& message) noexcept;
         
         //! Post a warning.
         /** The function post a warning and notify the console listeners that a warning has been received.
@@ -99,7 +99,7 @@ namespace Kiwi
          @param box  The box sender.
          @param message The warning in the string format.
          */
-        static void warning(const shared_ptr<const Box> box, string const& message) noexcept;
+        static void warning(const scBox box, string const& message) noexcept;
         
         //! Post an error.
         /** The function post a error and notify the console listeners that a error has been received.
@@ -112,7 +112,7 @@ namespace Kiwi
          @param box  The box sender.
          @param message The error in the string format.
          */
-        static void error(const shared_ptr<const Box> box, string const& message) noexcept;
+        static void error(const scBox box, string const& message) noexcept;
         
         // ================================================================================ //
         //                                  INSTANCE LISTENER                               //

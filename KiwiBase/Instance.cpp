@@ -48,7 +48,7 @@ namespace Kiwi
         m_dsp_pages.clear();
     }
     
-    shared_ptr<Instance> Instance::create()
+    sInstance Instance::create()
     {
         if(!libraries_loaded)
         {
@@ -62,7 +62,7 @@ namespace Kiwi
     //                                      FACTORY                                     //
     // ================================================================================ //
 
-    sPage Instance::createPage(sDico dico)
+    sPage Instance::createPage(scDico dico)
     {
         sPage page = Page::create(shared_from_this(), dico);
         if(page)
@@ -82,12 +82,18 @@ namespace Kiwi
             }
             
             m_listeners_mutex.lock();
-            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
             {
-                Instance::sListener listener = (*it).lock();
-                if(listener)
+                if((*it).expired())
                 {
+                    it = m_listeners.erase(it);
+                }
+                else
+                {
+                    Instance::sListener listener = (*it).lock();
                     listener->pageHasBeenCreated(shared_from_this(), page);
+                    ++it;
                 }
             }
             m_listeners_mutex.unlock();
@@ -116,12 +122,18 @@ namespace Kiwi
             m_pages_mutex.unlock();
             
             m_listeners_mutex.lock();
-            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
             {
-                Instance::sListener listener = (*it).lock();
-                if(listener)
+                if((*it).expired())
                 {
+                    it = m_listeners.erase(it);
+                }
+                else
+                {
+                    Instance::sListener listener = (*it).lock();
                     listener->pageHasBeenRemoved(shared_from_this(), page);
+                    ++it;
                 }
             }
             m_listeners_mutex.unlock();
@@ -130,6 +142,12 @@ namespace Kiwi
         {
             m_pages_mutex.unlock();
         }
+    }
+    
+    void Instance::getPages(vector<sPage>& pages)
+    {
+        lock_guard<mutex> guard(m_pages_mutex);
+        pages.assign(m_pages.begin(), m_pages.end());
     }
     
     void Instance::startDsp(long samplerate, long vectorsize)
@@ -158,12 +176,18 @@ namespace Kiwi
             m_dsp_mutex.unlock();
             
             m_listeners_mutex.lock();
-            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
             {
-                Instance::sListener listener = (*it).lock();
-                if(listener)
+                if((*it).expired())
                 {
+                    it = m_listeners.erase(it);
+                }
+                else
+                {
+                    Instance::sListener listener = (*it).lock();
                     listener->dspHasBeenStarted(shared_from_this());
+                    ++it;
                 }
             }
             m_listeners_mutex.unlock();
@@ -189,12 +213,18 @@ namespace Kiwi
             m_dsp_running = false;
             
             m_listeners_mutex.lock();
-            for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
             {
-                Instance::sListener listener = (*it).lock();
-                if(listener)
+                if((*it).expired())
                 {
+                    it = m_listeners.erase(it);
+                }
+                else
+                {
+                    Instance::sListener listener = (*it).lock();
                     listener->dspHasBeenStopped(shared_from_this());
+                    ++it;
                 }
             }
             m_listeners_mutex.unlock();

@@ -31,7 +31,7 @@ namespace Kiwi
     //                                      DSP NODE                                    //
     // ================================================================================ //
     
-    DspNode::DspNode(shared_ptr<Box> box) :
+    DspNode::DspNode(sBox box) :
     
     m_box(box),
     m_nins(0),

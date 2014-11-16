@@ -65,7 +65,7 @@ namespace Kiwi
         return m_processes.size();
     }
     
-    void DspContext::addBox(shared_ptr<Box> box)
+    void DspContext::addBox(sBox box)
     {
         /*
         if(box->type() == Box::DSPBOX)
@@ -75,7 +75,7 @@ namespace Kiwi
          */
     }
     
-    void DspContext::removeBox(shared_ptr<Box> box)
+    void DspContext::removeBox(sBox box)
     {
         int size = (int)m_nodes.size();
         for(int i = 0; i < size; i++)
@@ -93,8 +93,8 @@ namespace Kiwi
         int size = (int)m_nodes.size();
         shared_ptr<DspNode> nodeFrom, nodeTo;
         /*
-        shared_ptr<Box> boxFrom = connection->getFrom();
-        shared_ptr<Box> boxTo = connection->getTo();
+        sBox boxFrom = connection->getFrom();
+        sBox boxTo = connection->getTo();
         
         if(nodeFrom && nodeTo)
         {
@@ -120,8 +120,8 @@ namespace Kiwi
         {
             int size = (int)m_nodes.size();
             shared_ptr<DspNode> nodeFrom, nodeTo;
-            shared_ptr<Box> boxFrom = connection->getFrom();
-            shared_ptr<Box> boxTo = connection->getTo();
+            sBox boxFrom = connection->getFrom();
+            sBox boxTo = connection->getTo();
             
             for(int i = 0; i < size; i++)
             {
