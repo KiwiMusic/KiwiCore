@@ -55,7 +55,7 @@ namespace Kiwi
 		}
 	}
 	
-	void Attr::setInvisible(const bool b) noexcept
+	void Attr::setInvisible(bool b) noexcept
 	{
 		if (b)
 			m_behavior &= ~Invisible;
@@ -63,7 +63,7 @@ namespace Kiwi
 			m_behavior |= Invisible;
 	}
 	
-	void Attr::setDisabled(const bool b) noexcept
+	void Attr::setDisabled(bool b) noexcept
 	{
 		if (!b)
 			m_behavior &= ~Disabled;
@@ -71,23 +71,23 @@ namespace Kiwi
 			m_behavior |= Disabled;
 	}
 
-	void Attr::setSaveable(const bool b) noexcept
+	void Attr::setSaved(bool b) noexcept
 	{
 		if (!b)
-			m_behavior &= ~NotSaveable;
+			m_behavior &= ~Unsaved;
 		else
-			m_behavior |= NotSaveable;
+			m_behavior |= Unsaved;
 	}
 	
-	void Attr::setNotifyChanges(const bool b) noexcept
+	void Attr::setNotifier(bool b) noexcept
 	{
 		if (!b)
-			m_behavior &= ~NotNotifyChanges;
+			m_behavior &= ~Notifier;
 		else
-			m_behavior |= NotNotifyChanges;
+			m_behavior |= Notifier;
 	}
 	
-	void Attr::freeze(const bool frozen)
+	void Attr::freeze(bool frozen)
 	{
 		if(frozen)
         {
@@ -117,9 +117,9 @@ namespace Kiwi
     
     void Attr::write(sDico dico) const noexcept
     {
-		if(!(m_behavior & Behavior::NotSaveable) || !m_frozen_values.empty())
+		if(!(m_behavior & Behavior::Unsaved) || !m_frozen_values.empty())
 		{
-			if(m_frozen_values.empty() && !(m_behavior & Behavior::NotSaveable))
+			if(m_frozen_values.empty() && !(m_behavior & Behavior::Unsaved))
             {
                 ElemVector elements;
 				get(elements);
@@ -343,6 +343,62 @@ namespace Kiwi
             }
 		}
 	}
+    
+    void Attr::Manager::setAttributeInvisible(sTag name, bool invisible) noexcept
+    {
+        lock_guard<mutex> guard(m_attrs_mutex);
+		auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+		{
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->setInvisible(invisible);
+            }
+		}
+    }
+    
+    void Attr::Manager::setAttributeDisabled(sTag name, bool disable) noexcept
+    {
+        lock_guard<mutex> guard(m_attrs_mutex);
+		auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+		{
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->setDisabled(disable);
+            }
+		}
+    }
+    
+    void Attr::Manager::setAttributeSaved(sTag name, bool saved) noexcept
+    {
+        lock_guard<mutex> guard(m_attrs_mutex);
+		auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+		{
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->setSaved(saved);
+            }
+		}
+    }
+    
+    void Attr::Manager::setAttributeNotifier(sTag name, bool notifier) noexcept
+    {
+        lock_guard<mutex> guard(m_attrs_mutex);
+		auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+		{
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->setNotifier(notifier);
+            }
+		}
+    }
     
     unsigned long Attr::Manager::getNumberOfCategories() const noexcept
     {
