@@ -40,7 +40,7 @@ namespace Kiwi
     
     //! The box is a graphical box.
     /**
-     The box is a graphical box that aims to be instantiate in a page.
+     The box is a graphical class that aims to be instantiate in a page.
      */
 	class Box : public Attr::Manager, public enable_shared_from_this<Box>
     {
@@ -51,7 +51,7 @@ namespace Kiwi
         {
             SignalProcessor         = 1<<1,
             MouseListener           = 1<<2,
-            KeyboardMouseListener   = 1<<3,
+            KeyboardListener        = 1<<3,
             Drawer                  = 1<<4
         };
     protected:
@@ -86,10 +86,10 @@ namespace Kiwi
         class Outlet
         {
         public:
-            struct Link
+            struct Conn
             {
-                sBox m_box;
-                size_t          m_index;
+                sBox    m_box;
+                size_t  m_index;
             };
             
             enum Type
@@ -98,9 +98,9 @@ namespace Kiwi
                 Signal  = 1
             };
         
-            vector<Link>  m_conns;
-            const Type          m_type;
-            const string        m_description;
+            vector<Conn>  m_conns;
+            const Type    m_type;
+            const string  m_description;
             
             Outlet(Type type, string description) :
             m_type(type),
@@ -119,7 +119,7 @@ namespace Kiwi
             
         const wPage                 m_page;
         const sTag                  m_name;
-        const atomic_ulong          m_type;
+        const unsigned long         m_type;
         
         atomic_ulong                m_id;
         sTag                        m_text;

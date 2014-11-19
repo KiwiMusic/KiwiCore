@@ -91,6 +91,21 @@ void unbindListFomInstance(sInstance instance, shared_ptr<Instance::Listener> li
     cout << "unbind : " << endl;
 }
 
+ElemVector zaza;
+
+void generateElemVec(sBox box, sDico dico)
+{
+    double val1 = (double)rand() / (double)RAND_MAX;
+    double val2 = (double)rand() / (double)RAND_MAX;
+    long val3 = rand();
+    long val4 = rand();
+    ElemVector zozo  = {val1, val2, val3, val4, 5., 6., box, 8, dico};
+    zaza = zozo;
+    zaza.resize(2);
+    lock_guard<mutex> guard(coutmutex);
+    cout << "elem : " << toString(zaza) << endl;
+}
+
 //==============================================================================
 int main (int argc, char* argv[])
 {
@@ -109,6 +124,38 @@ int main (int argc, char* argv[])
             dico->set(Tag::from, {3, 0});
             dico->set(Tag::to, {4, 0});
             page->createConnection(dico);
+            
+            vector<sBox> boxes;
+            page->getBoxes(boxes);
+            sBox box;
+            if(boxes.size())
+            {
+                box = boxes[0];
+                box->receive(1, {1});
+                box->receive(0, {2});
+            }
+            
+            double val1 = (double)rand() / (double)RAND_MAX;
+            double val2 = (double)rand() / (double)RAND_MAX;
+            long val3 = rand();
+            long val4 = rand();
+            
+            zaza = {val1, val2, val3, val4, 5., 6., box, Tag::from, dico};
+            
+            const int nthread  = 6;
+            thread t[nthread];
+            for(int i = 0; i < nthread; ++i)
+            {
+                t[i] = thread(generateElemVec, box, dico);
+            }
+            //zaza = {5, Tag::text, box, Tag::from, dico, val1, val2, val3, val4};
+            for (int i = 0; i < nthread; ++i)
+            {
+                t[i].join();
+            }
+            cout << toString(zaza) << endl;
+            
+            cout << box.use_count() << endl;
             /*
             dico->set(Tag::from, {4, 0});
             dico->set(Tag::to, {1, 0});

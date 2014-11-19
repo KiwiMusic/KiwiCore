@@ -33,8 +33,6 @@
 
 namespace Kiwi
 {
-    class Instance;
-    
     // ================================================================================ //
     //                                      ATTRIBUTE                                   //
     // ================================================================================ //
@@ -207,10 +205,9 @@ namespace Kiwi
             return !(m_behavior & Notifier);
         }
 		
-		//! Is the attribute currently frozen ?
-		/** Is the attribute currently frozen ?
+		//! Retrieve if the attribute is frozen.
+		/** The function retrieves if the attribute is frozen.
 		 @return True if the attribute is frozen, false otherwise.
-		 @see freeze, getFrozenValue
 		 */
 		bool isFrozen() const noexcept
         {
@@ -220,7 +217,6 @@ namespace Kiwi
         //! Retrieves the default values.
 		/** Retrieve the default values.
 		 @param elements A vector of elements to fill.
-		 @see set
 		 */
 		inline void getDefaultValues(ElemVector& elements) const noexcept
         {
@@ -230,9 +226,8 @@ namespace Kiwi
 		//! Retrieve the frozen value.
 		/** Retrieve the frozen value, if the attribute is not frozen the vector will be empty.
 		 @param elements A vector of Element to be replaced by the frozen value.
-		 @see freeze, isFrozen
 		 */
-		void getFrozenValues(ElemVector& elements) const noexcept
+		inline void getFrozenValues(ElemVector& elements) const noexcept
         {
             elements = m_frozen_values;
         }
@@ -240,12 +235,18 @@ namespace Kiwi
         //! Retrieves the enum values.
 		/** The Attr subclasses than want to be displayed in an enum style must implement this function to retrieve enum values.
 		 @param elements A vector of elements to fill.
-		 @see AttrEnum
 		 */
 		virtual void getEnumValues(ElemVector& elements) const
         {
             elements.clear();
         }
+        
+        //! Retrieves the values.
+		/** The attribute must implement this function to retrieve the values.
+		 @param elements A vector of elements to fill.
+		 @see set
+		 */
+		virtual void get(ElemVector& elements) const noexcept = 0;
 		
 		//! Attempts to write the attribute in a dico.
 		/** The function attempts to write the attribute in a dico.
@@ -254,13 +255,6 @@ namespace Kiwi
 		 @see read
 		 */
 		void write(sDico dico) const noexcept;
-        
-        //! Retrieves the values.
-		/** The attribute must implement this function to retrieve the values.
-		 @param elements A vector of elements to fill.
-		 @see set
-		 */
-		virtual void get(ElemVector& elements) const noexcept = 0;
 	
 	protected:
 		
@@ -273,15 +267,25 @@ namespace Kiwi
 		
 		//! Resets the attribute values to default values.
 		/** Resets the attribute values to its default values.
-		 @see set
 		 */
 		void setDefaultValues();
         
         //! Resets the attribute values to frozen values.
 		/** Resets the attribute values to its frozen values.
-		 @see set
 		 */
 		void setFrozenValues();
+        
+        //! Freezes or unfreezes the attribute.
+		/** If you freeze an attribute, it will stores its current value as the saved value. When an attribute is frozen it can still be changed, but when the attribute will be saved it will take the frozen value rather than the current one.
+		 @param frozen If true the attribute will be frozen, if false it will be unfrozen.
+		 */
+		void freeze(bool frozen);
+        
+        //! Read the attribute in a dico.
+        /** The function reads the attribute in a dico.
+         @param dico The dico.
+         */
+        void read(scDico dico);
 		
         //! Set the whole behavior flags field of the attribute.
         /** The function sets the whole behavior flags field of the attribute.
@@ -312,19 +316,6 @@ namespace Kiwi
 		 @param disable If true, the attribute will be notify changes, if false it won't notify changes.
 		 */
 		void setNotifier(bool notifier) noexcept;
-        
-        //! Freezes or unfreezes the attribute.
-		/** If you freeze an attribute, it will stores its current value as the saved value. When an attribute is frozen it can still be changed, but when the attribute will be saved it will take the frozen value rather than the current one.
-		 @param frozen If true the attribute will be frozen, if false it will be unfrozen.
-		 */
-		void freeze(bool frozen);
-        
-        //! Read the attribute in a dico.
-        /** The function reads the attribute in a dico.
-         @param dico The dico.
-		 @see write
-         */
-        virtual void read(scDico dico);
         
     public:
         // ================================================================================ //
