@@ -42,7 +42,7 @@ namespace Kiwi
     /**
      The box is a graphical box that aims to be instantiate in a page.
      */
-	class Box : public Attribute::Manager, public enable_shared_from_this<Box>
+	class Box : public Attr::Manager, public enable_shared_from_this<Box>
     {
     public:
         class Listener;
@@ -86,7 +86,7 @@ namespace Kiwi
         class Outlet
         {
         public:
-            struct Connection
+            struct Link
             {
                 sBox m_box;
                 size_t          m_index;
@@ -98,7 +98,7 @@ namespace Kiwi
                 Signal  = 1
             };
         
-            vector<Connection>  m_conns;
+            vector<Link>  m_conns;
             const Type          m_type;
             const string        m_description;
             
@@ -119,10 +119,11 @@ namespace Kiwi
             
         const wPage                 m_page;
         const sTag                  m_name;
-        const atomic_ulong          m_id;
-        const atomic_long           m_type;
+        const atomic_ulong          m_type;
         
+        atomic_ulong                m_id;
         sTag                        m_text;
+        
         vector<unique_ptr<Outlet>>  m_outlets;
         vector<unique_ptr<Inlet>>   m_inlets;
         size_t                      m_stack_count;
@@ -136,7 +137,7 @@ namespace Kiwi
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Box(sPage page, string const& name, long type = 1<<0);
+        Box(sPage page, string const& name, unsigned long type = 1<<0);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
@@ -148,29 +149,38 @@ namespace Kiwi
          */
         static sBox create(sPage page, sDico dico);
         
-        //! Retrieve the page that manages the box.
-        /** The function retrieves the page that manages the box.
-         @return The page that manages the box.
-         */
-        sPage getPage() const noexcept;
-        
         //! Retrieve the instance that manages the page of the box.
         /** The function retrieves the instance that manages the page of the box.
          @return The instance that manages the page of the box.
          */
         sInstance getInstance() const noexcept;
         
+        //! Retrieve the page that manages the box.
+        /** The function retrieves the page that manages the box.
+         @return The page that manages the box.
+         */
+        inline sPage getPage() const noexcept
+        {
+            return m_page.lock();
+        }
+        
         //! Retrieve the name of the box.
         /** The function retrieves the name of the box as a tag.
          @return The name of the box as a tag.
          */
-        sTag getName() const noexcept;
+        inline sTag getName() const noexcept
+        {
+            return m_name;
+        }
         
         //! Retrieve the text of the box.
         /** The function retrieves the text of the box as a tag.
          @return The text of the box as a tag.
          */
-        sTag getText() const noexcept;
+        inline sTag getText() const noexcept
+        {
+            return m_text;
+        }
         
         //! Retrieve the text of the box.
         /** The function retrieves the text of the box as a tag.
@@ -185,43 +195,107 @@ namespace Kiwi
         /** The function retrieves the type of the box.
          @return The type of the box as a tag.
          */
-        long getType() const noexcept;
+        inline unsigned long getType() const noexcept
+        {
+            return m_type;
+        }
         
         //! Retrieve the expression of the box.
         /** The function retrieves the expression of the box as a string.
          @return The expression of the box as a string.
          */
-        virtual string getExpression() const noexcept;
+        virtual string getExpression() const noexcept
+        {
+            return "error";
+        }
         
-        //! Write the box in a dico.
-        /** The function writes the box in a dico.
-         @param dico The dico.
+        //! Retrieve the number of inlets of the box.
+        /** The functions retrieves the number of inlets of the box.
+         @return The number of inlets.
          */
-        void write(sDico dico) const;
-
+        inline unsigned long getNumberOfInlets() const noexcept
+        {
+            return (unsigned long)m_inlets.size();
+        }
+        
+        //! Retrieve the description of an inlet.
+        /** The functions retrieves the description of an inlet.
+         @param index The inlet index.
+         @return The description.
+         */
+        inline string getInletDescription(unsigned long index) const noexcept
+        {
+            if(index < m_inlets.size())
+            {
+                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_description;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        
+        //! Retrieve the number of outlets of the box.
+        /** The functions retrieves the number of outlets of the box.
+         @return The number of outlets.
+         */
+        inline unsigned long getNumberOfOutlets() const noexcept
+        {
+            return (unsigned long)m_outlets.size();
+        }
+        
+        //! Retrieve the description of an outlet.
+        /** The functions retrieves the description of an outlet.
+         @param index The index of the outlet.
+         @return The descrition.
+         */
+        inline string getOutletDescription(unsigned long index) const noexcept
+        {
+            if(index < m_outlets.size())
+            {
+                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_description;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
          @param elements    A list of elements to pass.
          */
-        virtual bool receive(size_t index, ElemVector const& elements);
+        virtual bool receive(size_t index, ElemVector const& elements)
+        {
+            return false;
+        }
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
          @param event    A mouse event.
          */
-        virtual bool receive(Event::Mouse const& event);
+        virtual bool receive(Event::Mouse const& event)
+        {
+            return false;
+        }
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
          @param event    A keyboard event.
          */
-        virtual bool receive(Event::Keyboard const& event);
+        virtual bool receive(Event::Keyboard const& event)
+        {
+            return false;
+        }
         
         //! The paint method that should be override.
         /** The function shoulds draw some stuff in the doodle.
          @param doodle    A doodle to draw.
          */
-        virtual bool draw(Doodle& doodle) const;
+        virtual bool draw(Doodle& doodle) const
+        {
+            return false;
+        }
         
         //! The draw method.
         /** The function performs some stuff before to call the paint method.
@@ -229,31 +303,20 @@ namespace Kiwi
          */
         void paint(Doodle& d, bool edit = 0, bool selected = 0) const;
         
-        //! Retrieve the number of inlets of the box.
-        /** The functions retrieves the number of inlets of the box.
-         @return The number of inlets.
+        //! Set the id of the box.
+        /** The function sets the id of the box.
+         @param id The id of the box.
          */
-        size_t getNumberOfInlets() const noexcept;
+        inline void setId(unsigned long _id) noexcept
+        {
+            m_id = _id;
+        }
         
-        //! Retrieve the description of an inlet.
-        /** The functions retrieves the description of an inlet.
-         @param index The inlet index.
-         @return The description.
+        //! Write the box in a dico.
+        /** The function writes the box in a dico.
+         @param dico The dico.
          */
-        string getInletDescription(size_t index) const noexcept;
-        
-        //! Retrieve the number of outlets of the box.
-        /** The functions retrieves the number of outlets of the box.
-         @return The number of outlets.
-         */
-        size_t  getNumberOfOutlets() const noexcept;
-        
-        //! Retrieve the description of an outlet.
-        /** The functions retrieves the description of an outlet.
-         @param index The index of the outlet.
-         @return The descrition.
-         */
-        string getOutletDescription(size_t index) const noexcept;
+        void write(sDico dico) const;
         
     protected:
         
@@ -333,11 +396,11 @@ namespace Kiwi
         
     public:
         
-        static bool compatible(scConnection connection) noexcept;
+        static bool compatible(scLink link) noexcept;
         
-        static bool connect(scConnection connection) noexcept;
+        static bool connect(scLink link) noexcept;
         
-        static bool disconnect(scConnection connection) noexcept;
+        static bool disconnect(scLink link) noexcept;
         
         // ================================================================================ //
         //                                  BOX LISTENER                                    //
@@ -443,11 +506,11 @@ namespace Kiwi
     //                                      CONNECTION                                  //
     // ================================================================================ //
     
-    //! The connection owns to a page and is used to create a patch lines.
+    //! The link owns to a page and is used to create a patch lines.
     /**
-     The connection is opaque, you shouldn't have to use it at all.
+     The link is opaque, you shouldn't have to use it at all.
      */
-    class Connection
+    class Link
     {
     private:
         
@@ -461,39 +524,39 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Connection(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept;
+        Link(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept;
         
         //! The destructor.
         /** You should never use this method.
          */
-        ~Connection();
+        ~Link();
         
-        //! The connection creation method.
-        /** The function allocates a connection.
+        //! The link creation method.
+        /** The function allocates a link.
          @param from    The output box.
-         @param outlet  The outlet of the connection.
+         @param outlet  The outlet of the link.
          @param to      The input box.
-         @param inlet   The inlet of the connection.
-         @return The connection.
+         @param inlet   The inlet of the link.
+         @return The link.
          */
-        static shared_ptr<Connection> create(const sBox from, const size_t outlet, const sBox to, const size_t inlet);
+        static sLink create(const sBox from, const size_t outlet, const sBox to, const size_t inlet);
         
-        //! The connection creation method.
-        /** The function allocates a connection with a page and a dico.
+        //! The link creation method.
+        /** The function allocates a link with a page and a dico.
          @param page    The page that owns the boxes.
-         @param dico    The dico that defines the connection.
-         @return The connection.
+         @param dico    The dico that defines the link.
+         @return The link.
          */
-        static shared_ptr<Connection> create(scPage page, scDico dico);
+        static sLink create(scPage page, scDico dico);
         
-        //! The connection creation method with another connection but change one of the boxes with another one.
-        /** The function allocates a connection with another connection.
-         @param connect The other connection.
+        //! The link creation method with another link but change one of the boxes with another one.
+        /** The function allocates a link with another link.
+         @param connect The other link.
          @param oldbox  The old box to replace.
          @param newbox  The newbox box that replace.
-         @return The connection.
+         @return The link.
          */
-        static shared_ptr<Connection> create(const shared_ptr<Connection> connect, const sBox oldbox, const sBox newbox)
+        static sLink create(const sLink connect, const sBox oldbox, const sBox newbox)
         {
             if(connect->getBoxFrom() == oldbox)
             {
@@ -513,7 +576,7 @@ namespace Kiwi
         }
         
         //! Retrieve the output box.
-        /** The function retrieves the output box of the connection.
+        /** The function retrieves the output box of the link.
          @return The output box.
          */
         inline sBox getBoxFrom() const noexcept
@@ -522,7 +585,7 @@ namespace Kiwi
         }
         
         //! Retrieve the input box.
-        /** The function retrieves the input box of the connection.
+        /** The function retrieves the input box of the link.
          @return The input box.
          */
         inline sBox getBoxTo() const noexcept
@@ -530,27 +593,27 @@ namespace Kiwi
             return m_to.lock();
         }
         
-        //! Retrieve the outlet of the connection.
-        /** The function retrieves the outlet of the connection.
-         @return The outlet of the connection.
+        //! Retrieve the outlet of the link.
+        /** The function retrieves the outlet of the link.
+         @return The outlet of the link.
          */
         inline size_t getOutletIndex() const noexcept
         {
             return m_outlet;
         }
         
-        //! Retrieve the inlet of the connection.
-        /** The function retrieves the inlet of the connection.
-         @return The inlet of the connection.
+        //! Retrieve the inlet of the link.
+        /** The function retrieves the inlet of the link.
+         @return The inlet of the link.
          */
         inline size_t getInletIndex() const noexcept
         {
             return m_inlet;
         }
         
-        //! Retrieve the inlet of the connection.
-        /** The function retrieves the inlet of the connection.
-         @return The inlet of the connection.
+        //! Retrieve the inlet of the link.
+        /** The function retrieves the inlet of the link.
+         @return The inlet of the link.
          */
         inline bool isValid() const noexcept
         {
@@ -560,7 +623,7 @@ namespace Kiwi
         }
         
         //! Write the page in a dico.
-        /** The function writes the connection in a dico.
+        /** The function writes the link in a dico.
          @param dico The dico.
          */
         void write(sDico dico) const noexcept

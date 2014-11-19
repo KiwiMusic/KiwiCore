@@ -30,29 +30,23 @@ namespace Kiwi
     //                                      ATTRIBUTE                                   //
     // ================================================================================ //
     
-	Attribute::Attribute(sTag name,
-						 ElemVector defaultValue,
-						 string const& label,
-						 Style style,
-						 string const& category,
-						 long behavior) :
+	Attr::Attr(sTag name, sTag label, sTag category, Style style, long behavior, ElemVector defaultValues) :
     m_name(name),
-	m_default_value(defaultValue),
     m_label(label),
-    m_style(style),
     m_category(category),
-    m_behavior(0 | behavior),
-	m_frozen(false)
+    m_style(style),
+	m_default_values(defaultValues),
+    m_behavior(0 | behavior)
     {
-		;
+		setToDefault();
     }
     
-    Attribute::~Attribute()
+    Attr::~Attr()
     {
-        m_frozen_value.clear();
+        m_frozen_values.clear();
     }
 	
-	void Attribute::setBehavior(long behavior)
+	void Attr::setBehavior(long behavior) noexcept
 	{
 		if(m_behavior != behavior)
 		{
@@ -60,7 +54,7 @@ namespace Kiwi
 		}
 	}
 	
-	void Attribute::setInvisible(const bool b) noexcept
+	void Attr::setInvisible(const bool b) noexcept
 	{
 		if (b)
 			m_behavior &= ~Invisible;
@@ -68,15 +62,7 @@ namespace Kiwi
 			m_behavior |= Invisible;
 	}
 	
-	void Attribute::setOpaque(const bool b) noexcept
-	{
-		if (b)
-			m_behavior &= ~Opaque;
-		else
-			m_behavior |= Opaque;
-	}
-	
-	void Attribute::setDisabled(const bool b) noexcept
+	void Attr::setDisabled(const bool b) noexcept
 	{
 		if (!b)
 			m_behavior &= ~Disabled;
@@ -84,7 +70,7 @@ namespace Kiwi
 			m_behavior |= Disabled;
 	}
 
-	void Attribute::setSaveable(const bool b) noexcept
+	void Attr::setSaveable(const bool b) noexcept
 	{
 		if (!b)
 			m_behavior &= ~NotSaveable;
@@ -92,7 +78,7 @@ namespace Kiwi
 			m_behavior |= NotSaveable;
 	}
 	
-	void Attribute::setNotifyChanges(const bool b) noexcept
+	void Attr::setNotifyChanges(const bool b) noexcept
 	{
 		if (!b)
 			m_behavior &= ~NotNotifyChanges;
@@ -100,41 +86,76 @@ namespace Kiwi
 			m_behavior |= NotNotifyChanges;
 	}
 	
-	void Attribute::freeze(const bool frozen)
+	void Attr::freeze(const bool frozen)
 	{
-		m_frozen = frozen;
-		
-		if (m_frozen)
-			get(m_frozen_value);
+		if(frozen)
+        {
+			get(m_frozen_values);
+        }
 		else
-			m_frozen_value.clear();
+        {
+			m_frozen_values.clear();
+        }
 	}
 	
-	void Attribute::reset()
+	void Attr::setToDefault()
 	{
-		set(m_default_value);
+        if(!m_default_values.empty())
+        {
+            set(m_default_values);
+        }
 	}
 	
-    void Attribute::write(sDico dico) const noexcept
+    void Attr::setToFrozen()
     {
-		if(!(m_behavior & Behavior::NotSaveable) || m_frozen)
+        if(!m_frozen_values.empty())
+        {
+            set(m_frozen_values);
+        }
+    }
+    
+    void Attr::write(sDico dico) const noexcept
+    {
+		if(!(m_behavior & Behavior::NotSaveable) || !m_frozen_values.empty())
 		{
-			ElemVector elements;
-			
-			if(!m_frozen)
+			if(m_frozen_values.empty() && !(m_behavior & Behavior::NotSaveable))
+            {
+                ElemVector elements;
 				get(elements);
+                if(elements.size() == m_default_values.size())
+                {
+                    for(ElemVector::size_type i = 0; i < elements.size(); i++)
+                    {
+                        if(elements[i] != m_default_values[i])
+                        {
+                            dico->set(m_name, elements);
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    dico->set(m_name, elements);
+                }
+            }
 			else
-				elements = m_frozen_value;
-				
-			dico->set(m_name, elements);
+            {
+                dico->set(m_name, m_frozen_values);
+                dico->append(Tag::frozen_attributes, m_name);
+            }
 		}
     }
     
-    void Attribute::read(scDico dico)
+    void Attr::read(scDico dico)
     {
         ElemVector elements;
         dico->get(m_name, elements);
         set(elements);
+        dico->get(Tag::frozen_attributes, elements);
+        if(find(elements.begin(), elements.end(), m_name) != elements.end())
+        {
+            freeze(true);
+        }
     }
 	
 	// ================================================================================ //
@@ -142,316 +163,268 @@ namespace Kiwi
 	// ================================================================================ //
 	
 	
-	Attribute::Manager::Manager() noexcept
+	Attr::Manager::Manager() noexcept
 	{
 		;
 	}
 	
-	Attribute::Manager::~Manager()
+	Attr::Manager::~Manager()
 	{
-		m_attributes.clear();
-		m_listeners.clear();
+		m_attrs.clear();
 	}
 	
-	sAttribute Attribute::Manager::getAttribute(sTag name) const noexcept
+	void Attr::Manager::addAttribute(sAttr attr)
 	{
-		auto it = m_attributes.find(name);
-		if(it != m_attributes.end() && !(it->second->isInvisible()))
-			return it->second;
-		else
+		if(attr)
+		{
+            lock_guard<mutex> guard(m_attrs_mutex);
+			m_attrs[attr->getName()] = attr;
+		}
+	}
+	
+	void Attr::Manager::removeAttribute(sAttr attr)
+	{
+		if(attr)
+		{
+            lock_guard<mutex> guard(m_attrs_mutex);
+            auto it = m_attrs.find(attr->getName());
+            if(it != m_attrs.end())
+            {
+                m_attrs.erase(it);
+            }
+		}
+	}
+	
+	void Attr::Manager::removeAttribute(sTag name)
+	{
+        if(name)
+        {
+            lock_guard<mutex> guard(m_attrs_mutex);
+            auto it = m_attrs.find(name);
+            if(it != m_attrs.end())
+            {
+                m_attrs.erase(it);
+            }
+        }
+	}
+	
+	bool Attr::Manager::setAttributeValue(sTag name, ElemVector const& elements)
+	{
+        lock_guard<mutex> guard(m_attrs_mutex);
+        auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+        {
+            sAttr attr = it->second;
+            if(attr && !attr->isDisabled())
+            {
+                attr->set(elements);
+            }
+        }
+		return false;
+	}
+	
+	bool Attr::Manager::getAttributeValue(sTag name, ElemVector& elements)
+	{
+        elements.clear();
+        lock_guard<mutex> guard(m_attrs_mutex);
+		auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+        {
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->get(elements);
+                return true;
+            }
+        }
+		return false;
+	}
+    
+    unsigned long Attr::Manager::getNumberOfAttributes() const noexcept
+    {
+        unsigned long size = 0;
+        lock_guard<mutex> guard(m_attrs_mutex);
+        for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
+        {
+            sAttr attr = it->second;
+            if(attr && !attr->isInvisible())
+            {
+                size++;
+            }
+        }
+        return size;
+    }
+    
+    void Attr::Manager::getAttributeNames(vector<sTag>& names) const noexcept
+	{
+        names.clear();
+        lock_guard<mutex> guard(m_attrs_mutex);
+		for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
+		{
+            sAttr attr = it->second;
+            if(attr && !attr->isInvisible())
+            {
+                names.push_back(attr->getName());
+            }
+		}
+	}
+	
+	bool Attr::Manager::hasAttribute(sTag name) const noexcept
+	{
+        lock_guard<mutex> guard(m_attrs_mutex);
+        auto it = m_attrs.find(name);
+        if(it != m_attrs.end())
+        {
+            sAttr attr = it->second;
+            if(attr && !attr->isInvisible())
+            {
+                return true;
+            }
+        }
+		return false;
+	}
+	
+	sAttr Attr::Manager::getAttribute(sTag name) const noexcept
+	{
+        lock_guard<mutex> guard(m_attrs_mutex);
+		auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+        {
+            sAttr attr = it->second;
+            if(attr && !attr->isInvisible())
+            {
+                return attr;
+            }
 			return nullptr;
-	}
-	
-	void Attribute::Manager::addAttribute(sAttribute attr)
-	{
-		if (attr != nullptr)
-		{
-			sTag attrname = attr->getName();
-			
-			m_attributes[attrname] = attr;
-			
-			triggerNotification(attr, NotificationType::AttrAdded);
-		}
-	}
-	
-	/*
-	void Attribute::Manager::addAttributeSet(shared_ptr<AttributeSet> attrset)
-	{
-		if (attrset)
-		{
-			vector<sTag> names = attrset->getAttributeNames();
-			
-			for (int i=0; i < names.size(); i++)
-				addAttribute(attrset->getAttribute(names[i]));
-		}
-	}
-	*/
-	
-	void Attribute::Manager::removeAttribute(sAttribute attr)
-	{
-		if (attr != nullptr)
-		{
-			sTag attrname = attr->getName();
-			m_attributes.erase(attrname);
-		}
-	}
-	
-	void Attribute::Manager::removeAttribute(sTag name)
-	{
-		removeAttribute(getAttribute(name));
-	}
-	
-	bool Attribute::Manager::setValue(sTag name, ElemVector const& elements)
-	{
-		sAttribute attr = getAttribute(name);
-		
-		if (attr != nullptr && !attr->isOpaque())
-		{
-			attr->set(elements);
-			if(attr->shouldNotifyChanges())
-				triggerNotification(attr, NotificationType::ValueChanged);
-			
-			return true;
-		}
-		
-		return false;
-	}
-	
-	bool Attribute::Manager::getValue(sTag name, ElemVector& elements, ElemVector const& defaultValue)
-	{
-		sAttribute attr = getAttribute(name);
-		
-		if (attr != nullptr && !attr->isOpaque())
-		{
-			attr->get(elements);
-			return true;
-		}
+        }
 		else
-		{
-			elements = defaultValue;
-		}
-		
-		return false;
+        {
+			return nullptr;
+        }
 	}
 	
-	void Attribute::Manager::receive(ElemVector const& elements)
+	void Attr::Manager::write(sDico dico) const noexcept
 	{
-		if(elements.size() && elements[0].isTag())
+        lock_guard<mutex> guard(m_attrs_mutex);
+		for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
 		{
-			auto it = m_attributes.find((sTag)elements[0]);
-			if(it != m_attributes.end())
-			{
-				ElemVector nelements;
-				nelements.assign(elements.begin()+1, elements.end());
-				
-				sAttribute attr = it->second;
-				
-				if(!attr->isOpaque())
-				{
-					attr->set(nelements);
-					
-					if(attr->shouldNotifyChanges())
-						triggerNotification(attr, NotificationType::ValueChanged);
-				}
-			}
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->write(dico);
+            }
 		}
 	}
 	
-	void Attribute::Manager::triggerNotification(sAttribute attr, NotificationType type)
+	void Attr::Manager::read(scDico dico) noexcept
 	{
-		for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+        lock_guard<mutex> guard(m_attrs_mutex);
+		for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
+        {
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->read(dico);
+            }
+        }
+	}
+	
+	void Attr::Manager::setAttributeBehavior(sTag name, Attr::Behavior behavior)
+	{
+        lock_guard<mutex> guard(m_attrs_mutex);
+		auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
 		{
-			if(!it->expired())
-				it->lock()->attributeChanged(this, attr, type);
+            sAttr attr = it->second;
+            if(attr)
+            {
+                attr->setBehavior(behavior);
+            }
 		}
 	}
-	
-	void Attribute::Manager::resetAllToDefault()
-	{
-		for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
-			if (it->second)
-				it->second->reset();
-	}
-	
-	vector<sTag> Attribute::Manager::getAttributeNames() const noexcept
-	{
-		sAttribute attr;
-		vector<sTag> names;
-		
-		for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
+    
+    unsigned long Attr::Manager::getNumberOfCategories() const noexcept
+    {
+        vector<sTag> names;
+        getCategoriesNames(names);
+        return (unsigned long)names.size();
+    }
+    
+    void Attr::Manager::getCategoriesNames(vector<sTag>& names) const noexcept
+    {
+        names.clear();
+        lock_guard<mutex> guard(m_attrs_mutex);
+		for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
 		{
-			attr = it->second;
-			if (!attr->isInvisible())
-				names.push_back(attr->getName());
+            sAttr attr = it->second;
+            if(attr && !attr->isInvisible())
+            {
+                if(find(names.begin(), names.end(), attr->getCategory()) != names.end())
+                {
+                    names.push_back(attr->getCategory());
+                }
+            }
 		}
-		
-		return names;
-	}
-	
-	bool Attribute::Manager::hasKey(sTag name) const noexcept
-	{
-		return (m_attributes.find(name) != m_attributes.end());
-	}
-	
-	long Attribute::Manager::getNumberOfCategories() const
-	{
-		return getCategories().size();
-	}
-	
-	vector<string> Attribute::Manager::getCategories() const
-	{
-		sAttribute attr;
-		vector<string> categories;
-		string category;
-		
-		for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
+    }
+    
+    bool Attr::Manager::hasCategory(sTag name) const noexcept
+    {
+        lock_guard<mutex> guard(m_attrs_mutex);
+        for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
 		{
-			attr = it->second;
-			
-			if (!attr->isInvisible())
-			{
-				category = attr->getCategory();
-				
-				// add category in categories if it's not allready there :
-				if (find(categories.begin(), categories.end(), category) == categories.end())
-					categories.push_back(category);
-			}
-		}
-		
-		return categories;
-	}
+            sAttr attr = it->second;
+            if(attr && !attr->isInvisible() && attr->getCategory() == name)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 	
-	void Attribute::Manager::bind(weak_ptr<Attribute::Manager::Listener> listener)
+	void Attr::Manager::getCategory(sTag name, vector<sAttr>& attrs) const
 	{
-		m_listeners.insert(listener);
-	}
-	
-	void Attribute::Manager::unbind(weak_ptr<Attribute::Manager::Listener> listener)
-	{
-		m_listeners.erase(listener);
-	}
-	
-	void Attribute::Manager::write(sDico dico) const noexcept
-	{
-		sAttribute attr;
-		ElemVector frozen_attributes_names = {};
-		
-		for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
+        attrs.clear();
+        lock_guard<mutex> guard(m_attrs_mutex);
+        for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
 		{
-			attr = it->second;
-			
-			if(attr && attr->isSaveable())
-			{
-				attr->write(dico);
-				
-				if(attr->isFrozen())
-					frozen_attributes_names.push_back(attr->getName());
-			}
-		}
-		
-		if(!frozen_attributes_names.empty())
-			dico->set(Tag::frozen_attributes, frozen_attributes_names);
-	}
-	
-	void Attribute::Manager::read(scDico dico) noexcept
-	{
-		for(auto it = m_attributes.begin(); it != m_attributes.end(); ++it)
-			it->second->read(dico);
-			
-		if(dico->has(Tag::frozen_attributes))
-		{
-			ElemVector frozenAttrs;
-			dico->get(Tag::frozen_attributes, frozenAttrs);
-			
-			for(int i=0; i < frozenAttrs.size(); i++)
-			{
-				if(frozenAttrs[i].isTag())
-					getAttribute(frozenAttrs[i])->freeze(true);
-			}
+            sAttr attr = it->second;
+            if(attr && !attr->isInvisible() && attr->getCategory() == name)
+            {
+                attrs.push_back(attr);
+            }
 		}
 	}
-	
-	/*
-	void Attribute::Manager::removeAttributesWithNonCommonKey(sAttributeSet attrset)
-	{
-		if (attrset)
-		{
-			vector<sTag> names = getAttributeNames();
-			
-			for (int i=0; i < names.size(); i++)
-				if (!attrset->hasKey(names[i]))
-					removeAttribute(names[i]);
-		}
-	}
-	*/
-	
-	void Attribute::Manager::setAttributeAppearance(sTag name, string const& label, Attribute::Style style, string const& category)
-	{
-		auto it = m_attributes.find(name);
-		if(it != m_attributes.end())
-		{
-			it->second->setLabel(label);
-			it->second->setStyle(style);
-			it->second->setCategory(category);
-		}
-	}
-	
-	void Attribute::Manager::setAttributeBehavior(sTag name, Attribute::Behavior behavior)
-	{
-		auto it = m_attributes.find(name);
-		if(it != m_attributes.end())
-		{
-			it->second->setBehavior(behavior);
-		}
-	}
-	
-	// ================================================================================ //
-	//                                 ATTRIBUTE BOOL									//
-	// ================================================================================ //
-	
-	AttributeBool::AttributeBool(sTag name,
-								 int defaultValue,
-								 string const& label,
-								 string const& category,
-								 long behavior) :
-	Attribute(name, {defaultValue}, label, Attribute::Style::Toggle, category, behavior)
-	{
-		set({defaultValue});
-	}
-	
-	void AttributeBool::set(ElemVector const& elements)
-	{
-		if(elements.size() && elements[0].isNumber())
-		{
-			m_value = ((int)elements[0] != 0);
-		}
-	}
-	
-	void AttributeBool::get(ElemVector& elements) const noexcept
-	{
-		elements = {m_value};
-	}
+    
+    // ================================================================================ //
+    //                                 ATTRIBUTE BOOL									//
+    // ================================================================================ //
+    
+    void AttrBool::get(ElemVector& elements) const noexcept
+    {
+        elements = {(long)m_value};
+    }
+    
+    void AttrBool::set(ElemVector const& elements)
+    {
+        if(!elements.empty() && elements[0].isNumber())
+        {
+            m_value = (bool)((long)elements[0]);
+        }
+    }
 
     // ================================================================================ //
     //                                 ATTRIBUTE LONG									//
     // ================================================================================ //
     
-	AttributeLong::AttributeLong(sTag name,
-								 long defaultValue,
-								 string const& label,
-								 string const& category,
-								 long behavior)
-	: Attribute(name, {defaultValue}, label, Attribute::Style::Number, category, behavior)
+    void AttrLong::set(ElemVector const& elements)
     {
-    }
-    
-    void AttributeLong::set(ElemVector const& elements)
-    {
-        if(elements.size() && (elements[0].isNumber()))
+        if(!elements.empty() && elements[0].isNumber())
+        {
             m_value = elements[0];
+        }
     }
     
-    void AttributeLong::get(ElemVector& elements) const noexcept
+    void AttrLong::get(ElemVector& elements) const noexcept
     {
         elements = {m_value};
     }
@@ -460,26 +433,15 @@ namespace Kiwi
 	//                                 ATTRIBUTE DOUBLE									//
 	// ================================================================================ //
 	
-	AttributeDouble::AttributeDouble(sTag name,
-									 double defaultValue,
-									 string const& label,
-									 string const& category,
-									 Attribute::Style style,
-									 long behavior) :
-		Attribute(name, {defaultValue}, label, style, category, behavior)
+    void AttrDouble::set(ElemVector const& elements)
     {
-		set({defaultValue});
-    }
-    
-    void AttributeDouble::set(ElemVector const& elements)
-    {
-        if(elements.size() && elements[0].isNumber())
+        if(!elements.empty() && elements[0].isNumber())
         {
             m_value = elements[0];
         }
     }
     
-    void AttributeDouble::get(ElemVector& elements) const noexcept
+    void AttrDouble::get(ElemVector& elements) const noexcept
     {
         elements = {m_value};
     }
@@ -487,26 +449,16 @@ namespace Kiwi
 	// ================================================================================ //
 	//                                 ATTRIBUTE TAG									//
 	// ================================================================================ //
-	
-	AttributeTag::AttributeTag(sTag name,
-							   string defaultValue,
-							   string const& label,
-							   string const& category,
-							   long behavior) :
-		Attribute(name, {defaultValue}, label, Attribute::Style::Text, category, behavior)
-    {
-		set({defaultValue});
-    }
     
-    void AttributeTag::set(ElemVector const& elements)
+    void AttrTag::set(ElemVector const& elements)
     {
-        if(elements.size() && elements[0].isTag())
+        if(!elements.empty() && elements[0].isTag())
         {
             m_value = elements[0];
         }
     }
     
-    void AttributeTag::get(ElemVector& elements) const noexcept
+    void AttrTag::get(ElemVector& elements) const noexcept
     {
         elements = {m_value};
     }
@@ -515,73 +467,43 @@ namespace Kiwi
 	//                                 ATTRIBUTE ENUM									//
 	// ================================================================================ //
 	
-	AttributeEnum::AttributeEnum(sTag name,
-								 ElemVector const& enumValues,
-								 long defaultValue,
-								 string const& label,
-								 string const& category,
-								 long behavior) :
-	Attribute(name, {defaultValue}, label, Attribute::Style::Enum, category, behavior),
-	m_enum_values(enumValues)
+	void AttrEnum::set(ElemVector const& elements)
 	{
-		set({defaultValue});
-	}
-	
-	void AttributeEnum::set(ElemVector const& elements)
-	{
-		if(elements.size() && elements[0].isTag())
+		if(!elements.empty())
 		{
-			if (elements[0].isNumber())
+			if(elements[0].isNumber())
 			{
-				m_value = clip((long)elements[0], (long)0, (long)m_enum_values.size());
+				m_value = clip((ElemVector::size_type)elements[0], (ElemVector::size_type)0, m_enum_values.size());
 			}
 			else if(elements[0].isTag())
 			{
 				sTag tag = elements[0];
-				for (int i=0; i < m_enum_values.size(); i++)
-				{
-					if (m_enum_values[i] == tag)
-					{
-						m_value = i;
-						return;
-					}
-				}
+                m_value = clip(find_position(m_enum_values, tag), (ElemVector::size_type)0, m_enum_values.size());
 			}
 		}
 	}
 	
-	void AttributeEnum::get(ElemVector& elements) const noexcept
+	void AttrEnum::get(ElemVector& elements) const noexcept
 	{
-		elements = {m_value};
+		elements = {(long)m_value};
 	}
 	
 	// ================================================================================ //
 	//                                 ATTRIBUTE COLOR									//
 	// ================================================================================ //
 	
-	AttributeColor::AttributeColor(sTag name,
-								   ElemVector const& defaultValue,
-								   string const& label,
-								   string const& category,
-								   long behavior)
-	: Attribute(name, defaultValue, label, Attribute::Style::Color, category, behavior)
+	void AttrColor::set(ElemVector const& elements)
 	{
-		set(defaultValue);
-	}
-	
-	void AttributeColor::set(ElemVector const& elements)
-	{
-		const size_t nelems = elements.size();
-		for(size_t i = 0; i < 4; i++)
+		for(ElemVector::size_type i = 0; i < 4 && i < elements.size(); i++)
 		{
-			if (nelems > i && elements[i].isNumber())
+			if(elements[i].isNumber())
+            {
 				m_value[i] = clip((double)elements[i], 0., 1.);
-			else
-				m_value[i] = (i < 3) ? 0.f : 1.f; // default is black with full alpha color
+            }
 		}
 	}
 	
-	void AttributeColor::get(ElemVector& elements) const noexcept
+	void AttrColor::get(ElemVector& elements) const noexcept
 	{
 		elements = {m_value[0], m_value[1], m_value[2], m_value[3]};
 	}
@@ -590,30 +512,18 @@ namespace Kiwi
 	//                                 ATTRIBUTE RECT									//
 	// ================================================================================ //
 	
-	AttributeRect::AttributeRect(sTag name,
-								 ElemVector const& defaultValue,
-								 string const& label,
-								 string const& category,
-								 long behavior)
-	: Attribute(name, defaultValue, label, Attribute::Style::List, category, behavior)
+	void AttrRect::set(ElemVector const& elements)
 	{
-		set(defaultValue);
-	}
-	
-	void AttributeRect::set(ElemVector const& elements)
-	{
-		const size_t nelems = elements.size();
-		
-		for(size_t i = 0; i < 4; i++)
+		for(ElemVector::size_type i = 0; i < 4 && i < elements.size(); i++)
 		{
-			if (nelems > i && elements[i].isNumber())
+			if(elements[i].isNumber())
+            {
 				m_value[i] = (double)elements[i];
-			else
-				m_value[i] = 0.f;
+            }
 		}
 	}
 	
-	void AttributeRect::get(ElemVector& elements) const noexcept
+	void AttrRect::get(ElemVector& elements) const noexcept
 	{
 		elements = {m_value[0], m_value[1], m_value[2], m_value[3]};
 	}
@@ -622,28 +532,18 @@ namespace Kiwi
 	//                                 ATTRIBUTE POINT									//
 	// ================================================================================ //
 	
-	AttributePoint::AttributePoint(sTag name,
-								 ElemVector const& defaultValue,
-								 string const& label,
-								 string const& category,
-								 long behavior)
-	: Attribute(name, defaultValue, label, Attribute::Style::List, category, behavior)
+	void AttrPoint::set(ElemVector const& elements)
 	{
-		set(defaultValue);
-	}
-	
-	void AttributePoint::set(ElemVector const& elements)
-	{
-		const size_t nelems = elements.size();
-		
-		for(size_t i = 0; i < 2; i++)
+		for(ElemVector::size_type i = 0; i < 2 && i < elements.size(); i++)
 		{
-			if (nelems > i && elements[i].isNumber())
+			if(elements[i].isNumber())
+            {
 				m_value[i] = (double)elements[i];
+            }
 		}
 	}
 	
-	void AttributePoint::get(ElemVector& elements) const noexcept
+	void AttrPoint::get(ElemVector& elements) const noexcept
 	{
 		elements = {m_value[0], m_value[1]};
 	}

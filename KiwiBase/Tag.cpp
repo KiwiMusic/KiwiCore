@@ -26,14 +26,15 @@
 
 namespace Kiwi
 {
-    map<string, sTag> Tag::m_tags;
+    unordered_map<string, sTag> Tag::m_tags;
     mutex Tag::m_mutex;
     
+    sTag Tag::empty       = Tag::create("");
     sTag Tag::text        = Tag::create("text");
     sTag Tag::box         = Tag::create("box");
     sTag Tag::boxes       = Tag::create("boxes");
-    sTag Tag::connection  = Tag::create("connection");
-    sTag Tag::connections = Tag::create("connections");
+    sTag Tag::link  = Tag::create("link");
+    sTag Tag::links = Tag::create("links");
     sTag Tag::id          = Tag::create("id");
     sTag Tag::from        = Tag::create("from");
     sTag Tag::to          = Tag::create("to");

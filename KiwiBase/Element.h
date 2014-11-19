@@ -66,15 +66,15 @@ namespace Kiwi
     private:
         struct Ele
         {
-            long    m_long      = 0;
-            double  m_double    = 0;
-            sTag    m_tag       = nullptr;
-            sBox    m_box       = nullptr;
-            sDico   m_dico      = nullptr;
+            long            m_long      = 0;
+            double          m_double    = 0;
+            sTag            m_tag       = nullptr;
+            sBox            m_box       = nullptr;
+            sDico           m_dico      = nullptr;
         };
         
-        Element::Type   m_type;
-        Ele             m_val;
+        Element::Type           m_type;
+        Ele                     m_val;
     public:
         
         //! Constructor.
@@ -381,6 +381,69 @@ namespace Kiwi
          @return true if the element hold the dico otherwise false.
          */
         bool operator==(sDico dico) const noexcept;
+        
+        //! Compare the element with another.
+        /** The function compares the element with another.
+         @param other The other element.
+         @return true if the elements differ otherwise false.
+         */
+        bool operator!=(const Element& other) const noexcept;
+        
+        //! Compare the element with an int value.
+        /** The function compares the element with an int value.
+         @param value   The int value.
+         @return true if the element differ from the int value otherwise false.
+         */
+        bool operator!=(const int value) const noexcept;
+        
+        //! Compare the element with a long value.
+        /** The function compares the element with a long.
+         @param value   The long value.
+         @return true if the element differ from the long value otherwise false.
+         */
+        bool operator!=(const long value) const noexcept;
+        
+        //! Compare the element with a float value.
+        /** The function compares the element with a float value.
+         @param value   The float value.
+         @return true if the element differ from the float value otherwise false.
+         */
+        bool operator!=(const float value) const noexcept;
+        
+        //! Compare the element with a double value.
+        /** The function compares the element with a double value.
+         @param value   The double value.
+         @return true if the element differ from the double value otherwise false.
+         */
+        bool operator!=(const double value) const noexcept;
+        
+        //! Compare the element with a string.
+        /** The function compares the element with a string.
+         @param tag   The string.
+         @return true if the element differ from the tag create with the string otherwise false.
+         */
+        bool operator!=(string const& tag) const noexcept;
+        
+        //! Compare the element with a tag.
+        /** The function compares the element with a tag.
+         @param value   The tag.
+         @return true if the element differ from the tag otherwise false.
+         */
+        bool operator!=(sTag tag) const noexcept;
+        
+        //! Compare the element with a box.
+        /** The function compares the element with a box.
+         @param box   The box.
+         @return true if the element differ from the box otherwise false.
+         */
+        bool operator!=(sBox box) const noexcept;
+        
+        //! Compare the element with a dico.
+        /** The function compares the element with a dico.
+         @param dico   The dico.
+         @return true if the element differ from the dico otherwise false.
+         */
+        bool operator!=(sDico dico) const noexcept;
     };
     
     string toString(Element const& __val);

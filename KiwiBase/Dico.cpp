@@ -138,7 +138,7 @@ namespace Kiwi
         auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
-            for(int i = 0; i < elements.size(); i++)
+            for(ElemVector::size_type i = 0; i < elements.size(); i++)
             {
                 it->second.push_back(elements[i]);
             }
@@ -360,7 +360,7 @@ namespace Kiwi
         bool state = false;
         ostringstream ss;
         pos++;
-        for(auto iter = text.cbegin()+pos; iter != text.cend(); iter++)
+        for(auto iter = text.cbegin()+(long)pos; iter != text.cend(); iter++)
         {
             ++pos;
             if(state)
@@ -422,10 +422,10 @@ namespace Kiwi
     
     bool getNextPosition(string const& text, string::size_type& pos, Element::Type type)
     {
-        char start = '{', end = '}';
+        char end = '}';
         if(type == Element::VECTOR)
         {
-            start = '['; end = ']';
+            end = ']';
         }
         
         if(pos == string::npos)

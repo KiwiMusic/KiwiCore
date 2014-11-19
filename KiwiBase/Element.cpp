@@ -271,12 +271,12 @@ namespace Kiwi
     
     bool Element::operator==(const float value) const noexcept
     {
-        return m_type == Element::LONG && m_val.m_double == (double)value;
+        return m_type == Element::DOUBLE && m_val.m_double == (double)value;
     }
     
     bool Element::operator==(const double value) const noexcept
     {
-        return m_type == Element::LONG && m_val.m_double == value;
+        return m_type == Element::DOUBLE && m_val.m_double == value;
     }
     
     bool Element::operator==(string const& tag) const noexcept
@@ -297,6 +297,74 @@ namespace Kiwi
     bool Element::operator==(sDico dico) const noexcept
     {
         return m_type == Element::DICO && m_val.m_dico == dico;
+    }
+    
+    bool Element::operator!=(const Element& other) const noexcept
+    {
+        if(m_type == other.m_type)
+        {
+            if(m_type == Element::LONG)
+            {
+                return m_val.m_long != other.m_val.m_long;
+            }
+            else if(m_type == Element::DOUBLE)
+            {
+                return  m_val.m_double != other.m_val.m_double;
+            }
+            else if(m_type == Element::TAG)
+            {
+                return m_val.m_tag != other.m_val.m_tag;
+            }
+            else if(m_type == Element::BOX)
+            {
+                return m_val.m_box != other.m_val.m_box;
+            }
+            else
+            {
+                return m_val.m_dico != other.m_val.m_dico;
+            }
+        }
+        return true;
+    }
+    
+    bool Element::operator!=(const int value) const noexcept
+    {
+        return m_type != Element::LONG || m_val.m_long != (long)value;
+    }
+    
+    bool Element::operator!=(const long value) const noexcept
+    {
+        return m_type != Element::LONG || m_val.m_long != value;
+    }
+    
+    bool Element::operator!=(const float value) const noexcept
+    {
+        return m_type != Element::DOUBLE && m_val.m_double != (double)value;
+    }
+    
+    bool Element::operator!=(const double value) const noexcept
+    {
+        return m_type != Element::DOUBLE && m_val.m_double != value;
+    }
+    
+    bool Element::operator!=(string const& tag) const noexcept
+    {
+        return m_type != Element::TAG && m_val.m_tag != Tag::create(tag);
+    }
+    
+    bool Element::operator!=(sTag tag) const noexcept
+    {
+        return m_type != Element::TAG && m_val.m_tag != tag;
+    }
+    
+    bool Element::operator!=(sBox box) const noexcept
+    {
+        return m_type != Element::BOX && m_val.m_box != box;
+    }
+    
+    bool Element::operator!=(sDico dico) const noexcept
+    {
+        return m_type != Element::DICO && m_val.m_dico != dico;
     }
     
     string toString(Element const& __val)

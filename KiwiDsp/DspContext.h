@@ -37,7 +37,7 @@ namespace Kiwi
     
     //! The dsp context manages a set of dsp nodes and builds the dsp chain.
     /**
-     The dsp context initializes a dsp chain with a set of boxes and connections. To create a dsp chain, first, you should setup the sample rate and the vector size, then add the boxes, then add the connections, then you have to compile the dsp context.
+     The dsp context initializes a dsp chain with a set of boxes and links. To create a dsp chain, first, you should setup the sample rate and the vector size, then add the boxes, then add the links, then you have to compile the dsp context.
      */
     class DspContext: public enable_shared_from_this<DspContext>
     {
@@ -107,17 +107,17 @@ namespace Kiwi
          */
         void removeBox(sBox box);
         
-        //! Add a connection to the dsp context.
-        /** The function adds a connection to the dsp context.
-         @param connection The connection to add.
+        //! Add a link to the dsp context.
+        /** The function adds a link to the dsp context.
+         @param link The link to add.
          */
-        void addConnection(shared_ptr<Connection> connection);
+        void addConnection(sLink link);
         
-        //! Remove a connection from the dsp context.
-        /** The function removes a connection from the dsp context.
-         @param box The connection to remove.
+        //! Remove a link from the dsp context.
+        /** The function removes a link from the dsp context.
+         @param box The link to remove.
          */
-        void removeConnection(shared_ptr<Connection> connection);
+        void removeConnection(sLink link);
         
         //! Add a process to the dsp context.
         /** The function adds a process to the dsp context.

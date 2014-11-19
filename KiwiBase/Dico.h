@@ -26,6 +26,7 @@
 
 #include "Element.h"
 
+// - Have to recheck all and threadsafe
 namespace Kiwi
 {
     // ================================================================================ //

@@ -88,13 +88,13 @@ namespace Kiwi
         }
     }
     
-    void DspContext::addConnection(shared_ptr<Connection> connection)
+    void DspContext::addConnection(sLink link)
     {
         int size = (int)m_nodes.size();
         shared_ptr<DspNode> nodeFrom, nodeTo;
         /*
-        sBox boxFrom = connection->getFrom();
-        sBox boxTo = connection->getTo();
+        sBox boxFrom = link->getFrom();
+        sBox boxTo = link->getTo();
         
         if(nodeFrom && nodeTo)
         {
@@ -105,23 +105,23 @@ namespace Kiwi
                 else if(m_nodes[i]->m_box == boxTo)
                     nodeTo = m_nodes[i];
                 
-                nodeFrom->addOutput(nodeTo, boxFrom->getOutletSignalIndex(connection->getOutletIndex()));
-                nodeTo->addInput(nodeFrom, boxTo->getInletSignalIndex(connection->getInletIndex()));
+                nodeFrom->addOutput(nodeTo, boxFrom->getOutletSignalIndex(link->getOutletIndex()));
+                nodeTo->addInput(nodeFrom, boxTo->getInletSignalIndex(link->getInletIndex()));
                 return;
             }
         }*/
         
     }
     
-    void DspContext::removeConnection(shared_ptr<Connection> connection)
+    void DspContext::removeConnection(sLink link)
     {
         /*
-        if(connection->isDsp())
+        if(link->isDsp())
         {
             int size = (int)m_nodes.size();
             shared_ptr<DspNode> nodeFrom, nodeTo;
-            sBox boxFrom = connection->getFrom();
-            sBox boxTo = connection->getTo();
+            sBox boxFrom = link->getFrom();
+            sBox boxTo = link->getTo();
             
             for(int i = 0; i < size; i++)
             {
@@ -132,8 +132,8 @@ namespace Kiwi
                 
                 if(nodeFrom && nodeTo)
                 {
-                    nodeFrom->removeOutput(nodeTo, connection->getOutletIndex());
-                    nodeTo->removeInput(nodeFrom, connection->getInletIndex());
+                    nodeFrom->removeOutput(nodeTo, link->getOutletIndex());
+                    nodeTo->removeInput(nodeFrom, link->getInletIndex());
                     return;
                 }
             }

@@ -8,7 +8,6 @@
 
 #include "../Kiwi.h"
 #include <time.h>
-#include "muParser.h"
 
 using namespace Kiwi;
 
@@ -126,7 +125,8 @@ int main (int argc, char* argv[])
             }
             page->write(dico);
             dico->write("test.kiwi", "/Users/Pierre/Desktop");
-            */
+             */
+            /*
             sBox nbox;
             dico->clear();
             dico->read("expr rint( i1 ) + rint( i2 )");
@@ -139,6 +139,7 @@ int main (int argc, char* argv[])
             nbox = page->createBox(dico);
             nbox->receive(0, {3.2});
             kiwi->removePage(page);
+             */
             /*
             double fVal = 3.8;
             mu::Parser p;

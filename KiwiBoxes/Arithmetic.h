@@ -25,7 +25,7 @@
 #define __DEF_KIWI_ARITHMETIC__
 
 #include "../KiwiBase/Core.h"
-#include "../ThirdParty/muParser/include/muParser.h"
+//#include "../ThirdParty/muParser/include/muParser.h"
 
 namespace Kiwi
 {
@@ -113,7 +113,7 @@ namespace Kiwi
         inline double compute() override{return pow(m_first, m_second);}
         AllocateElemVector(Power);
     };
-    
+    /*
     class Expression : public Box
     {
     private:
@@ -130,7 +130,7 @@ namespace Kiwi
             dico->get(Tag::create("arguments"), elements);
             return make_shared<Expression>(page, elements);
         }
-    };
+    };*/
     
     inline void arithmetic()
     {
@@ -140,7 +140,7 @@ namespace Kiwi
         Box::addPrototype(unique_ptr<Box>(new Divide()));
         Box::addPrototype(unique_ptr<Box>(new Modulo()));
         Box::addPrototype(unique_ptr<Box>(new Power()));
-        Box::addPrototype(unique_ptr<Box>(new Expression(nullptr, {})));
+        //Box::addPrototype(unique_ptr<Box>(new Expression(nullptr, {})));
     }
 }
 

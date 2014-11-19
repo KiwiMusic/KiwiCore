@@ -28,6 +28,8 @@
 #include "Tag.h"
 #include "Element.h"
 #include "Dico.h"
+#include "Event.h"
+#include "Doodle.h"
 
 namespace Kiwi
 {
@@ -37,51 +39,25 @@ namespace Kiwi
     //                                      ATTRIBUTE                                   //
     // ================================================================================ //
     
-    //! Attribute is an abstract class that holds a set of values of differents kinds and differents sizes.
+    //! The attribute is an abstract class that holds a set of values of differents kinds and differents sizes.
 	/** Holds a set of values of differents kinds and differents sizes.
      The attribute manages a set of values.
      */
-    class Attribute
+    class Attr
     {
     public:
-		
+		class Manager;
+        
 		/** Flags describing the behavior of the attribute.
-		 @see setInvisible, setOpaque, setDisabled, setSaveable, setNotifyChanges
+		 @see setInvisible, setDisabled, setSaveable, setNotifyChanges
 		 */
         enum Behavior
         {
-			/** Indicates that the attribute is visible
-			 @see Attribute::setInvisible
-			 */
-            Invisible			= (1<<0),
-			
-			/** Indicates that the attribute is opaque
-			 An opaque attribute will not be displayed in the Kiwi properties inspector
-			 @see Attribute::setOpaque
-			 */
-            Opaque				= (1<<1),
-			
-			/** Indicates that the attribute is disabled
-			 When the Disabled flag of an attribute is set it should be displayed in the Kiwi properties inspector,
-			 but any changes are not allowed
-			 @see Attribute::setOpaque
-			 */
-			Disabled			= (1<<2),
-			
-			/** Indicates that the attribute can not be frozen
-			 @see Attribute::freeze
-			 */
-			NotFreezable		= (1<<3),
-			
-			/** Indicates that the attribute is not saveable
-			 @see Attribute::setSaveable
-			 */
-            NotSaveable			= (1<<4),
-			
-			/** Indicates that the attribute should not broadcast a notify message when it is modified.
-			 @see Attribute::setNotifyChanges
-			 */
-            NotNotifyChanges	= (1<<5)
+            Invisible			= (1<<0),///< Indicates that the attribute is invisible.
+			Disabled			= (1<<1),///< Indicates that the attribute can't be changed.
+			NotFreezable		= (1<<2),///< Indicates that the attribute can not be frozen.
+            NotSaveable			= (1<<3),///< Indicates that the attribute is not saveable.
+            NotNotifyChanges	= (1<<4) ///< Indicates that the attribute should not notify its changes.
         };
         
 		/** Flags describing the display style of the attribute.
@@ -100,141 +76,162 @@ namespace Kiwi
 		};
 		
     private:
-        sTag            m_name;				///< The name of the attribute.
-		ElemVector		m_default_value;	///< The default value of the attribute.
-        string          m_label;			///< The label of the attribute.
-		Style			m_style;			///< The style of the attribute.
-		string          m_category;			///< A named category that the attribute fits into.
-        long            m_behavior;			///< The behavior of the attribute.
-		ElemVector		m_frozen_value;		///< The frozen value of the attribute.
-		bool			m_frozen;			///< Is the attribute currently frozen.
-
+        const sTag          m_name;				///< The name of the attribute.
+        const sTag          m_label;			///< The label of the attribute.
+        const sTag          m_category;			///< The category of the attribute.
+        const Style         m_style;			///< The style of the attribute.
+		const ElemVector    m_default_values;	///< The default value of the attribute.
+        atomic_long         m_behavior;			///< The behavior of the attribute.
+		ElemVector          m_frozen_values;    ///< The frozen value of the attribute.
+        
     public:
 		
         //! Constructor.
         /** Allocate and initialize the member values.
 		 @param name		The name of the attribute.
 		 @param label		A short description of the attribute in a human readable style.
-		 @param style		The style of the attribute specified in the Attribute::Style enum.
+		 @param style		The style of the attribute specified in the Attr::Style enum.
 		 @param category	A named category that the attribute fits into.
-		 @param behavior	A combination of the flags specified in the Attribute::Behavior enum,
+		 @param behavior	A combination of the flags specified in the Attr::Behavior enum,
 							which define the attribute's behavior.
          */
-        Attribute(sTag name,
-				  ElemVector defaultValue = {},
-                  string const& label = string(),
-				  Style style = Style::Default,
-                  string const& category = string(),
-                  long behavior = 0);
+        Attr(sTag name,  sTag label, sTag category, Style style = Style::Default, long behavior = 0, ElemVector defaultValues = {});
         
         //! Destructor.
         /** Clear the attribute.
          */
-        virtual ~Attribute();
-		
-		class Manager;
-		
-	public:
-		
-		//! Retrieves the values.
-		/** The Attribute subclasses must implement this function to retrieve the values.
-		 @param elements A vector of elements to fill.
-		 @see set
-		 */
-		virtual void get(ElemVector& elements) const noexcept = 0;
-		
-		//! Retrieves the default values.
-		/** Retrieve the default values.
-		 @param elements A vector of elements to fill.
-		 @see set
-		 */
-		void getDefault(ElemVector& elements) const noexcept		{elements = m_default_value;}
-		
-		//! Retrieves the enum values.
-		/** The Attribute subclasses than want to be displayed in an enum style must implement this function to retrieve enum values.
-		 @param elements A vector of elements to fill.
-		 @see AttributeEnum
-		 */
-		virtual void getEnumValues(ElemVector& elements) const		{elements.clear();}
+        virtual ~Attr();
 		
 		//! Retrieve the name of the attribute.
 		/** The function retrieves the name of the attribute.
 		 @return The name of the attribute.
 		 @see getLabel, getStyle, getCategory
 		 */
-		inline sTag getName() const noexcept						{return m_name;}
+		inline sTag getName() const noexcept
+        {
+            return m_name;
+        }
 		
 		//! Retrieve the attribute label.
 		/** The function retrieves the attribute label.
 		 @return The attribute label.
 		 @see getName, getStyle, getCategory
 		 */
-		inline string getLabel() const noexcept						{return m_label;}
+		inline sTag getLabel() const noexcept
+        {
+            return m_label;
+        }
+        
+        //! Retrieve the attribute category.
+		/** The function retrieves the attribute category.
+		 @return The attribute category.
+		 @see setCategory, getName, getLabel, getStyle
+		 */
+		inline sTag getCategory() const noexcept
+        {
+            return m_category;
+        }
 		
 		//! Retrieve the attribute style.
 		/** The function retrieves the attribute style.
 		 @return The attribute style.
 		 @see getName, getLabel, getCategory
 		 */
-		inline Style getStyle() const noexcept						{return m_style;}
-		
-		//! Retrieve the attribute category.
-		/** The function retrieves the attribute category.
-		 @return The attribute category.
-		 @see setCategory, getName, getLabel, getStyle
+		inline Style getStyle() const noexcept
+        {
+            return m_style;
+        }
+        
+        //! Retrieve if the attribute is invisible.
+		/** The function retrieves if the attribute is invisible.
+		 @return True if the attribute is invisible otherwise false.
+		 @see setInvisible, isDisabled, isSaveable, shouldNotifyChanges, getBehavior
 		 */
-		inline string getCategory() const noexcept					{return m_category;}
+		inline bool isInvisible() const noexcept
+        {
+            return m_behavior & Invisible;
+        }
 		
-		/** Is the attribute Invisible ?
-		 @return True if the attribute is invisible, false if it is visible.
-		 @see setInvisible, isOpaque, isDisabled, isSaveable, shouldNotifyChanges, getBehavior
+		//! Retrieve if the attribute is disable.
+		/** The function retrieves if the attribute is disable.
+		 @return True if the attribute is disabled otherwise false.
+		 @see setDisabled, isInvisible, isSaveable, shouldNotifyChanges, getBehavior
 		 */
-		inline bool isInvisible() const noexcept					{return (m_behavior & Invisible);}
+		inline bool isDisabled() const noexcept
+        {
+            return m_behavior & Disabled;
+        }
 		
-		/** Is the attribute opaque ?
-		 @return True if the attribute is opaque, false if not.
-		 @see setOpaque, isInvisible, isDisabled, isSaveable, shouldNotifyChanges, getBehavior
+		//! Retrieve if the attribute is saveable.
+		/** The function retrieves if the attribute is saveable.
+		 @return True if the attribute is saveable otherwise false.
+		 @see setDisabled, isInvisible, isSaveable, shouldNotifyChanges, getBehavior
 		 */
-		inline bool isOpaque() const noexcept						{return (m_behavior & Opaque);}
+		inline bool isSaveable() const noexcept
+        {
+            return !(m_behavior & NotSaveable);
+        }
 		
-		/** Is the attribute disabled ?
-		 @return True if the attribute is disabled, false if it is not.
-		 @see setDisabled, isInvisible, isOpaque, isSaveable, shouldNotifyChanges, getBehavior
+		//! Retrieve if the attribute should notify changes.
+		/** The function retrieves if the attribute should notify changes.
+		 @return True if the attribute should notify changes otherwise false.
+		 @see setDisabled, isInvisible, isSaveable, shouldNotifyChanges, getBehavior
 		 */
-		inline bool isDisabled() const noexcept						{return (m_behavior & Disabled);}
+		inline bool shouldNotifyChanges() const noexcept
+        {
+            return !(m_behavior & NotNotifyChanges);
+        }
 		
-		/** Is the attribute isSaveable ?
-		 @return True if the attribute is saveable, false if it is not.
-		 @see setDisabled, isInvisible, isOpaque, isSaveable, shouldNotifyChanges, getBehavior
-		 */
-		inline bool isSaveable() const noexcept						{return !(m_behavior & NotSaveable);}
-		
-		/** Should the attribute notify its changes ?
-		 @return True if the attribute should notify its changes, false if it should not.
-		 @see setDisabled, isInvisible, isOpaque, isSaveable, shouldNotifyChanges, getBehavior
-		 */
-		inline bool shouldNotifyChanges() const noexcept			{return !(m_behavior & NotNotifyChanges);}
-		
-		/** Retrieves the whole behavior flags field of the attribute.
-		 @param behavior	A combination of the flags specified in the Attribute::Behavior enum,
+        //! Retrieves the whole behavior flags field of the attribute.
+		/** The function retrieves the whole behavior flags field of the attribute.
+		 @param behavior	A combination of the flags specified in the Attr::Behavior enum,
 		 which define the attribute's behaviors.
-		 @see setInvisible, setOpaque, setDisabled, setSaveable, setNotifyChanges
+		 @see setInvisible, setDisabled, setSaveable, setNotifyChanges
 		 */
-		inline long getBehavior() const noexcept				{return m_behavior;}
+		inline long getBehavior() const noexcept
+        {
+            return m_behavior;
+        }
 		
 		//! Is the attribute currently frozen ?
 		/** Is the attribute currently frozen ?
 		 @return True if the attribute is frozen, false otherwise.
 		 @see freeze, getFrozenValue
 		 */
-		bool isFrozen() const noexcept {return m_frozen;}
-		
+		bool isFrozen() const noexcept
+        {
+            return !m_frozen_values.empty();
+        }
+        
+        //! Retrieves the default values.
+		/** Retrieve the default values.
+		 @param elements A vector of elements to fill.
+		 @see set
+		 */
+		inline void getDefaultValues(ElemVector& elements) const noexcept
+        {
+            elements = m_default_values;
+        }
+        
 		//! Retrieve the frozen value.
 		/** Retrieve the frozen value, if the attribute is not frozen the vector will be empty.
 		 @param elements A vector of Element to be replaced by the frozen value.
 		 @see freeze, isFrozen
 		 */
-		void getFrozenValue(ElemVector& elements) const noexcept	{elements = m_frozen_value;}
+		void getFrozenValues(ElemVector& elements) const noexcept
+        {
+            elements = m_frozen_values;
+        }
+        
+        //! Retrieves the enum values.
+		/** The Attr subclasses than want to be displayed in an enum style must implement this function to retrieve enum values.
+		 @param elements A vector of elements to fill.
+		 @see AttrEnum
+		 */
+		virtual void getEnumValues(ElemVector& elements) const
+        {
+            elements.clear();
+        }
 		
 		//! Attempts to write the attribute in a dico.
 		/** The function attempts to write the attribute in a dico.
@@ -242,56 +239,49 @@ namespace Kiwi
 		 @param dico The dico to write into.
 		 @see read
 		 */
-		virtual void write(sDico dico) const noexcept;
+		void write(sDico dico) const noexcept;
+        
+        //! Retrieves the values.
+		/** The Attr subclasses must implement this function to retrieve the values.
+		 @param elements A vector of elements to fill.
+		 @see set
+		 */
+		virtual void get(ElemVector& elements) const noexcept = 0;
 	
 	protected:
 		
 		//! Sets the values with a vector of elements.
 		/** The function sets the values with a vector of elements and resize the values if necessary.
-		 Attribute subclasses must implement this function
+		 Attr subclasses must implement this function
 		 @param elements The vector of elements.
 		 @see get
 		 */
 		virtual void set(ElemVector const& elements) = 0;
 		
-		//! Resets the attribute value to default.
-		/** Resets the attribute value to its default value.
+		//! Resets the attribute value to default values.
+		/** Resets the attribute value to its default values.
 		 @see set
 		 */
-		void reset();
-		
-		//! Sets the attribute label.
-		/** The function sets the attribute label.
-		 @param newLabel The new label of the attribute.
-		 @see getLabel
+		void setToDefault();
+        
+        //! Resets the attribute value to frozen values.
+		/** Resets the attribute value to its frozen values.
+		 @see set
 		 */
-		inline void setLabel(const string& newLabel) noexcept		{m_label = newLabel;}
+		void setToFrozen();
 		
-		//! Sets the attribute style.
-		/** The function sets the attribute style.
-		 @param newStyle The new style of the attribute.
-		 @see getStyle
+        /** An easy way to set the whole behavior flags field of the attribute.
+		 @param behavior	A combination of the flags specified in the Attr::Behavior enum,
+         which define the attribute's behaviors.
+		 @see setInvisible, setDisabled, setSaveable, setNotifyChanges
 		 */
-		inline void setStyle(Style newStyle) noexcept				{m_style = newStyle;}
-		
-		//! Sets the attribute category.
-		/** The function sets the attribute category.
-		 @param Category The new category of the attribute.
-		 @see tyle
-		 */
-		inline void setCategory(const string& newCategory) noexcept	{m_category = newCategory;}
-		
+		void setBehavior(long behavior) noexcept;
+        
 		/** An easy way to set or remove the Invisible bit in the attribute behavior flags field.
 		 @param isVisible If true, the attribute will be invisible, if false it will be visible.
-		 @see setOpaque, setDisabled, setSaveable, setNotifyChanges, setBehavior
+		 @see setDisabled, setSaveable, setNotifyChanges, setBehavior
 		 */
 		void setInvisible(const bool isInvisible) noexcept;
-		
-		/** An easy way to set or remove the Opaque bit in the attribute behavior flags field.
-		 @param isOpaque If true, the attribute will be opaque, if false it will not.
-		 @see setInvisible, setDisabled, setSaveable, setNotifyChanges, setBehavior
-		 */
-		void setOpaque(const bool isOpaque) noexcept;
 		
 		/** An easy way to set or remove the Disabled bit in the attribute behavior flags field.
 		 @param isDisabled If true, the attribute will be disabled, if false it will not.
@@ -301,22 +291,15 @@ namespace Kiwi
 		
 		/** An easy way to set or remove the NotSaveable bit in the attribute behavior flags field.
 		 @param saveable If true, the attribute will be saved, if false it will not.
-		 @see setInvisible, setOpaque, setDisabled, setNotifyChanges, setBehavior
+		 @see setInvisible, setDisabled, setNotifyChanges, setBehavior
 		 */
 		void setSaveable(const bool saveable) noexcept;
 		
 		/** An easy way to set or remove the NotNotifyChanges bit in the attribute behavior flags field.
 		 @param shouldNotify If true, the attribute will broadcast a notify message to its listeners when changed, if false it will not.
-		 @see setInvisible, setOpaque, setDisabled, setSaveable, setBehavior
+		 @see setInvisible, setDisabled, setSaveable, setBehavior
 		 */
 		void setNotifyChanges(const bool shouldNotify) noexcept;
-		
-		/** An easy way to set the whole behavior flags field of the attribute.
-		 @param behavior	A combination of the flags specified in the Attribute::Behavior enum,
-							which define the attribute's behaviors.
-		 @see setInvisible, setOpaque, setDisabled, setSaveable, setNotifyChanges
-		 */
-		void setBehavior(long behavior);
         
         //! Read the attribute in a dico.
         /** The function reads the attribute in a dico.
@@ -337,149 +320,153 @@ namespace Kiwi
     
     //! The shared pointer of an attribute.
     /**
-     The sAttribute is shared pointer of an attribute.
+     The sAttr is shared pointer of an attribute.
      */
-    typedef shared_ptr<Attribute>         sAttribute;
+    typedef shared_ptr<Attr>         sAttr;
     
     // ================================================================================ //
-    //                                  ATTRIBUTE::MANAGER                              //
+    //                                  ATTRIBUTE MANAGER                               //
     // ================================================================================ //
 	
-	//! The attribute set manages a set of attributes.
-	/** The attribute set manages a set of attributes.
-	 @see Kiwi::Attribute, Kiwi::Tag, Kiwi::Element
-	 
-	 @todo	- trigger notifications
-			- function to determine if it is different that the default value
-			- only save if attr != default
+	//! The attribute manager manages a set of attributes.
+	/** The attribute manager manages a set of attributes, it allows the setting and the getting of their values and to retrieve them by name or by category.
+	 @see Attr
 	 */
-	class Attribute::Manager
+	class Attr::Manager
 	{
-	public:
-		class Listener;
-		
 	private:
-		map<sTag, sAttribute>       m_attributes;
-		unordered_set<weak_ptr<Listener>,
-		weak_ptr_hash<Listener>,
-		weak_ptr_equal<Listener>>   m_listeners;
-		
-		typedef shared_ptr<Attribute::Manager> sAttributeManager;
-		
+		unordered_map<sTag, sAttr>          m_attrs;
+        mutable mutex                       m_attrs_mutex;
+        
 	public:
 		
 		//! Constructor.
-		/** Creates a new attribute set.
+		/** Creates a new attribute manager.
 		 */
 		Manager() noexcept;
 		
 		//! Descrutor.
 		/** Free the attributes.
 		 */
-		virtual ~Manager();
+		~Manager();
+        
+    protected:
 		
-		//! Try to set an attribute value.
-		/** This method try to set the value of a named attribute.
-		 @param name		The name to find in the attribute set.
-		 @param elements    A list of elements to pass.
-		 @return			true if the attribute value has been set, false otherwise.
-		 @see getValue
+		//! Add an attribute.
+		/** The function adds an attribute .
+		 @param attr the attribute to add.
 		 */
-		bool setValue(sTag name, ElemVector const& elements);
+		void addAttribute(sAttr attr);
 		
-		//! Retrieves an attribute value.
-		/** This method try to retrieve the value of a named attribute.
-		 @param elements		A list of elements in which the attribute value will be filled.
-		 @param defaultValue	An optional default value to fill the \p elements
-		 if the getter method fail or is not accessible.
-		 @return true if the attribute value exists and is gettable, false otherwise.
-		 @see setValue
+		//! Remove an attribute.
+		/** The function removes an attribute.
+		 @param attr The attribute to remove.
 		 */
-		bool getValue(sTag name, ElemVector& elements, ElemVector const& defaultValue = {});
+		void removeAttribute(sAttr attr);
 		
-		//! The receive method that set the values of the attributes.
-		/** The function looks for the names of that match with the attributes and call the set methods if necessary.
-		 @param elements A list of elements to pass, first element must be the name of the attribute.
+		//! The an attribute.
+		/** This function removes an attribute.
+		 @param name The name of the attribute to remove.
 		 */
-		void receive(ElemVector const& elements);
+		void removeAttribute(sTag name);
 		
-		//! Resets all attributes value to default.
-		/** This method resets all attributes value to default.
-		 @see setValue
+		//! Set the attribute behavior.
+		/** The function sets the attribute behaviors.
+         @param name The name of the attribute.
+		 @param behavior The behavior of the attribute.
 		 */
-		void resetAllToDefault();
-		
-		//! Retrieves the number of attribute in the current set.
-		/** This method retrieves the number of attribute in the current set.
-		 @return The number of attribute in the current set.
+		void setAttributeBehavior(sTag name, Attr::Behavior behavior);
+        
+        //! Set the attributes values with a dico.
+		/** The function sets the attributes values with a dico.
+		 @param dico A dico.
 		 */
-		inline long getNumberOfAttributes() const noexcept			{return m_attributes.size();}
+		void read(scDico dico) noexcept;
+        
+    public:
 		
-		//! Retrieves all the names of the current attribute set.
-		/** This method retrieves all the names of the current attribute set.
-		 @return A vector of Tag containing the attribute names;
+        //! Retrieve the number of attributes.
+		/** This function retrieves the numbers of attributes. The attributes invisibles won't be counted.
+		 @return The number of attributes.
 		 */
-		vector<sTag> getAttributeNames() const noexcept;
+		unsigned long getNumberOfAttributes() const noexcept;
 		
-		//! Checks if a given key exists in the attribute set.
-		/** The method checks if a given key exists in the attribute set.
-		 @param name The name to find in the attribute set.
-		 @return true if an attribute is set with the passed in key, false otherwise.
+		//! Retrieve the names of the attributes.
+		/** This function retrieves the names of the attributes. The name attributes invisibles won't be retrieved.
+		 @param names A vector of tags that will contain the names of the attributes;
 		 */
-		bool hasKey(sTag name) const noexcept;
+		void getAttributeNames(vector<sTag>& names) const noexcept;
 		
-		//! Retrieves the number of attribute categories in the current set.
-		/** This method retrieves the number of attribute categories in the current set.
-		 @return The number of attribute categories in the current set.
-		 */
-		long getNumberOfCategories() const;
-		
-		//! Retrieves all the categories of the current attribute set.
-		/** This method retrieves all the categories of the current attribute set.
-		 @return A vector of category name
-		 */
-		vector<string> getCategories() const;
-		
-		//! Retrieve an attribute.
-		/** The function retrieves an attribute.
+		//! Check if a given attribute exist.
+		/** The function checks if a given attribute exist. If the attribute is invisible the function returns false.
 		 @param name The name of the attribute.
-		 @return The attribute or nullptr if the key doesn't exist.
+		 @return true if an attribute exist, otherwise false.
 		 */
-		sAttribute getAttribute(sTag name) const noexcept;
+		bool hasAttribute(sTag name) const noexcept;
+        
+        //! Retrieve an attribute.
+		/** The function retrieves an attribute. If the attribute is invisible the function returns a pointer null.
+		 @param name The name of the attribute.
+		 @return The attribute or null if the attribute doesn't exist.
+		 */
+		sAttr getAttribute(sTag name) const noexcept;
+        
+		//! Set the values of an attribute.
+		/** The function sets the value of an attribute.
+		 @param name		The name of the attribute.
+		 @param elements    A vector of elements to pass.
+		 @return true if the attribute value has setted its values, otherwise false.
+		 @see getAttributeValue
+		 */
+		bool setAttributeValue(sTag name, ElemVector const& elements);
 		
-		//! Writes the whole attributes in a dico.
-		/** This method writes the whole attributes in a Dico.
-		 @param dico A dico std::shared_ptr.
-		 @see Kiwi::Dico, read
+		//! Get the values of an attribute.
+		/** The function gets the values of an attribute.
+         @param name        The name of the attribute.
+		 @param elements    A vector of elements to pass.
+		 @return true if the attribute value retrieved its values, otherwise false.
+		 @see setAttrValue
+		 */
+		bool getAttributeValue(sTag name, ElemVector& elements);
+		
+		//! Retrieve the number of attribute categories.
+		/** The function retrieves the number of attribute categories. If a category have only invisibles attributes, the category won't be counted.
+		 @return The number of attribute categories.
+		 */
+		unsigned long getNumberOfCategories() const noexcept;
+        
+        //! Retrieve the names of the categories.
+		/** The function retrieves the names of the categories. If a category have only invisibles attributes, the name of the category won't be retrieved.
+		 @param A vector of tag containing the names of the categories.
+		 */
+		void getCategoriesNames(vector<sTag>& names) const noexcept;
+        
+        //! Check if a category exist.
+		/** The function checks if a category exist.  If a category have only invisibles attributes, the function returns false.
+		 @param name The name of the category.
+		 @return true if the category exist, otherwise false.
+		 */
+		bool hasCategory(sTag name) const noexcept;
+		
+		//! Retrieve the attributes of a category.
+		/** The function retrieves the attributes of a category. If an attribute is invisible, the attribute won't be retrieved.
+         @param name The name of the category.
+		 @param attrs A vector of attributes to pass.
+		 */
+		void getCategory(sTag name, vector<sAttr>& attrs) const;
+		
+		//! Write the attributes in a dico.
+		/** This function writes the attributes in a dico.
+		 @param dico A dico.
 		 */
 		void write(sDico dico) const noexcept;
 		
-		//! Removes attributes on this current set if they are not present in an other AttributeSet.
-		/** This method removes attributes on this current set if they are not present in an other AttributeSet.
-		 This method is particulary suitable to get only the common properties of multiples AttributeSet.
-		 @param attrset An attribute set to compare with.
-		 */
-		void removeAttributesWithNonCommonKey(shared_ptr<Manager> attrset);
-		
 		// ================================================================================ //
-		//								ATRIBUTESET::LISTENER                               //
+		//								ATTRIBUTE MANAGER LISTENER                          //
 		// ================================================================================ //
 		
-		/** Flags describing the type of the notification
-		 @see Attribute::Manager::Listener
-		 */
-		enum NotificationType
-		{
-			AttrAdded = 0,		///< Indicates that an attribute has been added.
-			AttrRemoved,		///< Indicates that an attribute has been removed.
-			ValueChanged,		///< Indicates that an attribute value has changed.
-			AppearanceChanged,	///< Indicates that the appearance of the attribute has changed (style, category, label..).
-			BehaviorChanged		///< Indicates that the behavior of an attribute has changed.
-		};
-		
-		//! The attribute listener is a virtual class that can be binded to an AttributeSet to be notified of the attributes changes.
-		/** The attribute listener is a very light class that allows to be notified of the attributes modification.
-			To
+		//! The attribute manager listener is a virtual class that can be binded to an attribute manager to be notified of various changes.
+		/** The attribute manager listener is a very light class that allows to be notified of the attributes modification.
 		 */
 		class Listener
 		{
@@ -487,423 +474,245 @@ namespace Kiwi
 			virtual ~Listener() {}
 			
 			//! Receive the notification that an attribute has changed.
-			/** Sublass of Attribute::Manager::Listener must implement this virtual method to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
-			 @param manager		The Attribute::Manager that manages the attribute.
+			/** Sublass of Attr::Manager::Listener must implement this virtual function to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+			 @param manager		The Attr::Manager that manages the attribute.
 			 @param attr		The attribute that has been modified.
-			 @param type		The type of notification as specified in the Attribute::Manager::NotificationType enum,
+			 @param type		The type of notification as specified in the Attr::Manager::NotificationType enum,
 			 */
-			virtual void attributeChanged(Manager* manager, sAttribute attr, NotificationType type) = 0;
+			virtual void attributeChanged(Manager* manager, sAttr attr) = 0;
 		};
-		
-		//! Adds a listener to be called when this AttributeSet changes.
-		/** This method adds a listener to be called when this AttributeSet changes. \n
-		 If the listener is already there, the function doesn't do anything.
-		 @param listener  The pointer of the attribute set listener to bind.
-		 @see unbind()
-		 */
-		void bind(weak_ptr<Listener> listener);
-		
-		//! Removes a previously-registered listener.
-		/** This method removes a previously-registered listener. \n
-		 If the listener is not binded, the function doesn't do anything.
-		 @param listener  The pointer of the attribute set listener to unbind.
-		 @see bind()
-		 */
-		void unbind(weak_ptr<Listener> listener);
-		
-	protected:
-		
-		//! Receive the notification that an attribute has changed.
-		/** Sublass of Attribute::Manager can implement this virtual method to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
-		 @param attr		The attribute that has been modified.
-		 @param type		The type of notification as specified in the Attribute::Manager::NotificationType enum,
-		 */
-		virtual void attributeChanged(sAttribute attr, NotificationType type) {};
-		
-		//! Sets the attributes value with a dico.
-		/** This method sets the attributes value with a dico.
-		 @param dico The dico.
-		 */
-		void read(scDico dico) noexcept;
-		
-		//! Attribute maker.
-		/** This function creates and adds an attribute to the attribute factory.
-		 */
-		template<class ObjectClass, class ...Args> void addAttribute(Args&& ...arguments)
-		{
-			sAttribute attr = make_shared<ObjectClass>(forward<Args>(arguments)...);
-			m_attributes[attr->getName()] = attr;
-		}
-		
-		//! Adds an attribute to the current set.
-		/** This function adds an attribute to the attribute set.
-		 @param attr the attribute to add.
-		 */
-		void addAttribute(sAttribute attr);
-		
-		//! Adds a set of attributes to the current set.
-		/** This function adds a set of attributes to the current set.
-		 @param attr the attribute set to add.
-		 */
-		//void addAttributeSet(shared_ptr<AttributeSet> attrset);
-		
-		//! Removes an attribute from the current set.
-		/** This function removes an attribute from the current attribute set.
-		 @param attr The attribute to remove.
-		 */
-		void removeAttribute(sAttribute attr);
-		
-		//! Removes an attribute from the current set.
-		/** This function removes an attribute from the current attribute set.
-		 @param name The name of the attribute to remove.
-		 */
-		void removeAttribute(sTag name);
-		
-		//! Sets the label, the style and the category of an attribute.
-		/** The function set the label, the style and the category of an attribute.
-		 @param name The name of the attribute.
-		 @param label The label of the attribute.
-		 @param style The style of the attribute.
-		 @param category The category of the attribute.
-		 */
-		void setAttributeAppearance(sTag name, string const& label, Attribute::Style style, string const& category);
-		
-		//! Sets the attribute behavior.
-		/** The function sets the attribute behaviors.
-		 @param behavior The behavior of the attribute.
-		 */
-		void setAttributeBehavior(sTag name, Attribute::Behavior behavior);
-		
-	private:
-		
-		//! @internal Trigger notification to subclasses and listeners.
-		void triggerNotification(sAttribute attr, NotificationType type);
 	};
-	
-	//! The shared pointer of an attribute set.
-	/**
-	 The sAttributeSet is shared pointer of an attribute set.
-	 */
-	typedef shared_ptr<Attribute::Manager>         sAttributeManager;
     
     // ================================================================================ //
     //                                      ATTRIBUTE TYPED                             //
     // ================================================================================ //
-	
-    //! The AttributeBool is an Attribute that holds a boolean value.
-	/** Holds a boolean value
-	 Its default display style is obviously an Attribute::Style::Toggle.
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param defaultValue	The default value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum,
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
-	 */
-	class AttributeBool : public Attribute
-	{
-	private:
-		bool m_value;
-	public:
-		AttributeBool(sTag name,
-					  int defaultValue = 0,
-					  string const& label = string(),
-					  string const& category = string(),
-					  long behavior = 0);
-		virtual ~AttributeBool() {};
-		void get(ElemVector& elements) const noexcept;
-		void set(ElemVector const& elements) override;
-	};
     
-	//! The AttributeLong is an Attribute that holds a long value.
-	/** Holds a long value.
-	 Its default display style is obviously an Attribute::Style::Number
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param defaultValue	The default value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum,
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
+    //! The bool attribute is an attribute that holds a boolean value.
+    /** The bool attribute holds a boolean value. Its default display style is obviously an Attr::Style::Toggle.
+     @see Attr.
+     */
+    class AttrBool : public Attr
+    {
+    private:
+        bool m_value;
+    public:
+        AttrBool(sTag name, sTag label, sTag category, long behavior = 0, bool default_value = 0) :
+        Attr(name, label, category, Attr::Style::Toggle, behavior, {(long)default_value}) {;}
+        ~AttrBool() {};
+        void get(ElemVector& elements) const noexcept;
+        void set(ElemVector const& elements) override;
+    };
+
+    //! The bool attribute is an attribute that holds a long value.
+    /** The bool attribute holds a long value. Its default display style is obviously an Attr::Style::Number
+	 @see Attr.
 	 */
-    class AttributeLong : public Attribute
+    class AttrLong : public Attr
     {
     private:
         long m_value;
     public:
-		AttributeLong(sTag name,
-					  long defaultValue = 0,
-					  string const& label = string(),
-					  string const& category = string(),
-					  long behavior = 0);
-		virtual ~AttributeLong() {};
+		AttrLong(sTag name, sTag label, sTag category, long behavior = 0, long default_value = 0) :
+        Attr(name, label, category, Attr::Style::Number, behavior, {default_value}) {;}
+		~AttrLong() {};
         void get(ElemVector& elements) const noexcept;
         void set(ElemVector const& elements) override;
     };
 	
-	//! The AttributeDouble is an Attribute that holds a double value.
-	/** Holds a double value, its default display style will be a Attribute::Style::Number
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param defaultValue	The default value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum,
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
+    //! The bool attribute is an attribute that holds a double value.
+    /** The bool attribute holds a double value. Its default display style is obviously an Attr::Style::Number
+	 @see Attr.
 	 */
-    class AttributeDouble : public Attribute
+    class AttrDouble : public Attr
     {
     private:
         double m_value;
     public:
-		AttributeDouble(sTag name,
-						double defaultValue = 0.f,
-						string const& label = string(),
-						string const& category = string(),
-						Attribute::Style style = Attribute::Style::Number,
-						long behavior = 0);
-		virtual ~AttributeDouble() {};
+		AttrDouble(sTag name, sTag label, sTag category, long behavior = 0, double default_value = 0) :
+        Attr(name, label, category, Attr::Style::Number, behavior, {default_value}) {;}
+		~AttrDouble() {};
         void get(ElemVector& elements) const noexcept;
         void set(ElemVector const& elements) override;
     };
 	
-	//! The AttributeTag is an Attribute that holds a Tag value.
-	/** Holds a Tag value, its default display style will be a Attribute::Style::Text
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param defaultValue	The default value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum,
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
+	//! The bool attribute is an attribute that holds a tag.
+    /** The bool attribute holds a tag. Its default display style is obviously an Attr::Style::Text
+	 @see Attr.
 	 */
-    class AttributeTag : public Attribute
+    class AttrTag : public Attr
     {
     private:
         sTag m_value;
     public:
-		AttributeTag(sTag name,
-					 string defaultValue = string(),
-					 string const& label = string(),
-					 string const& category = string(),
-					 long behavior = 0);
-		virtual ~AttributeTag() {};
+		AttrTag(sTag name, sTag label, sTag category, long behavior = 0, sTag default_value = 0) :
+        Attr(name, label, category, Attr::Style::Text, behavior, {default_value}) {;}
+		~AttrTag() {};
         void get(ElemVector& elements) const noexcept;
         void set(ElemVector const& elements) override;
     };
 	
-	//! The AttributeEnum is an Attribute that represent an enumeration.
-	/** It holds a long value that represent a position in the enumeration.
-	 The value can be set either by a number or a Tag, and will be clipped between 0 and enum size.
-	 Its default display style is obviously an Attribute::Style::Enum.
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param enumValues		The enum values.
-	 @param defaultValue	The default enum value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum, 
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
+	//! The enum attribute is an attribute that represent an enumeration.
+	/** The enum attribute holds a long value and represents a position in an enumeration. The value can be set either by a number or a Tag, and will be clipped between 0 and the size of the enumeration. Its default display style is obviously an Attr::Style::Enum.
+     @see Attr.
 	 */
-	class AttributeEnum : public Attribute
+	class AttrEnum : public Attr
 	{
 	private:
-		long		m_value;
-		ElemVector	m_enum_values;
+        ElemVector::size_type m_value;
+		ElemVector            m_enum_values;
 	public:
-		AttributeEnum(sTag name,
-					  ElemVector const& enumValues = {},
-					  long defaultValue = 0,
-					  string const& label = string(),
-					  string const& category = string(),
-					  long behavior = 0);
-		virtual ~AttributeEnum() {};
+		AttrEnum(sTag name, sTag label, sTag category, ElemVector const& enum_vals, long behavior = 0, Element const& default_value = 0) :
+        Attr(name, label, category, Attr::Style::Enum, behavior, {default_value}), m_enum_values(enum_vals) {;}
+		~AttrEnum() {};
 		void get(ElemVector& elements) const noexcept;
 		void set(ElemVector const& elements) override;
-		void getEnumValues(ElemVector& elements) const		{elements = m_enum_values;}
+		void getEnumValues(ElemVector& elements) const
+        {
+            elements = m_enum_values;
+        }
 	};
 	
-	//! The AttributeColor is an Attribute that holds a color value.
-	/** Holds a vector of double values suitable to represent a RGBA type color, \n
-	 its default display style will obviously be a Attribute::Style::Color.
-	 Each value of the vector will be clipped between 0. and 1.
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param defaultValue	The default color value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum,
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
+	//! The color attribute is an attribute that holds a color value.
+	/** The color attribute holds a four double values suitable to represent a RGBA type color. Its default display style will obviously be a Attr::Style::Color. Each value of the vector will be clipped between 0 and 1.
+	 @see Attr.
 	 */
-	class AttributeColor : public Attribute
+	class AttrColor : public Attr
 	{
 	private:
 		double m_value[4];
 	public:
-		AttributeColor(sTag name,
-					   ElemVector const& defaultValue = {0., 0., 0., 1.},
-					   string const& label = string(),
-					   string const& category = string(),
-					   long behavior = 0);
-		virtual ~AttributeColor(){};
+		AttrColor(sTag name, sTag label, sTag category, long behavior = 0, ElemVector const& default_value = {0., 0., 0., 1.}) :
+        Attr(name, label, category, Attr::Style::Color, behavior, {default_value}) {;}
+		~AttrColor(){};
 		void get(ElemVector& elements) const noexcept;
 		void set(ElemVector const& elements) override;
 	};
 	
-	//! The AttributeRect is an Attribute that is particulary suitable to represent a position and a size.
-	/** Holds a vector of double values suitable to represent a rectangle, \n
-	 its default display style will obviously be a Attribute::Style::List.
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param defaultValue	The default value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum,
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
+	//! The rectangle attribute is an attribute that is particulary suitable to represent a position and a size.
+	/** The rectangle attribute holds four double values suitable to represent a rectangle, its default display style will obviously be a Attr::Style::List.
+	 @see Attr
 	 */
-	class AttributeRect : public Attribute
+	class AttrRect : public Attr
 	{
 	private:
 		double m_value[4];
 	public:
-		AttributeRect(sTag name,
-					  ElemVector const& defaultValue = {0., 0., 0., 0.},
-					  string const& label = string(),
-					  string const& category = string(),
-					  long behavior = 0);
-		virtual ~AttributeRect() {};
+		AttrRect(sTag name, sTag label, sTag category, long behavior = 0, ElemVector const& default_value = {0., 0., 0., 0.}) :
+		Attr(name, label, category, Attr::Style::List, behavior, {default_value}) {;}
+		~AttrRect() {};
 		void get(ElemVector& elements) const noexcept;
 		void set(ElemVector const& elements) override;
 	};
 	
-	//! The AttributePoint is an Attribute that is particulary suitable to represent a position or a size.
-	/** Holds a vector of two double values suitable to represent a position or a size, \n
-	 its default display style will be an Attribute::Style::List.
-	 
-	 Creation parameters are as follows :
-	 @param name			The name of the attribute.
-	 @param defaultValue	The default value (optional).
-	 @param label			The label of the attribute (optional).
-	 @param category		The category of the attribute (optional).
-	 @param behavior		An optional combination of flags specified in the Attribute::Behavior enum,
-							defining the attribute's behaviors.
-	 
-	 @see Attribute::Manager::addAttribute
+	//! The point attribute is an attribute that is particulary suitable to represent a position.
+	/** The point attribute holds two double values suitable to represent a point, its default display style will obviously be a Attr::Style::List.
+	 @see Attr
 	 */
-	class AttributePoint : public Attribute
+	class AttrPoint : public Attr
 	{
 	private:
 		double m_value[2];
 	public:
-		AttributePoint(sTag name,
-					   ElemVector const& defaultValue = {0., 0.},
-					   string const& label = string(),
-					   string const& category = string(),
-					   long behavior = 0);
-		virtual ~AttributePoint() {};
+		AttrPoint(sTag name, sTag label, sTag category, long behavior = 0, ElemVector const& default_value = {0., 0.}) :
+		Attr(name, label, category, Attr::Style::List, behavior, {default_value}) {;}
+		~AttrPoint() {};
 		void get(ElemVector& elements) const noexcept;
 		void set(ElemVector const& elements) override;
 	};
     
-    class AttributeFont
+    //! The font attribute is the default attributes for the font.
+	/** Holds a vector of two double values suitable to represent a position or a size,
+	 *
+    class AttrFont
     {
     public:
-        class Name : public AttributeTag
+        class Name : public AttrTag
         {
         public:
-            Name() : AttributeTag(Tag::create("fontname"), "Arial", "Font Name", "Font"){};
+            Name() : AttrTag(Kiwi::Tag::create("fontname"),Kiwi::Tag::create("Font Name"), Kiwi::Tag::create("Font"), 0,  Kiwi::Tag::create("Arial")){};
             ~Name(){};
         };
         
-        class Size : public AttributeDouble
+        class Size : public AttrDouble
         {
         public:
-            Size() : AttributeDouble(Tag::create("fontsize"), 12, "Font Size", "Font"){};
+            Size() : AttrDouble(Tag::create("fontsize"), 12, "Font Size", "Font"){};
             ~Size(){};
         };
         
-        class Face : public AttributeEnum
+        class Face : public AttrEnum
         {
         public:
-            Face() : AttributeEnum(Tag::create("fontface"), {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")}, 0, "Font Style", "Font"){};
+            Face() : AttrEnum(Tag::create("fontface"), {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")}, 0, "Font Style", "Font"){};
             ~Face(){};
         };
         
-        class Justification : public AttributeEnum
+        class Justification : public AttrEnum
         {
         public:
-            Justification() : AttributeEnum(Tag::create("fontjustification"), {Tag::create("left"), Tag::create("center"), Tag::create("right")}, 0, "Justification", "Font"){};
+            Justification() : AttrEnum(Tag::create("fontjustification"), {Tag::create("left"), Tag::create("center"), Tag::create("right")}, 0, "Justification", "Font"){};
             ~Justification(){};
         };
+    private:
+        Font                        m_font;
+        shared_ptr<Name>            m_name;
+        shared_ptr<Face>            m_face;
+        shared_ptr<Size>            m_size;
+        shared_ptr<Justification>   m_just;
+    public:
+        
+        AttrFont();
+        ~AttrFont();
+        
+        Font getFont();
+        Justification getJustification();
     };
     
-    class AttributeAppearance
+    class AttrAppearance
     {
     public:
-        class Hidden : public AttributeBool
+        class Hidden : public AttrBool
         {
         public:
-            Hidden() : AttributeBool(Tag::create("hidden"), false, "Hide on Lock", "Appearance"){};
+            Hidden() : AttrBool(Tag::create("hidden"), false, "Hide on Lock", "Appearance"){};
             ~Hidden(){};
         };
         
-        class Presentation : public AttributeBool
+        class Presentation : public AttrBool
         {
         public:
-            Presentation() : AttributeBool(Tag::create("presentation"), false, "Include in Presentation", "Appearance"){};
+            Presentation() : AttrBool(Tag::create("presentation"), false, "Include in Presentation", "Appearance"){};
             ~Presentation(){};
         };
         
-        class Position : public AttributePoint
+        class Position : public AttrPoint
         {
         public:
-            Position() : AttributePoint(Tag::create("position"), {0., 0.}, "Position", "Appearance"){};
+            Position() : AttrPoint(Tag::create("position"), {0., 0.}, "Position", "Appearance"){};
             ~Position(){};
         };
         
-        class Size : public AttributePoint
+        class Size : public AttrPoint
         {
         public:
-            Size() : AttributePoint(Tag::create("size"), {100., 20.}, "Size", "Appearance"){};
+            Size() : AttrPoint(Tag::create("size"), {100., 20.}, "Size", "Appearance"){};
             ~Size(){};
         };
         
-        class PresentationPosition : public AttributePoint
+        class PresentationPosition : public AttrPoint
         {
         public:
-            PresentationPosition() : AttributePoint(Tag::create("presentation_pos"), {0., 0.}, "Presentation Position", "Appearance"){};
+            PresentationPosition() : AttrPoint(Tag::create("presentation_pos"), {0., 0.}, "Presentation Position", "Appearance"){};
             ~PresentationPosition(){};
         };
         
-        class PresentationSize : public AttributePoint
+        class PresentationSize : public AttrPoint
         {
         public:
-            PresentationSize() : AttributePoint(Tag::create("presentation_size"), {0., 0.}, "Presentation Size", "Appearance"){};
+            PresentationSize() : AttrPoint(Tag::create("presentation_size"), {0., 0.}, "Presentation Size", "Appearance"){};
             ~PresentationSize(){};
         };
-    };
+    };*/
 }
 
 

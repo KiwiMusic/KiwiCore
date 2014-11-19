@@ -26,7 +26,12 @@
 #include "../KiwiDsp/DspContext.h"
 
 namespace Kiwi
-{    
+{
+    
+    // ================================================================================ //
+    //                                      PAGE                                        //
+    // ================================================================================ //
+    
     Page::Page(sInstance instance) :
     m_instance(instance),
     m_dsp_context(make_shared<DspContext>()),
@@ -37,7 +42,7 @@ namespace Kiwi
     
     Page::~Page()
     {
-        m_connections.clear();
+        m_links.clear();
         m_boxes.clear();
     }
     
@@ -122,14 +127,14 @@ namespace Kiwi
                     oldbox->unbind(shared_from_this());
                     newbox->bind(shared_from_this());
                 
-                    m_connections_mutex.lock();
-                    for(vector<sConnection>::size_type i = 0; i < m_connections.size(); i++)
+                    m_links_mutex.lock();
+                    for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
                     {
-                        sConnection newconnect = Connection::create(m_connections[i], oldbox, newbox);
+                        sLink newconnect = Link::create(m_links[i], oldbox, newbox);
                         if(newconnect)
                         {
-                            sConnection oldconnect  = m_connections[i];
-                            m_connections[i]        = newconnect;
+                            sLink oldconnect  = m_links[i];
+                            m_links[i]        = newconnect;
                             
                             Box::disconnect(oldconnect);
                             
@@ -144,7 +149,7 @@ namespace Kiwi
                                 else
                                 {
                                     Page::sListener listener = (*it).lock();
-                                    listener->connectionHasBeenReplaced(shared_from_this(), oldconnect, newconnect);
+                                    listener->linkHasBeenReplaced(shared_from_this(), oldconnect, newconnect);
                                     ++it;
                                 }
                             }
@@ -168,7 +173,7 @@ namespace Kiwi
                         }
                     }
                     m_listeners_mutex.unlock();
-                    m_connections_mutex.unlock();
+                    m_links_mutex.unlock();
                 }
             }
         }
@@ -182,14 +187,14 @@ namespace Kiwi
         vector<sBox>::size_type position = find_position(m_boxes, box);
         if(position != m_boxes.size())
         {
-            m_connections_mutex.lock();
-            for(vector<sConnection>::size_type i = 0; i < m_connections.size(); i++)
+            m_links_mutex.lock();
+            for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
             {
-                if(m_connections[i]->getBoxFrom() == box || m_connections[i]->getBoxTo() == box)
+                if(m_links[i]->getBoxFrom() == box || m_links[i]->getBoxTo() == box)
                 {
-                    sConnection oldconnection = m_connections[i];
-                    Box::disconnect(oldconnection);
-                    m_connections.erase(m_connections.begin()+(long)i);
+                    sLink oldlink = m_links[i];
+                    Box::disconnect(oldlink);
+                    m_links.erase(m_links.begin()+(long)i);
                     --i;
                     m_listeners_mutex.lock();
                     auto it = m_listeners.begin();
@@ -202,14 +207,14 @@ namespace Kiwi
                         else
                         {
                             Page::sListener listener = (*it).lock();
-                            listener->connectionHasBeenRemoved(shared_from_this(), oldconnection);
+                            listener->linkHasBeenRemoved(shared_from_this(), oldlink);
                             ++it;
                         }
                     }
                     m_listeners_mutex.unlock();
                 }
             }
-            m_connections_mutex.unlock();
+            m_links_mutex.unlock();
             
             m_boxes.erase(m_boxes.begin()+(long)position);
             m_boxes_mutex.unlock();
@@ -238,13 +243,13 @@ namespace Kiwi
         }
     }
     
-    sConnection Page::addConnection(sConnection connection)
+    sLink Page::addConnection(sLink link)
     {
-        if(Box::connect(connection))
+        if(Box::connect(link))
         {
-            m_connections_mutex.lock();
-            m_connections.push_back(connection);
-            m_connections_mutex.unlock();
+            m_links_mutex.lock();
+            m_links.push_back(link);
+            m_links_mutex.unlock();
             
             m_listeners_mutex.lock();
             auto it = m_listeners.begin();
@@ -257,38 +262,38 @@ namespace Kiwi
                 else
                 {
                     Page::sListener listener = (*it).lock();
-                    listener->connectionHasBeenCreated(shared_from_this(), connection);
+                    listener->linkHasBeenCreated(shared_from_this(), link);
                     ++it;
                 }
             }
             m_listeners_mutex.unlock();
             
-            return connection;
+            return link;
         }
         return nullptr;
     }
     
-    sConnection Page::createConnection(scDico dico)
+    sLink Page::createConnection(scDico dico)
     {
         if(dico)
         {
-            sConnection connection = Connection::create(shared_from_this(), dico);
-            if(connection)
+            sLink link = Link::create(shared_from_this(), dico);
+            if(link)
             {
-                return addConnection(connection);
+                return addConnection(link);
             }
         }
         return nullptr;
     }
     
-    void Page::removeConnection(sConnection connection)
+    void Page::removeConnection(sLink link)
     {
-        lock_guard<mutex> guard(m_connections_mutex);
-        vector<sConnection>::size_type position = find_position(m_connections, connection);
-        if(position != m_connections.size())
+        lock_guard<mutex> guard(m_links_mutex);
+        vector<sLink>::size_type position = find_position(m_links, link);
+        if(position != m_links.size())
         {
-            Box::disconnect(m_connections[position]);
-            m_connections.erase(m_connections.begin()+(long)position);
+            Box::disconnect(m_links[position]);
+            m_links.erase(m_links.begin()+(long)position);
             
             m_listeners_mutex.lock();
             auto it = m_listeners.begin();
@@ -301,7 +306,7 @@ namespace Kiwi
                 else
                 {
                     Page::sListener listener = (*it).lock();
-                    listener->connectionHasBeenRemoved(shared_from_this(), connection);
+                    listener->linkHasBeenRemoved(shared_from_this(), link);
                     ++it;
                 }
             }
@@ -329,14 +334,14 @@ namespace Kiwi
                 }
             }
             
-            ElemVector connections;
-            dico->get(Tag::connections, connections);
-            for(vector<sConnection>::size_type i = 0; i < connections.size(); i++)
+            ElemVector links;
+            dico->get(Tag::links, links);
+            for(vector<sLink>::size_type i = 0; i < links.size(); i++)
             {
-                sDico subdico = connections[i];
+                sDico subdico = links[i];
                 if(subdico)
                 {
-                    subdico = subdico->get(Tag::connection);
+                    subdico = subdico->get(Tag::link);
                     if(subdico)
                     {
                         createConnection(subdico);
@@ -348,7 +353,7 @@ namespace Kiwi
     
     void Page::read(scDico dico)
     {
-        m_connections.clear();
+        m_links.clear();
         m_boxes.clear();
         append(dico);
     }
@@ -376,35 +381,35 @@ namespace Kiwi
             
             elements.clear();
       
-            m_connections_mutex.lock();
-            for(vector<sConnection>::size_type i = 0; i < m_connections.size(); i++)
+            m_links_mutex.lock();
+            for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
             {
-                sDico connection = Dico::create();
+                sDico link = Dico::create();
                 sDico subconnect = Dico::create();
-                if(connection && subconnect && m_connections[i]->isValid())
+                if(link && subconnect && m_links[i]->isValid())
                 {
-                    m_connections[i]->write(subconnect);
-                    connection->set(Tag::connection, subconnect);
-                    elements.push_back(connection);
+                    m_links[i]->write(subconnect);
+                    link->set(Tag::link, subconnect);
+                    elements.push_back(link);
                 }
             }
-            m_connections_mutex.unlock();
-            dico->set(Tag::connections, elements);
+            m_links_mutex.unlock();
+            dico->set(Tag::links, elements);
         }
     }
     
-    bool Page::startDsp(long samplerate, long vectorsize)
+    bool Page::startDsp(unsigned long samplerate, unsigned long vectorsize)
     {
         m_dsp_context->clear();
         m_dsp_context->setSamplerate(samplerate);
-        m_dsp_context->setVectorsize(vectorsize);
+        m_dsp_context->setVectorsize((long)vectorsize);
         
         for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
             m_dsp_context->addBox((*it));
         }
         
-        for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        for(auto it = m_links.begin(); it != m_links.end(); ++it)
         {
             m_dsp_context->addConnection((*it));
         }
@@ -442,15 +447,15 @@ namespace Kiwi
     
     void Page::inletHasBeenRemoved(sBox box, unsigned long index)
     {
-        lock_guard<mutex> guard(m_connections_mutex);
-        vector<Connection>::size_type max_size = m_connections.size();
-        for(vector<Connection>::size_type i = 0; i < max_size;)
+        lock_guard<mutex> guard(m_links_mutex);
+        vector<Link>::size_type max_size = m_links.size();
+        for(vector<Link>::size_type i = 0; i < max_size;)
         {
-            if(m_connections[i]->getBoxTo() == box && m_connections[i]->getInletIndex() == index)
+            if(m_links[i]->getBoxTo() == box && m_links[i]->getInletIndex() == index)
             {
-                sConnection oldconnect = m_connections[i];
+                sLink oldconnect = m_links[i];
                 Box::disconnect(oldconnect);
-                m_connections.erase(m_connections.begin()+(long)i);
+                m_links.erase(m_links.begin()+(long)i);
                 max_size--;
                 
                 m_listeners_mutex.lock();
@@ -464,7 +469,7 @@ namespace Kiwi
                     else
                     {
                         Page::sListener listener = (*it).lock();
-                        listener->connectionHasBeenRemoved(shared_from_this(), oldconnect);
+                        listener->linkHasBeenRemoved(shared_from_this(), oldconnect);
                         ++it;
                     }
                 }
@@ -484,15 +489,15 @@ namespace Kiwi
     
     void Page::outletHasBeenRemoved(sBox box, unsigned long index)
     {
-        lock_guard<mutex> guard(m_connections_mutex);
-        vector<Connection>::size_type max_size = m_connections.size();
-        for(vector<Connection>::size_type i = 0; i < max_size;)
+        lock_guard<mutex> guard(m_links_mutex);
+        vector<Link>::size_type max_size = m_links.size();
+        for(vector<Link>::size_type i = 0; i < max_size;)
         {
-            if(m_connections[i]->getBoxFrom() == box || m_connections[i]->getOutletIndex() == index)
+            if(m_links[i]->getBoxFrom() == box || m_links[i]->getOutletIndex() == index)
             {
-                sConnection oldconnect = m_connections[i];
+                sLink oldconnect = m_links[i];
                 Box::disconnect(oldconnect);
-                m_connections.erase(m_connections.begin()+(long)i);
+                m_links.erase(m_links.begin()+(long)i);
                 max_size--;
                 
                 m_listeners_mutex.lock();
@@ -506,7 +511,7 @@ namespace Kiwi
                     else
                     {
                         Page::sListener listener = (*it).lock();
-                        listener->connectionHasBeenRemoved(shared_from_this(), oldconnect);
+                        listener->linkHasBeenRemoved(shared_from_this(), oldconnect);
                         ++it;
                     }
                 }
@@ -545,6 +550,31 @@ namespace Kiwi
             }
         }
         return false;
+    }
+    
+    // ================================================================================ //
+    //                                  PAGE CONTROLER                                  //
+    // ================================================================================ //
+    
+    Page::Controler::Controler(sPage page) noexcept :
+    m_page(page)
+    {
+        
+    }
+    
+    Page::Controler::~Controler()
+    {
+        m_boxes.clear();
+    }
+    
+    void Page::Controler::bind()
+    {
+        m_page->bind(shared_from_this());
+    }
+    
+    void Page::Controler::unbind()
+    {
+        m_page->unbind(shared_from_this());
     }
 }
 

@@ -41,9 +41,11 @@ namespace Kiwi
     class Beacon
     {
     private:
-        const string  m_name;
-        set<wBox, owner_less<wBox>> m_boxes;
-        mutable mutex m_mutex;
+        const string        m_name;
+        unordered_set<wBox,
+        weak_ptr_hash<Box>,
+		weak_ptr_equal<Box>>m_boxes;
+        mutable mutex       m_mutex;
     public:
         
         //! The constructor.
@@ -116,8 +118,9 @@ namespace Kiwi
         class Factory
         {
         private:
-            map<string, sBeacon> m_beacons;
-            mutex m_factory_mutex;
+            unordered_map<string,
+            sBeacon>    m_beacons;
+            mutex       m_factory_mutex;
         public:
             
             //! The constructor.

@@ -99,7 +99,7 @@ namespace Kiwi
         }
     }
     
-    
+    /*
     Expression::Expression(sPage page, ElemVector const& elements) : Box(page, "expr")
     {
         unsigned long   max = 0;
@@ -158,7 +158,7 @@ namespace Kiwi
             }
         }
         return false;
-    }
+    }*/
     
 }
 

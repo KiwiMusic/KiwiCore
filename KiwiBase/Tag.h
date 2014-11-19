@@ -72,8 +72,8 @@ namespace Kiwi
         
     private:
         
-        static map<string, sTag> m_tags;
-        static mutex             m_mutex;
+        static unordered_map<string, sTag> m_tags;
+        static mutex                       m_mutex;
     public:
         
         //! Tag creator.
@@ -97,11 +97,12 @@ namespace Kiwi
             }
         }
         
+        static sTag empty;
         static sTag text;
         static sTag box;
         static sTag boxes;
-        static sTag connection;
-        static sTag connections;
+        static sTag link;
+        static sTag links;
         static sTag id;
         static sTag from;
         static sTag to;

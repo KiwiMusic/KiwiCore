@@ -295,7 +295,7 @@ namespace Kiwi
         lock_guard<mutex> guard(m_hmutex);
         if(index < m_messages.size())
         {
-            m_messages.erase(m_messages.begin()+index);
+            m_messages.erase(m_messages.begin()+(long)index);
             std::sort(m_messages.begin(), m_messages.end(), compareIndex);
             for(size_t i = 0; i < m_messages.size(); i++)
             {
@@ -323,7 +323,7 @@ namespace Kiwi
         lock_guard<mutex> guard(m_hmutex);
         if(begin < last && last < m_messages.size())
         {
-            m_messages.erase(m_messages.begin()+begin, m_messages.begin()+last);
+            m_messages.erase(m_messages.begin()+(long)begin, m_messages.begin()+(long)last);
             std::sort(m_messages.begin(), m_messages.end(), compareIndex);
             for(size_t i = 0; i < m_messages.size(); i++)
             {
@@ -356,7 +356,7 @@ namespace Kiwi
         {
             if(indices[i] < max)
             {
-                m_messages.erase(m_messages.begin()+indices[i]);
+                m_messages.erase(m_messages.begin()+(long)indices[i]);
                 --max;
             }
         }

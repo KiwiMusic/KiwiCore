@@ -33,16 +33,16 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(sPage page, string const& name, long type) :
+    Box::Box(sPage page, string const& name, unsigned long type) :
     m_page(page),
     m_name(Tag::create(name)),
-    m_id(page ? page->getCurrentId() : 0),
     m_type(0 | type),
     m_stack_count(0)
     {
 		//getInstance()->getBoxDefaultAttributes();
 		
 		// Font attributes
+        /*
         addAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Font");
         addAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Font");
 		
@@ -73,6 +73,7 @@ namespace Kiwi
 		addAttribute<AttributePoint>(Tag::create("bdcolor"), elems, "Border Color", "Color");
 		elems = {0., 0., 0, 1.};
 		addAttribute<AttributePoint>(Tag::create("textcolor"), elems, "Text Color", "Color");
+         */
     }
     
     Box::~Box()
@@ -110,7 +111,7 @@ namespace Kiwi
                 {
                     box->m_text = dico->get(Tag::text);
                     box->load(dico);
-					box->Attribute::Manager::read(dico);
+					box->Attr::Manager::read(dico);
                     return box;
                 }
             }
@@ -122,11 +123,6 @@ namespace Kiwi
         }
         Console::error("The dico isn't valid for box creation !");
         return nullptr;
-    }
-    
-    sPage Box::getPage() const noexcept
-    {
-        return m_page.lock();
     }
     
     sInstance Box::getInstance() const noexcept
@@ -142,24 +138,15 @@ namespace Kiwi
         }
     }
     
-    sTag Box::getName() const noexcept
+    void Box::write(sDico dico) const
     {
-        return m_name;
-    }
-    
-    sTag Box::getText() const noexcept
-    {
-        return m_text;
-    }
-    
-    long Box::getType() const noexcept
-    {
-        return m_type;
-    }
-    
-    string Box::getExpression() const noexcept
-    {
-        return "error";
+        save(dico);
+        Attr::Manager::write(dico);
+        dico->set(Tag::name, m_name);
+        dico->set(Tag::ninlets, m_inlets.size());
+        dico->set(Tag::noutlets, m_outlets.size());
+        dico->set(Tag::text, m_text);
+        dico->set(Tag::id, (long)m_id);
     }
     
     void Box::save(sDico dico) const
@@ -170,26 +157,6 @@ namespace Kiwi
     void Box::load(scDico dico)
     {
         ;
-    }
-    
-    bool Box::receive(size_t index, ElemVector const& elements)
-    {
-        return false;
-    }
-    
-    bool Box::receive(Event::Mouse const& events)
-    {
-        return false;
-    }
-    
-    bool Box::receive(Event::Keyboard const& events)
-    {
-        return false;
-    }
-    
-    bool Box::draw(Doodle& d) const
-    {
-        return false;
     }
     
     void Box::paint(Doodle& d, bool edit, bool selected) const
@@ -257,17 +224,6 @@ namespace Kiwi
             }
         }
     }
-
-    void Box::write(sDico dico) const
-    {
-        save(dico);
-        Attribute::Manager::write(dico);
-        dico->set(Tag::name, m_name);
-        dico->set(Tag::ninlets, m_inlets.size());
-        dico->set(Tag::noutlets, m_outlets.size());
-        dico->set(Tag::text, m_text);
-        dico->set(Tag::id, (long)m_id);
-    }
     
     void Box::send(size_t index, ElemVector const& elements) const noexcept
     {
@@ -281,7 +237,19 @@ namespace Kiwi
                 {
                     if(!receiver->receive(inlet, elements))
                     {
-                        receiver->Attribute::Manager::receive(elements);
+                        if(!elements.empty() && elements[0].isTag())
+                        {
+                            ElemVector attrvec;
+                            attrvec.assign(elements.begin()+1, elements.end());
+                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
+                            {
+                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                            }
+                        }
+                        else
+                        {
+                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                        }
                     }
                 }
                 else if(receiver->m_stack_count  == 256)
@@ -289,7 +257,19 @@ namespace Kiwi
                     Console::error(receiver, "Stack overflow");
                     if(!receiver->receive(inlet, elements))
                     {
-                        receiver->Attribute::Manager::receive(elements);
+                        if(!elements.empty() && elements[0].isTag())
+                        {
+                            ElemVector attrvec;
+                            attrvec.assign(elements.begin()+1, elements.end());
+                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
+                            {
+                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                            }
+                        }
+                        else
+                        {
+                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                        }
                     }
                 }
                 else
@@ -330,23 +310,6 @@ namespace Kiwi
         }
     }
     
-    string Box::getInletDescription(size_t index) const noexcept
-    {
-        if(index < m_inlets.size())
-        {
-            return m_inlets[index]->m_description;
-        }
-        else
-        {
-            return "";
-        }
-    }
-    
-    size_t Box::getNumberOfInlets() const noexcept
-    {
-        return m_inlets.size();
-    }
-    
     // ================================================================================ //
     //                                      OUTLETS                                     //
     // ================================================================================ //
@@ -376,31 +339,14 @@ namespace Kiwi
         }
     }
 
-    string Box::getOutletDescription(size_t index) const noexcept
+    bool Box::compatible(scLink link) noexcept
     {
-        if(index < m_outlets.size())
+        if(link && link->isValid())
         {
-            return m_outlets[index]->m_description;
-        }
-        else
-        {
-            return "";
-        }
-    }
-    
-    size_t Box::getNumberOfOutlets() const noexcept
-    {
-        return m_outlets.size();
-    }
-    
-    bool Box::compatible(scConnection connection) noexcept
-    {
-        if(connection && connection->isValid())
-        {
-            sBox from   = connection->getBoxFrom();
-            sBox to     = connection->getBoxTo();
-            size_t outlet   = connection->getOutletIndex();
-            size_t inlet    = connection->getInletIndex();
+            sBox from   = link->getBoxFrom();
+            sBox to     = link->getBoxTo();
+            size_t outlet   = link->getOutletIndex();
+            size_t inlet    = link->getInletIndex();
             for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
             {
                 if(from->m_outlets[outlet]->m_conns[i].m_box == to && from->m_outlets[outlet]->m_conns[i].m_index == inlet)
@@ -413,26 +359,26 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::connect(scConnection connection) noexcept
+    bool Box::connect(scLink link) noexcept
     {
-        if(compatible(connection))
+        if(compatible(link))
         {
-            sBox from   = connection->getBoxFrom();
-            sBox to     = connection->getBoxTo();
-            size_t outlet   = connection->getOutletIndex();
-            size_t inlet    = connection->getInletIndex();
+            sBox from   = link->getBoxFrom();
+            sBox to     = link->getBoxTo();
+            size_t outlet   = link->getOutletIndex();
+            size_t inlet    = link->getInletIndex();
             from->m_outlets[outlet]->m_conns.push_back({to, inlet});
             return true;
         }
         return false;
     }
     
-    bool Box::disconnect(scConnection connection) noexcept
+    bool Box::disconnect(scLink link) noexcept
     {
-        sBox from   = connection->getBoxFrom();
-        sBox to     = connection->getBoxTo();
-        size_t outlet   = connection->getOutletIndex();
-        size_t inlet    = connection->getInletIndex();
+        sBox from   = link->getBoxFrom();
+        sBox to     = link->getBoxTo();
+        size_t outlet   = link->getOutletIndex();
+        size_t inlet    = link->getInletIndex();
         if(from && outlet < from->getNumberOfOutlets())
         {
             for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
@@ -484,7 +430,7 @@ namespace Kiwi
     //                                      CONNECTION                                  //
     // ================================================================================ //
     
-    Connection::Connection(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept :
+    Link::Link(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept :
     m_from(from),
     m_to(to),
     m_outlet(outlet),
@@ -493,14 +439,14 @@ namespace Kiwi
         ;
     }
     
-    Connection::~Connection()
+    Link::~Link()
     {
         ;
     }
     
-    shared_ptr<Connection> Connection::create(const sBox from, const size_t outlet, const sBox to, const size_t inlet)
+    sLink Link::create(const sBox from, const size_t outlet, const sBox to, const size_t inlet)
     {
-        shared_ptr<Connection> connect = make_shared<Connection>(from, outlet, to, inlet);
+        sLink connect = make_shared<Link>(from, outlet, to, inlet);
         if(connect && Box::compatible(connect))
         {
             return connect;
@@ -508,7 +454,7 @@ namespace Kiwi
         return nullptr;
     }
     
-    shared_ptr<Connection> Connection::create(scPage page, scDico dico)
+    sLink Link::create(scPage page, scDico dico)
     {
         if(page && dico)
         {
@@ -565,7 +511,7 @@ namespace Kiwi
                 
                 if(from && to)
                 {
-                    return Connection::create(from, outlet, to, inlet);
+                    return Link::create(from, outlet, to, inlet);
                 }
             }
             

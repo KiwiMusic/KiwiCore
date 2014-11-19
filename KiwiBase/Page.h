@@ -26,12 +26,12 @@
 
 #include "Box.h"
 
-// - Clear and add the connections and boxes managemennt
+// - Clear and add the links and boxes managemennt (Clean the id of the boxes)
 // - Add the attributes
 // - Make everything threadsafe
 // - Mutex for Dsp
 // - Clear the listeners
-// - See how to manage connection
+
 namespace Kiwi
 {
     class DspContext;
@@ -40,7 +40,7 @@ namespace Kiwi
     //                                      PAGE                                        //
     // ================================================================================ //
     
-    //! The page manages boxes and connections.
+    //! The page manages boxes and links.
     /**
      The page is the counterpart of the max patcher or the pd canvas...
      */
@@ -58,8 +58,8 @@ namespace Kiwi
         mutable mutex               m_boxes_mutex;
         atomic_ulong                m_boxes_id;
         
-        vector<sConnection>         m_connections;
-        mutable mutex               m_connections_mutex;
+        vector<sLink>               m_links;
+        mutable mutex               m_links_mutex;
         
         unordered_set<weak_ptr<Listener>,
         weak_ptr_hash<Listener>,
@@ -96,13 +96,44 @@ namespace Kiwi
             return m_instance.lock();
         }
         
-        //! Retrieve the current id to intialize a boxe.
-        /** This function retrieves the current id to intialize a boxe.
-         @return    The id.
+        //! Get the number of boxes.
+        /** The function retrieves the number of boxes in the page.
+         @return The number of boxes in the page.
          */
-        inline unsigned long getCurrentId() const noexcept
+        inline unsigned long getNumberOfBoxes() const noexcept
         {
-            return m_boxes_id;
+            lock_guard<mutex> guard(m_boxes_mutex);
+            return m_boxes.size();
+        }
+        
+        //! Get the boxes.
+        /** The function retrieves the boxes from the page.
+         @param boxes   A vector of elements.
+         */
+        void getBoxes(vector<sBox>& boxes) const
+        {
+            lock_guard<mutex> guard(m_boxes_mutex);
+            boxes = m_boxes;
+        }
+        
+        //! Get the number of links.
+        /** The function retrieves the number of links in the page.
+         @return The number of links in the page.
+         */
+        inline unsigned long getNumberOfConnections() const noexcept
+        {
+            lock_guard<mutex> guard(m_links_mutex);
+            return m_links.size();
+        }
+        
+        //! Get the links.
+        /** The function retrieves the links from the page.
+         @param links   A vector of links.
+         */
+        void getConnections(vector<sLink>& links) const
+        {
+            lock_guard<mutex> guard(m_links_mutex);
+            links = m_links;
         }
         
         //! Create a beacon.
@@ -133,68 +164,28 @@ namespace Kiwi
          */
         void removeBox(sBox box);
         
-        //! Get the boxes.
-        /** The function retrieves the boxes from the page.
-         @param boxes   A vector of elements.
+        //! Add a link.
+        /** The function add a link.
+         @param link The link to add.
+         @return A pointer to the link.
          */
-        void getBoxes(vector<sBox>& boxes) const
-        {
-            lock_guard<mutex> guard(m_boxes_mutex);
-            boxes = m_boxes;
-        }
+        sLink addConnection(sLink link);
         
-        //! Get the number of boxes.
-        /** The function retrieves the number of boxes in the page.
-         @return The number of boxes in the page.
+        //! Create a link.
+        /** The function creates a link with a dico.
+         @param dico        The dico that defines a link.
+         @return A pointer to the link.
          */
-        inline unsigned long getNumberOfBoxes() const noexcept
-        {
-            lock_guard<mutex> guard(m_boxes_mutex);
-            return m_boxes.size();
-        }
+        sLink createConnection(scDico dico);
         
-        //! Add a connection.
-        /** The function add a connection.
-         @param connection The connection to add.
-         @return A pointer to the connection.
+        //! Free a link.
+        /** The function removes a link from the page.
+         @param link        The pointer to the link.
          */
-        sConnection addConnection(sConnection connection);
-        
-        //! Create a connection.
-        /** The function creates a connection with a dico.
-         @param dico        The dico that defines a connection.
-         @return A pointer to the connection.
-         */
-        sConnection createConnection(scDico dico);
-        
-        //! Free a connection.
-        /** The function removes a connection from the page.
-         @param connection        The pointer to the connection.
-         */
-        void removeConnection(sConnection connection);
-        
-        //! Get the connections.
-        /** The function retrieves the connections from the page.
-         @param connections   A vector of connections.
-         */
-        void getConnections(vector<sConnection>& connections) const
-        {
-            lock_guard<mutex> guard(m_connections_mutex);
-            connections = m_connections;
-        }
-        
-        //! Get the number of connections.
-        /** The function retrieves the number of connections in the page.
-         @return The number of connections in the page.
-         */
-        inline unsigned long getNumberOfConnections() const noexcept
-        {
-            lock_guard<mutex> guard(m_connections_mutex);
-            return m_connections.size();
-        }
+        void removeConnection(sLink link);
         
         //! Append a dico.
-        /** The function reads a dico and add the boxes and connections to the page.
+        /** The function reads a dico and add the boxes and links to the page.
          @param dico The dico.
          */
         void append(scDico dico);
@@ -217,7 +208,7 @@ namespace Kiwi
          @param vectorsize The vector size of the signal.
          @return true if the page can process signal.
          */
-        bool startDsp(long samplerate, long vectorsize);
+        bool startDsp(unsigned long samplerate, unsigned long vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain.
@@ -326,31 +317,80 @@ namespace Kiwi
              */
             virtual void boxHasBeenRemoved(sPage page, sBox box){};
             
-            //! Receive the notification that a connection has been created.
-            /** The function is called by the page when a connection has been created.
+            //! Receive the notification that a link has been created.
+            /** The function is called by the page when a link has been created.
              @param page        The page.
-             @param connection  The box.
+             @param link  The box.
              */
-            virtual void connectionHasBeenCreated(sPage page, sConnection connection){};
+            virtual void linkHasBeenCreated(sPage page, sLink link){};
             
-            //! Receive the notification that a connection has been removed.
-            /** The function is called by the page when a connection has been removed.
+            //! Receive the notification that a link has been removed.
+            /** The function is called by the page when a link has been removed.
              @param page        The page.
-             @param connection  The connection.
+             @param link  The link.
              */
-            virtual void connectionHasBeenRemoved(sPage page, sConnection connection){};
+            virtual void linkHasBeenRemoved(sPage page, sLink link){};
             
-            //! Receive the notification that a connection has been replaced by another one.
-            /** The function is called by the page when a connection has been replaced by another one.
+            //! Receive the notification that a link has been replaced by another one.
+            /** The function is called by the page when a link has been replaced by another one.
              @param page            The page.
-             @param oldconnection   The connection that has been replaced.
-             @param newconnection   The connection that has replaced.
+             @param oldlink   The link that has been replaced.
+             @param newlink   The link that has replaced.
              */
-            virtual void connectionHasBeenReplaced(sPage page, sConnection oldconnection, sConnection newconnection){};
+            virtual void linkHasBeenReplaced(sPage page, sLink oldlink, sLink newlink){};
         };
         
         typedef shared_ptr<Listener>    sListener;
+        
+        // ================================================================================ //
+        //                                  PAGE CONTROLER                                  //
+        // ================================================================================ //
+        
+        //! The page controler is a virtual class that facilitates the control of a page in an application.
+        /**
+         The page controler should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page controler owns a vector of box controlers and facilitates managements of boxes like the creation, the deletion, the selection, etc.
+         @see Page
+         @see Page::Listener
+         @see Box::Controler
+         */
+        class Controler : public Page::Listener, public enable_shared_from_this<Controler>
+        {
+        private:
+            const sPage     m_page;
+            vector<sBox>    m_boxes;
+            
+        public:
+            //! The constructor.
+            /** The constructor.
+             @param page The page to control.
+             */
+            Controler(sPage page) noexcept;
+            
+            //! The destructor.
+            /** The destructor.
+             */
+            ~Controler();
+            
+        protected:
+            
+            //! Bind the controler to the page.
+            /** The function binds the controler to the page. You should call the method outside the contructor.
+             */
+            void bind();
+            
+            //! Unbind the controler to the page.
+            /** The function unbinds the controler to the page. You should call the method outside the destructor. More often the call of this method isn't necessary because if you controler is deleted, the page will automaticaly remove it from the listener list.
+             */
+            void unbind();
+            
+            void selectAll();
+            
+            void deselectAll();
+        };
+        
+        typedef shared_ptr<Controler>    sControler;
     };
+    
 }
 
 

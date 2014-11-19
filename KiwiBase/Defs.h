@@ -35,6 +35,7 @@
 #include <cmath>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <list>
 #include <set>
 #include <unordered_set>
@@ -69,9 +70,9 @@ namespace Kiwi
     typedef weak_ptr<Dico>          wDico;
     typedef weak_ptr<const Dico>    wcDico;
     
-    class Connection;
-    typedef shared_ptr<Connection>        sConnection;
-    typedef shared_ptr<const Connection>  scConnection;
+    class Link;
+    typedef shared_ptr<Link>        sLink;
+    typedef shared_ptr<const Link>  scLink;
     
     class Box;
     typedef shared_ptr<Box>         sBox;

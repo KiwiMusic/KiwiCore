@@ -52,8 +52,8 @@ namespace Kiwi
         vector<sPage>                       m_dsp_pages;
         mutable mutex                       m_dsp_mutex;
         atomic_bool                         m_dsp_running;
-        atomic_long                         m_sample_rate;
-        atomic_long                         m_vector_size;
+        atomic_ulong                        m_sample_rate;
+        atomic_ulong                        m_vector_size;
         
         unordered_set<sPage>                m_pages;
         mutex                               m_pages_mutex;
@@ -115,7 +115,7 @@ namespace Kiwi
          @see tickDsp()
          @see stopDsp()
          */
-        void startDsp(long samplerate, long vectorsize);
+        void startDsp(unsigned long samplerate, unsigned long vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain of all the pages.
@@ -158,7 +158,7 @@ namespace Kiwi
          @see getVectorSize()
          @see startDsp()
          */
-        inline long getSampleRate() const noexcept
+        inline unsigned long getSampleRate() const noexcept
         {
             return m_sample_rate;
         }
@@ -169,7 +169,7 @@ namespace Kiwi
          @see getSampleRate()
          @see startDsp()
          */
-        inline long getVectorSize() const noexcept
+        inline unsigned long getVectorSize() const noexcept
         {
             return m_vector_size;
         }

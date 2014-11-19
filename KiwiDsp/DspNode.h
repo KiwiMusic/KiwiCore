@@ -32,7 +32,7 @@
 namespace Kiwi
 {
     class Box;
-    class Connection;
+    class Link;
     class DspContext;
 
     // ================================================================================ //
