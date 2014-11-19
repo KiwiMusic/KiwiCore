@@ -26,11 +26,12 @@
 
 namespace Kiwi
 {
+    const sTag Attr::frozen_attributes  = Tag::create("frozen_attributes");
     // ================================================================================ //
     //                                      ATTRIBUTE                                   //
     // ================================================================================ //
     
-	Attr::Attr(sTag name, sTag label, sTag category, Style style, long behavior, ElemVector defaultValues) :
+	Attr::Attr(sTag name, sTag label, sTag category, Style style, ElemVector defaultValues, long behavior) :
     m_name(name),
     m_label(label),
     m_category(category),
@@ -38,7 +39,7 @@ namespace Kiwi
 	m_default_values(defaultValues),
     m_behavior(0 | behavior)
     {
-		setToDefault();
+		;
     }
     
     Attr::~Attr()
@@ -98,7 +99,7 @@ namespace Kiwi
         }
 	}
 	
-	void Attr::setToDefault()
+	void Attr::setDefaultValues()
 	{
         if(!m_default_values.empty())
         {
@@ -106,7 +107,7 @@ namespace Kiwi
         }
 	}
 	
-    void Attr::setToFrozen()
+    void Attr::setFrozenValues()
     {
         if(!m_frozen_values.empty())
         {
@@ -141,7 +142,7 @@ namespace Kiwi
 			else
             {
                 dico->set(m_name, m_frozen_values);
-                dico->append(Tag::frozen_attributes, m_name);
+                dico->append(Attr::frozen_attributes, m_name);
             }
 		}
     }
@@ -151,7 +152,7 @@ namespace Kiwi
         ElemVector elements;
         dico->get(m_name, elements);
         set(elements);
-        dico->get(Tag::frozen_attributes, elements);
+        dico->get(Attr::frozen_attributes, elements);
         if(find(elements.begin(), elements.end(), m_name) != elements.end())
         {
             freeze(true);
@@ -547,6 +548,28 @@ namespace Kiwi
 	{
 		elements = {m_value[0], m_value[1]};
 	}
+    
+    const sTag AttrFont::Font               = Tag::create("Font");
+    
+    const sTag AttrFont::fontname     = Tag::create("fontname");
+    const sTag AttrFont::Font_Name    = Tag::create("Font Name");
+    const sTag AttrFont::Arial        = Tag::create("Arial");
+    
+    const sTag AttrFont::fontsize     = Tag::create("fontsize");
+    const sTag AttrFont::Font_Size    = Tag::create("Font Size");
+    
+    const sTag AttrFont::fontface     = Tag::create("fontface");
+    const sTag AttrFont::Font_Face    = Tag::create("Font Face");
+    const sTag AttrFont::normal       = Tag::create("normal");
+    const sTag AttrFont::bold         = Tag::create("bold");
+    const sTag AttrFont::italic       = Tag::create("italic");
+    const sTag AttrFont::bold_italic  = Tag::create("bold_italic");
+    
+    const sTag AttrFont::fontjustification = Tag::create("fontjustification");
+    const sTag AttrFont::Font_Justification= Tag::create("Font Justification");
+    const sTag AttrFont::left              = Tag::create("left");
+    const sTag AttrFont::center            = Tag::create("center");
+    const sTag AttrFont::right             = Tag::create("right");
 }
 
 

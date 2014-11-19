@@ -29,7 +29,6 @@ namespace Kiwi
     unordered_map<string, sTag> Tag::m_tags;
     mutex Tag::m_mutex;
     
-    sTag Tag::empty       = Tag::create("");
     sTag Tag::text        = Tag::create("text");
     sTag Tag::box         = Tag::create("box");
     sTag Tag::boxes       = Tag::create("boxes");
@@ -44,7 +43,6 @@ namespace Kiwi
     sTag Tag::set         = Tag::create("set");
     sTag Tag::null        = Tag::create("null");
     sTag Tag::arguments   = Tag::create("arguments");
-	sTag Tag::frozen_attributes   = Tag::create("frozen_attributes");
 }
 
 

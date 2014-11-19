@@ -26,6 +26,8 @@
 
 #include "Tools.h"
 
+// TODO
+// - Clean and make it thread safe
 namespace Kiwi
 {
     class Box;

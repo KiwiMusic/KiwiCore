@@ -39,19 +39,11 @@ namespace Kiwi
     m_type(0 | type),
     m_stack_count(0)
     {
-		//getInstance()->getBoxDefaultAttributes();
-		
-		// Font attributes
-        /*
-        addAttribute<AttributeTag>(Tag::create("fontname"), "Arial", "Font Name", "Font");
-        addAttribute<AttributeDouble>(Tag::create("fontsize"), 12, "Font Size", "Font");
-		
-		ElemVector elems = {Tag::create("regular"), Tag::create("bold"), Tag::create("italic"), Tag::create("bold italic")};
-		addAttribute<AttributeEnum>(Tag::create("fontface"), elems, 0, "Font Style", "Font");
-		
-		elems = {Tag::create("left"), Tag::create("center"), Tag::create("right")};
-		addAttribute<AttributeEnum>(Tag::create("textjustification"), elems, 0, "Justification", "Font");
-		
+		addAttribute(Attr::create<AttrFont::Name>());
+        addAttribute(Attr::create<AttrFont::Size>());
+        addAttribute(Attr::create<AttrFont::Face>());
+        addAttribute(Attr::create<AttrFont::Justification>());
+		/*
 		// Appearance attributes
 		addAttribute<AttributeBool>(Tag::create("hidden"), false, "Hide on Lock", "Appearance");
 		addAttribute<AttributeBool>(Tag::create("presentation"), false, "Include in Presentation", "Appearance");

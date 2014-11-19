@@ -27,6 +27,8 @@
 #include "Tools.h"
 #include "Console.h"
 
+// TODO
+// - Put the tag in the classes
 namespace Kiwi
 {
     // ================================================================================ //
@@ -97,7 +99,6 @@ namespace Kiwi
             }
         }
         
-        static sTag empty;
         static sTag text;
         static sTag box;
         static sTag boxes;
@@ -112,7 +113,7 @@ namespace Kiwi
         static sTag set;
         static sTag null;
         static sTag arguments;
-		static sTag frozen_attributes;
+        
     };
     
     inline string toString(sTag __val)

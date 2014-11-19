@@ -70,6 +70,10 @@ namespace Kiwi
     typedef weak_ptr<Dico>          wDico;
     typedef weak_ptr<const Dico>    wcDico;
     
+    class Attr;
+    typedef shared_ptr<Attr>        sAttr;
+    typedef weak_ptr<Attr>          wAttr;
+    
     class Link;
     typedef shared_ptr<Link>        sLink;
     typedef shared_ptr<const Link>  scLink;
