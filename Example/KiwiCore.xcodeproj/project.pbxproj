@@ -20,6 +20,7 @@
 		8FA319091A06A50000A06500 /* Kiwi.cp in Sources */ = {isa = PBXBuildFile; fileRef = 8FA319081A06A50000A06500 /* Kiwi.cp */; };
 		8FA8FA6E1A181E86007A37CA /* Beacon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FA8FA6C1A181E86007A37CA /* Beacon.cpp */; };
 		8FA8FA711A1B684B007A37CA /* Doodle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FA8FA6F1A1B684B007A37CA /* Doodle.cpp */; };
+		8FAFBFF41A1E150800929003 /* Link.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FAFBFF21A1E150700929003 /* Link.cpp */; };
 		8FC8A33419C3243E0028F321 /* Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8A32119C3243E0028F321 /* Attribute.cpp */; };
 		8FC8A33619C3243E0028F321 /* Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8A32719C3243E0028F321 /* Element.cpp */; };
 		8FC8A33819C3243E0028F321 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8A32B19C3243E0028F321 /* Instance.cpp */; };
@@ -79,6 +80,8 @@
 		8FA8FA6D1A181E86007A37CA /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
 		8FA8FA6F1A1B684B007A37CA /* Doodle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Doodle.cpp; sourceTree = "<group>"; };
 		8FA8FA701A1B684B007A37CA /* Doodle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doodle.h; sourceTree = "<group>"; };
+		8FAFBFF21A1E150700929003 /* Link.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Link.cpp; sourceTree = "<group>"; };
+		8FAFBFF31A1E150800929003 /* Link.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Link.h; sourceTree = "<group>"; };
 		8FC8A32119C3243E0028F321 /* Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Attribute.cpp; sourceTree = "<group>"; };
 		8FC8A32219C3243E0028F321 /* Attribute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Attribute.h; sourceTree = "<group>"; };
 		8FC8A32519C3243E0028F321 /* Core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
@@ -235,6 +238,8 @@
 				8F479BA31A128E8300E81465 /* Event.h */,
 				8FC8A32119C3243E0028F321 /* Attribute.cpp */,
 				8FC8A32219C3243E0028F321 /* Attribute.h */,
+				8FAFBFF21A1E150700929003 /* Link.cpp */,
+				8FAFBFF31A1E150800929003 /* Link.h */,
 				8F1E2B8919DA9E3700F904B9 /* Box.cpp */,
 				8F1E2B8A19DA9E3700F904B9 /* Box.h */,
 				8F1E2B9219DB2D3C00F904B9 /* Page.cpp */,
@@ -352,6 +357,7 @@
 				8F479BA41A128E8300E81465 /* Event.cpp in Sources */,
 				8F1E2B9419DB2D3C00F904B9 /* Page.cpp in Sources */,
 				8F1E2B9719DBB72500F904B9 /* Dico.cpp in Sources */,
+				8FAFBFF41A1E150800929003 /* Link.cpp in Sources */,
 				8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */,
 				8FA8FA711A1B684B007A37CA /* Doodle.cpp in Sources */,
 				8FA8FA6E1A181E86007A37CA /* Beacon.cpp in Sources */,

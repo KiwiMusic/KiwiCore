@@ -33,9 +33,11 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(sPage page, string const& name, unsigned long type) :
+    Box::Box(sPage page, string const& name,  unsigned long type) :
+    m_instance(page ? page->m_instance : weak_ptr<Instance>()),
     m_page(page),
     m_name(Tag::create(name)),
+    m_id(page ? page->m_boxe_id : 0),
     m_type(0 | type),
     m_stack_count(0)
     {
@@ -43,21 +45,14 @@ namespace Kiwi
         addAttribute(Attr::create<AttrFont::Size>());
         addAttribute(Attr::create<AttrFont::Face>());
         addAttribute(Attr::create<AttrFont::Justification>());
+        
+        addAttribute(Attr::create<AttrAppearance::Hidden>());
+        addAttribute(Attr::create<AttrAppearance::Presentation>());
+        addAttribute(Attr::create<AttrAppearance::Position>());
+        addAttribute(Attr::create<AttrAppearance::Size>());
+        addAttribute(Attr::create<AttrAppearance::PresentationPosition>());
+        addAttribute(Attr::create<AttrAppearance::PresentationSize>());
 		/*
-		// Appearance attributes
-		addAttribute<AttributeBool>(Tag::create("hidden"), false, "Hide on Lock", "Appearance");
-		addAttribute<AttributeBool>(Tag::create("presentation"), false, "Include in Presentation", "Appearance");
-		
-		elems = {0., 0.};
-		addAttribute<AttributePoint>(Tag::create("position"), elems, "Position", "Appearance");
-		elems = {100., 20.};
-		addAttribute<AttributePoint>(Tag::create("size"), elems, "Size", "Appearance");
-		
-		elems = {0., 0.};
-		addAttribute<AttributePoint>(Tag::create("presentation_pos"), elems, "Presentation Position", "Appearance");
-		elems = {0., 0.};
-		addAttribute<AttributePoint>(Tag::create("presentation_size"), elems, "Presentation Size", "Appearance");
-		
 		// Color attributes
 		elems = {1., 1., 1, 1.};
 		addAttribute<AttributePoint>(Tag::create("bgcolor"), elems, "Background Color", "Color");
@@ -80,6 +75,7 @@ namespace Kiwi
         sTag name = dico->get(Tag::name);
         if(name)
         {
+            lock_guard<mutex> guard(m_prototypes_mutex);
             auto it = m_prototypes.find(name);
             if(it != m_prototypes.end())
             {
@@ -90,7 +86,7 @@ namespace Kiwi
                     other->read(toString(text));
                     ElemVector keys;
                     other->keys(keys);
-                    for(size_t i = 0; i < keys.size(); i++)
+                    for(ElemVector::size_type i = 0; i < keys.size(); i++)
                     {
                         ElemVector values;
                         other->get(keys[i], values);
@@ -117,49 +113,268 @@ namespace Kiwi
         return nullptr;
     }
     
-    sInstance Box::getInstance() const noexcept
+    void Box::write(sDico dico) const
     {
-        sPage page = m_page.lock();
-        if(page)
+        this->save(dico);
+        Attr::Manager::write(dico);
+        dico->set(Tag::name, getName());
+        dico->set(Tag::ninlets, getNumberOfInlets());
+        dico->set(Tag::noutlets,getNumberOfOutlets());
+        dico->set(Tag::text, getText());
+        dico->set(Tag::id, getId());
+    }
+    
+    void Box::redraw()
+    {
+        lock_guard<mutex> guard(m_listeners_mutex);
+        auto it = m_listeners.begin();
+        while(it != m_listeners.end())
         {
-            return page->getInstance();
+            if((*it).expired())
+            {
+                it = m_listeners.erase(it);
+            }
+            else
+            {
+                Box::sListener listener = (*it).lock();
+                listener->shouldBeRedrawn(shared_from_this());
+                ++it;
+            }
+        }
+    }
+    
+    void Box::send(unsigned long index, ElemVector const& elements) const noexcept
+    {
+        lock_guard<mutex> guard(m_io_mutex);
+        if(index < m_outlets.size())
+        {
+            for(vector<unique_ptr<Outlet>>::size_type i = 0; i < m_outlets[index]->m_sockets.size(); i++)
+            {
+                sBox receiver       = m_outlets[index]->m_sockets[i].box.lock();
+                if(receiver)
+                {
+                    unsigned long inlet = m_outlets[index]->m_sockets[i].index;
+                    if(++receiver->m_stack_count < 256)
+                    {
+                        if(!receiver->receive(inlet, elements))
+                        {
+                            if(!elements.empty() && elements[0].isTag())
+                            {
+                                ElemVector attrvec;
+                                attrvec.assign(elements.begin()+1, elements.end());
+                                if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
+                                {
+                                    Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                                }
+                            }
+                            else
+                            {
+                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                            }
+                        }
+                    }
+                    else if(receiver->m_stack_count  == 256)
+                    {
+                        Console::error(receiver, "Stack overflow");
+                        if(!receiver->receive(inlet, elements))
+                        {
+                            if(!elements.empty() && elements[0].isTag())
+                            {
+                                ElemVector attrvec;
+                                attrvec.assign(elements.begin()+1, elements.end());
+                                if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
+                                {
+                                    Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                                }
+                            }
+                            else
+                            {
+                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console::error(receiver, "Stack overflow");
+                    }
+                    receiver->m_stack_count--;
+                }
+            }
+        }
+    }
+    
+    // ================================================================================ //
+    //                                      INLETS                                      //
+    // ================================================================================ //
+    
+    void Box::addInlet(Inlet::Type type, string const& description)
+    {
+        lock_guard<mutex> guard(m_io_mutex);
+        m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
+        
+        lock_guard<mutex> guard2(m_listeners_mutex);
+        auto it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+            if((*it).expired())
+            {
+                it = m_listeners.erase(it);
+            }
+            else
+            {
+                Box::sListener listener = (*it).lock();
+                listener->inletHasBeenCreated(shared_from_this(), m_inlets.size() - 1);
+                ++it;
+            }
+        }
+    }
+    
+    void Box::insertInlet(unsigned long index, Inlet::Type type, string const& description)
+    {
+        lock_guard<mutex> guard(m_io_mutex);
+        if(index >= m_inlets.size())
+        {
+            index = m_inlets.size();
+            m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
         }
         else
         {
-            return nullptr;
+            m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, description)));
+        }
+        
+        lock_guard<mutex> guard2(m_listeners_mutex);
+        auto it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+            if((*it).expired())
+            {
+                it = m_listeners.erase(it);
+            }
+            else
+            {
+                Box::sListener listener = (*it).lock();
+                listener->inletHasBeenCreated(shared_from_this(), index);
+                ++it;
+            }
         }
     }
     
-    void Box::write(sDico dico) const
+    void Box::removeInlet(unsigned long index)
     {
-        save(dico);
-        Attr::Manager::write(dico);
-        dico->set(Tag::name, m_name);
-        dico->set(Tag::ninlets, m_inlets.size());
-        dico->set(Tag::noutlets, m_outlets.size());
-        dico->set(Tag::text, m_text);
-        dico->set(Tag::id, (long)m_id);
+        lock_guard<mutex> guard(m_io_mutex);
+        if(index < m_inlets.size())
+        {
+            m_inlets.erase(m_inlets.begin()+(long)index);
+            {
+                lock_guard<mutex> guard2(m_listeners_mutex);
+                auto it = m_listeners.begin();
+                while(it != m_listeners.end())
+                {
+                    if((*it).expired())
+                    {
+                        it = m_listeners.erase(it);
+                    }
+                    else
+                    {
+                        Box::sListener listener = (*it).lock();
+                        listener->inletHasBeenRemoved(shared_from_this(), index);
+                        ++it;
+                    }
+                }
+            }
+        }
     }
     
-    void Box::save(sDico dico) const
+    // ================================================================================ //
+    //                                      OUTLETS                                     //
+    // ================================================================================ //
+    
+    void Box::addOutlet(Outlet::Type type, string const& description)
     {
-        ;
+        lock_guard<mutex> guard(m_io_mutex);
+        m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
+        
+        lock_guard<mutex> guard2(m_listeners_mutex);
+        auto it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+            if((*it).expired())
+            {
+                it = m_listeners.erase(it);
+            }
+            else
+            {
+                Box::sListener listener = (*it).lock();
+                listener->outletHasBeenCreated(shared_from_this(), m_outlets.size() - 1);
+                ++it;
+            }
+        }
     }
     
-    void Box::load(scDico dico)
+    void Box::insertOutlet(unsigned long index, Outlet::Type type, string const& description)
     {
-        ;
+        lock_guard<mutex> guard(m_io_mutex);
+        if(index >= m_outlets.size())
+        {
+            index = m_outlets.size();
+            m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
+        }
+        else
+        {
+            m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
+        }
+        
+        lock_guard<mutex> guard2(m_listeners_mutex);
+        auto it = m_listeners.begin();
+        while(it != m_listeners.end())
+        {
+            if((*it).expired())
+            {
+                it = m_listeners.erase(it);
+            }
+            else
+            {
+                Box::sListener listener = (*it).lock();
+                listener->outletHasBeenCreated(shared_from_this(), index);
+                ++it;
+            }
+        }
     }
     
-    void Box::paint(Doodle& d, bool edit, bool selected) const
+    void Box::removeOutlet(unsigned long index)
+    {
+        lock_guard<mutex> guard(m_io_mutex);
+        if(index < m_outlets.size())
+        {
+            m_outlets.erase(m_outlets.begin()+(long)index);
+            
+            lock_guard<mutex> guard2(m_listeners_mutex);
+            auto it = m_listeners.begin();
+            while(it != m_listeners.end())
+            {
+                if((*it).expired())
+                {
+                    it = m_listeners.erase(it);
+                }
+                else
+                {
+                    Box::sListener listener = (*it).lock();
+                    listener->outletHasBeenRemoved(shared_from_this(), index);
+                    ++it;
+                }
+            }
+        }
+    }
+    
+    void Box::paint(sBox box, Doodle& d, bool edit, bool selected)
     {
         d.setFont(Font("Menelo", 13, Font::Normal));
         d.setColor(Color(1., 1., 1., 1.));
         d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
-        if(!draw(d))
+        if(box->getType() & Behavior::Graphic)
         {
             d.setColor({0.3, 0.3, 0.3, 1.});
-            d.drawText(toString(m_text), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
+            d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
         }
         if(selected)
         {
@@ -174,8 +389,8 @@ namespace Kiwi
         
         if(edit)
         {
-            size_t ninlet = m_inlets.size();
-            size_t noutlet = m_outlets.size();
+            unsigned long ninlet    = box->getNumberOfInlets();
+            unsigned long noutlet   = box->getNumberOfOutlets();
             d.setColor({0.3, 0.3, 0.3, 1.});
             if(ninlet)
             {
@@ -184,7 +399,7 @@ namespace Kiwi
             if(ninlet > 1)
             {
                 double ratio = (d.getWidth() - 5.) / (double)(ninlet - 1);
-                for(size_t i = ninlet; i; i--)
+                for(unsigned long i = ninlet; i; i--)
                 {
                     d.fillRectangle(ratio * i, 0., 5, 3, 1.5);
                 }
@@ -197,189 +412,98 @@ namespace Kiwi
             if(noutlet > 1)
             {
                 double ratio = (d.getWidth() - 5.) / (double)(noutlet - 1);
-                for(size_t i = noutlet; i; i--)
+                for(unsigned long i = noutlet; i; i--)
                 {
                     d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 1.5);
                 }
-            } 
-        }
-    }
-    
-    void Box::redraw()
-    {
-        for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
-        {
-            Box::sListener listener = (*it).lock();
-            if(listener)
-            {
-                listener->shouldBeRedrawn(shared_from_this());
             }
         }
     }
     
-    void Box::send(size_t index, ElemVector const& elements) const noexcept
+    bool Box::connectInlet(unsigned long inlet, sBox box, unsigned long outlet)
     {
-        if(index < m_outlets.size())
+        if(box)
         {
-            for(size_t i = 0; i < m_outlets[index]->m_conns.size(); i++)
+            if(inlet < getNumberOfInlets())
             {
-                sBox receiver   = m_outlets[index]->m_conns[i].m_box;
-                size_t inlet    = m_outlets[index]->m_conns[i].m_index;
-                if(++receiver->m_stack_count < 256)
+                lock_guard<mutex> guard(m_io_mutex);
+                for(vector<Socket>::size_type i = 0; i < m_inlets[inlet]->m_sockets.size(); i++)
                 {
-                    if(!receiver->receive(inlet, elements))
+                    sBox sender  = m_inlets[inlet]->m_sockets[i].box.lock();
+                    if(sender && sender == box && m_inlets[inlet]->m_sockets[i].index == outlet)
                     {
-                        if(!elements.empty() && elements[0].isTag())
-                        {
-                            ElemVector attrvec;
-                            attrvec.assign(elements.begin()+1, elements.end());
-                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
-                            {
-                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                            }
-                        }
-                        else
-                        {
-                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                        }
+                        return false;
                     }
                 }
-                else if(receiver->m_stack_count  == 256)
-                {
-                    Console::error(receiver, "Stack overflow");
-                    if(!receiver->receive(inlet, elements))
-                    {
-                        if(!elements.empty() && elements[0].isTag())
-                        {
-                            ElemVector attrvec;
-                            attrvec.assign(elements.begin()+1, elements.end());
-                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
-                            {
-                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                            }
-                        }
-                        else
-                        {
-                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                        }
-                    }
-                }
-                else
-                {
-                    Console::error(receiver, "Stack overflow");
-                }
-                receiver->m_stack_count--;
+                
+                m_inlets[inlet]->m_sockets.push_back({box, outlet});
+                return true;
             }
         }
-    }
-    
-    // ================================================================================ //
-    //                                      INLETS                                      //
-    // ================================================================================ //
-    
-    void Box::addInlet(Inlet::Type type, string const& description)
-    {
-        m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
-    }
-    
-    void Box::insertInlet(size_t index, Inlet::Type type, string const& description)
-    {
-        if(index >= m_inlets.size())
-        {
-            m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
-        }
-        else
-        {
-            m_inlets.insert(m_inlets.begin()+index, unique_ptr<Inlet>(new Inlet(type, description)));
-        }
-    }
-    
-    void Box::removeInlet(size_t index)
-    {
-        if(index < m_inlets.size())
-        {
-            m_inlets.erase(m_inlets.begin()+index);
-        }
-    }
-    
-    // ================================================================================ //
-    //                                      OUTLETS                                     //
-    // ================================================================================ //
-    
-    void Box::addOutlet(Outlet::Type type, string const& description)
-    {
-        m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
-    }
-    
-    void Box::insertOutlet(size_t index, Outlet::Type type, string const& description)
-    {
-        if(index >= m_outlets.size())
-        {
-            m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
-        }
-        else
-        {
-            m_outlets.insert(m_outlets.begin()+index, unique_ptr<Outlet>(new Outlet(type, description)));
-        }
-    }
-    
-    void Box::removeOutlet(size_t index)
-    {
-        if(index < m_outlets.size())
-        {
-            m_outlets.erase(m_outlets.begin()+index);
-        }
+        return false;
     }
 
-    bool Box::compatible(scLink link) noexcept
+    bool Box::connectOutlet(unsigned long outlet, sBox box, unsigned long inlet)
     {
-        if(link && link->isValid())
+        if(box)
         {
-            sBox from   = link->getBoxFrom();
-            sBox to     = link->getBoxTo();
-            size_t outlet   = link->getOutletIndex();
-            size_t inlet    = link->getInletIndex();
-            for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
+            if(outlet < getNumberOfOutlets())
             {
-                if(from->m_outlets[outlet]->m_conns[i].m_box == to && from->m_outlets[outlet]->m_conns[i].m_index == inlet)
+                lock_guard<mutex> guard(m_io_mutex);
+                for(vector<Socket>::size_type i = 0; i < m_outlets[outlet]->m_sockets.size(); i++)
                 {
-                    return false;
+                    sBox receiver  = m_outlets[outlet]->m_sockets[i].box.lock();
+                    if(receiver && receiver == box && m_outlets[outlet]->m_sockets[i].index == inlet)
+                    {
+                        return false;
+                    }
                 }
+                m_outlets[outlet]->m_sockets.push_back({box, inlet});
+                return true;
             }
-            return true;
         }
         return false;
     }
     
-    bool Box::connect(scLink link) noexcept
+    bool Box::disconnectInlet(unsigned long inlet, sBox box, unsigned long outlet)
     {
-        if(compatible(link))
+        if(box)
         {
-            sBox from   = link->getBoxFrom();
-            sBox to     = link->getBoxTo();
-            size_t outlet   = link->getOutletIndex();
-            size_t inlet    = link->getInletIndex();
-            from->m_outlets[outlet]->m_conns.push_back({to, inlet});
-            return true;
-        }
-        return false;
-    }
-    
-    bool Box::disconnect(scLink link) noexcept
-    {
-        sBox from   = link->getBoxFrom();
-        sBox to     = link->getBoxTo();
-        size_t outlet   = link->getOutletIndex();
-        size_t inlet    = link->getInletIndex();
-        if(from && outlet < from->getNumberOfOutlets())
-        {
-            for(size_t i = 0; i < from->m_outlets[outlet]->m_conns.size(); i++)
+            lock_guard<mutex> guard(m_io_mutex);
+            if(inlet < m_inlets.size())
             {
-                if(from->m_outlets[outlet]->m_conns[i].m_box == to && from->m_outlets[outlet]->m_conns[i].m_index == inlet)
+                for(vector<Socket>::size_type i = 0; i < m_inlets[inlet]->m_sockets.size(); i++)
                 {
-                    from->m_outlets[outlet]->m_conns.erase(from->m_outlets[outlet]->m_conns.begin()+i);
-                    return true;
+                    sBox sender  = m_inlets[inlet]->m_sockets[i].box.lock();
+                    if(sender && sender == box && m_inlets[inlet]->m_sockets[i].index == outlet)
+                    {
+                        m_inlets[inlet]->m_sockets.erase(m_inlets[inlet]->m_sockets.begin()+(long)i);
+                        return true;
+                    }
                 }
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    bool Box::disconnectOutlet(unsigned long outlet, sBox box, unsigned long inlet)
+    {
+        if(box)
+        {
+            lock_guard<mutex> guard(m_io_mutex);
+            if(outlet < m_outlets.size())
+            {
+                for(vector<Socket>::size_type i = 0; i < m_outlets[outlet]->m_sockets.size(); i++)
+                {
+                    sBox receiver  = m_outlets[outlet]->m_sockets[i].box.lock();
+                    if(receiver && receiver == box && m_outlets[outlet]->m_sockets[i].index == inlet)
+                    {
+                        m_outlets[outlet]->m_sockets.erase(m_outlets[outlet]->m_sockets.begin()+(long)i);
+                        return true;
+                    }
+                }
+                return false;
             }
         }
         return false;
@@ -387,13 +511,21 @@ namespace Kiwi
     
     void Box::bind(weak_ptr<Box::Listener> listener)
     {
+        lock_guard<mutex> guard(m_listeners_mutex);
         m_listeners.insert(listener);
     }
     
     void Box::unbind(weak_ptr<Box::Listener> listener)
     {
+        lock_guard<mutex> guard(m_listeners_mutex);
         m_listeners.erase(listener);
     }
+    
+    // ================================================================================ //
+    //                                      BOX FACTORY                                 //
+    // ================================================================================ //
+    
+    mutex Box::m_prototypes_mutex;
     
     void Box::addPrototype(unique_ptr<Box> box, string const& name)
     {
@@ -406,6 +538,7 @@ namespace Kiwi
         {
             tname = Tag::create(name);
         }
+        lock_guard<mutex> guard(m_prototypes_mutex);
         auto it = m_prototypes.find(tname);
         if(it != m_prototypes.end())
         {
@@ -415,100 +548,6 @@ namespace Kiwi
         {
             m_prototypes[tname] = move(box);
         }
-    }
-    
-    
-    // ================================================================================ //
-    //                                      CONNECTION                                  //
-    // ================================================================================ //
-    
-    Link::Link(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept :
-    m_from(from),
-    m_to(to),
-    m_outlet(outlet),
-    m_inlet(inlet)
-    {
-        ;
-    }
-    
-    Link::~Link()
-    {
-        ;
-    }
-    
-    sLink Link::create(const sBox from, const size_t outlet, const sBox to, const size_t inlet)
-    {
-        sLink connect = make_shared<Link>(from, outlet, to, inlet);
-        if(connect && Box::compatible(connect))
-        {
-            return connect;
-        }
-        return nullptr;
-    }
-    
-    sLink Link::create(scPage page, scDico dico)
-    {
-        if(page && dico)
-        {
-            sBox from, to;
-            unsigned long outlet, inlet;
-            unsigned long from_id, to_id;
-            
-            ElemVector elements;
-            dico->get(Tag::from, elements);
-            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
-            {
-                from_id = elements[0];
-                outlet  = elements[1];
-            }
-            else
-            {
-                return nullptr;
-            }
-            
-            dico->get(Tag::to, elements);
-            if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
-            {
-                to_id   = elements[0];
-                inlet   = elements[1];
-            }
-            else
-            {
-                return nullptr;
-            }
-        
-            if(from_id != to_id)
-            {
-                vector<sBox> boxes;
-                page->getBoxes(boxes);
-                for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
-                {
-                    if(boxes[i]->getId() == from_id)
-                    {
-                        from = boxes[i];
-                        if(from->getNumberOfOutlets() <=  outlet)
-                        {
-                            return nullptr;
-                        }
-                    }
-                    else if(boxes[i]->getId() == to_id)
-                    {
-                        to = boxes[i];
-                        if(from->getNumberOfInlets() <=  inlet)
-                        {
-                            return nullptr;
-                        }
-                    }
-                }
-                
-                if(from && to)
-                {
-                    return Link::create(from, outlet, to, inlet);
-                }
-            }
-            
-        }
-        return nullptr;
     }
 }
 

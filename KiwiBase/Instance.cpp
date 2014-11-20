@@ -62,7 +62,7 @@ namespace Kiwi
     //                                      FACTORY                                     //
     // ================================================================================ //
 
-    sPage Instance::createPage(scDico dico)
+    sPage Instance::createPage(sDico dico)
     {
         sPage page = Page::create(shared_from_this(), dico);
         if(page)

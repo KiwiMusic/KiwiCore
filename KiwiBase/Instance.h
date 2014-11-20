@@ -88,7 +88,7 @@ namespace Kiwi
          @see removePage()
          @see getPages()
          */
-        sPage createPage(scDico dico = nullptr);
+        sPage createPage(sDico dico = nullptr);
         
         //! Close a page.
         /** The function closes page.

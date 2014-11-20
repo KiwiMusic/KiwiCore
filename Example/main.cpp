@@ -11,106 +11,9 @@
 
 using namespace Kiwi;
 
-mutex coutmutex;
-
-class IListener : public Instance::Listener
-{
-public:
-    IListener(){};
-    ~IListener(){};
-    
-    //! Receive the notification that a page has been created.
-    /** The function is called by the instance when a page has been created.
-     @param instance    The instance.
-     @param page        The page.
-     */
-    void pageHasBeenCreated(sInstance instance, sPage page) override
-    {
-        lock_guard<mutex> guard(coutmutex);
-        cout << "Page created : "<< (long)page.get() << endl;
-    };
-    
-    //! Receive the notification that a page has been closed.
-    /** The function is called by the instance when a page has been closed.
-     @param instance    The instance.
-     @param page        The page.
-     */
-    void pageHasBeenRemoved(sInstance instance, sPage page) override
-    {
-        lock_guard<mutex> guard(coutmutex);
-        cout << "Page deleted : "<< (long)page.get() << endl;
-    }
-    
-    //! Receive the notification that the dsp has been started.
-    /** The function is called by the instance when the dsp has been started.
-     @param instance    The instance.
-     */
-    void dspHasBeenStarted(sInstance instance) override {};
-    
-    //! Receive the notification that the dsp has been stopped.
-    /** The function is called by the instance when the dsp has been stopped.
-     @param instance    The instance.
-     */
-    void dspHasBeenStopped(sInstance instance) override {};
-    
-};
-
-void createPageFomInstance(sInstance instance, int i)
-{
-    //cout << "Index : " << i << endl;
-    instance->createPage();
-}
-
-void deletePageFomInstance(sInstance instance, sPage page, int i)
-{
-    //cout << "Index : " << i << endl;
-    instance->removePage(page);
-}
-
-void tickDspFromInstance(sInstance instance, int i)
-{
-    for(int z = 0; z < i; z++)
-    {
-        instance->tickDsp();
-        lock_guard<mutex> guard(coutmutex);
-        cout << "dsp : " << z << endl;
-    }
-}
-
-void bindListFomInstance(sInstance instance, shared_ptr<Instance::Listener> list)
-{
-    instance->bind(list);
-    lock_guard<mutex> guard(coutmutex);
-    cout << "bind " << endl;
-}
-
-void unbindListFomInstance(sInstance instance, shared_ptr<Instance::Listener> list)
-{
-    instance->bind(list);
-    lock_guard<mutex> guard(coutmutex);
-    cout << "unbind : " << endl;
-}
-
-ElemVector zaza;
-
-void generateElemVec(sBox box, sDico dico)
-{
-    double val1 = (double)rand() / (double)RAND_MAX;
-    double val2 = (double)rand() / (double)RAND_MAX;
-    long val3 = rand();
-    long val4 = rand();
-    ElemVector zozo  = {val1, val2, val3, val4, 5., 6., box, 8, dico};
-    zaza = zozo;
-    zaza.resize(2);
-    lock_guard<mutex> guard(coutmutex);
-    cout << "elem : " << toString(zaza) << endl;
-}
-
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    shared_ptr<IListener> lis =  make_shared<IListener>();
-
     sInstance kiwi = Instance::create();
     {
         Console::post("---------");
@@ -124,156 +27,34 @@ int main (int argc, char* argv[])
             dico->set(Tag::from, {3, 0});
             dico->set(Tag::to, {4, 0});
             page->createConnection(dico);
+            dico->clear();
             
+            dico->read("test2.kiwi", "/Users/Pierre/Desktop");
+            page->append(dico);
             vector<sBox> boxes;
             page->getBoxes(boxes);
-            sBox box;
-            if(boxes.size())
+            for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
             {
-                box = boxes[0];
-                box->receive(1, {1});
-                box->receive(0, {2});
-            }
-            
-            double val1 = (double)rand() / (double)RAND_MAX;
-            double val2 = (double)rand() / (double)RAND_MAX;
-            long val3 = rand();
-            long val4 = rand();
-            
-            zaza = {val1, val2, val3, val4, 5., 6., box, Tag::from, dico};
-            
-            const int nthread  = 6;
-            thread t[nthread];
-            for(int i = 0; i < nthread; ++i)
-            {
-                t[i] = thread(generateElemVec, box, dico);
-            }
-            //zaza = {5, Tag::text, box, Tag::from, dico, val1, val2, val3, val4};
-            for (int i = 0; i < nthread; ++i)
-            {
-                t[i].join();
-            }
-            cout << toString(zaza) << endl;
-            
-            cout << box.use_count() << endl;
-            /*
-            dico->set(Tag::from, {4, 0});
-            dico->set(Tag::to, {1, 0});
-            if(page->createConnection(dico))
-                cout << "aki";
-            
-            vector<sBox> boxes;
-            page->getBoxes(boxes);
-            if(boxes.size())
-            {
-                sBox box = boxes[0];
-                box->receive(1, {1});
-                box->receive(0, {2});
-            }
-            page->write(dico);
-            dico->write("test.kiwi", "/Users/Pierre/Desktop");
-             */
-            /*
-            sBox nbox;
-            dico->clear();
-            dico->read("expr rint( i1 ) + rint( i2 )");
-            nbox = page->createBox(dico);
-            nbox->receive(1, {2.3});
-            nbox->receive(0, {3});
-            
-            dico->clear();
-            dico->read("expr i1 + 2");
-            nbox = page->createBox(dico);
-            nbox->receive(0, {3.2});
-            kiwi->removePage(page);
-             */
-            /*
-            double fVal = 3.8;
-            mu::Parser p;
-            p.DefineVar("a", &fVal);
-            try
-            {
-                p.SetExpr("1 - rint(a-0.5)");
-                cout << p.GetExpr()<< "\n";
-            }
-            catch(mu::ParserError &exc)
-            {
-                ;
-            }
-            
-            std::cout << p.Eval() << std::endl;
-             */
-            
-            /*
-            const int nthread  = 6;
-            const int nliste  = 4;
-            vector<shared_ptr<Instance::Listener>> liste;
-            for(int i = 0; i < nliste; i++)
-            {
-                liste.push_back(make_shared<Instance::Listener>());
-            }
-            
-            kiwi->startDsp(44100, 1024);
-            thread tt(tickDspFromInstance, kiwi, 50);
-            
-            kiwi->bind(lis);
-            thread t[nthread];
-            thread t2[nliste];
-            for(int i = 0; i < nthread; ++i)
-            {
-                t[i] = thread(createPageFomInstance, kiwi, i);
-            }
-            
-            for(int i = 0; i < nliste; ++i)
-            {
-                t2[i] = thread(bindListFomInstance, kiwi, liste[i]);
-            }
-            
-            for (int i = 0; i < nthread; ++i)
-            {
-                t[i].join();
-            }
-            
-            for(int i = 0; i < nliste; ++i)
-            {
-                t2[i].join();
-            }
-            
-            vector<sPage> pages;
-            kiwi->getPages(pages);
-            cout << endl;
-            {
-                lock_guard<mutex> guard(coutmutex);
-                cout << "npages " << pages.size() << endl;
-                for(int i = 0; i < pages.size(); ++i)
+                if(boxes[i]->getName() == Tag::create("+"))
                 {
-                    cout << "Page : "<< (long)pages[i].get() << endl;
+                    boxes[i]->receive(0, {i+1});
+                    cout << endl;
+                }
+            }
+            page->bringToFront(boxes[0]);
+            page->getBoxes(boxes);
+            for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
+            {
+                if(boxes[i]->getName() == Tag::create("+"))
+                {
+                    boxes[i]->receive(0, {i+1});
+                    cout << endl;
                 }
             }
             
-            for(int i = 0; i < nliste; ++i)
-            {
-                t2[i] = thread(unbindListFomInstance, kiwi, liste[i]);
-            }
-            
-            for(int i = 0; i < nthread; ++i)
-            {
-                t[i] = thread(deletePageFomInstance, kiwi, pages[i], i);
-            }
-            
-            for(int i = 0; i < nliste; ++i)
-            {
-                t2[i].join();
-            }
-            
-            for (int i = 0; i < nthread; ++i)
-            {
-                t[i].join();
-            }
-            
-            tt.join();
-             */
-            
+            dico->clear();
+            page->write(dico);
+            dico->write("test.kiwi", "/Users/Pierre/Desktop");
         }
     }
     return 0;

@@ -43,7 +43,7 @@ namespace Kiwi
         virtual ~Arithmetic();
         virtual string getExpression() const noexcept override;
     private:
-        bool receive(size_t index, ElemVector const& elements) override;
+        bool receive(unsigned long index, ElemVector const& elements) override;
         virtual inline double compute() = 0;
         virtual sBox allocate(sPage page, sDico dico) const = 0;
     };

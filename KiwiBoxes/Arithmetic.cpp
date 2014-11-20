@@ -48,19 +48,20 @@ namespace Kiwi
         ;
     }
     
-    bool Arithmetic::receive(size_t index, ElemVector const& elements)
+    bool Arithmetic::receive(unsigned long index, ElemVector const& elements)
     {
-		Console::post(shared_from_this(), "Receive inlet " + toString(index) + " : " + toString(elements));
+		//Console::post(shared_from_this(), "Receive " + toString(index) + " [" + toString(elements) + "]");
         if(!elements.empty())
         {
-            if(elements.size() == 1 && (elements[0].isLong() || elements[0].isDouble()))
+            if(elements.size() == 1)
             {
                 if(elements[0].isLong() || elements[0].isDouble())
                 {
                     if(!index)
                     {
                         m_first = elements[0];
-                        Console::post(shared_from_this(), "Send : " + toString({compute()}));
+                        //Console::post(shared_from_this(), "Send [" + toString({compute()}) + "]");
+                        Console::post(toString(m_first) + " " + toString(getName()) + " " + toString(m_second) + " = " + toString(compute()));
                         send(0, {compute()});
                     }
                     else
