@@ -26,12 +26,9 @@
 
 #include "Box.h"
 
-// - Clear and add the links and boxes managemennt (Clean the id of the boxes)
+// TODO
 // - Add the attributes
-// - Make everything threadsafe
-// - Mutex for Dsp
-// - Clear the listeners
-
+// - Dsp & Mutex for Dsp
 namespace Kiwi
 {
     class DspContext;
@@ -48,6 +45,7 @@ namespace Kiwi
     {
     public:
         class Listener;
+        friend Box::Box(sPage page, string const& name, unsigned long type);
     private:
         const wInstance             m_instance;
         
@@ -56,7 +54,7 @@ namespace Kiwi
         
         vector<sBox>                m_boxes;
         mutable mutex               m_boxes_mutex;
-        atomic_ulong                m_boxes_id;
+        unsigned long               m_boxe_id;
         
         vector<sLink>               m_links;
         mutable mutex               m_links_mutex;
@@ -66,7 +64,6 @@ namespace Kiwi
         weak_ptr_equal<Listener>>   m_listeners;
         mutex                       m_listeners_mutex;
         
-        static bool sortBoxes(Element first, Element second);
     public:
         
         //! Constructor.
@@ -85,7 +82,7 @@ namespace Kiwi
          @param dico The dico that will initialize the page.
          @return The page.
          */
-        static sPage create(sInstance instance, scDico dico = nullptr);
+        static sPage create(sInstance instance, sDico dico = nullptr);
         
         //! Retrieve the instance that manages the page.
         /** The function retrieves the instance that manages the page.
@@ -120,7 +117,7 @@ namespace Kiwi
         /** The function retrieves the number of links in the page.
          @return The number of links in the page.
          */
-        inline unsigned long getNumberOfConnections() const noexcept
+        inline unsigned long getNumberOfLinks() const noexcept
         {
             lock_guard<mutex> guard(m_links_mutex);
             return m_links.size();
@@ -130,7 +127,7 @@ namespace Kiwi
         /** The function retrieves the links from the page.
          @param links   A vector of links.
          */
-        void getConnections(vector<sLink>& links) const
+        void getLinks(vector<sLink>& links) const
         {
             lock_guard<mutex> guard(m_links_mutex);
             links = m_links;
@@ -164,6 +161,18 @@ namespace Kiwi
          */
         void removeBox(sBox box);
         
+        //! Bring a box to the front of the page.
+        /** The function brings a box to the front of the page. The box will be setted as if it was the last box created and will be the last box of the vector of boxes.
+         @param box        The pointer to the box.
+         */
+        void bringToFront(sBox box);
+        
+        //! Bring a box to the back of the page.
+        /** The function brings a box to the back of the page. The box will be setted as if it was the first box created and will be the first box of the vector of boxes.
+         @param box        The pointer to the box.
+         */
+        void bringToBack(sBox box);
+        
         //! Add a link.
         /** The function add a link.
          @param link The link to add.
@@ -188,13 +197,13 @@ namespace Kiwi
         /** The function reads a dico and add the boxes and links to the page.
          @param dico The dico.
          */
-        void append(scDico dico);
+        void append(sDico dico);
         
         //! Read a dico.
         /** The function reads a dico that initializes the page.
          @param dico The dico.
          */
-        void read(scDico dico);
+        void read(sDico dico);
         
         //! Write the page in a dico.
         /** The function writes the pagein a dico.

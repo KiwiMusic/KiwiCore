@@ -35,7 +35,7 @@ namespace Kiwi
     Page::Page(sInstance instance) :
     m_instance(instance),
     m_dsp_context(make_shared<DspContext>()),
-    m_boxes_id(1)
+    m_boxe_id(1)
     {
         ;
     }
@@ -59,7 +59,7 @@ namespace Kiwi
         }
     }
     
-    sPage Page::create(sInstance instance, scDico dico)
+    sPage Page::create(sInstance instance, sDico dico)
     {
         sPage page = make_shared<Page>(instance);
         if(page && dico)
@@ -74,8 +74,16 @@ namespace Kiwi
         if(dico)
         {
             m_boxes_mutex.lock();
-            m_boxes_id = m_boxes.size()+1;
+            for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
+            {
+                if(m_boxe_id == m_boxes[i]->getId())
+                {
+                    m_boxe_id = m_boxes.size() + 1;
+                    break;
+                }
+            }
             sBox box = Box::create(shared_from_this(), dico);
+            m_boxe_id++;
             if(box)
             {
                 m_boxes.push_back(box);
@@ -117,8 +125,10 @@ namespace Kiwi
         {
             if(dico)
             {
-                m_boxes_id = oldbox->getId();
+                unsigned long current_box_id = m_boxe_id;
+                m_boxe_id = oldbox->getId();
                 sBox newbox = Box::create(shared_from_this(), dico);
+                m_boxe_id = current_box_id;
                 if(newbox)
                 {
                     m_boxes[position] = newbox;
@@ -133,10 +143,9 @@ namespace Kiwi
                         sLink newconnect = Link::create(m_links[i], oldbox, newbox);
                         if(newconnect)
                         {
-                            sLink oldconnect  = m_links[i];
+                            sLink oldlink  = m_links[i];
                             m_links[i]        = newconnect;
-                            
-                            Box::disconnect(oldconnect);
+                            oldlink->disconnect();
                             
                             m_listeners_mutex.lock();
                             auto it = m_listeners.begin();
@@ -149,7 +158,7 @@ namespace Kiwi
                                 else
                                 {
                                     Page::sListener listener = (*it).lock();
-                                    listener->linkHasBeenReplaced(shared_from_this(), oldconnect, newconnect);
+                                    listener->linkHasBeenReplaced(shared_from_this(), oldlink, newconnect);
                                     ++it;
                                 }
                             }
@@ -193,7 +202,7 @@ namespace Kiwi
                 if(m_links[i]->getBoxFrom() == box || m_links[i]->getBoxTo() == box)
                 {
                     sLink oldlink = m_links[i];
-                    Box::disconnect(oldlink);
+                    oldlink->disconnect();
                     m_links.erase(m_links.begin()+(long)i);
                     --i;
                     m_listeners_mutex.lock();
@@ -217,6 +226,7 @@ namespace Kiwi
             m_links_mutex.unlock();
             
             m_boxes.erase(m_boxes.begin()+(long)position);
+            m_boxe_id = box->getId();
             m_boxes_mutex.unlock();
             box->unbind(shared_from_this());
             
@@ -243,9 +253,31 @@ namespace Kiwi
         }
     }
     
+    void Page::bringToFront(sBox box)
+    {
+        lock_guard<mutex> guard(m_boxes_mutex);
+        vector<sBox>::size_type pos = find_position(m_boxes, box);
+        if(pos != m_boxes.size())
+        {
+            m_boxes.erase(m_boxes.begin()+(long)pos);
+            m_boxes.push_back(box);
+        }
+    }
+    
+    void Page::bringToBack(sBox box)
+    {
+        lock_guard<mutex> guard(m_boxes_mutex);
+        vector<sBox>::size_type pos = find_position(m_boxes, box);
+        if(pos != m_boxes.size())
+        {
+            m_boxes.erase(m_boxes.begin()+(long)pos);
+            m_boxes.insert(m_boxes.begin(), box);
+        }
+    }
+    
     sLink Page::addConnection(sLink link)
     {
-        if(Box::connect(link))
+        if(link->connect())
         {
             m_links_mutex.lock();
             m_links.push_back(link);
@@ -292,7 +324,7 @@ namespace Kiwi
         vector<sLink>::size_type position = find_position(m_links, link);
         if(position != m_links.size())
         {
-            Box::disconnect(m_links[position]);
+            m_links[position]->disconnect();
             m_links.erase(m_links.begin()+(long)position);
             
             m_listeners_mutex.lock();
@@ -314,13 +346,13 @@ namespace Kiwi
         }
     }
     
-    void Page::append(scDico dico)
+    void Page::append(sDico dico)
     {
         if(dico)
         {
+            map<unsigned long, unsigned long> m_ids_mapper;
             ElemVector boxes;
             dico->get(Tag::boxes, boxes);
-            sort(m_boxes.begin(), m_boxes.end(), sortBoxes);
             for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
             {
                 sDico subdico = boxes[i];
@@ -329,7 +361,17 @@ namespace Kiwi
                     subdico = subdico->get(Tag::box);
                     if(subdico)
                     {
-                        createBox(subdico);
+                        sBox box = createBox(subdico);
+                    
+                        if(dico->has(Tag::links) && box && subdico->has(Tag::id))
+                        {
+                            unsigned long _id = subdico->get(Tag::id);
+                            if(box->getId() != _id)
+                            {
+                                m_ids_mapper[_id] = box->getId();
+                            }
+                        }
+                            
                     }
                 }
             }
@@ -344,6 +386,23 @@ namespace Kiwi
                     subdico = subdico->get(Tag::link);
                     if(subdico)
                     {
+                        ElemVector elem;
+                        subdico->get(Tag::from, elem);
+                        if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
+                        {
+                            if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+                            {
+                                subdico->set(Tag::from, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+                            }
+                        }
+                        subdico->get(Tag::to, elem);
+                        if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
+                        {
+                            if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+                            {
+                                subdico->set(Tag::to, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+                            }
+                        }
                         createConnection(subdico);
                     }
                 }
@@ -351,7 +410,7 @@ namespace Kiwi
         }
     }
     
-    void Page::read(scDico dico)
+    void Page::read(sDico dico)
     {
         m_links.clear();
         m_boxes.clear();
@@ -385,11 +444,11 @@ namespace Kiwi
             for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
             {
                 sDico link = Dico::create();
-                sDico subconnect = Dico::create();
-                if(link && subconnect && m_links[i]->isValid())
+                sDico sublink = Dico::create();
+                if(link && sublink)
                 {
-                    m_links[i]->write(subconnect);
-                    link->set(Tag::link, subconnect);
+                    m_links[i]->write(sublink);
+                    link->set(Tag::link, sublink);
                     elements.push_back(link);
                 }
             }
@@ -453,8 +512,8 @@ namespace Kiwi
         {
             if(m_links[i]->getBoxTo() == box && m_links[i]->getInletIndex() == index)
             {
-                sLink oldconnect = m_links[i];
-                Box::disconnect(oldconnect);
+                sLink oldlink = m_links[i];
+                oldlink->disconnect();
                 m_links.erase(m_links.begin()+(long)i);
                 max_size--;
                 
@@ -469,7 +528,7 @@ namespace Kiwi
                     else
                     {
                         Page::sListener listener = (*it).lock();
-                        listener->linkHasBeenRemoved(shared_from_this(), oldconnect);
+                        listener->linkHasBeenRemoved(shared_from_this(), oldlink);
                         ++it;
                     }
                 }
@@ -495,8 +554,8 @@ namespace Kiwi
         {
             if(m_links[i]->getBoxFrom() == box || m_links[i]->getOutletIndex() == index)
             {
-                sLink oldconnect = m_links[i];
-                Box::disconnect(oldconnect);
+                sLink oldlink = m_links[i];
+                oldlink->disconnect();
                 m_links.erase(m_links.begin()+(long)i);
                 max_size--;
                 
@@ -511,7 +570,7 @@ namespace Kiwi
                     else
                     {
                         Page::sListener listener = (*it).lock();
-                        listener->linkHasBeenRemoved(shared_from_this(), oldconnect);
+                        listener->linkHasBeenRemoved(shared_from_this(), oldlink);
                         ++it;
                     }
                 }
@@ -534,22 +593,6 @@ namespace Kiwi
     {
         lock_guard<mutex> guard(m_listeners_mutex);
         m_listeners.erase(listener);
-    }
-    
-    bool Page::sortBoxes(Element first, Element second)
-    {
-        sDico firstdico = first;
-        sDico seconddico = second;
-        if(firstdico && seconddico)
-        {
-            firstdico = firstdico->get(Tag::box);
-            seconddico = seconddico->get(Tag::box);
-            if(firstdico && seconddico)
-            {
-                return (long)firstdico->get(Tag::id) < (long)seconddico->get(Tag::id);
-            }
-        }
-        return false;
     }
     
     // ================================================================================ //

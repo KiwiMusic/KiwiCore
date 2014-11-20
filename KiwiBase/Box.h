@@ -24,11 +24,16 @@
 #ifndef __DEF_KIWI_BOX__
 #define __DEF_KIWI_BOX__
 
+#include "Link.h"
 #include "Attribute.h"
 #include "Event.h"
 #include "Doodle.h"
 #include "Beacon.h"
 
+// TODO
+// - Box connection method (see where to put it and make it threadsafe)
+// - Attributes (getFont, getSize, getPosition etc...) !!
+// - See how to format the expression
 namespace Kiwi
 {
     class Instance;
@@ -46,15 +51,14 @@ namespace Kiwi
     {
     public:
         class Listener;
-        
-        enum Type
+
+        enum Behavior
         {
-            SignalProcessor         = 1<<1,
-            MouseListener           = 1<<2,
-            KeyboardListener        = 1<<3,
-            Drawer                  = 1<<4
+            Signal      = 1<<1,
+            Mouse       = 1<<2,
+            Keyboard    = 1<<3,
+            Graphic     = 1<<4
         };
-    protected:
         
         class Inlet
         {
@@ -63,22 +67,26 @@ namespace Kiwi
             {
                 DataCold    = 0,
                 DataHot     = 1,
-                Signal      = 2
+                Signal      = 2,
+                Error       = 3
             };
-
+        private:
+            
+            friend class Box;
+            vector<Socket>  m_sockets;
             const Type      m_type;
             const string    m_description;
-            
-            Inlet(Type type, string description) :
+        
+            Inlet(Type type, string description) noexcept :
             m_type(type),
             m_description(description)
             {
                 ;
             }
-            
+        public:
             ~Inlet()
             {
-                ;
+                m_sockets.clear();
             }
         };
         
@@ -86,52 +94,54 @@ namespace Kiwi
         class Outlet
         {
         public:
-            struct Conn
-            {
-                sBox    m_box;
-                size_t  m_index;
-            };
             
             enum Type
             {
                 Data    = 0,
-                Signal  = 1
+                Signal  = 2,
+                Error   = 3
             };
-        
-            vector<Conn>  m_conns;
-            const Type    m_type;
-            const string  m_description;
+        private:
             
-            Outlet(Type type, string description) :
+            friend class Box;
+            vector<Socket>  m_sockets;
+            const Type      m_type;
+            const string    m_description;
+            
+            Outlet(Type type, string description) noexcept :
             m_type(type),
             m_description(description)
             {
                 ;
             }
-            
+        public:
             ~Outlet()
             {
-                m_conns.clear();
+                m_sockets.clear();
             }
         };
         
     private:
-            
+        friend bool Link::connect() const noexcept;
+        friend bool Link::disconnect() const noexcept;
+        
+        const wInstance             m_instance;
         const wPage                 m_page;
         const sTag                  m_name;
+        const unsigned long         m_id;
         const unsigned long         m_type;
-        
-        atomic_ulong                m_id;
         sTag                        m_text;
         
         vector<unique_ptr<Outlet>>  m_outlets;
         vector<unique_ptr<Inlet>>   m_inlets;
-        size_t                      m_stack_count;
+        atomic_ullong               m_stack_count;
+        mutable mutex               m_io_mutex;
         
         unordered_set<weak_ptr<Listener>,
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>   m_listeners;
-        
+        mutex                       m_listeners_mutex;
+    
     public:
         
         //! Constructor.
@@ -153,7 +163,10 @@ namespace Kiwi
         /** The function retrieves the instance that manages the page of the box.
          @return The instance that manages the page of the box.
          */
-        sInstance getInstance() const noexcept;
+        inline sInstance getInstance() const noexcept
+        {
+            return m_instance.lock();
+        }
         
         //! Retrieve the page that manages the box.
         /** The function retrieves the page that manages the box.
@@ -177,15 +190,6 @@ namespace Kiwi
         /** The function retrieves the text of the box as a tag.
          @return The text of the box as a tag.
          */
-        inline sTag getText() const noexcept
-        {
-            return m_text;
-        }
-        
-        //! Retrieve the text of the box.
-        /** The function retrieves the text of the box as a tag.
-         @return The text of the box as a tag.
-         */
         inline unsigned long getId() const noexcept
         {
             return m_id;
@@ -198,6 +202,15 @@ namespace Kiwi
         inline unsigned long getType() const noexcept
         {
             return m_type;
+        }
+        
+        //! Retrieve the text of the box.
+        /** The function retrieves the text of the box as a tag.
+         @return The text of the box as a tag.
+         */
+        inline sTag getText() const noexcept
+        {
+            return m_text;
         }
         
         //! Retrieve the expression of the box.
@@ -215,6 +228,7 @@ namespace Kiwi
          */
         inline unsigned long getNumberOfInlets() const noexcept
         {
+            lock_guard<mutex> guard(m_io_mutex);
             return (unsigned long)m_inlets.size();
         }
         
@@ -225,6 +239,7 @@ namespace Kiwi
          */
         inline string getInletDescription(unsigned long index) const noexcept
         {
+            lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
                 return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_description;
@@ -235,12 +250,49 @@ namespace Kiwi
             }
         }
         
+        //! Retrieve the type of an inlet.
+        /** The functions retrieves the type of an inlet.
+         @param index The inlet index.
+         @return The type.
+         */
+        inline Inlet::Type getInletType(unsigned long index) const noexcept
+        {
+            lock_guard<mutex> guard(m_io_mutex);
+            if(index < m_inlets.size())
+            {
+                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_type;
+            }
+            else
+            {
+                return Inlet::Type::Error;
+            }
+        }
+        
+        //! Retrieve the sockets of an inlet.
+        /** The functions retrieves the sockets of an inlet.
+         @param index The inlet index.
+         @param sockets A vetcor of socket to fill.
+         */
+        inline void getInletSockets(unsigned long index, vector<Socket>& sockets) const noexcept
+        {
+            lock_guard<mutex> guard(m_io_mutex);
+            if(index < m_inlets.size())
+            {
+                sockets = m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_sockets;
+            }
+            else
+            {
+                sockets.clear();
+            }
+        }
+        
         //! Retrieve the number of outlets of the box.
         /** The functions retrieves the number of outlets of the box.
          @return The number of outlets.
          */
         inline unsigned long getNumberOfOutlets() const noexcept
         {
+            lock_guard<mutex> guard(m_io_mutex);
             return (unsigned long)m_outlets.size();
         }
         
@@ -251,6 +303,7 @@ namespace Kiwi
          */
         inline string getOutletDescription(unsigned long index) const noexcept
         {
+            lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
                 return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_description;
@@ -261,17 +314,53 @@ namespace Kiwi
             }
         }
         
+        //! Retrieve the type of an inlet.
+        /** The functions retrieves the type of an inlet.
+         @param index The inlet index.
+         @return The type.
+         */
+        inline Outlet::Type getOutletType(unsigned long index) const noexcept
+        {
+            lock_guard<mutex> guard(m_io_mutex);
+            if(index < m_outlets.size())
+            {
+                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_type;
+            }
+            else
+            {
+                return Outlet::Type::Error;
+            }
+        }
+        
+        //! Retrieve the sockets of an outlet.
+        /** The functions retrieves the sockets of an outlet.
+         @param index The outlet index.
+         @param sockets A vetcor of socket to fill.
+         */
+        inline void getOutletSockets(unsigned long index, vector<Socket>& sockets) const noexcept
+        {
+            lock_guard<mutex> guard(m_io_mutex);
+            if(index < m_outlets.size())
+            {
+                sockets = m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_sockets;
+            }
+            else
+            {
+                sockets.clear();
+            }
+        }
+        
         //! The receive method that should be override.
-        /** The function shoulds perform some stuff.
+        /** The function shoulds perform some stuff. Return false if the vector of element doesn't match with your method then the box will check if the vector match with attributes methods, othersize return true.
          @param elements    A list of elements to pass.
          */
-        virtual bool receive(size_t index, ElemVector const& elements)
+        virtual bool receive(unsigned long index, ElemVector const& elements)
         {
             return false;
         }
         
         //! The receive method that should be override.
-        /** The function shoulds perform some stuff.
+        /** The function shoulds perform some stuff. Return false if you don't want the mouse event then the box manager will notify other mouse listener if needed, othersize return true.
          @param event    A mouse event.
          */
         virtual bool receive(Event::Mouse const& event)
@@ -280,7 +369,7 @@ namespace Kiwi
         }
         
         //! The receive method that should be override.
-        /** The function shoulds perform some stuff.
+        /** The function shoulds perform some stuff. Return false if you don't want the keyboard event then the box manager will notifiy other keyboard listener if needed, othersize return true.
          @param event    A keyboard event.
          */
         virtual bool receive(Event::Keyboard const& event)
@@ -289,27 +378,12 @@ namespace Kiwi
         }
         
         //! The paint method that should be override.
-        /** The function shoulds draw some stuff in the doodle.
+        /** The function shoulds draw some stuff in the doodle. Return false if you don't want to draw then the box manager will draw the text of the box, othersize return true.
          @param doodle    A doodle to draw.
          */
         virtual bool draw(Doodle& doodle) const
         {
             return false;
-        }
-        
-        //! The draw method.
-        /** The function performs some stuff before to call the paint method.
-         @param paper    A doodle to draw.
-         */
-        void paint(Doodle& d, bool edit = 0, bool selected = 0) const;
-        
-        //! Set the id of the box.
-        /** The function sets the id of the box.
-         @param id The id of the box.
-         */
-        inline void setId(unsigned long _id) noexcept
-        {
-            m_id = _id;
         }
         
         //! Write the box in a dico.
@@ -330,7 +404,7 @@ namespace Kiwi
          @param index The index of the outlet.
          @param elements A list of elements to pass.
          */
-        void    send(size_t index, ElemVector const& elements) const noexcept;
+        void    send(unsigned long index, ElemVector const& elements) const noexcept;
         
         //! Add a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -345,13 +419,13 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    insertInlet(size_t index, Inlet::Type type, string const& description = "");
+        void    insertInlet(unsigned long index, Inlet::Type type, string const& description = "");
         
         //! Remove an inlet from the box.
         /** The function removes an inlet from the box.
          @param index The index of the inlet
          */
-        void    removeInlet(size_t index);
+        void    removeInlet(unsigned long index);
         
         //! Add a new outlet the the box.
         /** The function adds a new outlet the the box.
@@ -366,13 +440,13 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    insertOutlet(size_t index, Outlet::Type type, string const& description = "");
+        void    insertOutlet(unsigned long index, Outlet::Type type, string const& description = "");
         
         //! Remove an outlet.
         /** The function removes an outlet.
          @param index The index of the outlet.
          */
-        void    removeOutlet(size_t index);
+        void    removeOutlet(unsigned long index);
 
     private:
         
@@ -386,21 +460,65 @@ namespace Kiwi
         /** The function writes the box in a dico.
          @param dico The dico.
          */
-        virtual void save(sDico dico) const;
+        virtual void save(sDico dico) const
+        {
+            
+        }
         
         //! The read method that should be override.
-        /** The function read a dico to initalize the boxe.
+        /** The function reads a dico to initalize the boxe.
          @param dico The dico.
          */
-        virtual void load(scDico dico);
+        virtual void load(scDico dico)
+        {
+            
+        }
+        
+        //! Connect an inlet to a box's outlet.
+        /** The function connects an inlet to a box's outlet. Note that the connection of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
+         @param inlet   The index of the inlet.
+         @param box     The outlet's box.
+         @param outlet  The index of the outlet.
+         @return true if the connection has been done, otherwise false.
+         */
+        bool connectInlet(unsigned long inlet, sBox box, unsigned long outlet);
+        
+        //! Connect an outlet to a box's inlet.
+        /** The function connects an outlet to a box's inlet. This part of the connection is the only one really important, because this is the one used by the send method.
+         @param inlet   The index of the outlet.
+         @param box     The inlet box.
+         @param outlet  The index of the inlet.
+         @return true if the connection has been done, otherwise false.
+         */
+        bool connectOutlet(unsigned long outlet, sBox box, unsigned long inlet);
+        
+        //! Disconnect an inlet to a box's outlet.
+        /** The function disconnects an inlet to a box's outlet. Note that the connection of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
+         @param inlet   The index of the inlet.
+         @param box     The outlet's box.
+         @param outlet  The index of the outlet.
+         @return true if the connection has been removed, otherwise false.
+         */
+        bool disconnectInlet(unsigned long inlet, sBox box, unsigned long outlet);
+        
+        //! Disconnect an outlet to a box's inlet.
+        /** The function disconnects an outlet to a box's inlet. This part of the disconnection is the only one really important, because this is the one used by the send method.
+         @param inlet   The index of the outlet.
+         @param box     The inlet box.
+         @param outlet  The index of the inlet.
+         @return true if the connection has been removed, otherwise false.
+         */
+        bool disconnectOutlet(unsigned long outlet, sBox box, unsigned long inlet);
         
     public:
         
-        static bool compatible(scLink link) noexcept;
-        
-        static bool connect(scLink link) noexcept;
-        
-        static bool disconnect(scLink link) noexcept;
+        //! The default paint method.
+        /** The default function paint a default box with the background, border, inlets, outlets and text.
+         @param paper       A doodle to draw.
+         @param edit        If the page is in edition mode.
+         @param selected    If the box is selected
+         */
+        static void paint(sBox box, Doodle& d, bool edit = false, bool selected = false);
         
         // ================================================================================ //
         //                                  BOX LISTENER                                    //
@@ -450,6 +568,13 @@ namespace Kiwi
              */
             virtual void inletHasBeenRemoved(sBox box, unsigned long index){};
             
+            //! Receive the notification that an inlet has been connected.
+            /** The function is called by the box when an inlet has been connected.
+             @param box    The box.
+             @param index  The inlet index.
+             */
+            virtual void inletHasBeenConnected(sBox box, unsigned long index){};
+            
             //! Receive the notification that an outlet has been created.
             /** The function is called by the box when a outlet has been created.
              @param box    The box.
@@ -463,6 +588,13 @@ namespace Kiwi
              @param index  The outlet index.
              */
             virtual void outletHasBeenRemoved(sBox box, unsigned long index){};
+            
+            //! Receive the notification that an outlet has been connected.
+            /** The function is called by the box when an outlet has been connected.
+             @param box    The box.
+             @param index  The outlet index.
+             */
+            virtual void outletHasBeenConnected(sBox box, unsigned long index){};
         };
 		
 		//! Add a box listener in the binding list of the box.
@@ -486,8 +618,8 @@ namespace Kiwi
         // ================================================================================ //
         //                                      BOX FACTORY                                 //
         // ================================================================================ //
-        
         static map<sTag, unique_ptr<Box>>  m_prototypes;
+        static mutex m_prototypes_mutex;
     public:
     
         //! Box factory
@@ -501,148 +633,6 @@ namespace Kiwi
     {
         return toString(box->getName());
     }
-    
-    // ================================================================================ //
-    //                                      CONNECTION                                  //
-    // ================================================================================ //
-    
-    //! The link owns to a page and is used to create a patch lines.
-    /**
-     The link is opaque, you shouldn't have to use it at all.
-     */
-    class Link
-    {
-    private:
-        
-        const wBox     m_from;
-        const wBox     m_to;
-        const size_t   m_outlet;
-        const size_t   m_inlet;
-        
-    public:
-        
-        //! The constructor.
-        /** You should never use this method.
-         */
-        Link(sBox from, unsigned long outlet, sBox to, unsigned long inlet) noexcept;
-        
-        //! The destructor.
-        /** You should never use this method.
-         */
-        ~Link();
-        
-        //! The link creation method.
-        /** The function allocates a link.
-         @param from    The output box.
-         @param outlet  The outlet of the link.
-         @param to      The input box.
-         @param inlet   The inlet of the link.
-         @return The link.
-         */
-        static sLink create(const sBox from, const size_t outlet, const sBox to, const size_t inlet);
-        
-        //! The link creation method.
-        /** The function allocates a link with a page and a dico.
-         @param page    The page that owns the boxes.
-         @param dico    The dico that defines the link.
-         @return The link.
-         */
-        static sLink create(scPage page, scDico dico);
-        
-        //! The link creation method with another link but change one of the boxes with another one.
-        /** The function allocates a link with another link.
-         @param connect The other link.
-         @param oldbox  The old box to replace.
-         @param newbox  The newbox box that replace.
-         @return The link.
-         */
-        static sLink create(const sLink connect, const sBox oldbox, const sBox newbox)
-        {
-            if(connect->getBoxFrom() == oldbox)
-            {
-                if(connect->getOutletIndex() < newbox->getNumberOfOutlets())
-                {
-                    return create(newbox, connect->getOutletIndex(), connect->getBoxTo(), connect->getInletIndex());
-                }
-            }
-            else if(connect->getBoxTo() == oldbox)
-            {
-                if(connect->getInletIndex() < newbox->getNumberOfInlets())
-                {
-                    return create(connect->getBoxFrom(), connect->getOutletIndex(), newbox, connect->getInletIndex());
-                }
-            }
-            return nullptr;
-        }
-        
-        //! Retrieve the output box.
-        /** The function retrieves the output box of the link.
-         @return The output box.
-         */
-        inline sBox getBoxFrom() const noexcept
-        {
-            return m_from.lock();
-        }
-        
-        //! Retrieve the input box.
-        /** The function retrieves the input box of the link.
-         @return The input box.
-         */
-        inline sBox getBoxTo() const noexcept
-        {
-            return m_to.lock();
-        }
-        
-        //! Retrieve the outlet of the link.
-        /** The function retrieves the outlet of the link.
-         @return The outlet of the link.
-         */
-        inline size_t getOutletIndex() const noexcept
-        {
-            return m_outlet;
-        }
-        
-        //! Retrieve the inlet of the link.
-        /** The function retrieves the inlet of the link.
-         @return The inlet of the link.
-         */
-        inline size_t getInletIndex() const noexcept
-        {
-            return m_inlet;
-        }
-        
-        //! Retrieve the inlet of the link.
-        /** The function retrieves the inlet of the link.
-         @return The inlet of the link.
-         */
-        inline bool isValid() const noexcept
-        {
-            sBox from   = m_from.lock();
-            sBox to     = m_to.lock();
-            return from && to && from != to && m_outlet  < from->getNumberOfOutlets() && m_inlet < to->getNumberOfInlets() && from->getPage() == to->getPage();
-        }
-        
-        //! Write the page in a dico.
-        /** The function writes the link in a dico.
-         @param dico The dico.
-         */
-        void write(sDico dico) const noexcept
-        {
-            sBox     from    = getBoxFrom();
-            sBox     to      = getBoxTo();
-            if(from && to)
-            {
-                dico->set(Tag::from, {from->getId(), getOutletIndex()});
-                dico->set(Tag::to, {to->getId(), getInletIndex()});
-            }
-            else
-            {
-                dico->clear(Tag::from);
-                dico->clear(Tag::to);
-            }
-        }
-            
-    };
 }
 
 

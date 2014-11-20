@@ -32,8 +32,8 @@ namespace Kiwi
     sTag Tag::text        = Tag::create("text");
     sTag Tag::box         = Tag::create("box");
     sTag Tag::boxes       = Tag::create("boxes");
-    sTag Tag::link  = Tag::create("link");
-    sTag Tag::links = Tag::create("links");
+    sTag Tag::link        = Tag::create("link");
+    sTag Tag::links       = Tag::create("links");
     sTag Tag::id          = Tag::create("id");
     sTag Tag::from        = Tag::create("from");
     sTag Tag::to          = Tag::create("to");
