@@ -342,7 +342,7 @@ namespace Kiwi
             //! Descrutor.
             /** Free the attributes.
              */
-            ~Manager();
+            virtual ~Manager();
             
         protected:
             

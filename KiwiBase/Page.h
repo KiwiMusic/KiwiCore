@@ -319,21 +319,21 @@ namespace Kiwi
             
             //! Receive the notification that a link has been created.
             /** The function is called by the page when a link has been created.
-             @param page        The page.
+             @param page  The page.
              @param link  The box.
              */
             virtual void linkHasBeenCreated(sPage page, sLink link){};
             
             //! Receive the notification that a link has been removed.
             /** The function is called by the page when a link has been removed.
-             @param page        The page.
+             @param page  The page.
              @param link  The link.
              */
             virtual void linkHasBeenRemoved(sPage page, sLink link){};
             
             //! Receive the notification that a link has been replaced by another one.
             /** The function is called by the page when a link has been replaced by another one.
-             @param page            The page.
+             @param page      The page.
              @param oldlink   The link that has been replaced.
              @param newlink   The link that has replaced.
              */
