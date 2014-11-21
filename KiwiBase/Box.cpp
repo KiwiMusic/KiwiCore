@@ -371,7 +371,7 @@ namespace Kiwi
         d.setFont(Font("Menelo", 13, Font::Normal));
         d.setColor(Color(1., 1., 1., 1.));
         d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
-        if(box->getType() & Behavior::Graphic)
+        if(!(box->getType() & Behavior::Graphic))
         {
             d.setColor({0.3, 0.3, 0.3, 1.});
             d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
