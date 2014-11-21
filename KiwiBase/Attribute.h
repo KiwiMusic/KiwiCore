@@ -103,7 +103,7 @@ namespace Kiwi
 		 */
 		template<class AttrClass, class ...Args> static shared_ptr<AttrClass> create(Args&& ...arguments)
 		{
-            sAttr attr = make_shared<AttrClass>(forward<Args>(arguments)...);
+            shared_ptr<AttrClass> attr = make_shared<AttrClass>(forward<Args>(arguments)...);
             if(attr)
             {
                 attr->setDefaultValues();
@@ -525,6 +525,8 @@ namespace Kiwi
             };
         };
     };
+	
+	typedef shared_ptr<Attr::Manager> sAttrManager;
     
     // ================================================================================ //
     //                                      ATTRIBUTE TYPED                             //
