@@ -114,9 +114,9 @@ namespace Kiwi
         //! Attribute maker.
 		/** The function creates an attribute.
 		 */
-		template<class AttrClass> static sAttr create()
+		template<class AttrClass> static shared_ptr<AttrClass> create()
 		{
-			sAttr attr = make_shared<AttrClass>();
+			shared_ptr<AttrClass> attr = make_shared<AttrClass>();
             if(attr)
             {
                 attr->setDefaultValues();
