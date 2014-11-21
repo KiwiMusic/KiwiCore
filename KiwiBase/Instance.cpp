@@ -38,7 +38,19 @@ namespace Kiwi
     m_sample_rate(0),
     m_vector_size(0)
     {
-        
+		// just to test attributes
+		sTag pageTag = Tag::create("Page");
+
+		ElemVector elems = {20., 20.};
+		addAttribute(Attr::create<AttrPoint>(Tag::create("newpagedef_gridsize"),
+											 Tag::create("Grid Size (default for new pages)"),
+											 pageTag,
+											 elems));
+		 
+		addAttribute(Attr::create<AttrBool>(Tag::create("newpagedef_snaptogrid"),
+											Tag::create("Snap To Grid (default for new pages)"),
+											pageTag,
+											false));
     }
     
     Instance::~Instance()
