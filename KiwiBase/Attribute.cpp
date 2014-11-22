@@ -416,10 +416,8 @@ namespace Kiwi
             sAttr attr = it->second;
             if(attr && !attr->isInvisible())
             {
-                if(find(names.begin(), names.end(), attr->getCategory()) != names.end())
-                {
-                    names.push_back(attr->getCategory());
-                }
+				if (find(names.begin(), names.end(), attr->getCategory()) == names.end())
+					names.push_back(attr->getCategory());
             }
 		}
     }
