@@ -234,6 +234,15 @@ namespace Kiwi
             return m_attr_size->get();
         }
         
+        //! Retrieve the bounds of the box.
+        /** The function retrieves the bounds of the box as a rectangle.
+         @return The bounds of the box as a rectangle.
+         */
+        inline Rectangle getBounds() const noexcept
+        {
+            return Rectangle(m_attr_position->get(), m_attr_position->get());
+        }
+        
         //! Retrieve the expression of the box.
         /** The function retrieves the expression of the box as a string.
          @return The expression of the box as a string.
@@ -712,7 +721,7 @@ namespace Kiwi
             
             inline bool isHit(Point const& pt)
             {
-                if(1)
+                if(m_box->getBounds().contains(pt))
                 {
                     return true;
                 }

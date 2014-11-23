@@ -28,27 +28,26 @@
 
 namespace Kiwi
 {
-    class Doodle;
-    
     // ================================================================================ //
     //                                      POINT                                       //
     // ================================================================================ //
     
-    //! The point holds two double value.
+    //! The point holds two double values.
     /**
      The point is used to represent a point in a space and allows several modification.
      */
     class Point
     {
-    public:
-        double x;
-        double y;
+    private:
+        double m_x;
+        double m_y;
         
+    public:
         //! Constructor.
         /** The function initialize a point at zero origin.
          */
         Point() noexcept :
-        x(0.), y(0.)
+        m_x(0.), m_y(0.)
         {
             ;
         }
@@ -56,8 +55,8 @@ namespace Kiwi
         //! Constructor.
         /** The function initialize a point with two double values.
          */
-        Point(const double _x, const double _y) noexcept :
-        x(_x), y(_y)
+        Point(const double x, const double y) noexcept :
+        m_x(x), m_y(y)
         {
             ;
         }
@@ -66,15 +65,15 @@ namespace Kiwi
         /** The function initialize a point a vector of elements.
          */
         Point(ElemVector const& elements) noexcept :
-        x(0.), y(0.)
+        m_x(0.), m_y(0.)
         {
             if(!elements.empty() && elements[0].isNumber())
             {
-                x = (double)elements[0];
+                m_x = (double)elements[0];
             }
             if(elements.size() > 1 && elements[1].isNumber())
             {
-                y = (double)elements[1];
+                m_y = (double)elements[1];
             }
         }
         
@@ -82,7 +81,7 @@ namespace Kiwi
         /** The function initialize another point.
          */
         Point(Point const& pt) noexcept :
-        x(pt.x), y(pt.y)
+        m_x(pt.m_x), m_y(pt.m_y)
         {
             ;
         }
@@ -95,24 +94,39 @@ namespace Kiwi
             ;
         }
         
+        inline double x() const noexcept
+        {
+            return m_x;
+        }
+        
+        inline double y() const noexcept
+        {
+            return m_y;
+        }
+        
         inline Point& operator=(ElemVector const& elements) noexcept
         {
             if(!elements.empty() && elements[0].isNumber())
             {
-                x = (double)elements[0];
+                m_x = (double)elements[0];
             }
             if(elements.size() > 1 && elements[1].isNumber())
             {
-                y = (double)elements[1];
+                m_y = (double)elements[1];
             }
             return *this;
         }
         
         inline Point& operator=(Point const& pt) noexcept
         {
-            x = pt.x;
-            y = pt.y;
+            m_x = pt.m_x;
+            m_y = pt.m_y;
             return *this;
+        }
+        
+        inline operator ElemVector() const noexcept
+        {
+            return {m_x, m_y};
         }
     };
 }

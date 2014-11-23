@@ -25,6 +25,7 @@
 #define __DEF_KIWI_DOODLE__
 
 #include "Point.h"
+#include "Rectangle.h"
 #include "Color.h"
 
 namespace Kiwi
@@ -81,30 +82,6 @@ namespace Kiwi
     };
     
     // ================================================================================ //
-    //                                      RECTANGLE                                   //
-    // ================================================================================ //
-    
-    class Rectangle
-    {
-    public:
-        double x;
-        double y;
-        double width;
-        double height;
-        
-        Rectangle(double _x, double _y, double _width, double _height) noexcept :
-        x(_x), y(_y), width(_width), height(_height)
-        {
-            ;
-        }
-        
-        ~Rectangle()
-        {
-            ;
-        }
-    };
-    
-    // ================================================================================ //
     //                                      DOODLE                                      //
     // ================================================================================ //
     
@@ -140,21 +117,21 @@ namespace Kiwi
         
         virtual inline void drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap = true)
         {
-            drawText(text, rect.x, rect.y, rect.width, rect.height, j, wrap);
+            drawText(text, rect.x(), rect.y(), rect.width(), rect.height(), j, wrap);
         }
         
         virtual inline void drawRectangle(double x, double y, double w, double h, double thickness, double rounded = 0.) = 0;
         
         virtual inline void drawRectangle(Rectangle const& rect, double thickness, double rounded = 0.)
         {
-            drawRectangle(rect.x, rect.y, rect.width, rect.height, thickness, rounded);
+            drawRectangle(rect.x(), rect.y(), rect.width(), rect.height(), thickness, rounded);
         }
         
         virtual inline void fillRectangle(double x, double y, double w, double h, double rounded = 0.) = 0;
         
         virtual inline void fillRectangle(Rectangle const& rect, double rounded = 0.)
         {
-            drawRectangle(rect.x, rect.y, rect.width, rect.height, rounded);
+            drawRectangle(rect.x(), rect.y(), rect.width(), rect.height(), rounded);
         }
     };
 }

@@ -691,7 +691,7 @@ namespace Kiwi
 	class AttrRect : public Attr
 	{
 	private:
-		double m_value[4];
+		Rectangle m_value;
 	public:
 		AttrRect(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0., 0., 0.}, long behavior = 0) :
 		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
@@ -706,49 +706,49 @@ namespace Kiwi
     class AttrFont
     {
     private:
-        static const sTag Font;
-        static const sTag fontname;
-        static const sTag Font_Name;
-        static const sTag Arial;
-        static const sTag fontsize;
-        static const sTag Font_Size;
-        static const sTag fontface;
-        static const sTag Font_Face;
-        static const sTag normal;
-        static const sTag bold;
-        static const sTag italic;
-        static const sTag bold_italic;
-        static const sTag fontjustification;
-        static const sTag Font_Justification;
-        static const sTag left;
-        static const sTag center;
-        static const sTag right;
+        static const sTag Tag_Font;
+        static const sTag Tag_fontname;
+        static const sTag Tag_Font_Name;
+        static const sTag Tag_Arial;
+        static const sTag Tag_fontsize;
+        static const sTag Tag_Font_Size;
+        static const sTag Tag_fontface;
+        static const sTag Tag_Font_Face;
+        static const sTag Tag_normal;
+        static const sTag Tag_bold;
+        static const sTag Tag_italic;
+        static const sTag Tag_bold_italic;
+        static const sTag Tag_fontjustification;
+        static const sTag Tag_Font_Justification;
+        static const sTag Tag_left;
+        static const sTag Tag_center;
+        static const sTag Tag_right;
     public:
         class Name : public AttrTag
         {
         public:
-            Name() : AttrTag(fontname, Font_Name, Font, Arial){};
+            Name() : AttrTag(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Arial){};
             ~Name(){};
         };
         
         class Size : public AttrDouble
         {
         public:
-            Size() : AttrDouble(fontsize, Font_Size, Font, 12){};
+            Size() : AttrDouble(Tag_fontsize, Tag_Font_Size, Tag_Font, 12){};
             ~Size(){};
         };
         
         class Face : public AttrEnum
         {
         public:
-            Face() : AttrEnum(fontface, Font_Face, Font, {normal, bold, italic, bold_italic}, 0){};
+            Face() : AttrEnum(Tag_fontface, Tag_Font_Face, Tag_Font, {Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0){};
             ~Face(){};
         };
         
         class Justification : public AttrEnum
         {
         public:
-            Justification() : AttrEnum(fontjustification, Font_Justification, Font, {left, center, right}, 0){};
+            Justification() : AttrEnum(Tag_fontjustification, Tag_Font_Justification, Tag_Font, {Tag_left, Tag_center, Tag_right}, 0){};
             ~Justification(){};
         };
     private:
@@ -826,6 +826,49 @@ namespace Kiwi
             Presentation() : AttrBool(Tag_presentation,  Tag_Include_in_Presentation, Tag_Appearance, false){};
             ~Presentation(){};
         };
+        
+    private:
+        shared_ptr<Position>                m_position;
+        shared_ptr<Size>                    m_size;
+        shared_ptr<PresentationPosition>    m_presentation_position;
+        shared_ptr<PresentationSize>        m_presentation_size;
+        shared_ptr<Hidden>                  m_hidden;
+        shared_ptr<Presentation>            m_presentation;
+    public:
+        
+        AttrAppearance() :
+        m_position(Attr::create<Position>()),
+        m_size(Attr::create<Size>()),
+        m_presentation_position(Attr::create<PresentationPosition>()),
+        m_presentation_size(Attr::create<PresentationSize>()),
+        m_hidden(Attr::create<Hidden>()),
+        m_presentation(Attr::create<Presentation>())
+        {
+            ;
+        }
+        
+        ~AttrAppearance()
+        {
+            ;
+        }
+        
+        //! Retrieve the size of the box.
+        /** The function retrieves the size of the box as a point.
+         @return The size of the box as a point.
+         */
+        inline Point getPosition() const noexcept
+        {
+            return m_position->get();
+        }
+        
+        //! Retrieve the size of the box.
+        /** The function retrieves the size of the box as a point.
+         @return The size of the box as a point.
+         */
+        inline Point getSize() const noexcept
+        {
+            return m_size->get();
+        }
     };
 }
 

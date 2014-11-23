@@ -530,12 +530,12 @@ namespace Kiwi
 		{
 			if(elements[0].isNumber())
 			{
-				m_value = clip((ElemVector::size_type)elements[0], (ElemVector::size_type)0, m_enum_values.size());
+				m_value = clip((ElemVector::size_type)elements[0], (ElemVector::size_type)0, m_enum_values.size()-1);
 			}
 			else if(elements[0].isTag())
 			{
 				sTag tag = elements[0];
-                m_value = clip(find_position(m_enum_values, tag), (ElemVector::size_type)0, m_enum_values.size());
+                m_value = clip(find_position(m_enum_values, tag), (ElemVector::size_type)0, m_enum_values.size()-1);
 			}
 		}
 	}
@@ -570,7 +570,7 @@ namespace Kiwi
 	
 	void AttrPoint::get(ElemVector& elements) const noexcept
 	{
-		elements = {m_value.x, m_value.y};
+		elements = m_value;
 	}
 
     
@@ -580,45 +580,35 @@ namespace Kiwi
 	
 	void AttrRect::set(ElemVector const& elements)
 	{
-		for(ElemVector::size_type i = 0; i < 4 && i < elements.size(); i++)
-		{
-			if(elements[i].isNumber())
-            {
-				m_value[i] = (double)elements[i];
-            }
-		}
+        m_value = elements;
 	}
 	
 	void AttrRect::get(ElemVector& elements) const noexcept
 	{
-		elements = {m_value[0], m_value[1], m_value[2], m_value[3]};
+		elements = m_value;
 	}
     
     // ================================================================================ //
 	//                                 ATTRIBUTE OTHER									//
 	// ================================================================================ //
 	
-    const sTag AttrFont::Font               = Tag::create("Font");
-    
-    const sTag AttrFont::fontname     = Tag::create("fontname");
-    const sTag AttrFont::Font_Name    = Tag::create("Font Name");
-    const sTag AttrFont::Arial        = Tag::create("Arial");
-    
-    const sTag AttrFont::fontsize     = Tag::create("fontsize");
-    const sTag AttrFont::Font_Size    = Tag::create("Font Size");
-    
-    const sTag AttrFont::fontface     = Tag::create("fontface");
-    const sTag AttrFont::Font_Face    = Tag::create("Font Face");
-    const sTag AttrFont::normal       = Tag::create("normal");
-    const sTag AttrFont::bold         = Tag::create("bold");
-    const sTag AttrFont::italic       = Tag::create("italic");
-    const sTag AttrFont::bold_italic  = Tag::create("bold_italic");
-    
-    const sTag AttrFont::fontjustification = Tag::create("fontjustification");
-    const sTag AttrFont::Font_Justification= Tag::create("Font Justification");
-    const sTag AttrFont::left              = Tag::create("left");
-    const sTag AttrFont::center            = Tag::create("center");
-    const sTag AttrFont::right             = Tag::create("right");
+    const sTag AttrFont::Tag_Font               = Tag::create("Font");
+    const sTag AttrFont::Tag_fontname                           = Tag::create("fontname");
+    const sTag AttrFont::Tag_Font_Name                          = Tag::create("Font Name");
+    const sTag AttrFont::Tag_Arial                              = Tag::create("Arial");
+    const sTag AttrFont::Tag_fontsize                           = Tag::create("fontsize");
+    const sTag AttrFont::Tag_Font_Size                          = Tag::create("Font Size");
+    const sTag AttrFont::Tag_fontface                           = Tag::create("fontface");
+    const sTag AttrFont::Tag_Font_Face                          = Tag::create("Font Face");
+    const sTag AttrFont::Tag_normal                             = Tag::create("normal");
+    const sTag AttrFont::Tag_bold                               = Tag::create("bold");
+    const sTag AttrFont::Tag_italic                             = Tag::create("italic");
+    const sTag AttrFont::Tag_bold_italic                        = Tag::create("bold_italic");
+    const sTag AttrFont::Tag_fontjustification                  = Tag::create("fontjustification");
+    const sTag AttrFont::Tag_Font_Justification                 = Tag::create("Font Justification");
+    const sTag AttrFont::Tag_left                               = Tag::create("left");
+    const sTag AttrFont::Tag_center                             = Tag::create("center");
+    const sTag AttrFont::Tag_right                              = Tag::create("right");
     
     const sTag AttrAppearance::Tag_Appearance   = Tag::create("Appearance");
     const sTag AttrAppearance::Tag_position                     = Tag::create("position");
