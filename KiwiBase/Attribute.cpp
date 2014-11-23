@@ -551,18 +551,12 @@ namespace Kiwi
 	
 	void AttrColor::set(ElemVector const& elements)
 	{
-		for(ElemVector::size_type i = 0; i < 4 && i < elements.size(); i++)
-		{
-			if(elements[i].isNumber())
-            {
-				//m_value[i] = clip((double)elements[i], 0., 1.);
-            }
-		}
+        m_value = elements;
 	}
 	
 	void AttrColor::get(ElemVector& elements) const noexcept
 	{
-		elements = {m_value.red, m_value.green, m_value.blue, m_value.alpha};
+		elements = m_value;
 	}
 	
     // ================================================================================ //

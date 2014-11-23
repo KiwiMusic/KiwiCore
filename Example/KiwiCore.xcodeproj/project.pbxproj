@@ -28,6 +28,8 @@
 		8FCE3DE019C2EDD200DEAA7F /* DspNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DD919C2EDD200DEAA7F /* DspNode.cpp */; };
 		8FCE3DE119C2EDD200DEAA7F /* DspProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DDB19C2EDD200DEAA7F /* DspProcess.cpp */; };
 		8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */; };
+		8FCFF72F1A21E111008C7C80 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCFF72D1A21E111008C7C80 /* Point.cpp */; };
+		8FCFF7321A21E64E008C7C80 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCFF7301A21E64E008C7C80 /* Color.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -100,6 +102,10 @@
 		8FCE3DDC19C2EDD200DEAA7F /* DspProcess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspProcess.h; sourceTree = "<group>"; };
 		8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Signal.cpp; sourceTree = "<group>"; };
 		8FCE3DDE19C2EDD200DEAA7F /* Signal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Signal.h; sourceTree = "<group>"; };
+		8FCFF72D1A21E111008C7C80 /* Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Point.cpp; sourceTree = "<group>"; };
+		8FCFF72E1A21E111008C7C80 /* Point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Point.h; sourceTree = "<group>"; };
+		8FCFF7301A21E64E008C7C80 /* Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Color.cpp; sourceTree = "<group>"; };
+		8FCFF7311A21E64E008C7C80 /* Color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Color.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,6 +238,10 @@
 				8FC8A32819C3243E0028F321 /* Element.h */,
 				8F1E2B9519DBB72500F904B9 /* Dico.cpp */,
 				8F1E2B9619DBB72500F904B9 /* Dico.h */,
+				8FCFF72D1A21E111008C7C80 /* Point.cpp */,
+				8FCFF72E1A21E111008C7C80 /* Point.h */,
+				8FCFF7301A21E64E008C7C80 /* Color.cpp */,
+				8FCFF7311A21E64E008C7C80 /* Color.h */,
 				8FA8FA6F1A1B684B007A37CA /* Doodle.cpp */,
 				8FA8FA701A1B684B007A37CA /* Doodle.h */,
 				8F479BA21A128E8300E81465 /* Event.cpp */,
@@ -353,11 +363,13 @@
 				8F1B7BE91A0138D500E58BBB /* Tag.cpp in Sources */,
 				8FCE3DE019C2EDD200DEAA7F /* DspNode.cpp in Sources */,
 				8FCE3DE119C2EDD200DEAA7F /* DspProcess.cpp in Sources */,
+				8FCFF7321A21E64E008C7C80 /* Color.cpp in Sources */,
 				8FC8A33819C3243E0028F321 /* Instance.cpp in Sources */,
 				8F479BA41A128E8300E81465 /* Event.cpp in Sources */,
 				8F1E2B9419DB2D3C00F904B9 /* Page.cpp in Sources */,
 				8F1E2B9719DBB72500F904B9 /* Dico.cpp in Sources */,
 				8FAFBFF41A1E150800929003 /* Link.cpp in Sources */,
+				8FCFF72F1A21E111008C7C80 /* Point.cpp in Sources */,
 				8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */,
 				8FA8FA711A1B684B007A37CA /* Doodle.cpp in Sources */,
 				8FA8FA6E1A181E86007A37CA /* Beacon.cpp in Sources */,

@@ -710,7 +710,7 @@ namespace Kiwi
                 return m_want_keyboard_focus;
             }
             
-            inline bool isHit(Doodle::Point const& pt)
+            inline bool isHit(Point const& pt)
             {
                 if(1)
                 {

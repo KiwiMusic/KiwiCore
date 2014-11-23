@@ -24,137 +24,11 @@
 #ifndef __DEF_KIWI_DOODLE__
 #define __DEF_KIWI_DOODLE__
 
-#include "Element.h"
+#include "Point.h"
+#include "Color.h"
 
 namespace Kiwi
 {
-    class Doodle;
-    
-    // ================================================================================ //
-    //                                      POINT                                       //
-    // ================================================================================ //
-    
-    class Point
-    {
-    public:
-        double x;
-        double y;
-        
-        Point() noexcept :
-        x(0.), y(0.)
-        {
-            ;
-        }
-        
-        Point(const double _x, const double _y) noexcept :
-        x(_x), y(_y)
-        {
-            ;
-        }
-        
-        Point(ElemVector const& elements) noexcept :
-        x(0.), y(0.)
-        {
-            if(!elements.empty() && elements[0].isNumber())
-            {
-                x = (double)elements[0];
-            }
-            if(elements.size() > 1 && elements[1].isNumber())
-            {
-                y = (double)elements[1];
-            }
-        }
-        
-        Point(Point const& pt) noexcept :
-        x(pt.x), y(pt.y)
-        {
-            ;
-        }
-        
-        ~Point()
-        {
-            ;
-        }
-        
-        inline Point& operator=(ElemVector const& elements) noexcept
-        {
-            if(!elements.empty() && elements[0].isNumber())
-            {
-                x = (double)elements[0];
-            }
-            if(elements.size() > 1 && elements[1].isNumber())
-            {
-                y = (double)elements[1];
-            }
-            return *this;
-        }
-        
-        inline Point& operator=(Point const& pt) noexcept
-        {
-            x = pt.x;
-            y = pt.y;
-            return *this;
-        }
-    };
-    
-    // ================================================================================ //
-    //                                      COLOR                                       //
-    // ================================================================================ //
-    
-    class Color
-    {
-    public:
-        double red;
-        double green;
-        double blue;
-        double alpha;
-        
-        Color() noexcept :
-        red(0.), green(0.), blue(0.), alpha(1.)
-        {
-            ;
-        }
-        
-        Color(const double _red, const double _green, const double _blue, const double _alpha = 1.) noexcept :
-        red(clip(_red, 0., 1.)), green(clip(_green, 0., 1.)), blue(clip(_blue, 0., 1.)), alpha(clip(_alpha, 0., 1.))
-        {
-            ;
-        }
-        
-        Color(ElemVector const& elements) noexcept :
-        red(0.), green(0.), blue(0.), alpha(1.)
-        {
-            const ElemVector::size_type size = elements.size();
-            if(size && elements[0].isNumber())
-            {
-                red = (double)elements[0];
-            }
-            if(size > 1 && elements[1].isNumber())
-            {
-                green = (double)elements[1];
-            }
-            if(size > 2 && elements[2].isNumber())
-            {
-                blue = (double)elements[1];
-            }
-            if(size > 2 && elements[3].isNumber())
-            {
-                alpha = (double)elements[1];
-            }
-        }
-        
-        Color(Color const& color) noexcept :
-        red(clip(color.red, 0., 1.)), green(clip(color.green, 0., 1.)), blue(clip(color.blue, 0., 1.)), alpha(clip(color.alpha, 0., 1.))
-        {
-            ;
-        }
-        
-        ~Color()
-        {
-            ;
-        }
-    };
-    
     // ================================================================================ //
     //                                      FONT                                        //
     // ================================================================================ //
@@ -237,7 +111,6 @@ namespace Kiwi
     class Doodle
     {
     public:
-        class Point;
         
         Doodle()
         {

@@ -120,6 +120,8 @@ namespace Kiwi
     typedef shared_ptr<Instance>    sInstance;
     typedef weak_ptr<Instance>      wInstance;
     
+    class Point;
+    
 };
 
 #endif
