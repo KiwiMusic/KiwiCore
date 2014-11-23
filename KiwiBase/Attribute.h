@@ -546,6 +546,10 @@ namespace Kiwi
         virtual ~AttrBool() {};
         virtual void get(ElemVector& elements) const noexcept;
         virtual void set(ElemVector const& elements) override;
+        inline bool get() const noexcept
+        {
+            return m_value;
+        }
     };
 
     //! The bool attribute is an attribute that holds a long value.
@@ -562,6 +566,10 @@ namespace Kiwi
 		virtual ~AttrLong() {};
         virtual void get(ElemVector& elements) const noexcept;
         virtual void set(ElemVector const& elements) override;
+        inline long get() const noexcept
+        {
+            return m_value;
+        }
     };
 	
     //! The bool attribute is an attribute that holds a double value.
@@ -578,6 +586,10 @@ namespace Kiwi
 		virtual ~AttrDouble() {};
         virtual void get(ElemVector& elements) const noexcept;
         virtual void set(ElemVector const& elements) override;
+        inline double get() const noexcept
+        {
+            return m_value;
+        }
     };
 	
 	//! The bool attribute is an attribute that holds a tag.
@@ -594,6 +606,10 @@ namespace Kiwi
 		virtual ~AttrTag() {};
         virtual void get(ElemVector& elements) const noexcept;
         virtual void set(ElemVector const& elements) override;
+        inline sTag get() const noexcept
+        {
+            return m_value;
+        }
     };
 	
 	//! The enum attribute is an attribute that represent an enumeration.
@@ -615,6 +631,10 @@ namespace Kiwi
         {
             elements = m_enum_values;
         }
+        inline unsigned long get() const noexcept
+        {
+            return (unsigned long)m_value;
+        }
 	};
 	
 	//! The color attribute is an attribute that holds a color value.
@@ -624,15 +644,46 @@ namespace Kiwi
 	class AttrColor : public Attr
 	{
 	private:
-		double m_value[4];
+        Kiwi::Color m_value;
 	public:
 		AttrColor(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0., 0., 1.}, long behavior = 0) :
         Attr(name, label, category, Attr::Style::Color, {default_value}, behavior) {;}
 		virtual ~AttrColor(){};
 		virtual void get(ElemVector& elements) const noexcept;
 		virtual void set(ElemVector const& elements) override;
+        
+        inline Kiwi::Color get() const noexcept
+        {
+            return m_value;
+        }
 	};
 	
+    //! The point attribute is an attribute that is particulary suitable to represent a position.
+	/** The point attribute holds two double values suitable to represent a point, its default display style will obviously be a Attr::Style::List.
+	 @see Attr
+	 */
+	class AttrPoint : public Attr
+	{
+	private:
+        Point m_value = {0, 0};
+	public:
+		AttrPoint(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0.}, long behavior = 0) :
+		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
+		virtual ~AttrPoint() {};
+		virtual void get(ElemVector& elements) const noexcept;
+		virtual void set(ElemVector const& elements) override;
+        
+        inline Point get() const noexcept
+        {
+            return m_value;
+        }
+	};
+    
+    typedef shared_ptr<AttrPoint>       sAttrPoint;
+    typedef weak_ptr<AttrPoint>         wAttrPoint;
+    typedef shared_ptr<const AttrPoint> scAttrPoint;
+    typedef weak_ptr<const AttrPoint>   wcAttrPoint;
+    
 	//! The rectangle attribute is an attribute that is particulary suitable to represent a position and a size.
 	/** The rectangle attribute holds four double values suitable to represent a rectangle, its default display style will obviously be a Attr::Style::List.
 	 @see Attr
@@ -645,22 +696,6 @@ namespace Kiwi
 		AttrRect(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0., 0., 0.}, long behavior = 0) :
 		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
 		virtual ~AttrRect() {};
-		virtual void get(ElemVector& elements) const noexcept;
-		virtual void set(ElemVector const& elements) override;
-	};
-	
-	//! The point attribute is an attribute that is particulary suitable to represent a position.
-	/** The point attribute holds two double values suitable to represent a point, its default display style will obviously be a Attr::Style::List.
-	 @see Attr
-	 */
-	class AttrPoint : public Attr
-	{
-	private:
-		double m_value[2];
-	public:
-		AttrPoint(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0.}, long behavior = 0) :
-		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
-		virtual ~AttrPoint() {};
 		virtual void get(ElemVector& elements) const noexcept;
 		virtual void set(ElemVector const& elements) override;
 	};
@@ -733,47 +768,63 @@ namespace Kiwi
     
     class AttrAppearance
     {
-    public:
-        class Hidden : public AttrBool
-        {
-        public:
-            Hidden() : AttrBool(Tag::create("hidden"), Tag::create("Hide on Lock"), Tag::create("Appearance"), false){};
-            ~Hidden(){};
-        };
+    private:
+        static const sTag Tag_Appearance;
+        static const sTag Tag_position;
+        static const sTag Tag_Position;
+        static const sTag Tag_size;
+        static const sTag Tag_Size;
+        static const sTag Tag_presentation_position;
+        static const sTag Tag_Presentation_Position;
+        static const sTag Tag_presentation_size;
+        static const sTag Tag_Presentation_Size;
+        static const sTag Tag_hidden;
+        static const sTag Tag_Hide_on_Lock;
+        static const sTag Tag_presentation;
+        static const sTag Tag_Include_in_Presentation;
         
-        class Presentation : public AttrBool
-        {
-        public:
-            Presentation() : AttrBool(Tag::create("presentation"),  Tag::create("Include in Presentation"), Tag::create("Appearance"), false){};
-            ~Presentation(){};
-        };
+    public:
         
         class Position : public AttrPoint
         {
         public:
-            Position() : AttrPoint(Tag::create("position"), Tag::create("Position"), Tag::create("Appearance"), {0., 0.}){};
+            Position() : AttrPoint(Tag_position, Tag_Position, Tag_Appearance, {0., 0.}){};
             ~Position(){};
         };
         
         class Size : public AttrPoint
         {
         public:
-            Size() : AttrPoint(Tag::create("size"), Tag::create("Size"), Tag::create("Appearance"), {100., 20.}){};
+            Size() : AttrPoint(Tag_size, Tag_Size, Tag_Appearance, {100., 20.}){};
             ~Size(){};
         };
         
         class PresentationPosition : public AttrPoint
         {
         public:
-            PresentationPosition() : AttrPoint(Tag::create("presentation_pos"), Tag::create("Presentation Position"), Tag::create("Appearance"), {0., 0.}){};
+            PresentationPosition() : AttrPoint(Tag_presentation_position, Tag_Presentation_Position, Tag_Appearance, {0., 0.}){};
             ~PresentationPosition(){};
         };
         
         class PresentationSize : public AttrPoint
         {
         public:
-            PresentationSize() : AttrPoint(Tag::create("presentation_size"), Tag::create("Presentation Size"), Tag::create("Appearance"), {0., 0.}){};
+            PresentationSize() : AttrPoint(Tag_presentation_size, Tag_Presentation_Size, Tag_Appearance, {0., 0.}){};
             ~PresentationSize(){};
+        };
+        
+        class Hidden : public AttrBool
+        {
+        public:
+            Hidden() : AttrBool(Tag_hidden, Tag_Hide_on_Lock, Tag_Appearance, false){};
+            ~Hidden(){};
+        };
+        
+        class Presentation : public AttrBool
+        {
+        public:
+            Presentation() : AttrBool(Tag_presentation,  Tag_Include_in_Presentation, Tag_Appearance, false){};
+            ~Presentation(){};
         };
     };
 }

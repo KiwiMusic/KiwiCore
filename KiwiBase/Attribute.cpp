@@ -555,16 +555,31 @@ namespace Kiwi
 		{
 			if(elements[i].isNumber())
             {
-				m_value[i] = clip((double)elements[i], 0., 1.);
+				//m_value[i] = clip((double)elements[i], 0., 1.);
             }
 		}
 	}
 	
 	void AttrColor::get(ElemVector& elements) const noexcept
 	{
-		elements = {m_value[0], m_value[1], m_value[2], m_value[3]};
+		elements = {m_value.red, m_value.green, m_value.blue, m_value.alpha};
 	}
 	
+    // ================================================================================ //
+	//                                 ATTRIBUTE POINT									//
+	// ================================================================================ //
+	
+	void AttrPoint::set(ElemVector const& elements)
+	{
+        m_value = elements;
+	}
+	
+	void AttrPoint::get(ElemVector& elements) const noexcept
+	{
+		elements = {m_value.x, m_value.y};
+	}
+
+    
 	// ================================================================================ //
 	//                                 ATTRIBUTE RECT									//
 	// ================================================================================ //
@@ -584,27 +599,11 @@ namespace Kiwi
 	{
 		elements = {m_value[0], m_value[1], m_value[2], m_value[3]};
 	}
-	
-	// ================================================================================ //
-	//                                 ATTRIBUTE POINT									//
-	// ================================================================================ //
-	
-	void AttrPoint::set(ElemVector const& elements)
-	{
-		for(ElemVector::size_type i = 0; i < 2 && i < elements.size(); i++)
-		{
-			if(elements[i].isNumber())
-            {
-				m_value[i] = (double)elements[i];
-            }
-		}
-	}
-	
-	void AttrPoint::get(ElemVector& elements) const noexcept
-	{
-		elements = {m_value[0], m_value[1]};
-	}
     
+    // ================================================================================ //
+	//                                 ATTRIBUTE OTHER									//
+	// ================================================================================ //
+	
     const sTag AttrFont::Font               = Tag::create("Font");
     
     const sTag AttrFont::fontname     = Tag::create("fontname");
@@ -626,6 +625,20 @@ namespace Kiwi
     const sTag AttrFont::left              = Tag::create("left");
     const sTag AttrFont::center            = Tag::create("center");
     const sTag AttrFont::right             = Tag::create("right");
+    
+    const sTag AttrAppearance::Tag_Appearance   = Tag::create("Appearance");
+    const sTag AttrAppearance::Tag_position                     = Tag::create("position");
+    const sTag AttrAppearance::Tag_Position                     = Tag::create("Position");
+    const sTag AttrAppearance::Tag_size                         = Tag::create("size");
+    const sTag AttrAppearance::Tag_Size                         = Tag::create("Size");
+    const sTag AttrAppearance::Tag_presentation_position        = Tag::create("presentation position");
+    const sTag AttrAppearance::Tag_Presentation_Position        = Tag::create("Presentation Position");
+    const sTag AttrAppearance::Tag_presentation_size            = Tag::create("presentation size");
+    const sTag AttrAppearance::Tag_Presentation_Size            = Tag::create("Presentation Size");
+    const sTag AttrAppearance::Tag_hidden                       = Tag::create("hidden");
+    const sTag AttrAppearance::Tag_Hide_on_Lock                 = Tag::create("Hide on Lock");
+    const sTag AttrAppearance::Tag_presentation                 = Tag::create("presentation");
+    const sTag AttrAppearance::Tag_Include_in_Presentation      = Tag::create("Include in Presentation");
 }
 
 

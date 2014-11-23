@@ -22,3 +22,8 @@
  */
 
 #include "Doodle.h"
+
+namespace Kiwi
+{
+    ;
+}

@@ -141,7 +141,10 @@ namespace Kiwi
         weak_ptr_hash<Listener>,
         weak_ptr_equal<Listener>>   m_listeners;
         mutex                       m_listeners_mutex;
-    
+        
+        sAttrPoint                  m_attr_position;
+        sAttrPoint                  m_attr_size;
+        
     public:
         
         //! Constructor.
@@ -211,6 +214,24 @@ namespace Kiwi
         inline sTag getText() const noexcept
         {
             return m_text;
+        }
+        
+        //! Retrieve the size of the box.
+        /** The function retrieves the size of the box as a point.
+         @return The size of the box as a point.
+         */
+        inline Point getPosition() const noexcept
+        {
+            return m_attr_position->get();
+        }
+        
+        //! Retrieve the size of the box.
+        /** The function retrieves the size of the box as a point.
+         @return The size of the box as a point.
+         */
+        inline Point getSize() const noexcept
+        {
+            return m_attr_size->get();
         }
         
         //! Retrieve the expression of the box.
@@ -521,7 +542,7 @@ namespace Kiwi
         static void paint(sBox box, Doodle& d, bool edit = false, bool selected = false);
         
         // ================================================================================ //
-        //                                  BOX LISTENER                                    //
+        //                                      BOX LISTENER                                //
         // ================================================================================ //
         
         //! The box listener is a virtual class that can bind itself to a box and be notified of the several changes.
@@ -612,6 +633,102 @@ namespace Kiwi
 		void unbind(weak_ptr<Listener> listener);
 		
         typedef shared_ptr<Listener>    sListener;
+        
+        // ================================================================================ //
+        //                                  BOX CONTROLER                                   //
+        // ================================================================================ //
+        
+        //! The box listener is a virtual class that can bind itself to a box and be notified of the several changes.
+        /**
+         The box listener is a very light class with methods that receive the notifications of the boxes.
+         @see Instance
+         */
+        class Controler
+        {
+        private:
+            const sBox  m_box;
+            const bool  m_want_mouse_focus;
+            const bool  m_want_keyboard_focus;
+            
+            bool    m_edition;
+            bool    m_selected;
+        public:
+            //! Constructor.
+            /** You should never call this method except if you really know what you're doing.
+             */
+            Controler(sBox box) :
+            m_box(box),
+            m_want_mouse_focus(box->getType() & Box::Mouse),
+            m_want_keyboard_focus(box->getType() & Box::Keyboard),
+            m_edition(true),
+            m_selected(false)
+            {
+                ;
+            }
+            
+            //! The destructor.
+            /** You should never call this method except if you really know what you're doing.
+             */
+            virtual ~Controler()
+            {
+                ;
+            }
+            
+            //! Retrieve the box.
+            /** The funtion retrieves the box.
+             @return The box.
+             */
+            inline sBox getBox() const noexcept
+            {
+                return m_box;
+            }
+            
+            //! Retrieve the text of the box.
+            /** The funtion retrieves the text of the box.
+             @return The text of the box.
+             */
+            inline string getText() const noexcept
+            {
+                return toString(m_box->getText());
+            }
+            
+            //! Retrieve if the box wants the mouse focus.
+            /** The function retrieves if the box wants the mouse focus.
+             @return true if the box wants the mouse focus otherwise false.
+             */
+            inline bool isMouseListener() const noexcept
+            {
+                return m_want_mouse_focus;
+            }
+            
+            //! Retrieve if the box wants the keyboard focus.
+            /** The function retrieves if the box wants the keyboard focus.
+             @return true if the box wants the keyboard focus otherwise false.
+             */
+            inline bool isKeyboardListener() const noexcept
+            {
+                return m_want_keyboard_focus;
+            }
+            
+            inline bool isHit(Doodle::Point const& pt)
+            {
+                if(1)
+                {
+                    return true;
+                }
+                return false;
+            }
+            
+            void setEditionStatus(bool status);
+            
+            void setSelectedStatus(bool status);
+            
+            //! The redraw function that should be override.
+            /** The function is called by the box when it should be repainted.
+             @param box    The box.
+             */
+            virtual void redraw(sBox box) = 0;
+        };
         
     private:
 		

@@ -39,7 +39,9 @@ namespace Kiwi
     m_name(Tag::create(name)),
     m_id(page ? page->m_boxe_id : 0),
     m_type(0 | type),
-    m_stack_count(0)
+    m_stack_count(0),
+    m_attr_position(Attr::create<AttrAppearance::Position>()),
+    m_attr_size(Attr::create<AttrAppearance::Size>())    
     {
 		addAttribute(Attr::create<AttrFont::Name>());
         addAttribute(Attr::create<AttrFont::Size>());
@@ -48,8 +50,8 @@ namespace Kiwi
         
         addAttribute(Attr::create<AttrAppearance::Hidden>());
         addAttribute(Attr::create<AttrAppearance::Presentation>());
-        addAttribute(Attr::create<AttrAppearance::Position>());
-        addAttribute(Attr::create<AttrAppearance::Size>());
+        addAttribute(m_attr_position);
+        addAttribute(m_attr_size);
         addAttribute(Attr::create<AttrAppearance::PresentationPosition>());
         addAttribute(Attr::create<AttrAppearance::PresentationSize>());
 		/*
