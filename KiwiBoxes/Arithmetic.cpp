@@ -50,7 +50,7 @@ namespace Kiwi
     
     bool Arithmetic::receive(unsigned long index, ElemVector const& elements)
     {
-		//Console::post(shared_from_this(), "Receive " + toString(index) + " [" + toString(elements) + "]");
+		//Console::post(getShared(), "Receive " + toString(index) + " [" + toString(elements) + "]");
         if(!elements.empty())
         {
             if(elements.size() == 1)
@@ -60,7 +60,7 @@ namespace Kiwi
                     if(!index)
                     {
                         m_first = elements[0];
-                        //Console::post(shared_from_this(), "Send [" + toString({compute()}) + "]");
+                        //Console::post(getShared(), "Send [" + toString({compute()}) + "]");
                         Console::post(toString(m_first) + " " + toString(getName()) + " " + toString(m_second) + " = " + toString(compute()));
                         send(0, {compute()});
                     }
@@ -74,7 +74,7 @@ namespace Kiwi
                     if(!index)
                     {
                         m_first = elements[0];
-                        Console::post(shared_from_this(), "Send : " + toString({compute()}));
+                        Console::post(getShared(), "Send : " + toString({compute()}));
                         send(0, {compute()});
                     }
                     else
@@ -154,7 +154,7 @@ namespace Kiwi
                 }
                 
                 send(0, {result});
-                Console::post(shared_from_this(), " = " + toString(result));
+                Console::post(getShared(), " = " + toString(result));
                 return true;
             }
         }

@@ -39,21 +39,14 @@ namespace Kiwi
     m_name(Tag::create(name)),
     m_id(page ? page->m_boxe_id : 0),
     m_type(0 | type),
-    m_stack_count(0),
-    m_attr_position(Attr::create<AttrAppearance::Position>()),
-    m_attr_size(Attr::create<AttrAppearance::Size>())    
+    m_stack_count(0)
     {
 		addAttribute(Attr::create<AttrFont::Name>());
         addAttribute(Attr::create<AttrFont::Size>());
         addAttribute(Attr::create<AttrFont::Face>());
         addAttribute(Attr::create<AttrFont::Justification>());
         
-        addAttribute(Attr::create<AttrAppearance::Hidden>());
-        addAttribute(Attr::create<AttrAppearance::Presentation>());
-        addAttribute(m_attr_position);
-        addAttribute(m_attr_size);
-        addAttribute(Attr::create<AttrAppearance::PresentationPosition>());
-        addAttribute(Attr::create<AttrAppearance::PresentationSize>());
+        AttrAppearance::addAttributes(this);
 		/*
 		// Color attributes
 		elems = {1., 1., 1, 1.};
@@ -229,7 +222,7 @@ namespace Kiwi
             
             vector<sLink> links;
             sPage page = getPage();
-            sBox me = shared_from_this();
+            sBox me = getShared();
             if(page)
             {
                 page->getLinks(links);
@@ -279,7 +272,7 @@ namespace Kiwi
             
             vector<sLink> links;
             sPage page = getPage();
-            sBox me = shared_from_this();
+            sBox me = getShared();
             if(page)
             {
                 page->getLinks(links);

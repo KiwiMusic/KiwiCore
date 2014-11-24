@@ -47,7 +47,7 @@ namespace Kiwi
     /**
      The box is a graphical class that aims to be instantiate in a page.
      */
-	class Box : public Attr::Manager/*, public enable_shared_from_this<Box>*/
+	class Box : public Attr::Manager, public AttrAppearance
     {
     public:
         class Listener;
@@ -141,10 +141,6 @@ namespace Kiwi
         mutable mutex               m_io_mutex;
         
         weak_ptr<Controler>         m_controler;
-        
-        sAttrPoint                  m_attr_position;
-        sAttrPoint                  m_attr_size;
-        
     public:
         
         //! Constructor.
@@ -162,9 +158,22 @@ namespace Kiwi
          */
         static sBox create(sPage page, sDico dico);
 		
-		sBox getShared()
+        //! Retrieve the sBox.
+        /** The function sBox.
+         @return The sBox.
+         */
+		inline sBox getShared() noexcept
 		{
 			return static_pointer_cast<Box>(shared_from_this());
+		}
+        
+        //! Retrieve the scBox.
+        /** The function scBox.
+         @return The scBox.
+         */
+		inline scBox getShared() const noexcept
+		{
+			return nullptr;//static_pointer_cast<Box>(shared_from_this());
 		}
         
         //! Retrieve the instance that manages the page of the box.
@@ -228,33 +237,6 @@ namespace Kiwi
         inline sTag getText() const noexcept
         {
             return m_text;
-        }
-        
-        //! Retrieve the size of the box.
-        /** The function retrieves the size of the box as a point.
-         @return The size of the box as a point.
-         */
-        inline Point getPosition() const noexcept
-        {
-            return m_attr_position->get();
-        }
-        
-        //! Retrieve the size of the box.
-        /** The function retrieves the size of the box as a point.
-         @return The size of the box as a point.
-         */
-        inline Point getSize() const noexcept
-        {
-            return m_attr_size->get();
-        }
-        
-        //! Retrieve the bounds of the box.
-        /** The function retrieves the bounds of the box as a rectangle.
-         @return The bounds of the box as a rectangle.
-         */
-        inline Rectangle getBounds() const noexcept
-        {
-            return Rectangle(m_attr_position->get(), m_attr_size->get());
         }
         
         //! Retrieve the expression of the box.
@@ -574,20 +556,35 @@ namespace Kiwi
         class Controler
         {
         public:
+            enum Type
+            {
+                Inside  = 1,
+                Inlet   = 2,
+                Outlet  = 3,
+                Border  = 4,
+                Corner  = 5
+            };
+            
             enum Border
             {
-                Left  = 1,
-                Right = 2,
-                Top   = 3,
-                Bottom= 4,
+                Left  = 0,
+                Right = 1,
+                Top   = 2,
+                Bottom= 3,
             };
             
             enum Corner
             {
-                TopLeft     = 1,
-                TopRight    = 2,
-                BottomLeft  = 3,
-                BottomRight = 4
+                TopLeft     = 0,
+                TopRight    = 1,
+                BottomLeft  = 2,
+                BottomRight = 3
+            };
+            
+            struct Hit
+            {
+                Type            type;
+                unsigned long   index;
             };
             
         protected:
@@ -693,7 +690,7 @@ namespace Kiwi
             /** The function retrieves if the box is hit by a point.
              @return true if the box is hit by a point otherwise false.
              */
-            virtual inline bool isHit(Point const& pt) const noexcept
+            virtual inline bool isHit(Point const& pt, Hit& hit) const noexcept
             {
                 if(m_box->getBounds().contains(pt))
                 {
