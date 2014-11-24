@@ -31,9 +31,9 @@
 #include "Beacon.h"
 
 // TODO
-// - Box connection method (see where to put it and make it threadsafe)
 // - Attributes (getFont, getSize, getPosition etc...) !!
 // - See how to format the expression
+// - Box should deletes it owns connections at deletion
 namespace Kiwi
 {
     class Instance;
@@ -51,7 +51,10 @@ namespace Kiwi
     {
     public:
         class Listener;
-
+        class Controler;
+        typedef shared_ptr<Listener>    sListener;
+        typedef shared_ptr<Controler>   sControler;
+        
         enum Behavior
         {
             Signal      = 1<<1,
@@ -137,11 +140,11 @@ namespace Kiwi
         atomic_ullong               m_stack_count;
         mutable mutex               m_io_mutex;
         
-        unordered_set<weak_ptr<Listener>,
-        weak_ptr_hash<Listener>,
-        weak_ptr_equal<Listener>>   m_listeners;
-        mutex                       m_listeners_mutex;
-    
+        weak_ptr<Controler>         m_controler;
+        
+        sAttrPoint                  m_attr_position;
+        sAttrPoint                  m_attr_size;
+        
     public:
         
         //! Constructor.
@@ -175,6 +178,15 @@ namespace Kiwi
         inline sPage getPage() const noexcept
         {
             return m_page.lock();
+        }
+        
+        //! Retrieve the controler that manages the box.
+        /** The function retrieves the controler that manages the box.
+         @return The controler that manages the box.
+         */
+        inline sControler getControler() const noexcept
+        {
+            return m_controler.lock();
         }
         
         //! Retrieve the name of the box.
@@ -211,6 +223,33 @@ namespace Kiwi
         inline sTag getText() const noexcept
         {
             return m_text;
+        }
+        
+        //! Retrieve the size of the box.
+        /** The function retrieves the size of the box as a point.
+         @return The size of the box as a point.
+         */
+        inline Point getPosition() const noexcept
+        {
+            return m_attr_position->get();
+        }
+        
+        //! Retrieve the size of the box.
+        /** The function retrieves the size of the box as a point.
+         @return The size of the box as a point.
+         */
+        inline Point getSize() const noexcept
+        {
+            return m_attr_size->get();
+        }
+        
+        //! Retrieve the bounds of the box.
+        /** The function retrieves the bounds of the box as a rectangle.
+         @return The bounds of the box as a rectangle.
+         */
+        inline Rectangle getBounds() const noexcept
+        {
+            return Rectangle(m_attr_position->get(), m_attr_size->get());
         }
         
         //! Retrieve the expression of the box.
@@ -512,16 +551,14 @@ namespace Kiwi
         
     public:
         
-        //! The default paint method.
-        /** The default function paint a default box with the background, border, inlets, outlets and text.
-         @param paper       A doodle to draw.
-         @param edit        If the page is in edition mode.
-         @param selected    If the box is selected
+        //! Set the controler of the box.
+        /** The function sets the controler of the box.
+         @param ctrl    The controler.
          */
-        static void paint(sBox box, Doodle& d, bool edit = false, bool selected = false);
+        void setControler(sControler ctrl);
         
         // ================================================================================ //
-        //                                  BOX LISTENER                                    //
+        //                                  BOX CONTROLER                                   //
         // ================================================================================ //
         
         //! The box listener is a virtual class that can bind itself to a box and be notified of the several changes.
@@ -529,95 +566,170 @@ namespace Kiwi
          The box listener is a very light class with methods that receive the notifications of the boxes.
          @see Instance
          */
-        class Listener
+        class Controler
         {
         public:
-            //! The constructor.
-            /** The constructor does nothing.
+            enum Border
+            {
+                Left  = 1,
+                Right = 2,
+                Top   = 3,
+                Bottom= 4,
+            };
+            
+            enum Corner
+            {
+                TopLeft     = 1,
+                TopRight    = 2,
+                BottomLeft  = 3,
+                BottomRight = 4
+            };
+            
+        protected:
+            
+            const sBox  m_box;
+            const bool  m_want_mouse_focus;
+            const bool  m_want_keyboard_focus;
+            
+        private:
+            
+            bool    m_edition;
+            bool    m_selected;
+        public:
+            //! Constructor.
+            /** You should never call this method except if you really know what you're doing.
              */
-            Listener()
+            Controler(sBox box) :
+            m_box(box),
+            m_want_mouse_focus(box->getType() & Box::Mouse),
+            m_want_keyboard_focus(box->getType() & Box::Keyboard),
+            m_edition(true),
+            m_selected(false)
             {
                 ;
             }
             
             //! The destructor.
-            /** The destructor does nothing.
+            /** You should never call this method except if you really know what you're doing.
              */
-            virtual ~Listener()
+            virtual ~Controler()
             {
                 ;
             }
             
-            //! Receive the notification that the box should be repainted
+            //! The controler maker.
+            /** The function creates an controler with arguments.
+             */
+            template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
+            {
+                shared_ptr<CtrlClass> ctrl = make_shared<CtrlClass>(forward<Args>(arguments)...);
+                if(ctrl && ctrl->m_box)
+                {
+                    ctrl->m_box->setControler(ctrl);
+                }
+                return ctrl;
+            }
+            
+            //! Retrieve the box.
+            /** The funtion retrieves the box.
+             @return The box.
+             */
+            inline sBox getBox() const noexcept
+            {
+                return m_box;
+            }
+            
+            //! Retrieve the text of the box.
+            /** The funtion retrieves the text of the box.
+             @return The text of the box.
+             */
+            inline string getText() const noexcept
+            {
+                return toString(m_box->getText());
+            }
+            
+            //! Retrieve if the page is in edition.
+            /** The function retrieves if the page is in edition.
+             @param true if the page is in edition, otherwise false.
+             */
+            inline bool getEditionStatus() const noexcept
+            {
+                return m_edition;
+            }
+            
+            //! Retrieve if the box is selected.
+            /** The function retrieves if the box is selected.
+             @param true if the box is selected, otherwise false.
+             */
+            inline bool getSelectedStatus() const noexcept
+            {
+                return m_selected;
+            }
+            
+            //! Retrieve if the box wants the mouse focus.
+            /** The function retrieves if the box wants the mouse focus.
+             @return true if the box wants the mouse focus otherwise false.
+             */
+            inline bool isMouseListener() const noexcept
+            {
+                return m_want_mouse_focus;
+            }
+            
+            //! Retrieve if the box wants the keyboard focus.
+            /** The function retrieves if the box wants the keyboard focus.
+             @return true if the box wants the keyboard focus otherwise false.
+             */
+            inline bool isKeyboardListener() const noexcept
+            {
+                return m_want_keyboard_focus;
+            }
+            
+            //! Retrieve if the box is hit by a point.
+            /** The function retrieves if the box is hit by a point.
+             @return true if the box is hit by a point otherwise false.
+             */
+            virtual inline bool isHit(Point const& pt) const noexcept
+            {
+                if(m_box->getBounds().contains(pt))
+                {
+                    return true;
+                }
+                return false;
+            }
+            
+            //! Notify that the page is in edition.
+            /** The function notifies that page is in edition to redraw the box.
+             @param true if page is in edition, otherwise false.
+             */
+            void setEditionStatus(bool status);
+            
+            //! Notify that the box is selected.
+            /** The function notifies that the box is selected to redraw the box.
+             @param true if the box is selected, otherwise false.
+             */
+            void setSelectedStatus(bool status);
+            
+            //! The redraw function that should be override.
             /** The function is called by the box when it should be repainted.
              @param box    The box.
              */
-            virtual void shouldBeRedrawn(sBox box){};
+            virtual void redraw() = 0;
             
-            //! Receive the notification that an inlet has been created.
-            /** The function is called by the box when a inlet has been created.
-             @param box    The box.
-             @param index  The inlet index.
+            //! The default paint method.
+            /** The default function paint a default box with the background, border, inlets, outlets and text.
+             @param paper       A doodle to draw.
+             @param edit        If the page is in edition mode.
+             @param selected    If the box is selected
              */
-            virtual void inletHasBeenCreated(sBox box, unsigned long index){};
-            
-            //! Receive the notification that an inlet has been removed.
-            /** The function is called by the box when an inlet has been removed.
-             @param box    The box.
-             @param index  The inlet index.
-             */
-            virtual void inletHasBeenRemoved(sBox box, unsigned long index){};
-            
-            //! Receive the notification that an inlet has been connected.
-            /** The function is called by the box when an inlet has been connected.
-             @param box    The box.
-             @param index  The inlet index.
-             */
-            virtual void inletHasBeenConnected(sBox box, unsigned long index){};
-            
-            //! Receive the notification that an outlet has been created.
-            /** The function is called by the box when a outlet has been created.
-             @param box    The box.
-             @param index  The outlet index.
-             */
-            virtual void outletHasBeenCreated(sBox box, unsigned long index){};
-            
-            //! Receive the notification that an outlet has been removed.
-            /** The function is called by the box when an outlet has been removed.
-             @param box    The box.
-             @param index  The outlet index.
-             */
-            virtual void outletHasBeenRemoved(sBox box, unsigned long index){};
-            
-            //! Receive the notification that an outlet has been connected.
-            /** The function is called by the box when an outlet has been connected.
-             @param box    The box.
-             @param index  The outlet index.
-             */
-            virtual void outletHasBeenConnected(sBox box, unsigned long index){};
+            static void paint(sBox box, Doodle& d, bool edit = false, bool selected = false);
         };
-		
-		//! Add a box listener in the binding list of the box.
-		/** The function adds a box listener in the binding list of the box. If the box listener is already in the binding list, the function doesn't do anything.
-		 @param listener  The pointer of the box listener.
-		 @see              unbind()
-		 */
-		void bind(weak_ptr<Listener> listener);
-		
-		//! Remove a box listener from the binding list of the box.
-		/** The function removes a box listener from the binding list of the box. If the box listener isn't in the binding list, the function doesn't do anything.
-		 @param listener  The pointer of the box listener.
-		 @see           bind()
-		 */
-		void unbind(weak_ptr<Listener> listener);
-		
-        typedef shared_ptr<Listener>    sListener;
         
-    private:
-		
         // ================================================================================ //
         //                                      BOX FACTORY                                 //
         // ================================================================================ //
+        
+    private:
+        
         static map<sTag, unique_ptr<Box>>  m_prototypes;
         static mutex m_prototypes_mutex;
     public:

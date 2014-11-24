@@ -117,7 +117,7 @@ namespace Kiwi
         /** The function removes a link from the dsp context.
          @param box The link to remove.
          */
-        void removeConnection(sLink link);
+        void removeLink(sLink link);
         
         //! Add a process to the dsp context.
         /** The function adds a process to the dsp context.

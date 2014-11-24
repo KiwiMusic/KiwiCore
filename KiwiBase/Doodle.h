@@ -24,34 +24,12 @@
 #ifndef __DEF_KIWI_DOODLE__
 #define __DEF_KIWI_DOODLE__
 
-#include "Tools.h"
+#include "Point.h"
+#include "Rectangle.h"
+#include "Color.h"
 
 namespace Kiwi
 {
-    // ================================================================================ //
-    //                                      COLOR                                       //
-    // ================================================================================ //
-    
-    class Color
-    {
-    public:
-        double red;
-        double green;
-        double blue;
-        double alpha;
-        
-        Color(double _red, double _green, double _blue, double _alpha = 1.) noexcept :
-        red(_red), green(_green), blue(_blue), alpha(_alpha)
-        {
-            ;
-        }
-        
-        ~Color()
-        {
-            ;
-        }
-    };
-    
     // ================================================================================ //
     //                                      FONT                                        //
     // ================================================================================ //
@@ -104,59 +82,13 @@ namespace Kiwi
     };
     
     // ================================================================================ //
-    //                                      POINT                                       //
-    // ================================================================================ //
-    
-    class Point
-    {
-    public:
-        double x;
-        double y;
-
-        Point(double _x, double _y) noexcept :
-        x(_x), y(_y)
-        {
-            ;
-        }
-        
-        ~Point()
-        {
-            ;
-        }
-    };
-    
-    // ================================================================================ //
-    //                                      RECTANGLE                                   //
-    // ================================================================================ //
-    
-    class Rectangle
-    {
-    public:
-        double x;
-        double y;
-        double width;
-        double height;
-        
-        Rectangle(double _x, double _y, double _width, double _height) noexcept :
-        x(_x), y(_y), width(_width), height(_height)
-        {
-            ;
-        }
-        
-        ~Rectangle()
-        {
-            ;
-        }
-    };
-    
-    // ================================================================================ //
     //                                      DOODLE                                      //
     // ================================================================================ //
     
     class Doodle
     {
     public:
-
+        
         Doodle()
         {
             ;
@@ -185,21 +117,21 @@ namespace Kiwi
         
         virtual inline void drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap = true)
         {
-            drawText(text, rect.x, rect.y, rect.width, rect.height, j, wrap);
+            drawText(text, rect.x(), rect.y(), rect.width(), rect.height(), j, wrap);
         }
         
         virtual inline void drawRectangle(double x, double y, double w, double h, double thickness, double rounded = 0.) = 0;
         
         virtual inline void drawRectangle(Rectangle const& rect, double thickness, double rounded = 0.)
         {
-            drawRectangle(rect.x, rect.y, rect.width, rect.height, thickness, rounded);
+            drawRectangle(rect.x(), rect.y(), rect.width(), rect.height(), thickness, rounded);
         }
         
         virtual inline void fillRectangle(double x, double y, double w, double h, double rounded = 0.) = 0;
         
         virtual inline void fillRectangle(Rectangle const& rect, double rounded = 0.)
         {
-            drawRectangle(rect.x, rect.y, rect.width, rect.height, rounded);
+            drawRectangle(rect.x(), rect.y(), rect.width(), rect.height(), rounded);
         }
     };
 }

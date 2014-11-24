@@ -113,7 +113,7 @@ namespace Kiwi
         
     }
     
-    void DspContext::removeConnection(sLink link)
+    void DspContext::removeLink(sLink link)
     {
         /*
         if(link->isDsp())

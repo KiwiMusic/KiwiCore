@@ -89,8 +89,6 @@ namespace Kiwi
                 m_boxes.push_back(box);
                 m_boxes_mutex.unlock();
                 
-				box->bind(shared_from_this());
-                
                 m_listeners_mutex.lock();
                 auto it = m_listeners.begin();
                 while(it != m_listeners.end())
@@ -133,9 +131,6 @@ namespace Kiwi
                 {
                     m_boxes[position] = newbox;
                     m_boxes_mutex.unlock();
-                    
-                    oldbox->unbind(shared_from_this());
-                    newbox->bind(shared_from_this());
                 
                     m_links_mutex.lock();
                     for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
@@ -228,7 +223,6 @@ namespace Kiwi
             m_boxes.erase(m_boxes.begin()+(long)position);
             m_boxe_id = box->getId();
             m_boxes_mutex.unlock();
-            box->unbind(shared_from_this());
             
             m_listeners_mutex.lock();
             auto it = m_listeners.begin();
@@ -318,7 +312,7 @@ namespace Kiwi
         return nullptr;
     }
     
-    void Page::removeConnection(sLink link)
+    void Page::removeLink(sLink link)
     {
         lock_guard<mutex> guard(m_links_mutex);
         vector<sLink>::size_type position = find_position(m_links, link);
@@ -497,90 +491,6 @@ namespace Kiwi
     bool Page::isDspRunning() const noexcept
     {
         return m_dsp_running;
-    }
-    
-    void Page::inletHasBeenCreated(sBox box, unsigned long index)
-    {
-        ;
-    }
-    
-    void Page::inletHasBeenRemoved(sBox box, unsigned long index)
-    {
-        lock_guard<mutex> guard(m_links_mutex);
-        vector<Link>::size_type max_size = m_links.size();
-        for(vector<Link>::size_type i = 0; i < max_size;)
-        {
-            if(m_links[i]->getBoxTo() == box && m_links[i]->getInletIndex() == index)
-            {
-                sLink oldlink = m_links[i];
-                oldlink->disconnect();
-                m_links.erase(m_links.begin()+(long)i);
-                max_size--;
-                
-                m_listeners_mutex.lock();
-                auto it = m_listeners.begin();
-                while(it != m_listeners.end())
-                {
-                    if((*it).expired())
-                    {
-                        it = m_listeners.erase(it);
-                    }
-                    else
-                    {
-                        Page::sListener listener = (*it).lock();
-                        listener->linkHasBeenRemoved(shared_from_this(), oldlink);
-                        ++it;
-                    }
-                }
-                m_listeners_mutex.unlock();
-            }
-            else
-            {
-                i++;
-            }
-        }
-    }
-    
-    void Page::outletHasBeenCreated(sBox box, unsigned long index)
-    {
-        ;
-    }
-    
-    void Page::outletHasBeenRemoved(sBox box, unsigned long index)
-    {
-        lock_guard<mutex> guard(m_links_mutex);
-        vector<Link>::size_type max_size = m_links.size();
-        for(vector<Link>::size_type i = 0; i < max_size;)
-        {
-            if(m_links[i]->getBoxFrom() == box || m_links[i]->getOutletIndex() == index)
-            {
-                sLink oldlink = m_links[i];
-                oldlink->disconnect();
-                m_links.erase(m_links.begin()+(long)i);
-                max_size--;
-                
-                m_listeners_mutex.lock();
-                auto it = m_listeners.begin();
-                while(it != m_listeners.end())
-                {
-                    if((*it).expired())
-                    {
-                        it = m_listeners.erase(it);
-                    }
-                    else
-                    {
-                        Page::sListener listener = (*it).lock();
-                        listener->linkHasBeenRemoved(shared_from_this(), oldlink);
-                        ++it;
-                    }
-                }
-                m_listeners_mutex.unlock();
-            }
-            else
-            {
-                i++;
-            }
-        }
     }
     
     void Page::bind(shared_ptr<Page::Listener> listener)
