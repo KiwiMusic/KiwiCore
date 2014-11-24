@@ -69,7 +69,6 @@ namespace Kiwi
     {
         m_outlets.clear();
         m_inlets.clear();
-        m_listeners.clear();
     }
     
     sBox Box::create(sPage page, sDico dico)
@@ -128,20 +127,10 @@ namespace Kiwi
     
     void Box::redraw()
     {
-        lock_guard<mutex> guard(m_listeners_mutex);
-        auto it = m_listeners.begin();
-        while(it != m_listeners.end())
+        sControler controler = getControler();
+        if(controler)
         {
-            if((*it).expired())
-            {
-                it = m_listeners.erase(it);
-            }
-            else
-            {
-                Box::sListener listener = (*it).lock();
-                listener->shouldBeRedrawn(shared_from_this());
-                ++it;
-            }
+            controler->redraw();
         }
     }
     
@@ -213,22 +202,7 @@ namespace Kiwi
     {
         lock_guard<mutex> guard(m_io_mutex);
         m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
-        
-        lock_guard<mutex> guard2(m_listeners_mutex);
-        auto it = m_listeners.begin();
-        while(it != m_listeners.end())
-        {
-            if((*it).expired())
-            {
-                it = m_listeners.erase(it);
-            }
-            else
-            {
-                Box::sListener listener = (*it).lock();
-                listener->inletHasBeenCreated(shared_from_this(), m_inlets.size() - 1);
-                ++it;
-            }
-        }
+        redraw();
     }
     
     void Box::insertInlet(unsigned long index, Inlet::Type type, string const& description)
@@ -243,22 +217,7 @@ namespace Kiwi
         {
             m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, description)));
         }
-        
-        lock_guard<mutex> guard2(m_listeners_mutex);
-        auto it = m_listeners.begin();
-        while(it != m_listeners.end())
-        {
-            if((*it).expired())
-            {
-                it = m_listeners.erase(it);
-            }
-            else
-            {
-                Box::sListener listener = (*it).lock();
-                listener->inletHasBeenCreated(shared_from_this(), index);
-                ++it;
-            }
-        }
+        redraw();
     }
     
     void Box::removeInlet(unsigned long index)
@@ -267,23 +226,22 @@ namespace Kiwi
         if(index < m_inlets.size())
         {
             m_inlets.erase(m_inlets.begin()+(long)index);
+            
+            vector<sLink> links;
+            sPage page = getPage();
+            sBox me = shared_from_this();
+            if(page)
             {
-                lock_guard<mutex> guard2(m_listeners_mutex);
-                auto it = m_listeners.begin();
-                while(it != m_listeners.end())
+                page->getLinks(links);
+                for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                 {
-                    if((*it).expired())
+                    if(links[i]->getBoxTo() == me && links[i]->getInletIndex() == index)
                     {
-                        it = m_listeners.erase(it);
-                    }
-                    else
-                    {
-                        Box::sListener listener = (*it).lock();
-                        listener->inletHasBeenRemoved(shared_from_this(), index);
-                        ++it;
+                        page->removeLink(links[i]);
                     }
                 }
             }
+            redraw();
         }
     }
     
@@ -295,22 +253,7 @@ namespace Kiwi
     {
         lock_guard<mutex> guard(m_io_mutex);
         m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
-        
-        lock_guard<mutex> guard2(m_listeners_mutex);
-        auto it = m_listeners.begin();
-        while(it != m_listeners.end())
-        {
-            if((*it).expired())
-            {
-                it = m_listeners.erase(it);
-            }
-            else
-            {
-                Box::sListener listener = (*it).lock();
-                listener->outletHasBeenCreated(shared_from_this(), m_outlets.size() - 1);
-                ++it;
-            }
-        }
+        redraw();
     }
     
     void Box::insertOutlet(unsigned long index, Outlet::Type type, string const& description)
@@ -318,29 +261,13 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index >= m_outlets.size())
         {
-            index = m_outlets.size();
             m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
         }
         else
         {
             m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
         }
-        
-        lock_guard<mutex> guard2(m_listeners_mutex);
-        auto it = m_listeners.begin();
-        while(it != m_listeners.end())
-        {
-            if((*it).expired())
-            {
-                it = m_listeners.erase(it);
-            }
-            else
-            {
-                Box::sListener listener = (*it).lock();
-                listener->outletHasBeenCreated(shared_from_this(), index);
-                ++it;
-            }
-        }
+        redraw();
     }
     
     void Box::removeOutlet(unsigned long index)
@@ -350,76 +277,23 @@ namespace Kiwi
         {
             m_outlets.erase(m_outlets.begin()+(long)index);
             
-            lock_guard<mutex> guard2(m_listeners_mutex);
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+            vector<sLink> links;
+            sPage page = getPage();
+            sBox me = shared_from_this();
+            if(page)
             {
-                if((*it).expired())
+                page->getLinks(links);
+                for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                 {
-                    it = m_listeners.erase(it);
-                }
-                else
-                {
-                    Box::sListener listener = (*it).lock();
-                    listener->outletHasBeenRemoved(shared_from_this(), index);
-                    ++it;
+                    if(links[i]->getBoxFrom() == me && links[i]->getOutletIndex() == index)
+                    {
+                        page->removeLink(links[i]);
+                    }
                 }
             }
-        }
-    }
-    
-    void Box::paint(sBox box, Doodle& d, bool edit, bool selected)
-    {
-        d.setFont(Font("Menelo", 13, Font::Normal));
-        d.setColor(Color(1., 1., 1., 1.));
-        d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
-        if(!(box->getType() & Behavior::Graphic))
-        {
-            d.setColor({0.3, 0.3, 0.3, 1.});
-            d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
-        }
-        if(selected)
-        {
-            d.setColor({0., 0., 1., 1.});
-            d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 2., 2.5);
-        }
-        else
-        {
-            d.setColor({0.4, 0.4, 0.4, 1.});
-            d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1., 2.5);
+            redraw();
         }
         
-        if(edit)
-        {
-            unsigned long ninlet    = box->getNumberOfInlets();
-            unsigned long noutlet   = box->getNumberOfOutlets();
-            d.setColor({0.3, 0.3, 0.3, 1.});
-            if(ninlet)
-            {
-                d.fillRectangle(0., 0., 5, 3, 1.5);
-            }
-            if(ninlet > 1)
-            {
-                double ratio = (d.getWidth() - 5.) / (double)(ninlet - 1);
-                for(unsigned long i = ninlet; i; i--)
-                {
-                    d.fillRectangle(ratio * i, 0., 5, 3, 1.5);
-                }
-            }
-            
-            if(noutlet)
-            {
-                d.fillRectangle(0., d.getHeight() - 3., 5, 3, 1.5);
-            }
-            if(noutlet > 1)
-            {
-                double ratio = (d.getWidth() - 5.) / (double)(noutlet - 1);
-                for(unsigned long i = noutlet; i; i--)
-                {
-                    d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 1.5);
-                }
-            }
-        }
     }
     
     bool Box::connectInlet(unsigned long inlet, sBox box, unsigned long outlet)
@@ -511,16 +385,87 @@ namespace Kiwi
         return false;
     }
     
-    void Box::bind(weak_ptr<Box::Listener> listener)
+    void Box::setControler(sControler ctrl)
     {
-        lock_guard<mutex> guard(m_listeners_mutex);
-        m_listeners.insert(listener);
+        m_controler = ctrl;
     }
     
-    void Box::unbind(weak_ptr<Box::Listener> listener)
+    // ================================================================================ //
+    //                                  BOX CONTROLER                                   //
+    // ================================================================================ //
+    
+    void Box::Controler::setEditionStatus(bool status)
     {
-        lock_guard<mutex> guard(m_listeners_mutex);
-        m_listeners.erase(listener);
+        if(m_edition != status)
+        {
+            m_edition = status;
+            redraw();
+        }
+    }
+    
+    void Box::Controler::setSelectedStatus(bool status)
+    {
+        if(m_selected != status)
+        {
+            m_selected = status;
+            redraw();
+        }
+    }
+    
+    void Box::Controler::paint(sBox box, Doodle& d, bool edit, bool selected)
+    {
+        d.setFont(Font("Menelo", 13, Font::Normal));
+        d.setColor(Color(1., 1., 1., 1.));
+        d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
+        if(!(box->getType() & Behavior::Graphic))
+        {
+            d.setColor({0.3, 0.3, 0.3, 1.});
+            d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
+        }
+        else
+        {
+            box->draw(d);
+        }
+        d.setColor({0.4, 0.4, 0.4, 1.});
+        d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 2., 2.5);
+        
+        if(edit)
+        {
+            unsigned long ninlet    = box->getNumberOfInlets();
+            unsigned long noutlet   = box->getNumberOfOutlets();
+            d.setColor({0.3, 0.3, 0.3, 1.});
+            if(ninlet)
+            {
+                d.fillRectangle(0., 0., 5, 3, 1.5);
+            }
+            if(ninlet > 1)
+            {
+                double ratio = (d.getWidth() - 5.) / (double)(ninlet - 1);
+                for(unsigned long i = ninlet-1; i; i--)
+                {
+                    d.fillRectangle(ratio * i, 0., 5, 3, 1.5);
+                }
+            }
+            
+            if(noutlet)
+            {
+                d.fillRectangle(0., d.getHeight() - 3., 5, 3, 1.5);
+            }
+            if(noutlet > 1)
+            {
+                double ratio = (d.getWidth() - 5.) / (double)(noutlet - 1);
+                for(unsigned long i = noutlet-1; i; i--)
+                {
+                    d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 1.5);
+                }
+            }
+        }
+        
+        if(selected)
+        {
+            d.setColor({0., 0.5, 0.75, 0.15});
+            d.fillRectangle(0., 0., d.getWidth(), d.getHeight(), 2.5);
+        }
     }
     
     // ================================================================================ //

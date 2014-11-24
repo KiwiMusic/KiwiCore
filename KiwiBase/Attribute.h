@@ -521,7 +521,7 @@ namespace Kiwi
                  @param attr		The attribute that has been modified.
                  @param type		The type of notification as specified in the Attr::Manager::NotificationType enum,
                  */
-                virtual void attributeChanged(Manager* manager, sAttr attr) = 0;
+                virtual void attributeChanged(shared_ptr<Manager> manager, sAttr attr) {};
             };
         };
     };

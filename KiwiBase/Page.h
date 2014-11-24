@@ -41,7 +41,7 @@ namespace Kiwi
     /**
      The page is the counterpart of the max patcher or the pd canvas...
      */
-    class Page : public Box::Listener, public enable_shared_from_this<Page>
+    class Page : public enable_shared_from_this<Page>
     {
     public:
         class Listener;
@@ -191,7 +191,7 @@ namespace Kiwi
         /** The function removes a link from the page.
          @param link        The pointer to the link.
          */
-        void removeConnection(sLink link);
+        void removeLink(sLink link);
         
         //! Append a dico.
         /** The function reads a dico and add the boxes and links to the page.
@@ -233,34 +233,6 @@ namespace Kiwi
         /** The function checks if the dsp is running
          */
         bool isDspRunning() const noexcept;
-        
-        //! Receive the notification that an inlet has been created.
-        /** The function is called by the box when a inlet has been created.
-         @param box    The box.
-         @param index  The inlet index.
-         */
-        void inletHasBeenCreated(sBox box, unsigned long index) override;
-        
-        //! Receive the notification that an inlet has been removed.
-        /** The function is called by the box when an inlet has been removed.
-         @param box    The box.
-         @param index  The inlet index.
-         */
-        void inletHasBeenRemoved(sBox box, unsigned long index) override;
-        
-        //! Receive the notification that an outlet has been created.
-        /** The function is called by the box when a outlet has been created.
-         @param box    The box.
-         @param index  The outlet index.
-         */
-        void outletHasBeenCreated(sBox box, unsigned long index) override;
-        
-        //! Receive the notification that an outlet has been removed.
-        /** The function is called by the box when an outlet has been removed.
-         @param box    The box.
-         @param index  The outlet index.
-         */
-        void outletHasBeenRemoved(sBox box, unsigned long index) override;
         
         //! Add a page listener in the binding list of the page.
         /** The function adds a page listener in the binding list of the page. If the page listener is already in the binding list, the function doesn't do anything.
