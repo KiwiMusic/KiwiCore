@@ -51,6 +51,23 @@ namespace Kiwi
 											Tag::create("Snap To Grid (default for new pages)"),
 											pageTag,
 											false));
+		// just a test:
+		addAttribute(Attr::create<AttrBool>(Tag::create("test1"),
+											Tag::create("test1"),
+											pageTag,
+											true));
+		
+		// just a test:
+		addAttribute(Attr::create<AttrBool>(Tag::create("test2"),
+											Tag::create("test2"),
+											Tag::create("test2"),
+											false));
+		
+		// just a test:
+		addAttribute(Attr::create<AttrBool>(Tag::create("test3"),
+											Tag::create("test3"),
+											Tag::create("test2"),
+											true));
     }
     
     Instance::~Instance()

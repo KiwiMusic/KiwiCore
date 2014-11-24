@@ -326,8 +326,8 @@ namespace Kiwi
         /** The attribute manager manages a set of attributes, it allows the setting and the getting of their values and to retrieve them by name or by category.
          @see Attr
          */
-        class Manager
-        {
+		class Manager
+		{
         private:
             unordered_map<sTag, sAttr>          m_attrs;
             mutable mutex                       m_attrs_mutex;
