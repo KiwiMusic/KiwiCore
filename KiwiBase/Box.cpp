@@ -404,6 +404,83 @@ namespace Kiwi
             redraw();
         }
     }
+
+#define KIO_HEIGHT 3.
+#define KIO_WIDTH 5.
+    bool Box::Controler::isHit(Point const& pt, Hit& hit) const noexcept
+    {
+        const Rectangle bounds = m_box->getBounds();
+        if(bounds.contains(pt))
+        {
+            if(pt.y() < bounds.y() + KIO_HEIGHT)
+            {
+                const unsigned long ninlets = m_box->getNumberOfInlets();
+                if(ninlets && pt.x() < bounds.x() + KIO_WIDTH)
+                {
+                    hit.type    = Inlet;
+                    hit.index   = 0;
+                    return true;
+                }
+                else if(ninlets > 1)
+                {
+                    const double ratio = (bounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
+                    for(unsigned long i = 1; i < ninlets; i++)
+                    {
+                        double val = ratio * i + bounds.x();
+                        if(pt.x() >= val && pt.x() < val + KIO_WIDTH)
+                        {
+                            hit.type    = Inlet;
+                            hit.index   = i;
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    hit.type    = Inside;
+                    hit.index   = 0;
+                    return true;
+                }
+            }
+            else if(pt.y() > bounds.y() + bounds.height() - KIO_HEIGHT)
+            {
+                const unsigned long noutlets = m_box->getNumberOfOutlets();
+                if(noutlets && pt.x() < bounds.x() + KIO_WIDTH)
+                {
+                    hit.type    = Outlet;
+                    hit.index   = 0;
+                    return true;
+                }
+                else if(noutlets > 1)
+                {
+                    const double ratio = (bounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
+                    for(unsigned long i = 1; i < noutlets; i++)
+                    {
+                        double val = ratio * i + bounds.x();
+                        if(pt.x() >= val && pt.x() < val + KIO_WIDTH)
+                        {
+                            hit.type    = Outlet;
+                            hit.index   = i;
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    hit.type    = Inside;
+                    hit.index   = 0;
+                    return true;
+                }
+            }
+            else
+            {
+                hit.type    = Inside;
+                hit.index   = 0;
+            }
+            return true;
+        }
+        return false;
+    }
     
     void Box::Controler::paint(sBox box, Doodle& d, bool edit, bool selected)
     {
@@ -420,36 +497,38 @@ namespace Kiwi
             box->draw(d);
         }
         d.setColor({0.4, 0.4, 0.4, 1.});
-        d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 2., 2.5);
+        d.drawRectangle(0.5, 0.5, d.getWidth()-1., d.getHeight()-1., 1., 2.5);
         
         if(edit)
         {
-            unsigned long ninlet    = box->getNumberOfInlets();
-            unsigned long noutlet   = box->getNumberOfOutlets();
-            d.setColor({0.3, 0.3, 0.3, 1.});
-            if(ninlet)
+            const unsigned long ninlets = box->getNumberOfInlets();
+            const unsigned long noutlets= box->getNumberOfOutlets();
+            
+            if(ninlets)
             {
-                d.fillRectangle(0., 0., 5, 3, 1.5);
+                d.setColor({0.3, 0.3, 0.3, 1.});
+                d.fillRectangle(0., 0., KIO_WIDTH, KIO_HEIGHT, 1.5);
             }
-            if(ninlet > 1)
+            if(ninlets > 1)
             {
-                double ratio = (d.getWidth() - 5.) / (double)(ninlet - 1);
-                for(unsigned long i = ninlet-1; i; i--)
+                const double ratio = (d.getWidth() - KIO_WIDTH) / (double)(ninlets - 1);
+                for(unsigned long i = 1; i < ninlets; i++)
                 {
-                    d.fillRectangle(ratio * i, 0., 5, 3, 1.5);
+                    d.fillRectangle(ratio * i, 0., KIO_WIDTH, KIO_HEIGHT, 1.5);
                 }
             }
             
-            if(noutlet)
+            if(noutlets)
             {
-                d.fillRectangle(0., d.getHeight() - 3., 5, 3, 1.5);
+                d.setColor({0.3, 0.3, 0.3, 1.});
+                d.fillRectangle(0., d.getHeight() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT, 1.5);
             }
-            if(noutlet > 1)
+            if(noutlets > 1)
             {
-                double ratio = (d.getWidth() - 5.) / (double)(noutlet - 1);
-                for(unsigned long i = noutlet-1; i; i--)
+                const double ratio = (d.getWidth() - KIO_WIDTH) / (double)(noutlets - 1);
+                for(unsigned long i = 1; i < noutlets; i--)
                 {
-                    d.fillRectangle(ratio * i, d.getHeight() - 3., 5, 3, 1.5);
+                    d.fillRectangle(ratio * i, d.getHeight() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT, 1.5);
                 }
             }
         }
@@ -460,7 +539,8 @@ namespace Kiwi
             d.fillRectangle(0., 0., d.getWidth(), d.getHeight(), 2.5);
         }
     }
-    
+#undef KIO_HEIGHT
+#undef KIO_WIDTH
     // ================================================================================ //
     //                                      BOX FACTORY                                 //
     // ================================================================================ //

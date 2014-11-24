@@ -536,33 +536,32 @@ namespace Kiwi
          */
         bool disconnectOutlet(unsigned long outlet, sBox box, unsigned long inlet);
         
-    public:
-        
         //! Set the controler of the box.
         /** The function sets the controler of the box.
          @param ctrl    The controler.
          */
         void setControler(sControler ctrl);
         
+    public:
+        
         // ================================================================================ //
         //                                  BOX CONTROLER                                   //
         // ================================================================================ //
         
-        //! The box listener is a virtual class that can bind itself to a box and be notified of the several changes.
+        //! The box controler .
         /**
-         The box listener is a very light class with methods that receive the notifications of the boxes.
-         @see Instance
+         The box controler...
          */
         class Controler
         {
         public:
             enum Type
             {
-                Inside  = 1,
-                Inlet   = 2,
-                Outlet  = 3,
-                Border  = 4,
-                Corner  = 5
+                Inside  = 0,
+                Inlet   = 1,
+                Outlet  = 2,
+                Corner  = 3,
+                Border  = 4
             };
             
             enum Border
@@ -690,14 +689,7 @@ namespace Kiwi
             /** The function retrieves if the box is hit by a point.
              @return true if the box is hit by a point otherwise false.
              */
-            virtual inline bool isHit(Point const& pt, Hit& hit) const noexcept
-            {
-                if(m_box->getBounds().contains(pt))
-                {
-                    return true;
-                }
-                return false;
-            }
+            virtual bool isHit(Point const& pt, Hit& hit) const noexcept;
             
             //! Notify that the page is in edition.
             /** The function notifies that page is in edition to redraw the box.

@@ -269,7 +269,7 @@ namespace Kiwi
         }
     }
     
-    sLink Page::addConnection(sLink link)
+    sLink Page::addLink(sLink link)
     {
         if(link->connect())
         {
@@ -299,14 +299,14 @@ namespace Kiwi
         return nullptr;
     }
     
-    sLink Page::createConnection(scDico dico)
+    sLink Page::createLink(scDico dico)
     {
         if(dico)
         {
             sLink link = Link::create(shared_from_this(), dico);
             if(link)
             {
-                return addConnection(link);
+                return addLink(link);
             }
         }
         return nullptr;
@@ -397,7 +397,7 @@ namespace Kiwi
                                 subdico->set(Tag::to, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
                             }
                         }
-                        createConnection(subdico);
+                        createLink(subdico);
                     }
                 }
             }

@@ -178,14 +178,14 @@ namespace Kiwi
          @param link The link to add.
          @return A pointer to the link.
          */
-        sLink addConnection(sLink link);
+        sLink addLink(sLink link);
         
         //! Create a link.
         /** The function creates a link with a dico.
          @param dico        The dico that defines a link.
          @return A pointer to the link.
          */
-        sLink createConnection(scDico dico);
+        sLink createLink(scDico dico);
         
         //! Free a link.
         /** The function removes a link from the page.
