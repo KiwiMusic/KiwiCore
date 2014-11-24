@@ -451,7 +451,54 @@ namespace Kiwi
             }
 		}
 	}
-    
+	
+	void Attr::Manager::bind(shared_ptr<Attr::Manager::Listener> listener)
+	{
+		if(listener)
+		{
+			lock_guard<mutex> guard(m_listeners_mutex);
+			m_listeners.insert(listener);
+		}
+	}
+	
+	void Attr::Manager::unbind(shared_ptr<Attr::Manager::Listener> listener)
+	{
+		if(listener)
+		{
+			lock_guard<mutex> guard(m_listeners_mutex);
+			m_listeners.erase(listener);
+		}
+	}
+	
+	//! @internal Trigger notification to subclasses and listeners.
+	void Attr::Manager::sendNotification(sAttr attr, Notification type)
+	{
+		m_listeners_mutex.lock();
+		auto it = m_listeners.begin();
+		while(it != m_listeners.end())
+		{
+			if((*it).expired())
+			{
+				it = m_listeners.erase(it);
+			}
+			else
+			{
+				Manager::sListener listener = (*it).lock();
+				listener->attributeChanged(shared_from_this(), attr, type);
+				++it;
+			}
+		}
+		m_listeners_mutex.unlock();
+		
+		/*
+		for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
+		{
+			if(!it->expired())
+				it->lock()->attributeChanged(this, attr, type);
+		}
+		*/
+	}
+	
     // ================================================================================ //
     //                                 ATTRIBUTE BOOL									//
     // ================================================================================ //

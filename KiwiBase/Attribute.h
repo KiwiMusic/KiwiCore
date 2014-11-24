@@ -326,12 +326,19 @@ namespace Kiwi
         /** The attribute manager manages a set of attributes, it allows the setting and the getting of their values and to retrieve them by name or by category.
          @see Attr
          */
-		class Manager
+		class Manager : public enable_shared_from_this<Manager>
 		{
-        private:
-            unordered_map<sTag, sAttr>          m_attrs;
-            mutable mutex                       m_attrs_mutex;
-            
+		public:
+			class Listener;
+		private:
+			unordered_map<sTag, sAttr>          m_attrs;
+			mutable mutex                       m_attrs_mutex;
+			
+			unordered_set<weak_ptr<Listener>,
+			weak_ptr_hash<Listener>,
+			weak_ptr_equal<Listener>>           m_listeners;
+			mutex                               m_listeners_mutex;
+			
         public:
             
             //! Constructor.
@@ -483,30 +490,41 @@ namespace Kiwi
             /** The function notifies the manager that an attribute has created.
              @param dico A dico.
              */
-            virtual void attributeHasCreated(){};
+            virtual void attributeHasBeenCreated(sAttr attr){};
             
             //! Notify the manager that an attribute has removed.
             /** The function notifies the manager that an attribute has removed.
              @param dico A dico.
              */
-            virtual void attributeHasRemoved(){};
+            virtual void attributeHasBeenRemoved(sAttr attr){};
             
             //! Notify the manager that the values of an attribute has changed.
             /** The function notifies the manager that the values of an attribute has changed.
              @param dico A dico.
              */
-            virtual void attributeValuesHasChanged(){};
+            virtual void attributeValueChanged(sAttr attr){};
             
             //! Notify the manager that the behavior of an attribute has changed.
             /** The function notifies the manager that the behavior of an attribute has changed.
              @param dico A dico.
              */
-            virtual void attributeBehaviorHasChanged(){};
+            virtual void attributeBehaviorChanged(sAttr attr){};
             
             // ================================================================================ //
             //								ATTRIBUTE MANAGER LISTENER                          //
             // ================================================================================ //
-            
+			
+			/** Flags describing the type of the notification
+			 @see Manager::Listener
+			 */
+			enum Notification
+			{
+				AttrAdded		= 0,	///< Indicates that an attribute has been added.
+				AttrRemoved		= 1,	///< Indicates that an attribute has been removed.
+				ValueChanged	= 2,	///< Indicates that an attribute value has changed.
+				BehaviorChanged	= 3		///< Indicates that the behavior of an attribute has changed.
+			};
+			
             //! The attribute manager listener is a virtual class that can be binded to an attribute manager to be notified of various changes.
             /** The attribute manager listener is a very light class that allows to be notified of the attributes modification.
              */
@@ -521,8 +539,28 @@ namespace Kiwi
                  @param attr		The attribute that has been modified.
                  @param type		The type of notification as specified in the Attr::Manager::NotificationType enum,
                  */
-                virtual void attributeChanged(shared_ptr<Manager> manager, sAttr attr) {};
+                virtual void attributeChanged(shared_ptr<Manager> manager, sAttr attr, Notification type) = 0;
             };
+			
+			//! Adds an attribute manager listener in the binding list of the attribute manager.
+			/** The function adds an attribute manager listener in the binding list of the attribute manager. If the attribute manager listener is already in the binding list, the function has no effect.
+			 @param listener  The pointer of the attribute manager listener.
+			 @see              unbind()
+			 */
+			void bind(shared_ptr<Listener> listener);
+			
+			//! Removes an attribute manager listener from the binding list of the attribute manager.
+			/** The function removes an attribute manager listener from the binding list of the attribute manager. If the attribute manager listener was not in the binding list, the function has no effect.
+			 @param listener  The pointer of the attribute manager listener.
+			 @see              unbind()
+			 */
+			void unbind(shared_ptr<Listener> listener);
+			
+			typedef shared_ptr<Listener>    sListener;
+			
+		private:
+			//! @internal Trigger notification to subclasses and listeners.
+			void sendNotification(sAttr attr, Notification type);
         };
     };
 	

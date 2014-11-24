@@ -42,7 +42,7 @@ namespace Kiwi
      @see Page
      @see Beacon
      */
-    class Instance : public Attr::Manager, public Beacon::Factory, public enable_shared_from_this<Instance>
+    class Instance : public Beacon::Factory, public enable_shared_from_this<Instance>
     {
     public:
         class Listener;

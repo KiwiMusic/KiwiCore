@@ -47,7 +47,7 @@ namespace Kiwi
     /**
      The box is a graphical class that aims to be instantiate in a page.
      */
-	class Box : public Attr::Manager, public enable_shared_from_this<Box>
+	class Box : public Attr::Manager/*, public enable_shared_from_this<Box>*/
     {
     public:
         class Listener;
@@ -161,6 +161,11 @@ namespace Kiwi
         /** The function allocates a box and initialize the defaults members.
          */
         static sBox create(sPage page, sDico dico);
+		
+		sBox getShared()
+		{
+			return static_pointer_cast<Box>(shared_from_this());
+		}
         
         //! Retrieve the instance that manages the page of the box.
         /** The function retrieves the instance that manages the page of the box.
