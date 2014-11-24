@@ -173,7 +173,7 @@ namespace Kiwi
          */
 		inline scBox getShared() const noexcept
 		{
-			return nullptr;//static_pointer_cast<Box>(shared_from_this());
+			return static_pointer_cast<const Box>(shared_from_this());
 		}
         
         //! Retrieve the instance that manages the page of the box.
@@ -592,12 +592,12 @@ namespace Kiwi
             const sBox  m_box;
             const bool  m_want_mouse_focus;
             const bool  m_want_keyboard_focus;
-            
         private:
             
             bool    m_edition;
             bool    m_selected;
         public:
+            
             //! Constructor.
             /** You should never call this method except if you really know what you're doing.
              */
