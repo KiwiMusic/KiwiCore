@@ -172,6 +172,7 @@ namespace Kiwi
 	Attr::Manager::~Manager()
 	{
 		m_attrs.clear();
+		m_listeners.clear();
 	}
 	
 	void Attr::Manager::addAttribute(sAttr attr)
@@ -219,6 +220,7 @@ namespace Kiwi
             if(attr && !attr->isDisabled())
             {
                 attr->set(elements);
+				sendNotification(attr, Notification::ValueChanged);
             }
         }
 		return false;
@@ -484,19 +486,11 @@ namespace Kiwi
 			else
 			{
 				Manager::sListener listener = (*it).lock();
-				listener->attributeChanged(shared_from_this(), attr, type);
+				listener->attributeNotify(shared_from_this(), attr, type);
 				++it;
 			}
 		}
 		m_listeners_mutex.unlock();
-		
-		/*
-		for(auto it = m_listeners.begin(); it != m_listeners.end(); ++it)
-		{
-			if(!it->expired())
-				it->lock()->attributeChanged(this, attr, type);
-		}
-		*/
 	}
 	
     // ================================================================================ //
