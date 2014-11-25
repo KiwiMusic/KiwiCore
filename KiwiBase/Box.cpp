@@ -407,6 +407,29 @@ namespace Kiwi
 
 #define KIO_HEIGHT 3.
 #define KIO_WIDTH 5.
+    
+    Point Box::Controler::getInletPosition(unsigned long index) const noexcept
+    {
+        const unsigned long ninlets = m_box->getNumberOfInlets();
+        if(index && ninlets > 1)
+        {
+            const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
+            return Point(m_box->getPosition().x() + x + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
+        }
+        return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
+    }
+    
+    Point Box::Controler::getOutletPosition(unsigned long index) const noexcept
+    {
+        const unsigned long ninlets = m_box->getNumberOfInlets();
+        if(index && ninlets > 1)
+        {
+            const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
+            return Point(m_box->getPosition().x() + x + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
+        }
+        return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
+    }
+    
     bool Box::Controler::isHit(Point const& pt, Hit& hit) const noexcept
     {
         const Rectangle bounds = m_box->getBounds();
@@ -415,7 +438,7 @@ namespace Kiwi
             if(pt.y() < bounds.y() + KIO_HEIGHT)
             {
                 const unsigned long ninlets = m_box->getNumberOfInlets();
-                if(ninlets && pt.x() < bounds.x() + KIO_WIDTH)
+                if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
                 {
                     hit.type    = Inlet;
                     hit.index   = 0;
@@ -427,7 +450,7 @@ namespace Kiwi
                     for(unsigned long i = 1; i < ninlets; i++)
                     {
                         double val = ratio * i + bounds.x();
-                        if(pt.x() >= val && pt.x() < val + KIO_WIDTH)
+                        if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
                         {
                             hit.type    = Inlet;
                             hit.index   = i;
@@ -445,7 +468,7 @@ namespace Kiwi
             else if(pt.y() > bounds.y() + bounds.height() - KIO_HEIGHT)
             {
                 const unsigned long noutlets = m_box->getNumberOfOutlets();
-                if(noutlets && pt.x() < bounds.x() + KIO_WIDTH)
+                if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
                 {
                     hit.type    = Outlet;
                     hit.index   = 0;
@@ -457,7 +480,7 @@ namespace Kiwi
                     for(unsigned long i = 1; i < noutlets; i++)
                     {
                         double val = ratio * i + bounds.x();
-                        if(pt.x() >= val && pt.x() < val + KIO_WIDTH)
+                        if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
                         {
                             hit.type    = Outlet;
                             hit.index   = i;

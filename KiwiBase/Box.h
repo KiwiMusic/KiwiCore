@@ -685,6 +685,10 @@ namespace Kiwi
                 return m_want_keyboard_focus;
             }
             
+            Point getInletPosition(unsigned long index) const noexcept;
+            
+            Point getOutletPosition(unsigned long index) const noexcept;
+            
             //! Retrieve if the box is hit by a point.
             /** The function retrieves if the box is hit by a point.
              @return true if the box is hit by a point otherwise false.

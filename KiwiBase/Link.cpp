@@ -89,7 +89,7 @@ namespace Kiwi
                     else if(boxes[i]->getId() == to_id)
                     {
                         to = boxes[i];
-                        if(from->getNumberOfInlets() <=  inlet)
+                        if(to->getNumberOfInlets() <=  inlet)
                         {
                             return nullptr;
                         }
