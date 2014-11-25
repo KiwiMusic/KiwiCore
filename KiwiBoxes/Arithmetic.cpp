@@ -74,7 +74,7 @@ namespace Kiwi
                     if(!index)
                     {
                         m_first = elements[0];
-                        Console::post(shared_from_this(), "Send : " + toString({compute()}));
+                        Console::post(getShared(), "Send : " + toString({compute()}));
                         send(0, {compute()});
                     }
                     else

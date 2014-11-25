@@ -229,7 +229,7 @@ namespace Kiwi
             
             vector<sLink> links;
             sPage page = getPage();
-            sBox me = shared_from_this();
+            sBox me = getShared();
             if(page)
             {
                 page->getLinks(links);
@@ -279,7 +279,7 @@ namespace Kiwi
             
             vector<sLink> links;
             sPage page = getPage();
-            sBox me = shared_from_this();
+            sBox me = getShared();
             if(page)
             {
                 page->getLinks(links);
