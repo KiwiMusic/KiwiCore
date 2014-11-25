@@ -181,6 +181,7 @@ namespace Kiwi
 		{
             lock_guard<mutex> guard(m_attrs_mutex);
 			m_attrs[attr->getName()] = attr;
+			sendNotification(attr, Notification::AttrAdded);
 		}
 	}
 	
@@ -193,6 +194,7 @@ namespace Kiwi
             if(it != m_attrs.end())
             {
                 m_attrs.erase(it);
+				sendNotification(attr, Notification::AttrRemoved);
             }
 		}
 	}
@@ -206,6 +208,7 @@ namespace Kiwi
             if(it != m_attrs.end())
             {
                 m_attrs.erase(it);
+				sendNotification(it->second, Notification::AttrRemoved);
             }
         }
 	}
@@ -220,7 +223,10 @@ namespace Kiwi
             if(attr && !attr->isDisabled())
             {
                 attr->set(elements);
-				sendNotification(attr, Notification::ValueChanged);
+				if(attributeValueChanged(attr))
+				{
+					sendNotification(attr, Notification::ValueChanged);
+				}
             }
         }
 		return false;
@@ -342,6 +348,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setBehavior(behavior);
+				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
 	}
@@ -356,6 +363,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setInvisible(invisible);
+				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -370,6 +378,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setDisabled(disable);
+				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -384,6 +393,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setSaved(saved);
+				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -398,6 +408,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setNotifier(notifier);
+				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -475,7 +486,7 @@ namespace Kiwi
 	//! @internal Trigger notification to subclasses and listeners.
 	void Attr::Manager::sendNotification(sAttr attr, Notification type)
 	{
-		m_listeners_mutex.lock();
+		lock_guard<mutex> guard(m_listeners_mutex);
 		auto it = m_listeners.begin();
 		while(it != m_listeners.end())
 		{
@@ -490,7 +501,6 @@ namespace Kiwi
 				++it;
 			}
 		}
-		m_listeners_mutex.unlock();
 	}
 	
     // ================================================================================ //

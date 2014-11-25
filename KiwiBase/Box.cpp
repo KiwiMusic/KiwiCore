@@ -186,6 +186,11 @@ namespace Kiwi
             }
         }
     }
+	
+	bool Box::attributeValueChanged(sAttr attr)
+	{
+		return true;
+	}
     
     // ================================================================================ //
     //                                      INLETS                                      //
