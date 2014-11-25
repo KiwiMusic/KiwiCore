@@ -499,6 +499,13 @@ namespace Kiwi
         {
             
         }
+		
+		//! Notify the manager that the values of an attribute has changed.
+		/** The function notifies the manager that the values of an attribute has changed.
+		 @param attr The attribute that has changed.
+		 @return pass true to notify changes to listeners, false if you don't want them to be notified
+		 */
+		bool attributeValueChanged(sAttr attr);
         
         //! Connect an inlet to a box's outlet.
         /** The function connects an inlet to a box's outlet. Note that the connection of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.

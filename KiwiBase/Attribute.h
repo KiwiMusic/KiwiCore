@@ -485,31 +485,17 @@ namespace Kiwi
              @param dico A dico.
              */
             void write(sDico dico) const noexcept;
-            
-            //! Notify the manager that an attribute has created.
-            /** The function notifies the manager that an attribute has created.
-             @param dico A dico.
-             */
-            virtual void attributeHasBeenCreated(sAttr attr){};
-            
-            //! Notify the manager that an attribute has removed.
-            /** The function notifies the manager that an attribute has removed.
-             @param dico A dico.
-             */
-            virtual void attributeHasBeenRemoved(sAttr attr){};
-            
+			
             //! Notify the manager that the values of an attribute has changed.
             /** The function notifies the manager that the values of an attribute has changed.
              @param dico A dico.
+			 @return pass true to notify changes to listeners, false if you don't want them to be notified
              */
-            virtual void attributeValueChanged(sAttr attr){};
-            
-            //! Notify the manager that the behavior of an attribute has changed.
-            /** The function notifies the manager that the behavior of an attribute has changed.
-             @param dico A dico.
-             */
-            virtual void attributeBehaviorChanged(sAttr attr){};
-            
+			virtual bool attributeValueChanged(sAttr attr)
+			{
+				return false;
+			}
+			
             // ================================================================================ //
             //								ATTRIBUTE MANAGER LISTENER                          //
             // ================================================================================ //
