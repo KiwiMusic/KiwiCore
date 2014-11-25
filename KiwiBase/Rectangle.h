@@ -109,7 +109,7 @@ namespace Kiwi
             return Point(m_width, m_height);
         }
         
-        inline bool contains(Point const& pt)
+        inline bool contains(Point const& pt) const noexcept
         {
             return pt.x() >= m_x && pt.y() >= m_y && pt.x() < m_x + m_width && pt.y() < m_y + m_height;
         }

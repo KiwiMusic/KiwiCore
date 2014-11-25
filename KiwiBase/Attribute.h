@@ -351,13 +351,13 @@ namespace Kiwi
              */
             virtual ~Manager();
             
-        protected:
-            
             //! Add an attribute.
             /** The function adds an attribute .
              @param attr the attribute to add.
              */
             void addAttribute(sAttr attr);
+            
+        protected:
             
             //! Remove an attribute.
             /** The function removes an attribute.
@@ -891,6 +891,16 @@ namespace Kiwi
             ;
         }
         
+        void addAttributes(Attr::Manager* manager)
+        {
+            manager->addAttribute(m_position);
+            manager->addAttribute(m_size);
+            manager->addAttribute(m_presentation_position);
+            manager->addAttribute(m_presentation_size);
+            manager->addAttribute(m_hidden);
+            manager->addAttribute(m_presentation);
+        }
+        
         //! Retrieve the size of the box.
         /** The function retrieves the size of the box as a point.
          @return The size of the box as a point.
@@ -907,6 +917,16 @@ namespace Kiwi
         inline Point getSize() const noexcept
         {
             return m_size->get();
+        }
+        
+        
+        //! Retrieve the bounds of the box.
+        /** The function retrieves the bounds of the box as a rectangle.
+         @return The bounds of the box as a rectangle.
+         */
+        inline Rectangle getBounds() const noexcept
+        {
+            return Rectangle(m_position->get(), m_size->get());
         }
     };
 }
