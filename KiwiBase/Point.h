@@ -93,6 +93,16 @@ namespace Kiwi
         {
             ;
         }
+       
+        inline void x(const double _x) noexcept
+        {
+            m_x = _x;
+        }
+        
+        inline void y(const double _y) noexcept
+        {
+            m_y = _y;
+        }
         
         inline double x() const noexcept
         {
