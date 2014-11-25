@@ -548,10 +548,12 @@ namespace Kiwi
 			//! @internal Trigger notification to subclasses and listeners.
 			void sendNotification(sAttr attr, Notification type);
         };
+		
+		typedef shared_ptr<Attr::Manager> sManager;
+		typedef shared_ptr<const Attr::Manager> scManager;
     };
 	
-	typedef shared_ptr<Attr::Manager> sAttrManager;
-	typedef shared_ptr<const Attr::Manager> scAttrManager;
+	
     
     // ================================================================================ //
     //                                      ATTRIBUTE TYPED                             //
