@@ -49,8 +49,11 @@ namespace Kiwi
         AttrAppearance::addAttributes(this);
 		
 		// Color attributes
-		ElemVector elems = {1., 1., 1, 1.};
+		ElemVector elems = {1., 1., 1., 1.};
 		addAttribute(Attr::create<AttrColor>(Tag::create("bgcolor"), Tag::create("Background Color"), Tag::create("Color"), elems));
+		
+		elems = {0.1, 0.1, 0.1, 1.};
+		addAttribute(Attr::create<AttrColor>(Tag::create("bdcolor"), Tag::create("Border Color"), Tag::create("Color"), elems));
 		
 		/*
 		// Color attributes
@@ -194,6 +197,12 @@ namespace Kiwi
 	
 	bool Box::attributeValueChanged(sAttr attr)
 	{
+		/*
+		if (attr == getAttribute(Tag::create("bgcolor")))
+		{
+			//redraw();
+		}
+		*/
 		return true;
 	}
     
@@ -518,8 +527,15 @@ namespace Kiwi
     void Box::Controler::paint(sBox box, Doodle& d, bool edit, bool selected)
     {
         d.setFont(Font("Menelo", 13, Font::Normal));
-        d.setColor(Color(1., 1., 1., 1.));
+		
+		ElemVector bgcolor;
+		box->getAttributeValue(Tag::create("bgcolor"), bgcolor);
+		d.setColor(Color(bgcolor));
+		
+		//d.setColor(Color(1., 1., 1., 1.));
+		
         d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
+		
         if(!(box->getType() & Behavior::Graphic))
         {
             d.setColor({0.3, 0.3, 0.3, 1.});
