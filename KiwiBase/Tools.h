@@ -59,7 +59,7 @@ namespace Kiwi
         x |= x >> 16;
         return x+1;
     }
-    
+	
     inline string toString(int __val)
     {
         return to_string(__val);
@@ -95,9 +95,22 @@ namespace Kiwi
         return to_string(__val);
     }
     
-    inline string toString(double __val)
+    inline string toString(double __val, bool removeTrailingPoint = false)
     {
-        return to_string(__val);
+		size_t len = snprintf(0, 0, "%.10f", __val);
+		string s(len+1, 0);
+		// technically non-portable, see below
+		snprintf(&s[0], len+1, "%.10f", __val);
+		// remove nul terminator
+		s.pop_back();
+		// remove trailing zeros
+		s.erase(s.find_last_not_of('0') + 1, string::npos);
+		
+		// remove trailing point
+		if(removeTrailingPoint && s.back() == '.')
+			s.pop_back();
+		
+		return s;
     }
     
     inline string toString(long double __val)

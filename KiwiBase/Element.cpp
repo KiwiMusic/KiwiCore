@@ -38,7 +38,7 @@ namespace Kiwi
                 return to_string((long)__val);
                 break;
             case Element::DOUBLE:
-                return to_string((double)__val);
+                return toString((double)__val);
                 break;
             case Element::TAG:
                 return toString((sTag)__val);
