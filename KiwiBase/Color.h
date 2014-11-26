@@ -57,25 +57,25 @@ namespace Kiwi
         Color(ElemVector const& elements) noexcept :
         m_red(0.), m_green(0.), m_blue(0.), m_alpha(1.)
         {
-            const ElemVector::size_type size = elements.size();
-            if(size && elements[0].isNumber())
-            {
-                m_red = (double)elements[0];
-            }
-            if(size > 1 && elements[1].isNumber())
-            {
-                m_green = (double)elements[1];
-            }
-            if(size > 2 && elements[2].isNumber())
-            {
-                m_blue = (double)elements[1];
-            }
-            if(size > 2 && elements[3].isNumber())
-            {
-                m_alpha = (double)elements[1];
-            }
+			const ElemVector::size_type size = elements.size();
+			if(size && elements[0].isNumber())
+			{
+				m_red = clip((double)elements[0], 0., 1.);
+			}
+			if(size > 1 && elements[1].isNumber())
+			{
+				m_green = clip((double)elements[1], 0., 1.);
+			}
+			if(size > 2 && elements[2].isNumber())
+			{
+				m_blue = clip((double)elements[2], 0., 1.);
+			}
+			if(size > 2 && elements[3].isNumber())
+			{
+				m_alpha = clip((double)elements[3], 0., 1.);
+			}
         }
-        
+		
         Color(Color const& color) noexcept :
         m_red(color.m_red), m_green(color.m_green), m_blue(color.m_blue), m_alpha(color.m_alpha)
         {
