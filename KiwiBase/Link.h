@@ -112,7 +112,11 @@ namespace Kiwi
          */
         inline sBox getBoxFrom() const noexcept
         {
-            return m_from->box.lock();
+            if(m_from)
+            {
+                return m_from->getBox();
+            }
+            return nullptr;
         }
         
         //! Retrieve the input box.
@@ -121,7 +125,11 @@ namespace Kiwi
          */
         inline sBox getBoxTo() const noexcept
         {
-            return m_to->box.lock();
+            if(m_to)
+            {
+                return m_to->getBox();
+            }
+            return nullptr;
         }
         
         //! Retrieve the index of the outlet of the link.
@@ -130,7 +138,11 @@ namespace Kiwi
          */
         inline unsigned long getOutletIndex() const noexcept
         {
-            return m_from->index;
+            if(m_from)
+            {
+                return m_from->getIndex();
+            }
+            return 0;
         }
         
         //! Retrieve the index of the inlet of the link.
@@ -139,14 +151,12 @@ namespace Kiwi
          */
         inline unsigned long getInletIndex() const noexcept
         {
-            return m_to->index;
+            if(m_to)
+            {
+                return m_to->getIndex();
+            }
+            return 0;
         }
-        
-        //! Retrieve if the link is valid.
-        /** The function retrieves if the link is potentially connectable. It checks if the boxes, the inlet and the outlet are compatibles.
-         @return True if the link is valid, otherwise false.
-         */
-        bool isValid() const noexcept;
         
         //! Retrieve if the link is connectable.
         /** The function retrieves if the link is connectable. It checks if link is valid and if the inlet and outlet are not already connected.

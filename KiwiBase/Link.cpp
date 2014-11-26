@@ -26,7 +26,7 @@
 #include "Page.h"
 
 namespace Kiwi
-{
+{    
     // ================================================================================ //
     //                                      LINK                                        //
     // ================================================================================ //
@@ -119,14 +119,7 @@ namespace Kiwi
         }
         return nullptr;
     }
-    
-    bool Link::isValid() const noexcept
-    {
-        sBox from   = getBoxFrom();
-        sBox to     = getBoxTo();
-        return from && to && from != to && from->getPage() == to->getPage() && getOutletIndex() < from->getNumberOfOutlets() && getInletIndex() < to->getNumberOfInlets();
-    }
-    
+
     bool Link::isConnectable() const noexcept
     {
         sBox from   = getBoxFrom();
@@ -137,8 +130,8 @@ namespace Kiwi
             from->getOutletSockets(getOutletIndex(), sockets);
             for(vector<shared_ptr<Socket>>::size_type i = 0; i < sockets.size(); i++)
             {
-                sBox receiver = sockets[i]->box.lock();
-                if(receiver && receiver == to && sockets[i]->index == getInletIndex())
+                sBox receiver = sockets[i]->getBox();
+                if(receiver && receiver == to && sockets[i]->getIndex() == getInletIndex())
                 {
                     return false;
                 }
@@ -154,17 +147,15 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->connectOutlet(getOutletIndex(), to, getInletIndex()))
+            if(from->connectOutlet(getOutletIndex(), m_to) && to->connectInlet(getInletIndex(), m_from))
             {
-                if(to->connectInlet(getInletIndex(), from, getOutletIndex()))
-                {
-                    return true;
-                }
-                else
-                {
-                    from->disconnectOutlet(getOutletIndex(), to, getInletIndex());
-                    return false;
-                }
+                return true;
+            }
+            else
+            {
+                from->disconnectOutlet(getOutletIndex(), m_from);
+                to->disconnectInlet(getInletIndex(), m_from);
+                return false;
             }
         }
         return false;
