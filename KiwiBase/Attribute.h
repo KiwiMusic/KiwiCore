@@ -692,7 +692,7 @@ namespace Kiwi
 	class AttrPoint : public Attr
 	{
 	private:
-        Point m_value = {0, 0};
+        Point m_value = {0., 0.};
 	public:
 		AttrPoint(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0.}, long behavior = 0) :
 		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
@@ -854,7 +854,7 @@ namespace Kiwi
             ~Presentation(){};
         };
         
-    private:
+    protected:
         shared_ptr<Position>                m_position;
         shared_ptr<Size>                    m_size;
         shared_ptr<PresentationPosition>    m_presentation_position;

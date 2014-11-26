@@ -47,6 +47,11 @@ namespace Kiwi
         addAttribute(Attr::create<AttrFont::Justification>());
         
         AttrAppearance::addAttributes(this);
+		
+		// Color attributes
+		ElemVector elems = {1., 1., 1, 1.};
+		addAttribute(Attr::create<AttrColor>(Tag::create("bgcolor"), Tag::create("Background Color"), Tag::create("Color"), elems));
+		
 		/*
 		// Color attributes
 		elems = {1., 1., 1, 1.};
