@@ -118,7 +118,7 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_outlets.size())
         {
-            for(unsigned long i = 0; i < m_outlets[index]->getNumberOfSockets(); i++)
+            for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
             {
                 sBox receiver       = m_outlets[index]->getBox(i);
                 unsigned long inlet = m_outlets[index]->getInletIndex(i);
@@ -229,6 +229,7 @@ namespace Kiwi
         else
         {
             m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, description)));
+            int zaza; // Notify Links that they must change their indices
         }
         
         sControler controler = getControler();
@@ -243,19 +244,12 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_inlets.size())
         {
-            vector<sLink> links;
             sPage page = getPage();
-            sBox me = getShared();
             if(page)
             {
-                page->getLinks(links);
-                for(vector<sLink>::size_type i = 0; i < links.size(); i++)
+                for(unsigned long i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
                 {
-                    sSocket socket = links[i]->getSocketTo();
-                    if(socket && socket->getBox() == me && socket->getIndex() == index)
-                    {
-                        page->removeLink(links[i]);
-                    }
+                    page->removeLink(m_inlets[index]->getLink(i));
                 }
             }
             m_inlets.erase(m_inlets.begin()+(long)index);
@@ -293,6 +287,7 @@ namespace Kiwi
         else
         {
             m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
+            int zaza; // Notify Links that they must change their indices
         }
         sControler controler = getControler();
         if(controler)
@@ -306,22 +301,14 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_outlets.size())
         {
-            vector<sLink> links;
             sPage page = getPage();
-            sBox me = getShared();
             if(page)
             {
-                page->getLinks(links);
-                for(vector<sLink>::size_type i = 0; i < links.size(); i++)
+                for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
                 {
-                    sSocket socket = links[i]->getSocketFrom();
-                    if(socket && socket->getBox() == me && socket->getIndex() == index)
-                    {
-                        page->removeLink(links[i]);
-                    }
+                    page->removeLink(m_outlets[index]->getLink(i));
                 }
             }
-            
             m_outlets.erase(m_outlets.begin()+(long)index);
             
             sControler controler = getControler();
@@ -333,42 +320,42 @@ namespace Kiwi
         
     }
     
-    bool Box::connectInlet(unsigned long inlet, sSocket socket)
+    bool Box::connectInlet(sLink link)
     {
-        if(socket && inlet < getNumberOfInlets())
+        if(link && link->getInletIndex() < getNumberOfInlets())
         {
             lock_guard<mutex> guard(m_io_mutex);
-            return m_inlets[inlet]->append(socket);
+            return m_inlets[link->getInletIndex()]->append(link);
         }
         return false;
     }
 
-    bool Box::connectOutlet(unsigned long outlet, sSocket socket)
+    bool Box::connectOutlet(sLink link)
     {
-        if(socket && outlet < getNumberOfOutlets())
+        if(link && link->getOutletIndex() < getNumberOfOutlets())
         {
             lock_guard<mutex> guard(m_io_mutex);
-            return m_outlets[outlet]->append(socket);
+            return m_outlets[link->getOutletIndex()]->append(link);
         }
         return false;
     }
     
-    bool Box::disconnectInlet(unsigned long inlet, sSocket socket)
+    bool Box::disconnectInlet(sLink link)
     {
-        if(socket && inlet < getNumberOfInlets())
+        if(link && link->getInletIndex() < getNumberOfInlets())
         {
             lock_guard<mutex> guard(m_io_mutex);
-            return m_inlets[inlet]->erase(socket);
+            return m_inlets[link->getInletIndex()]->erase(link);
         }
         return false;
     }
     
-    bool Box::disconnectOutlet(unsigned long outlet, sSocket socket)
+    bool Box::disconnectOutlet(sLink link)
     {
-        if(socket && outlet < getNumberOfOutlets())
+        if(link && link->getOutletIndex() < getNumberOfOutlets())
         {
             lock_guard<mutex> guard(m_io_mutex);
-            return m_outlets[outlet]->erase(socket);
+            return m_outlets[link->getOutletIndex()]->erase(link);
         }
         return false;
     }

@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_BOX__
 #define __DEF_KIWI_BOX__
 
-#include "Link.h"
+#include "Iolets.h"
 #include "AttributeBox.h"
 #include "Event.h"
 #include "Doodle.h"
@@ -60,8 +60,8 @@ namespace Kiwi
         };
         
     private:
-        friend bool Link::connect() const noexcept;
-        friend bool Link::disconnect() const noexcept;
+        friend bool Link::connect() noexcept;
+        friend bool Link::disconnect() noexcept;
         
         const wInstance     m_instance;
         const wPage         m_page;
@@ -229,20 +229,20 @@ namespace Kiwi
             }
         }
         
-        //! Retrieve the sockets of an inlet.
-        /** The functions retrieves the sockets of an inlet.
+        //! Retrieve the links of an inlet.
+        /** The functions retrieves the links of an inlet.
          @param index The inlet index.
-         @param sockets A vetcor of socket to fill.
+         @param links A vetcor of link to fill.
          */
-        inline void getInletSockets(unsigned long index, vector<shared_ptr<Socket>>& sockets) const noexcept
+        inline void getInletLinks(unsigned long index, vector<shared_ptr<Link>>& links) const noexcept
         {
-            sockets.clear();
+            links.clear();
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                for(unsigned long i = 0; i < m_inlets[index]->getNumberOfSockets(); i++)
+                for(unsigned long i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
                 {
-                    sockets.push_back(m_inlets[index]->getSocket(i));
+                    links.push_back(m_inlets[index]->getLink(i));
                 }
             }
         }
@@ -293,20 +293,20 @@ namespace Kiwi
             }
         }
         
-        //! Retrieve the sockets of an outlet.
-        /** The functions retrieves the sockets of an outlet.
+        //! Retrieve the links of an outlet.
+        /** The functions retrieves the links of an outlet.
          @param index The outlet index.
-         @param sockets A vetcor of socket to fill.
+         @param links A vetcor of link to fill.
          */
-        inline void getOutletSockets(unsigned long index, vector<shared_ptr<Socket>>& sockets) const noexcept
+        inline void getOutletLinks(unsigned long index, vector<shared_ptr<Link>>& links) const noexcept
         {
-            sockets.clear();
+            links.clear();
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                for(unsigned long i = 0; i < m_outlets[index]->getNumberOfSockets(); i++)
+                for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
                 {
-                    sockets.push_back(m_outlets[index]->getSocket(i));
+                    links.push_back(m_outlets[index]->getLink(i));
                 }
             }
         }
@@ -444,35 +444,31 @@ namespace Kiwi
         
         //! Connect an inlet to a box's outlet.
         /** The function connects an inlet to a box's outlet. Note that the link of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
-         @param inlet   The index of the inlet.
-         @param socket  The socket.
+         @param link  The link.
          @return true if the link has been done, otherwise false.
          */
-        bool connectInlet(unsigned long inlet, sSocket socket);
+        bool connectInlet(sLink link);
         
         //! Connect an outlet to a box's inlet.
         /** The function connects an outlet to a box's inlet. This part of the link is the only one really important, because this is the one used by the send method.
-         @param inlet   The index of the outlet.
-         @param socket  The socket.
+         @param link  The link.
          @return true if the link has been done, otherwise false.
          */
-        bool connectOutlet(unsigned long outlet, sSocket socket);
+        bool connectOutlet(sLink link);
         
         //! Disconnect an inlet to a box's outlet.
         /** The function disconnects an inlet to a box's outlet. Note that the link of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
-         @param inlet   The index of the inlet.
-         @param socket  The socket.
+         @param link  The link.
          @return true if the link has been removed, otherwise false.
          */
-        bool disconnectInlet(unsigned long inlet, sSocket socket);
+        bool disconnectInlet(sLink link);
         
         //! Disconnect an outlet to a box's inlet.
         /** The function disconnects an outlet to a box's inlet. This part of the dislink is the only one really important, because this is the one used by the send method.
-         @param inlet   The index of the outlet.
-         @param socket  The socket.
+         @param link  The link.
          @return true if the link has been removed, otherwise false.
          */
-        bool disconnectOutlet(unsigned long outlet, sSocket socket);
+        bool disconnectOutlet(sLink link);
         
         //! Set the controler of the box.
         /** The function sets the controler of the box.

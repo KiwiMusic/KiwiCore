@@ -30,13 +30,13 @@ namespace Kiwi
     //                                      INLET                                       //
     // ================================================================================ //
     
-    bool Inlet::has(sSocket socket) noexcept
+    bool Inlet::has(sLink link) noexcept
     {
-        if(socket)
+        if(link)
         {
-            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
             {
-                if(socket->getBox() == getBox(i) && socket->getIndex() == getOutletIndex(i))
+                if(link->getBoxFrom() == getBox(i) && link->getOutletIndex() == getOutletIndex(i))
                 {
                     return true;
                 }
@@ -45,32 +45,32 @@ namespace Kiwi
         return false;
     }
     
-    bool Inlet::append(sSocket socket) noexcept
+    bool Inlet::append(sLink link) noexcept
     {
-        if(socket)
+        if(link)
         {
-            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
             {
-                if(socket->getBox() == getBox(i) && socket->getIndex() == getOutletIndex(i))
+                if(link->getBoxFrom() == getBox(i) && link->getOutletIndex() == getOutletIndex(i))
                 {
                     return false;
                 }
             }
-            m_sockets.push_back(socket);
+            m_links.push_back(link);
             return true;
         }
         return false;
     }
     
-    bool Inlet::erase(const sSocket socket) noexcept
+    bool Inlet::erase(const sLink link) noexcept
     {
-        if(socket)
+        if(link)
         {
-            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
             {
-                if(socket->getBox() == getBox(i) && socket->getIndex() == getOutletIndex(i))
+                if(link->getBoxFrom() == getBox(i) && link->getOutletIndex() == getOutletIndex(i))
                 {
-                    m_sockets.erase(m_sockets.begin()+(long)i);
+                    m_links.erase(m_links.begin()+(long)i);
                     return true;
                 }
             }
@@ -82,13 +82,13 @@ namespace Kiwi
     //                                      OUTLET                                      //
     // ================================================================================ //
     
-    bool Outlet::has(sSocket socket) noexcept
+    bool Outlet::has(sLink link) noexcept
     {
-        if(socket)
+        if(link)
         {
-            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
             {
-                if(socket->getBox() == getBox(i) && socket->getIndex() == getInletIndex(i))
+                if(link->getBoxTo() == getBox(i) && link->getInletIndex() == getInletIndex(i))
                 {
                     return true;
                 }
@@ -97,32 +97,32 @@ namespace Kiwi
         return false;
     }
     
-    bool Outlet::append(sSocket socket) noexcept
+    bool Outlet::append(sLink link) noexcept
     {
-        if(socket)
+        if(link)
         {
-            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
             {
-                if(socket->getBox() == getBox(i) && socket->getIndex() == getInletIndex(i))
+                if(link->getBoxTo() == getBox(i) && link->getInletIndex() == getInletIndex(i))
                 {
                     return false;
                 }
             }
-            m_sockets.push_back(socket);
+            m_links.push_back(link);
             return true;
         }
         return false;
     }
     
-    bool Outlet::erase(const sSocket socket) noexcept
+    bool Outlet::erase(sLink link) noexcept
     {
-        if(socket)
+        if(link)
         {
-            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
             {
-                if(socket->getBox() == getBox(i) && socket->getIndex() == getInletIndex(i))
+                if(link->getBoxTo() == getBox(i) && link->getInletIndex() == getInletIndex(i))
                 {
-                    m_sockets.erase(m_sockets.begin()+(long)i);
+                    m_links.erase(m_links.begin()+(long)i);
                     return true;
                 }
             }
