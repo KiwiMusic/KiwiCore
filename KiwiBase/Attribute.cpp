@@ -638,42 +638,6 @@ namespace Kiwi
 	{
 		elements = m_value;
 	}
-    
-    // ================================================================================ //
-	//                                 ATTRIBUTE OTHER									//
-	// ================================================================================ //
-	
-    const sTag AttrFont::Tag_Font               = Tag::create("Font");
-    const sTag AttrFont::Tag_fontname                           = Tag::create("fontname");
-    const sTag AttrFont::Tag_Font_Name                          = Tag::create("Font Name");
-    const sTag AttrFont::Tag_Arial                              = Tag::create("Arial");
-    const sTag AttrFont::Tag_fontsize                           = Tag::create("fontsize");
-    const sTag AttrFont::Tag_Font_Size                          = Tag::create("Font Size");
-    const sTag AttrFont::Tag_fontface                           = Tag::create("fontface");
-    const sTag AttrFont::Tag_Font_Face                          = Tag::create("Font Face");
-    const sTag AttrFont::Tag_normal                             = Tag::create("normal");
-    const sTag AttrFont::Tag_bold                               = Tag::create("bold");
-    const sTag AttrFont::Tag_italic                             = Tag::create("italic");
-    const sTag AttrFont::Tag_bold_italic                        = Tag::create("bold_italic");
-    const sTag AttrFont::Tag_fontjustification                  = Tag::create("fontjustification");
-    const sTag AttrFont::Tag_Font_Justification                 = Tag::create("Font Justification");
-    const sTag AttrFont::Tag_left                               = Tag::create("left");
-    const sTag AttrFont::Tag_center                             = Tag::create("center");
-    const sTag AttrFont::Tag_right                              = Tag::create("right");
-    
-    const sTag AttrAppearance::Tag_Appearance   = Tag::create("Appearance");
-    const sTag AttrAppearance::Tag_position                     = Tag::create("position");
-    const sTag AttrAppearance::Tag_Position                     = Tag::create("Position");
-    const sTag AttrAppearance::Tag_size                         = Tag::create("size");
-    const sTag AttrAppearance::Tag_Size                         = Tag::create("Size");
-    const sTag AttrAppearance::Tag_presentation_position        = Tag::create("presentation position");
-    const sTag AttrAppearance::Tag_Presentation_Position        = Tag::create("Presentation Position");
-    const sTag AttrAppearance::Tag_presentation_size            = Tag::create("presentation size");
-    const sTag AttrAppearance::Tag_Presentation_Size            = Tag::create("Presentation Size");
-    const sTag AttrAppearance::Tag_hidden                       = Tag::create("hidden");
-    const sTag AttrAppearance::Tag_Hide_on_Lock                 = Tag::create("Hide on Lock");
-    const sTag AttrAppearance::Tag_presentation                 = Tag::create("presentation");
-    const sTag AttrAppearance::Tag_Include_in_Presentation      = Tag::create("Include in Presentation");
 }
 
 

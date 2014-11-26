@@ -109,7 +109,7 @@ namespace Kiwi
         //! Constructor with an int value.
         /** The function allocates the element with a long value from a casted int value.
          */
-        Element(int value) noexcept
+        Element(const int value) noexcept
         {
             m_type = LONG;
             m_val.m_long = value;
@@ -118,7 +118,7 @@ namespace Kiwi
         //! Constructor with a long value.
         /** The function allocates the element with a long value.
          */
-        Element(long value) noexcept
+        Element(const long value) noexcept
         {
             m_type = LONG;
             m_val.m_long = value;
@@ -127,7 +127,7 @@ namespace Kiwi
         //! Constructor with a long value.
         /** The function allocates the element with a long value.
          */
-        Element(unsigned long value) noexcept
+        Element(const unsigned long value) noexcept
         {
             m_type = LONG;
             m_val.m_long = (long)value;
@@ -136,7 +136,7 @@ namespace Kiwi
         //! Constructor with a float value.
         /** The function allocates the element with a double value from a casted float value.
          */
-        Element(float value) noexcept
+        Element(const float value) noexcept
         {
             m_type = DOUBLE;
             m_val.m_double = (double)value;
@@ -145,7 +145,7 @@ namespace Kiwi
         //! Constructor with a double value.
         /** The function allocates the element with a double value.
          */
-        Element(double value) noexcept
+        Element(const double value) noexcept
         {
             m_type = DOUBLE;
             m_val.m_double = value;

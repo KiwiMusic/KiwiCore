@@ -41,16 +41,8 @@ namespace Kiwi
     m_type(0 | type),
     m_stack_count(0)
     {
-		addAttribute(Attr::create<AttrFont::Name>());
-        addAttribute(Attr::create<AttrFont::Size>());
-        addAttribute(Attr::create<AttrFont::Face>());
-        addAttribute(Attr::create<AttrFont::Justification>());
-        
-        AttrAppearance::addAttributes(this);
-		
 		// Color attributes
-		ElemVector elems = {1., 1., 1, 1.};
-		addAttribute(Attr::create<AttrColor>(Tag::create("bgcolor"), Tag::create("Background Color"), Tag::create("Color"), elems));
+		addAttribute(Attr::create<AttrColor>(Tag::create("bgcolor"), Tag::create("Background Color"), Tag::create("Color"), (ElemVector){1., 1., 1, 1.}));
 		
 		/*
 		// Color attributes
@@ -194,6 +186,22 @@ namespace Kiwi
 	
 	bool Box::attributeValueChanged(sAttr attr)
 	{
+        if(attr == AttrBox::appearance_position)
+        {
+            sControler controler = getControler();
+            if(controler)
+            {
+                controler->positionChanged();
+            }
+        }
+        else if(attr == AttrBox::appearance_size)
+        {
+            sControler controler = getControler();
+            if(controler)
+            {
+                controler->sizeChanged();
+            }
+        }
 		return true;
 	}
     
