@@ -271,7 +271,7 @@ namespace Kiwi
     
     sLink Page::addLink(sLink link)
     {
-        if(link->connect())
+        if(link && link->connect())
         {
             m_links_mutex.lock();
             m_links.push_back(link);

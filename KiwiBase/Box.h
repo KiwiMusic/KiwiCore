@@ -25,13 +25,12 @@
 #define __DEF_KIWI_BOX__
 
 #include "Link.h"
-#include "Attribute.h"
+#include "AttributeBox.h"
 #include "Event.h"
 #include "Doodle.h"
 #include "Beacon.h"
 
 // TODO
-// - Attributes (getFont, getSize, getPosition etc...) !!
 // - See how to format the expression
 // - Box should deletes it owns connections at deletion
 namespace Kiwi
@@ -47,7 +46,7 @@ namespace Kiwi
     /**
      The box is a graphical class that aims to be instantiate in a page.
      */
-	class Box : public Attr::Manager, public AttrAppearance
+	class Box : public AttrBox
     {
     public:
         class Listener;
@@ -593,12 +592,11 @@ namespace Kiwi
                 unsigned long   index;
             };
             
-        protected:
+        private:
             
             const sBox  m_box;
             const bool  m_want_mouse_focus;
             const bool  m_want_keyboard_focus;
-        private:
             
             bool    m_edition;
             bool    m_selected;
@@ -692,8 +690,18 @@ namespace Kiwi
                 return m_want_keyboard_focus;
             }
             
+            //! Retrieve the position of an inlet.
+            /** The function retrieves the position of an inlet.
+             @param index The index of the inlet.
+             @return the position of the inlet as a point.
+             */
             Point getInletPosition(unsigned long index) const noexcept;
             
+            //! Retrieve the position of an outlet.
+            /** The function retrieves the position of an outlet.
+             @param index The index of the outlet.
+             @return the position of the outlet as a point.
+             */
             Point getOutletPosition(unsigned long index) const noexcept;
             
             //! Retrieve if the box is hit by a point.
@@ -716,9 +724,18 @@ namespace Kiwi
             
             //! The redraw function that should be override.
             /** The function is called by the box when it should be repainted.
-             @param box    The box.
              */
             virtual void redraw() = 0;
+            
+            //! The position notification function that should be override.
+            /** The function is called by the box when its position changed.
+             */
+            virtual void positionChanged() = 0;
+            
+            //! The size notification function that should be override.
+            /** The function is called by the box when its size changed.
+             */
+            virtual void sizeChanged() = 0;
             
             //! The default paint method.
             /** The default function paint a default box with the background, border, inlets, outlets and text.
