@@ -31,9 +31,9 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    sLink Link::create(const sSocket from, const sSocket to)
+    sLink Link::create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
     {
-        return make_shared<Link>(from, to);
+        return make_shared<Link>(from, outlet, to, inlet);
     }
     
     sLink Link::create(scPage page, scDico dico)
@@ -93,7 +93,7 @@ namespace Kiwi
                 
                 if(from && to)
                 {
-                    return Link::create(make_shared<Socket>(from, outlet), make_shared<Socket>(to, inlet));
+                    return Link::create(from, outlet, to, inlet);
                 }
             }
             
@@ -107,54 +107,33 @@ namespace Kiwi
         {
             if(link->getOutletIndex() < newbox->getNumberOfOutlets())
             {
-                return create(make_shared<Socket>(newbox, link->getOutletIndex()), link->getSocketTo());
+                return create(newbox, link->getOutletIndex(), link->getBoxTo(), link->getInletIndex());
             }
         }
         else if(link && link->getBoxTo() == oldbox)
         {
             if(link->getInletIndex() < newbox->getNumberOfInlets())
             {
-                return create(link->getSocketFrom(), make_shared<Socket>(newbox, link->getInletIndex()));
+                return create(link->getBoxFrom(), link->getOutletIndex(), newbox, link->getInletIndex());
             }
         }
         return nullptr;
     }
-
-    bool Link::isConnectable() const noexcept
-    {
-        sBox from   = getBoxFrom();
-        sBox to     = getBoxTo();
-        if(from && to && from != to && from->getPage() == to->getPage() && getOutletIndex() < from->getNumberOfOutlets() && getInletIndex() < to->getNumberOfInlets())
-        {
-            vector<shared_ptr<Socket>> sockets;
-            from->getOutletSockets(getOutletIndex(), sockets);
-            for(vector<shared_ptr<Socket>>::size_type i = 0; i < sockets.size(); i++)
-            {
-                sBox receiver = sockets[i]->getBox();
-                if(receiver && receiver == to && sockets[i]->getIndex() == getInletIndex())
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
     
-    bool Link::connect() const noexcept
+    bool Link::connect() noexcept
     {
         sBox     from    = getBoxFrom();
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->connectOutlet(getOutletIndex(), m_to) && to->connectInlet(getInletIndex(), m_from))
+            if(from->connectOutlet(shared_from_this()) && to->connectInlet(shared_from_this()))
             {
                 return true;
             }
             else
             {
-                from->disconnectOutlet(getOutletIndex(), m_from);
-                to->disconnectInlet(getInletIndex(), m_from);
+                from->disconnectOutlet(shared_from_this());
+                to->disconnectInlet(shared_from_this());
                 return false;
             }
         }
@@ -162,8 +141,20 @@ namespace Kiwi
     }
     
 
-    bool Link::disconnect() const noexcept
+    bool Link::disconnect() noexcept
     {
+        sBox     from    = getBoxFrom();
+        sBox     to      = getBoxTo();
+        if(from && to)
+        {
+            if(from->disconnectOutlet(shared_from_this()))
+            {
+                if(to->disconnectInlet(shared_from_this()))
+                {
+                   return true;
+                }
+            }
+        }
         return false;
     }
     

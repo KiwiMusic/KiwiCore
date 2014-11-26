@@ -25,7 +25,6 @@
 #define __DEF_KIWI_LINK__
 
 #include "Attribute.h"
-#include "Iolets.h"
 
 namespace Kiwi
 {
@@ -37,11 +36,13 @@ namespace Kiwi
     /**
      The link is a combination of two sockets used to create the connection between boxes in a page.
      */
-    class Link
+    class Link : public enable_shared_from_this<Link>
     {
     private:
-        const sSocket   m_from;
-        const sSocket   m_to;
+        const wBox      m_box_from;
+        const wBox      m_box_to;
+        const unsigned long m_index_outlet;
+        const unsigned long m_index_intlet;
         vector<Point>   m_points;
         
     public:
@@ -49,8 +50,8 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Link(const sSocket from, const sSocket to) noexcept :
-        m_from(from), m_to(to)
+        Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept :
+        m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
         {
             ;
         }
@@ -65,11 +66,13 @@ namespace Kiwi
         
         //! The link creation method with sockets.
         /** The function allocates a link, checks if the link is valid and returns it. If the link isn't valid it returns an invalid pointer.
-         @param from    The from socket.
-         @param to      The to socket.
+         @param from    The box that send.
+         @param outlet  The index of the outlet.
+         @param to      The box that receive.
+         @param inlet   The index of the inlet.
          @return The link.
          */
-        static sLink create(const sSocket from, const sSocket to);
+        static sLink create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet);
         
         //! The link creation method with a dico.
         /** The function allocates a link with a page and a dico.
@@ -88,35 +91,13 @@ namespace Kiwi
          */
         static sLink create(scLink link, const sBox oldbox, const sBox newbox);
         
-        //! Retrieve the from socket.
-        /** The function retrieves from socket.
-         @return The socket.
-         */
-        inline sSocket getSocketFrom() const noexcept
-        {
-            return m_from;
-        }
-        
-        //! Retrieve the to socket.
-        /** The function retrieves to socket.
-         @return The socket.
-         */
-        inline sSocket getSocketTo() const noexcept
-        {
-            return m_to;
-        }
-        
         //! Retrieve the output box.
         /** The function retrieves the output box of the link.
          @return The output box.
          */
         inline sBox getBoxFrom() const noexcept
         {
-            if(m_from)
-            {
-                return m_from->getBox();
-            }
-            return nullptr;
+            return m_box_from.lock();
         }
         
         //! Retrieve the input box.
@@ -125,11 +106,7 @@ namespace Kiwi
          */
         inline sBox getBoxTo() const noexcept
         {
-            if(m_to)
-            {
-                return m_to->getBox();
-            }
-            return nullptr;
+            return m_box_to.lock();
         }
         
         //! Retrieve the index of the outlet of the link.
@@ -138,11 +115,7 @@ namespace Kiwi
          */
         inline unsigned long getOutletIndex() const noexcept
         {
-            if(m_from)
-            {
-                return m_from->getIndex();
-            }
-            return 0;
+            return m_index_outlet;
         }
         
         //! Retrieve the index of the inlet of the link.
@@ -151,30 +124,20 @@ namespace Kiwi
          */
         inline unsigned long getInletIndex() const noexcept
         {
-            if(m_to)
-            {
-                return m_to->getIndex();
-            }
-            return 0;
+            return m_index_intlet;
         }
-        
-        //! Retrieve if the link is connectable.
-        /** The function retrieves if the link is connectable. It checks if link is valid and if the inlet and outlet are not already connected.
-         @return True if the link is valid, otherwise false.
-         */
-        bool isConnectable() const noexcept;
         
         //! Connect the link.
         /** The function connects link.
          @return True if the link has been connected, otherwise false.
          */
-        bool connect() const noexcept;
+        bool connect() noexcept;
         
         //! Disconnect the link.
         /** The function disconnects link.
          @return True if the link has been disconnected, otherwise false.
          */
-        bool disconnect() const noexcept;
+        bool disconnect() noexcept;
         
         //! Write the page in a dico.
         /** The function writes the link in a dico.

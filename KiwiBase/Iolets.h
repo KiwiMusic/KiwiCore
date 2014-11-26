@@ -24,84 +24,17 @@
 #ifndef __DEF_KIWI_IOLETS__
 #define __DEF_KIWI_IOLETS__
 
-#include "Tools.h"
+#include "Link.h"
 
 namespace Kiwi
 {
-    
-    // ================================================================================ //
-    //                                      SOCKET                                      //
-    // ================================================================================ //
-    
-    //! The socket owns a box and an index of inlet or outlet.
-    /**
-     The socket is a half part of a link and is used by inlets and outlets to send messages between boxes.
-     */
-    class Socket
-    {
-    private:
-        const wBox          m_box;
-        const unsigned long m_index;
-        
-     public:
-        //! Constructor.
-        /** You should never call this method except if you really know what you're doing.
-         */
-        Socket(const sBox box, const unsigned long index) noexcept :
-        m_box(box), m_index(index)
-        {
-            ;
-        }
-        
-        ~Socket()
-        {
-            ;
-        }
-        
-        //! The socket creation method.
-        /** The function allocates a socket.
-         @param box    The box.
-         @param index  The index.
-         @return The socket.
-         */
-        static sSocket create(const sBox box, const unsigned long index)
-        {
-            if(box)
-            {
-                return make_shared<Socket>(box, index);
-            }
-            else
-            {
-                return nullptr;
-            }
-        }
-        
-        //! Retrieve the box of the socket.
-        /** The functions retrieves the box of the socket.
-         @return The box of the socket.
-         */
-        inline sBox getBox() const noexcept
-        {
-            return m_box.lock();
-        }
-        
-        //! Retrieve the index of the socket.
-        /** The functions retrieves the index of the socket.
-         @return The index of the socket.
-         */
-        inline unsigned long getIndex() const noexcept
-        {
-            return m_index;
-        }
-    };
-    
     // ================================================================================ //
     //                                      INLET                                       //
     // ================================================================================ //
     
-    //! The inlet owns a set of sockets.
+    //! The inlet owns a set of links.
     /**
-     The inlet owns a set of sockets that are used to manage links in a box. It also have a type and a description.
+     The inlet owns a set of links that are used to manage links in a box. It also have a type and a description.
      */
     class Inlet
     {
@@ -115,7 +48,7 @@ namespace Kiwi
         };
     private:
         
-        vector<sSocket> m_sockets;
+        vector<sLink>   m_links;
         const Type      m_type;
         const string    m_description;
     
@@ -136,7 +69,7 @@ namespace Kiwi
          */
         ~Inlet()
         {
-            m_sockets.clear();
+            m_links.clear();
         }
         
         //! Retrieve the type of the inlet.
@@ -157,25 +90,25 @@ namespace Kiwi
             return m_description;
         }
         
-        //! Retrieve the number of sockets.
-        /** The functions retrieves the number of sockets of the inlet.
-         @return The number of sockets.
+        //! Retrieve the number of links.
+        /** The functions retrieves the number of links of the inlet.
+         @return The number of links.
          */
-        inline unsigned long getNumberOfSockets() const noexcept
+        inline unsigned long getNumberOfLinks() const noexcept
         {
-            return (unsigned long)m_sockets.size();
+            return (unsigned long)m_links.size();
         }
         
-        //! Retrieve a socket.
-        /** The functions retrieves a socket.
-         @param index The index of the socket.
-         @return The socket.
+        //! Retrieve a link.
+        /** The functions retrieves a link.
+         @param index The index of the link.
+         @return The link.
          */
-        inline sSocket getSocket(unsigned long index) const noexcept
+        inline sLink getLink(unsigned long index) const noexcept
         {
-            if(index < (unsigned long)m_sockets.size())
+            if(index < (unsigned long)m_links.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index];
+                return m_links[(vector<sLink>::size_type)index];
             }
             else
             {
@@ -183,16 +116,16 @@ namespace Kiwi
             }
         }
         
-        //! Retrieve the box of a socket.
-        /** The functions retrieves the box of a socket.
-         @param index The index of the socket.
-         @return The box of a socket.
+        //! Retrieve the box of a link.
+        /** The functions retrieves the box of a link.
+         @param index The index of the link.
+         @return The box of a link.
          */
         inline sBox getBox(unsigned long index) const noexcept
         {
-            if(index < (unsigned long)m_sockets.size())
+            if(index < (unsigned long)m_links.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->getBox();
+                return m_links[(vector<sLink>::size_type)index]->getBoxFrom();
             }
             else
             {
@@ -200,16 +133,16 @@ namespace Kiwi
             }
         }
         
-        //! Retrieve the outlet's index of a socket.
-        /** The functions retrieves the outlet's index of a socket.
-         @param index The index of the socket.
-         @return The outlet's index of a socket.
+        //! Retrieve the outlet's index of a link.
+        /** The functions retrieves the outlet's index of a link.
+         @param index The index of the link.
+         @return The outlet's index of a link.
          */
         inline unsigned long getOutletIndex(unsigned long index) const noexcept
         {
-            if(index < (unsigned long)m_sockets.size())
+            if(index < (unsigned long)m_links.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->getIndex();
+                return m_links[(vector<sLink>::size_type)index]->getOutletIndex();
             }
             else
             {
@@ -217,36 +150,36 @@ namespace Kiwi
             }
         }
         
-        //! Check if a socket is in the inlet.
-        /** The functions checks if a socket is in the inlet.
-         @param socket The socket.
-         @return true if the socket is in the inlet, otherwise false.
+        //! Check if a link is in the inlet.
+        /** The functions checks if a link is in the inlet.
+         @param link The link.
+         @return true if the link is in the inlet, otherwise false.
          */
-        bool has(sSocket socket) noexcept;
+        bool has(sLink link) noexcept;
         
-        //! Append a new socket to the inlet.
-        /** The functions appends a new socket to the inlet.
-         @param sSocket The socket.
-         @return true if the socket has been added, otherwise false.
+        //! Append a new link to the inlet.
+        /** The functions appends a new link to the inlet.
+         @param sLink The link.
+         @return true if the link has been added, otherwise false.
          */
-        bool append(sSocket socket) noexcept;
+        bool append(sLink link) noexcept;
         
-        //! Remove a socket from the inlet.
-        /** The functions removes a socket from the inlet.
-         @param index The box of the socket.
-         @param index The outlet's index of the socket.
-         @return true if the socket has been removed, otherwise false.
+        //! Remove a link from the inlet.
+        /** The functions removes a link from the inlet.
+         @param index The box of the link.
+         @param index The outlet's index of the link.
+         @return true if the link has been removed, otherwise false.
          */
-        bool erase(const sSocket socket) noexcept;
+        bool erase(sLink link) noexcept;
     };
     
     // ================================================================================ //
     //                                      OUTLET                                      //
     // ================================================================================ //
     
-    //! The outlet owns a set of sockets.
+    //! The outlet owns a set of links.
     /**
-     The outlet owns a set of sockets that are used to manage links in a box. It also have a type and a description.
+     The outlet owns a set of links that are used to manage links in a box. It also have a type and a description.
      */
     class Outlet
     {
@@ -259,7 +192,7 @@ namespace Kiwi
         };
         
     private:
-        vector<sSocket> m_sockets;
+        vector<sLink> m_links;
         const Type      m_type;
         const string    m_description;
         
@@ -280,7 +213,7 @@ namespace Kiwi
          */
         ~Outlet()
         {
-            m_sockets.clear();
+            m_links.clear();
         }
         
         //! Retrieve the type of the outlet.
@@ -301,25 +234,25 @@ namespace Kiwi
             return m_description;
         }
         
-        //! Retrieve the number of sockets.
-        /** The functions retrieves the number of sockets of the outlet.
-         @return The number of sockets.
+        //! Retrieve the number of links.
+        /** The functions retrieves the number of links of the outlet.
+         @return The number of links.
          */
-        inline unsigned long getNumberOfSockets() const noexcept
+        inline unsigned long getNumberOfLinks() const noexcept
         {
-            return (unsigned long)m_sockets.size();
+            return (unsigned long)m_links.size();
         }
         
-        //! Retrieve a socket.
-        /** The functions retrieves a socket.
-         @param index The index of the socket.
-         @return The socket.
+        //! Retrieve a link.
+        /** The functions retrieves a link.
+         @param index The index of the link.
+         @return The link.
          */
-        inline sSocket getSocket(unsigned long index) const noexcept
+        inline sLink getLink(unsigned long index) const noexcept
         {
-            if(index < (unsigned long)m_sockets.size())
+            if(index < (unsigned long)m_links.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index];
+                return m_links[(vector<sLink>::size_type)index];
             }
             else
             {
@@ -327,16 +260,16 @@ namespace Kiwi
             }
         }
         
-        //! Retrieve the box of a socket.
-        /** The functions retrieves the box of a socket.
-         @param index The index of the socket.
-         @return The box of a socket.
+        //! Retrieve the box of a link.
+        /** The functions retrieves the box of a link.
+         @param index The index of the link.
+         @return The box of a link.
          */
         inline sBox getBox(unsigned long index) const noexcept
         {
-            if(index < (unsigned long)m_sockets.size())
+            if(index < (unsigned long)m_links.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->getBox();
+                return m_links[(vector<sLink>::size_type)index]->getBoxFrom();
             }
             else
             {
@@ -344,16 +277,16 @@ namespace Kiwi
             }
         }
         
-        //! Retrieve the inlet's index of a socket.
-        /** The functions retrieves the inlet's index of a socket.
-         @param index The index of the socket.
-         @return The inlet's index of a socket.
+        //! Retrieve the inlet's index of a link.
+        /** The functions retrieves the inlet's index of a link.
+         @param index The index of the link.
+         @return The inlet's index of a link.
          */
         inline unsigned long getInletIndex(unsigned long index) const noexcept
         {
-            if(index < (unsigned long)m_sockets.size())
+            if(index < (unsigned long)m_links.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->getIndex();
+                return m_links[(vector<sLink>::size_type)index]->getInletIndex();
             }
             else
             {
@@ -361,28 +294,28 @@ namespace Kiwi
             }
         }
         
-        //! Check if a socket is in the outlet.
-        /** The functions checks if a socket is in the outlet.
-         @param socket The socket.
-         @return true if the socket is in the inlet, otherwise false.
+        //! Check if a link is in the outlet.
+        /** The functions checks if a link is in the outlet.
+         @param link The link.
+         @return true if the link is in the inlet, otherwise false.
          */
-        bool has(sSocket socket) noexcept;
+        bool has(sLink link) noexcept;
         
-        //! Append a new socket to the outlet.
-        /** The functions appends a new socket to the outlet.
-         @param index The box of the socket.
-         @param index The inlet's index of the socket.
-         @return true if the socket has been added, otherwise false.
+        //! Append a new link to the outlet.
+        /** The functions appends a new link to the outlet.
+         @param index The box of the link.
+         @param index The inlet's index of the link.
+         @return true if the link has been added, otherwise false.
          */
-        bool append(sSocket socket) noexcept;
+        bool append(sLink link) noexcept;
         
-        //! Remove a socket from the outlet.
-        /** The functions removes a socket from the outlet.
-         @param index The box of the socket.
-         @param index The inlet's index of the socket.
-         @return true if the socket has been removed, otherwise false.
+        //! Remove a link from the outlet.
+        /** The functions removes a link from the outlet.
+         @param index The box of the link.
+         @param index The inlet's index of the link.
+         @return true if the link has been removed, otherwise false.
          */
-        bool erase(const sSocket socket) noexcept;
+        bool erase(sLink link) noexcept;
     };
 }
 
