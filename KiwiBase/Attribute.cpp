@@ -31,11 +31,12 @@ namespace Kiwi
     //                                      ATTRIBUTE                                   //
     // ================================================================================ //
     
-	Attr::Attr(sTag name, sTag label, sTag category, Style style, ElemVector defaultValues, long behavior) :
+	Attr::Attr(sTag name, sTag label, sTag category, Style style, ElemVector defaultValues, long behavior, long order) :
     m_name(name),
     m_label(label),
     m_category(category),
     m_style(style),
+	m_order(order),
 	m_default_values(defaultValues),
     m_behavior(0 | behavior)
     {
@@ -158,6 +159,29 @@ namespace Kiwi
             freeze(true);
         }
     }
+	
+	void Attr::sort(vector<sAttr>& attrs)
+	{
+		struct less_than_compare
+		{
+			inline bool operator() (const sAttr& attr1, const sAttr& attr2)
+			{
+				if(attr1->getCategory() == attr2->getCategory())
+				{
+					// defined order in a same category sorts attrs by order
+					if(attr1->getOrder() > 0 && attr2->getOrder() > 0)
+					{
+						return (attr1->getOrder() < attr2->getOrder());
+					}
+				}
+				
+				// sort attribute by label
+				return (attr1->getLabel()->getName() < attr2->getLabel()->getName());
+			}
+		};
+		
+		std::sort(attrs.begin(), attrs.end(), less_than_compare());
+	}
 	
 	// ================================================================================ //
 	//                                 ATTRIBUTES MANAGER								//
@@ -454,7 +478,7 @@ namespace Kiwi
         return false;
     }
 	
-	void Attr::Manager::getCategory(sTag name, vector<sAttr>& attrs) const
+	void Attr::Manager::getAttributesInCategory(sTag name, vector<sAttr>& attrs, bool sorted) const
 	{
         attrs.clear();
         lock_guard<mutex> guard(m_attrs_mutex);
@@ -466,6 +490,9 @@ namespace Kiwi
                 attrs.push_back(attr);
             }
 		}
+		
+		if (sorted)
+			Attr::sort(attrs);
 	}
 	
 	void Attr::Manager::bind(shared_ptr<Attr::Manager::Listener> listener)

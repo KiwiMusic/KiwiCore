@@ -53,9 +53,9 @@ namespace Kiwi
     const sTag AttrBox::Tag_Position                     = Tag::create("Position");
     const sTag AttrBox::Tag_size                         = Tag::create("size");
     const sTag AttrBox::Tag_Size                         = Tag::create("Size");
-    const sTag AttrBox::Tag_presentation_position        = Tag::create("presentation position");
+    const sTag AttrBox::Tag_presentation_position        = Tag::create("presentation_position");
     const sTag AttrBox::Tag_Presentation_Position        = Tag::create("Presentation Position");
-    const sTag AttrBox::Tag_presentation_size            = Tag::create("presentation size");
+    const sTag AttrBox::Tag_presentation_size            = Tag::create("presentation_size");
     const sTag AttrBox::Tag_Presentation_Size            = Tag::create("Presentation Size");
     const sTag AttrBox::Tag_hidden                       = Tag::create("hidden");
     const sTag AttrBox::Tag_Hide_on_Lock                 = Tag::create("Hide on Lock");

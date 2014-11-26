@@ -76,6 +76,7 @@ namespace Kiwi
         const sTag          m_label;			///< The label of the attribute.
         const sTag          m_category;			///< The category of the attribute.
         const Style         m_style;			///< The style of the attribute.
+		const long			m_order;			///< The order of the attribute.
 		const ElemVector    m_default_values;	///< The default value of the attribute.
         atomic_long         m_behavior;			///< The behavior of the attribute.
 		ElemVector          m_frozen_values;    ///< The frozen value of the attribute.
@@ -84,14 +85,15 @@ namespace Kiwi
 		
         //! Constructor.
         /** Allocate and initialize the member values.
-		 @param name		The name of the attribute.
-		 @param label		A short description of the attribute in a human readable style.
-         @param category	A named category that the attribute fits into.
-		 @param style		The style of the attribute specified in the Attr::Style enum.
-         @param defaultValues The default values.
-		 @param behavior	A combination of the flags which define the attribute's behavior.
+		 @param name			The name of the attribute (usually only letters and undescore characters).
+		 @param label			A short description of the attribute in a human readable style.
+         @param category		A named category that the attribute fits into.
+		 @param style			The style of the attribute specified in the Attr::Style enum.
+         @param defaultValues	The default values.
+		 @param behavior		A combination of the flags which define the attribute's behavior.
+		 @param order			The attribute order.
          */
-        Attr(sTag name,  sTag label, sTag category, Style style = Style::Default, ElemVector defaultValues = {}, long behavior = 0);
+        Attr(sTag name, sTag label, sTag category, Style style = Style::Default, ElemVector defaultValues = {}, long behavior = 0, long order = 0);
         
         //! Destructor.
         /** Clear the attribute.
@@ -150,7 +152,16 @@ namespace Kiwi
         {
             return m_category;
         }
-        
+		
+		//! Retrieve the attribute order.
+		/** The function retrieves the attribute order.
+		 @return The attribute order.
+		 */
+		inline long getOrder() const noexcept
+		{
+			return m_order;
+		}
+		
         //! Retrieves the whole behavior flags field of the attribute.
 		/** The function retrieves the whole behavior flags field of the attribute.
 		 @return behavior	A combination of the flags which define the attribute's behaviors.
@@ -255,6 +266,12 @@ namespace Kiwi
 		 @see read
 		 */
 		void write(sDico dico) const noexcept;
+
+		//! Sorts a vector of attribute pointers alphabetically and according to their order in their category.
+		/** This function sorts a vector of attribute pointers alphabetically and according to their order in their category.
+		 @param  attrs   The attributes to be sorted.
+		 */
+		static void sort(vector<sAttr>& attrs);
 	
 	protected:
 		
@@ -476,10 +493,11 @@ namespace Kiwi
             
             //! Retrieve the attributes of a category.
             /** The function retrieves the attributes of a category. If an attribute is invisible, the attribute won't be retrieved.
-             @param name The name of the category.
-             @param attrs A vector of attributes to pass.
+             @param name	The name of the category.
+             @param attrs	A vector of attributes to pass.
+			 @param sorted	If true, attributes will be sorted alphabetically and according to their order.
              */
-            void getCategory(sTag name, vector<sAttr>& attrs) const;
+            void getAttributesInCategory(sTag name, vector<sAttr>& attrs, bool sorted = false) const;
             
             //! Write the attributes in a dico.
             /** The function writes the attributes in a dico.
