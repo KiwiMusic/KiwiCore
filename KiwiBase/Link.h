@@ -36,24 +36,6 @@ namespace Kiwi
     {
         wBox          box;
         unsigned long index;
-        
-        Socket() noexcept :
-        box(weak_ptr<Box>()), index(0)
-        {
-            
-        }
-        
-        Socket(shared_ptr<Box> _box, unsigned long _index) noexcept :
-        box(_box), index(_index)
-        {
-            
-        }
-        
-        Socket(Socket const& other) noexcept :
-        box(other.box), index(other.index)
-        {
-            
-        }
     };
     
     //! The link is used to create a connection between boxes.

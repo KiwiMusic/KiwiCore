@@ -120,11 +120,11 @@ namespace Kiwi
             }
             if(size > 2 && elements[2].isNumber())
             {
-                m_blue = clip((double)elements[1], 0., 1.);
+                m_blue = clip((double)elements[2], 0., 1.);
             }
             if(size > 2 && elements[3].isNumber())
             {
-                m_alpha = clip((double)elements[1], 0., 1.);
+                m_alpha = clip((double)elements[3], 0., 1.);
             }
             return *this;
         }

@@ -146,6 +146,42 @@ namespace Kiwi
             return Point(*this) += pt;
         }
         
+        inline Point& operator+=(double const value) noexcept
+        {
+            m_x += value;
+            m_y += value;
+            return *this;
+        }
+        
+        inline Point& operator+(double const value) noexcept
+        {
+            return Point(*this) += value;
+        }
+        
+        inline Point& operator-=(Point const& pt) noexcept
+        {
+            m_x -= pt.m_x;
+            m_y -= pt.m_y;
+            return *this;
+        }
+        
+        inline Point& operator-(Point const& pt) noexcept
+        {
+            return Point(*this) -= pt;
+        }
+        
+        inline Point& operator-=(double const value) noexcept
+        {
+            m_x -= value;
+            m_y -= value;
+            return *this;
+        }
+        
+        inline Point& operator-(double const value) noexcept
+        {
+            return Point(*this) -= value;
+        }
+        
         inline operator ElemVector() const noexcept
         {
             return {m_x, m_y};

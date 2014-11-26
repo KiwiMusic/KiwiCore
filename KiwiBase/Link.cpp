@@ -33,12 +33,7 @@ namespace Kiwi
     
     sLink Link::create(Socket const& from, Socket const& to)
     {
-        sLink link = make_shared<Link>(from, to);
-        if(link && link->isValid())
-        {
-            return link;
-        }
-        return nullptr;
+        return make_shared<Link>(from, to);
     }
     
     sLink Link::create(scPage page, scDico dico)
@@ -108,14 +103,14 @@ namespace Kiwi
     
     sLink Link::create(scLink link, const sBox oldbox, const sBox newbox)
     {
-        if(link->getBoxFrom() == oldbox)
+        if(link && link->getBoxFrom() == oldbox)
         {
             if(link->getOutletIndex() < newbox->getNumberOfOutlets())
             {
                 return create({newbox, link->getOutletIndex()}, link->getTo());
             }
         }
-        else if(link->getBoxTo() == oldbox)
+        else if(link && link->getBoxTo() == oldbox)
         {
             if(link->getInletIndex() < newbox->getNumberOfInlets())
             {
