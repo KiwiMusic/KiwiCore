@@ -419,8 +419,8 @@ namespace Kiwi
         getCategoriesNames(names);
         return (unsigned long)names.size();
     }
-    
-    void Attr::Manager::getCategoriesNames(vector<sTag>& names) const noexcept
+	
+    void Attr::Manager::getCategoriesNames(vector<sTag>& names, bool sortAlphabetically) const noexcept
     {
         names.clear();
         lock_guard<mutex> guard(m_attrs_mutex);
@@ -435,6 +435,9 @@ namespace Kiwi
                 }
             }
 		}
+		
+		if(sortAlphabetically)
+			Tag::sort(names);
     }
     
     bool Attr::Manager::hasCategory(sTag name) const noexcept

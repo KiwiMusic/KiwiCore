@@ -76,6 +76,14 @@ namespace Kiwi
         
         static unordered_map<string, sTag> m_tags;
         static mutex                       m_mutex;
+		
+		struct less_than_compare
+		{
+			inline bool operator() (const sTag& tag1, const sTag& tag2)
+			{
+				return (tag1->getName() < tag2->getName());
+			}
+		};
     public:
         
         //! Tag creator.
@@ -98,7 +106,16 @@ namespace Kiwi
                 return tag;
             }
         }
-        
+		
+		//! Sorts a vector of tag pointers alphabetically
+		/** This function sorts a vector of tag pointers alphabetically
+		 @param  tags   The tags to be sorted.
+		 */
+		static void sort(vector<sTag>& tags)
+		{
+			std::sort(tags.begin(), tags.end(), less_than_compare());
+		}
+		
         static sTag text;
         static sTag box;
         static sTag boxes;
@@ -115,7 +132,7 @@ namespace Kiwi
         static sTag arguments;
         
     };
-    
+	
     inline string toString(sTag __val)
     {
         return __val->getName();

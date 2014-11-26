@@ -462,9 +462,10 @@ namespace Kiwi
             
             //! Retrieve the names of the categories.
             /** The function retrieves the names of the categories. If a category have only invisibles attributes, the name of the category won't be retrieved.
-             @param A vector of tag containing the names of the categories.
+             @param names				A vector of tag containing the names of the categories.
+			 @param sortAlphabetically	If true, categories name will be sorted alphabetically.
              */
-            void getCategoriesNames(vector<sTag>& names) const noexcept;
+            void getCategoriesNames(vector<sTag>& names, bool sortAlphabetically = false) const noexcept;
             
             //! Check if a category exist.
             /** The function checks if a category exist.  If a category have only invisibles attributes, the function returns false.
