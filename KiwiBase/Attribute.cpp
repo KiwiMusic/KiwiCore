@@ -203,8 +203,10 @@ namespace Kiwi
 	{
 		if(attr)
 		{
-            lock_guard<mutex> guard(m_attrs_mutex);
+			m_attrs_mutex.lock();
 			m_attrs[attr->getName()] = attr;
+			m_attrs_mutex.unlock();
+			
 			sendNotification(attr, Notification::AttrAdded);
 		}
 	}
@@ -213,11 +215,12 @@ namespace Kiwi
 	{
 		if(attr)
 		{
-            lock_guard<mutex> guard(m_attrs_mutex);
+            m_attrs_mutex.lock();
             auto it = m_attrs.find(attr->getName());
             if(it != m_attrs.end())
             {
                 m_attrs.erase(it);
+				m_attrs_mutex.unlock();
 				sendNotification(attr, Notification::AttrRemoved);
             }
 		}
@@ -227,11 +230,12 @@ namespace Kiwi
 	{
         if(name)
         {
-            lock_guard<mutex> guard(m_attrs_mutex);
+            m_attrs_mutex.lock();
             auto it = m_attrs.find(name);
             if(it != m_attrs.end())
             {
                 m_attrs.erase(it);
+				m_attrs_mutex.unlock();
 				sendNotification(it->second, Notification::AttrRemoved);
             }
         }
@@ -239,7 +243,7 @@ namespace Kiwi
 	
 	bool Attr::Manager::setAttributeValue(sTag name, ElemVector const& elements)
 	{
-        lock_guard<mutex> guard(m_attrs_mutex);
+		m_attrs_mutex.lock();
         auto it = m_attrs.find(name);
 		if(it != m_attrs.end())
         {
@@ -247,12 +251,16 @@ namespace Kiwi
             if(attr && !attr->isDisabled())
             {
                 attr->set(elements);
+				m_attrs_mutex.unlock();
+				
 				if(attributeValueChanged(attr))
 				{
 					sendNotification(attr, Notification::ValueChanged);
 				}
+				return true;
             }
         }
+		m_attrs_mutex.unlock();
 		return false;
 	}
 	
@@ -364,7 +372,7 @@ namespace Kiwi
 	
 	void Attr::Manager::setAttributeBehavior(sTag name, Attr::Behavior behavior)
 	{
-        lock_guard<mutex> guard(m_attrs_mutex);
+        m_attrs_mutex.lock();
 		auto it = m_attrs.find(name);
 		if(it != m_attrs.end())
 		{
@@ -372,6 +380,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setBehavior(behavior);
+				m_attrs_mutex.unlock();
 				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
@@ -379,7 +388,7 @@ namespace Kiwi
     
     void Attr::Manager::setAttributeInvisible(sTag name, bool invisible) noexcept
     {
-        lock_guard<mutex> guard(m_attrs_mutex);
+        m_attrs_mutex.lock();
 		auto it = m_attrs.find(name);
 		if(it != m_attrs.end())
 		{
@@ -387,6 +396,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setInvisible(invisible);
+				m_attrs_mutex.unlock();
 				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
@@ -394,7 +404,7 @@ namespace Kiwi
     
     void Attr::Manager::setAttributeDisabled(sTag name, bool disable) noexcept
     {
-        lock_guard<mutex> guard(m_attrs_mutex);
+        m_attrs_mutex.lock();
 		auto it = m_attrs.find(name);
 		if(it != m_attrs.end())
 		{
@@ -402,6 +412,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setDisabled(disable);
+				m_attrs_mutex.unlock();
 				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
@@ -409,7 +420,7 @@ namespace Kiwi
     
     void Attr::Manager::setAttributeSaved(sTag name, bool saved) noexcept
     {
-        lock_guard<mutex> guard(m_attrs_mutex);
+        m_attrs_mutex.lock();
 		auto it = m_attrs.find(name);
 		if(it != m_attrs.end())
 		{
@@ -417,6 +428,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setSaved(saved);
+				m_attrs_mutex.unlock();
 				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
@@ -424,7 +436,7 @@ namespace Kiwi
     
     void Attr::Manager::setAttributeNotifier(sTag name, bool notifier) noexcept
     {
-        lock_guard<mutex> guard(m_attrs_mutex);
+        m_attrs_mutex.lock();
 		auto it = m_attrs.find(name);
 		if(it != m_attrs.end())
 		{
@@ -432,6 +444,7 @@ namespace Kiwi
             if(attr)
             {
                 attr->setNotifier(notifier);
+				m_attrs_mutex.unlock();
 				sendNotification(attr, Notification::BehaviorChanged);
             }
 		}
