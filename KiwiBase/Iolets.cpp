@@ -26,30 +26,49 @@
 namespace Kiwi
 {
     
-    bool Inlet::append(sBox box, unsigned long index) noexcept
+    // ================================================================================ //
+    //                                      INLET                                       //
+    // ================================================================================ //
+    
+    bool Inlet::has(sSocket socket) noexcept
     {
-        if(box)
+        if(socket)
         {
-            for(vector<sSocket>::size_type i = 0; i < m_sockets.size(); i++)
+            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
             {
-                if(box == getBox((unsigned long)i) && index == getOutletIndex((unsigned long)i))
+                if(socket->getBox() == getBox(i) && socket->getIndex() == getOutletIndex(i))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    bool Inlet::append(sSocket socket) noexcept
+    {
+        if(socket)
+        {
+            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            {
+                if(socket->getBox() == getBox(i) && socket->getIndex() == getOutletIndex(i))
                 {
                     return false;
                 }
             }
-            m_sockets.push_back(make_shared<Socket>(box, index));
+            m_sockets.push_back(socket);
             return true;
         }
         return false;
     }
     
-    bool Inlet::erase(sBox box, unsigned long index) noexcept
+    bool Inlet::erase(const sSocket socket) noexcept
     {
-        if(box)
+        if(socket)
         {
-            for(vector<sSocket>::size_type i = 0; i < m_sockets.size(); i++)
+            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
             {
-                if(box == getBox((unsigned long)i) && index == getOutletIndex((unsigned long)i))
+                if(socket->getBox() == getBox(i) && socket->getIndex() == getOutletIndex(i))
                 {
                     m_sockets.erase(m_sockets.begin()+(long)i);
                     return true;
@@ -63,30 +82,45 @@ namespace Kiwi
     //                                      OUTLET                                      //
     // ================================================================================ //
     
-    bool Outlet::append(sBox box, unsigned long index) noexcept
+    bool Outlet::has(sSocket socket) noexcept
     {
-        if(box)
+        if(socket)
         {
-            for(vector<sSocket>::size_type i = 0; i < m_sockets.size(); i++)
+            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
             {
-                if(box == getBox((unsigned long)i) && index == getInletIndex((unsigned long)i))
+                if(socket->getBox() == getBox(i) && socket->getIndex() == getInletIndex(i))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    bool Outlet::append(sSocket socket) noexcept
+    {
+        if(socket)
+        {
+            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
+            {
+                if(socket->getBox() == getBox(i) && socket->getIndex() == getInletIndex(i))
                 {
                     return false;
                 }
             }
-            m_sockets.push_back(make_shared<Socket>(box, index));
+            m_sockets.push_back(socket);
             return true;
         }
         return false;
     }
     
-    bool Outlet::erase(sBox box, unsigned long index) noexcept
+    bool Outlet::erase(const sSocket socket) noexcept
     {
-        if(box)
+        if(socket)
         {
-            for(vector<sSocket>::size_type i = 0; i < m_sockets.size(); i++)
+            for(unsigned long i = 0; i < getNumberOfSockets(); i++)
             {
-                if(box == getBox((unsigned long)i) && index == getInletIndex((unsigned long)i))
+                if(socket->getBox() == getBox(i) && socket->getIndex() == getInletIndex(i))
                 {
                     m_sockets.erase(m_sockets.begin()+(long)i);
                     return true;

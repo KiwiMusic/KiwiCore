@@ -118,7 +118,7 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_outlets.size())
         {
-            for(unsigned long i = 0; i < m_outlets[index]->size(); i++)
+            for(unsigned long i = 0; i < m_outlets[index]->getNumberOfSockets(); i++)
             {
                 sBox receiver       = m_outlets[index]->getBox(i);
                 unsigned long inlet = m_outlets[index]->getInletIndex(i);
@@ -246,19 +246,16 @@ namespace Kiwi
             vector<sLink> links;
             sPage page = getPage();
             sBox me = getShared();
-            Socket socket = {me, index};
             if(page)
             {
                 page->getLinks(links);
                 for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                 {
-                    int zaza;
-                    /*
-                    if(links[i]->getSocketTo() == socket)
+                    sSocket socket = links[i]->getSocketTo();
+                    if(socket && socket->getBox() == me && socket->getIndex() == index)
                     {
                         page->removeLink(links[i]);
                     }
-                     */
                 }
             }
             m_inlets.erase(m_inlets.begin()+(long)index);
@@ -312,19 +309,16 @@ namespace Kiwi
             vector<sLink> links;
             sPage page = getPage();
             sBox me = getShared();
-            Socket socket = {me, index};
             if(page)
             {
                 page->getLinks(links);
                 for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                 {
-                    int zaza;
-                    /*
-                    if(links[i]->getSocketFrom() == socket)
+                    sSocket socket = links[i]->getSocketFrom();
+                    if(socket && socket->getBox() == me && socket->getIndex() == index)
                     {
                         page->removeLink(links[i]);
                     }
-                     */
                 }
             }
             
@@ -339,54 +333,42 @@ namespace Kiwi
         
     }
     
-    bool Box::connectInlet(unsigned long inlet, sBox box, unsigned long outlet)
+    bool Box::connectInlet(unsigned long inlet, sSocket socket)
     {
-        if(box)
+        if(socket && inlet < getNumberOfInlets())
         {
-            if(inlet < getNumberOfInlets())
-            {
-                lock_guard<mutex> guard(m_io_mutex);
-                return m_inlets[inlet]->append(box, outlet);
-            }
+            lock_guard<mutex> guard(m_io_mutex);
+            return m_inlets[inlet]->append(socket);
         }
         return false;
     }
 
-    bool Box::connectOutlet(unsigned long outlet, sBox box, unsigned long inlet)
+    bool Box::connectOutlet(unsigned long outlet, sSocket socket)
     {
-        if(box)
+        if(socket && outlet < getNumberOfOutlets())
         {
-            if(outlet < getNumberOfOutlets())
-            {
-                lock_guard<mutex> guard(m_io_mutex);
-                return m_outlets[outlet]->append(box, inlet);;
-            }
+            lock_guard<mutex> guard(m_io_mutex);
+            return m_outlets[outlet]->append(socket);
         }
         return false;
     }
     
-    bool Box::disconnectInlet(unsigned long inlet, sBox box, unsigned long outlet)
+    bool Box::disconnectInlet(unsigned long inlet, sSocket socket)
     {
-        if(box)
+        if(socket && inlet < getNumberOfInlets())
         {
             lock_guard<mutex> guard(m_io_mutex);
-            if(inlet < m_inlets.size())
-            {
-                return m_inlets[inlet]->erase(box, outlet);
-            }
+            return m_inlets[inlet]->erase(socket);
         }
         return false;
     }
     
-    bool Box::disconnectOutlet(unsigned long outlet, sBox box, unsigned long inlet)
+    bool Box::disconnectOutlet(unsigned long outlet, sSocket socket)
     {
-        if(box)
+        if(socket && outlet < getNumberOfOutlets())
         {
             lock_guard<mutex> guard(m_io_mutex);
-            if(outlet < m_outlets.size())
-            {
-                return m_outlets[outlet]->erase(box, inlet);
-            }
+            return m_outlets[outlet]->erase(socket);
         }
         return false;
     }

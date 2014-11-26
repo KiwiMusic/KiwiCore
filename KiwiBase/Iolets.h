@@ -33,26 +33,65 @@ namespace Kiwi
     //                                      SOCKET                                      //
     // ================================================================================ //
     
+    //! The socket owns a box and an index of inlet or outlet.
+    /**
+     The socket is a half part of a link and is used by inlets and outlets to send messages between boxes.
+     */
     class Socket
     {
-    public:
-        wBox          box;
-        unsigned long index;
+    private:
+        const wBox          m_box;
+        const unsigned long m_index;
         
-        Socket() noexcept
+     public:
+        //! Constructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        Socket(const sBox box, const unsigned long index) noexcept :
+        m_box(box), m_index(index)
         {
             ;
         }
         
-        Socket(sBox _box, const unsigned long _index) noexcept :
-        box(_box), index(_index)
+        ~Socket()
         {
             ;
         }
         
-        static sSocket create(sBox _box, const unsigned long _index)
+        //! The socket creation method.
+        /** The function allocates a socket.
+         @param box    The box.
+         @param index  The index.
+         @return The socket.
+         */
+        static sSocket create(const sBox box, const unsigned long index)
         {
-            return make_shared<Socket>(_box, _index);
+            if(box)
+            {
+                return make_shared<Socket>(box, index);
+            }
+            else
+            {
+                return nullptr;
+            }
+        }
+        
+        //! Retrieve the box of the socket.
+        /** The functions retrieves the box of the socket.
+         @return The box of the socket.
+         */
+        inline sBox getBox() const noexcept
+        {
+            return m_box.lock();
+        }
+        
+        //! Retrieve the index of the socket.
+        /** The functions retrieves the index of the socket.
+         @return The index of the socket.
+         */
+        inline unsigned long getIndex() const noexcept
+        {
+            return m_index;
         }
     };
     
@@ -62,7 +101,7 @@ namespace Kiwi
     
     //! The inlet owns a set of sockets.
     /**
-     The inlet owns a set of sockets that are used to manage connections in a box. It also have a type and a description.
+     The inlet owns a set of sockets that are used to manage links in a box. It also have a type and a description.
      */
     class Inlet
     {
@@ -76,7 +115,7 @@ namespace Kiwi
         };
     private:
         
-        vector<shared_ptr<Socket>> m_sockets;
+        vector<sSocket> m_sockets;
         const Type      m_type;
         const string    m_description;
     
@@ -122,9 +161,26 @@ namespace Kiwi
         /** The functions retrieves the number of sockets of the inlet.
          @return The number of sockets.
          */
-        inline unsigned long size() const noexcept
+        inline unsigned long getNumberOfSockets() const noexcept
         {
             return (unsigned long)m_sockets.size();
+        }
+        
+        //! Retrieve a socket.
+        /** The functions retrieves a socket.
+         @param index The index of the socket.
+         @return The socket.
+         */
+        inline sSocket getSocket(unsigned long index) const noexcept
+        {
+            if(index < (unsigned long)m_sockets.size())
+            {
+                return m_sockets[(vector<sSocket>::size_type)index];
+            }
+            else
+            {
+                return 0;
+            }
         }
         
         //! Retrieve the box of a socket.
@@ -136,7 +192,7 @@ namespace Kiwi
         {
             if(index < (unsigned long)m_sockets.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->box.lock();
+                return m_sockets[(vector<sSocket>::size_type)index]->getBox();
             }
             else
             {
@@ -153,7 +209,7 @@ namespace Kiwi
         {
             if(index < (unsigned long)m_sockets.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->index;
+                return m_sockets[(vector<sSocket>::size_type)index]->getIndex();
             }
             else
             {
@@ -161,13 +217,19 @@ namespace Kiwi
             }
         }
         
+        //! Check if a socket is in the inlet.
+        /** The functions checks if a socket is in the inlet.
+         @param socket The socket.
+         @return true if the socket is in the inlet, otherwise false.
+         */
+        bool has(sSocket socket) noexcept;
+        
         //! Append a new socket to the inlet.
         /** The functions appends a new socket to the inlet.
-         @param index The box of the socket.
-         @param index The outlet's index of the socket.
+         @param sSocket The socket.
          @return true if the socket has been added, otherwise false.
          */
-        bool append(sBox box, unsigned long index) noexcept;
+        bool append(sSocket socket) noexcept;
         
         //! Remove a socket from the inlet.
         /** The functions removes a socket from the inlet.
@@ -175,7 +237,7 @@ namespace Kiwi
          @param index The outlet's index of the socket.
          @return true if the socket has been removed, otherwise false.
          */
-        bool erase(sBox box, unsigned long index) noexcept;
+        bool erase(const sSocket socket) noexcept;
     };
     
     // ================================================================================ //
@@ -184,7 +246,7 @@ namespace Kiwi
     
     //! The outlet owns a set of sockets.
     /**
-     The outlet owns a set of sockets that are used to manage connections in a box. It also have a type and a description.
+     The outlet owns a set of sockets that are used to manage links in a box. It also have a type and a description.
      */
     class Outlet
     {
@@ -243,9 +305,26 @@ namespace Kiwi
         /** The functions retrieves the number of sockets of the outlet.
          @return The number of sockets.
          */
-        inline unsigned long size() const noexcept
+        inline unsigned long getNumberOfSockets() const noexcept
         {
             return (unsigned long)m_sockets.size();
+        }
+        
+        //! Retrieve a socket.
+        /** The functions retrieves a socket.
+         @param index The index of the socket.
+         @return The socket.
+         */
+        inline sSocket getSocket(unsigned long index) const noexcept
+        {
+            if(index < (unsigned long)m_sockets.size())
+            {
+                return m_sockets[(vector<sSocket>::size_type)index];
+            }
+            else
+            {
+                return 0;
+            }
         }
         
         //! Retrieve the box of a socket.
@@ -257,7 +336,7 @@ namespace Kiwi
         {
             if(index < (unsigned long)m_sockets.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->box.lock();
+                return m_sockets[(vector<sSocket>::size_type)index]->getBox();
             }
             else
             {
@@ -274,7 +353,7 @@ namespace Kiwi
         {
             if(index < (unsigned long)m_sockets.size())
             {
-                return m_sockets[(vector<sSocket>::size_type)index]->index;
+                return m_sockets[(vector<sSocket>::size_type)index]->getIndex();
             }
             else
             {
@@ -282,13 +361,20 @@ namespace Kiwi
             }
         }
         
+        //! Check if a socket is in the outlet.
+        /** The functions checks if a socket is in the outlet.
+         @param socket The socket.
+         @return true if the socket is in the inlet, otherwise false.
+         */
+        bool has(sSocket socket) noexcept;
+        
         //! Append a new socket to the outlet.
         /** The functions appends a new socket to the outlet.
          @param index The box of the socket.
          @param index The inlet's index of the socket.
          @return true if the socket has been added, otherwise false.
          */
-        bool append(sBox box, unsigned long index) noexcept;
+        bool append(sSocket socket) noexcept;
         
         //! Remove a socket from the outlet.
         /** The functions removes a socket from the outlet.
@@ -296,7 +382,7 @@ namespace Kiwi
          @param index The inlet's index of the socket.
          @return true if the socket has been removed, otherwise false.
          */
-        bool erase(sBox box, unsigned long index) noexcept;
+        bool erase(const sSocket socket) noexcept;
     };
 }
 

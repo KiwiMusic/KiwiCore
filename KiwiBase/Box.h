@@ -32,7 +32,7 @@
 
 // TODO
 // - See how to format the expression
-// - Box should deletes it owns connections at deletion
+// - Box should deletes it owns links at deletion
 namespace Kiwi
 {    
     // ================================================================================ //
@@ -236,14 +236,14 @@ namespace Kiwi
          */
         inline void getInletSockets(unsigned long index, vector<shared_ptr<Socket>>& sockets) const noexcept
         {
+            sockets.clear();
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                //sockets = m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_sockets;
-            }
-            else
-            {
-                sockets.clear();
+                for(unsigned long i = 0; i < m_inlets[index]->getNumberOfSockets(); i++)
+                {
+                    sockets.push_back(m_inlets[index]->getSocket(i));
+                }
             }
         }
         
@@ -267,7 +267,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->getDescription();
+                return m_outlets[(vector<uOutlet>::size_type)index]->getDescription();
             }
             else
             {
@@ -285,7 +285,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->getType();
+                return m_outlets[(vector<uOutlet>::size_type)index]->getType();
             }
             else
             {
@@ -300,14 +300,14 @@ namespace Kiwi
          */
         inline void getOutletSockets(unsigned long index, vector<shared_ptr<Socket>>& sockets) const noexcept
         {
+            sockets.clear();
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                //sockets = m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_sockets;
-            }
-            else
-            {
-                sockets.clear();
+                for(unsigned long i = 0; i < m_outlets[index]->getNumberOfSockets(); i++)
+                {
+                    sockets.push_back(m_outlets[index]->getSocket(i));
+                }
             }
         }
         
@@ -443,40 +443,36 @@ namespace Kiwi
 		bool attributeValueChanged(sAttr attr);
         
         //! Connect an inlet to a box's outlet.
-        /** The function connects an inlet to a box's outlet. Note that the connection of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
+        /** The function connects an inlet to a box's outlet. Note that the link of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
          @param inlet   The index of the inlet.
-         @param box     The outlet's box.
-         @param outlet  The index of the outlet.
-         @return true if the connection has been done, otherwise false.
+         @param socket  The socket.
+         @return true if the link has been done, otherwise false.
          */
-        bool connectInlet(unsigned long inlet, sBox box, unsigned long outlet);
+        bool connectInlet(unsigned long inlet, sSocket socket);
         
         //! Connect an outlet to a box's inlet.
-        /** The function connects an outlet to a box's inlet. This part of the connection is the only one really important, because this is the one used by the send method.
+        /** The function connects an outlet to a box's inlet. This part of the link is the only one really important, because this is the one used by the send method.
          @param inlet   The index of the outlet.
-         @param box     The inlet box.
-         @param outlet  The index of the inlet.
-         @return true if the connection has been done, otherwise false.
+         @param socket  The socket.
+         @return true if the link has been done, otherwise false.
          */
-        bool connectOutlet(unsigned long outlet, sBox box, unsigned long inlet);
+        bool connectOutlet(unsigned long outlet, sSocket socket);
         
         //! Disconnect an inlet to a box's outlet.
-        /** The function disconnects an inlet to a box's outlet. Note that the connection of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
+        /** The function disconnects an inlet to a box's outlet. Note that the link of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
          @param inlet   The index of the inlet.
-         @param box     The outlet's box.
-         @param outlet  The index of the outlet.
-         @return true if the connection has been removed, otherwise false.
+         @param socket  The socket.
+         @return true if the link has been removed, otherwise false.
          */
-        bool disconnectInlet(unsigned long inlet, sBox box, unsigned long outlet);
+        bool disconnectInlet(unsigned long inlet, sSocket socket);
         
         //! Disconnect an outlet to a box's inlet.
-        /** The function disconnects an outlet to a box's inlet. This part of the disconnection is the only one really important, because this is the one used by the send method.
+        /** The function disconnects an outlet to a box's inlet. This part of the dislink is the only one really important, because this is the one used by the send method.
          @param inlet   The index of the outlet.
-         @param box     The inlet box.
-         @param outlet  The index of the inlet.
-         @return true if the connection has been removed, otherwise false.
+         @param socket  The socket.
+         @return true if the link has been removed, otherwise false.
          */
-        bool disconnectOutlet(unsigned long outlet, sBox box, unsigned long inlet);
+        bool disconnectOutlet(unsigned long outlet, sSocket socket);
         
         //! Set the controler of the box.
         /** The function sets the controler of the box.
