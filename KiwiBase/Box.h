@@ -31,7 +31,6 @@
 #include "Beacon.h"
 
 // TODO
-// - Attributes (getFont, getSize, getPosition etc...) !!
 // - See how to format the expression
 // - Box should deletes it owns connections at deletion
 namespace Kiwi

@@ -33,6 +33,7 @@ namespace Kiwi
     const sTag AttrBox::Tag_fontname                           = Tag::create("fontname");
     const sTag AttrBox::Tag_Font_Name                          = Tag::create("Font Name");
     const sTag AttrBox::Tag_Arial                              = Tag::create("Arial");
+    const sTag AttrBox::Tag_Menelo                             = Tag::create("Menelo");
     const sTag AttrBox::Tag_fontsize                           = Tag::create("fontsize");
     const sTag AttrBox::Tag_Font_Size                          = Tag::create("Font Size");
     const sTag AttrBox::Tag_fontface                           = Tag::create("fontface");
@@ -60,6 +61,14 @@ namespace Kiwi
     const sTag AttrBox::Tag_Hide_on_Lock                 = Tag::create("Hide on Lock");
     const sTag AttrBox::Tag_presentation                 = Tag::create("presentation");
     const sTag AttrBox::Tag_Include_in_Presentation      = Tag::create("Include in Presentation");
+    
+    const sTag AttrBox::Tag_Color       = Tag::create("Color");
+    const sTag AttrBox::Tag_bgcolor                             = Tag::create("bgcolor");
+    const sTag AttrBox::Tag_Background_Color                    = Tag::create("Background Color");
+    const sTag AttrBox::Tag_bdcolor                             = Tag::create("bdcolor");
+    const sTag AttrBox::Tag_Border_Color                        = Tag::create("Border Color");
+    const sTag AttrBox::Tag_textcolor                           = Tag::create("textcolor");
+    const sTag AttrBox::Tag_Text_Color                          = Tag::create("Text Color");
 }
 
 

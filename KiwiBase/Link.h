@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_LINK__
 #define __DEF_KIWI_LINK__
 
-#include "Tools.h"
+#include "Attribute.h"
 
 namespace Kiwi
 {
@@ -45,8 +45,9 @@ namespace Kiwi
     class Link
     {
     private:
-        const Socket m_from;
-        const Socket m_to;
+        const Socket    m_from;
+        const Socket    m_to;
+        vector<Point>   m_points;
         
     public:
         
@@ -175,7 +176,82 @@ namespace Kiwi
          @param dico The dico.
          */
         void write(sDico dico) const noexcept;
+        
+        // ================================================================================ //
+        //                                  LINK CONTROLER                                  //
+        // ================================================================================ //
+        
+        //! The link controler .
+        /**
+         The link controler...
+         */
+        class Controler : public Attr::Manager::Listener
+        {
+        private:
+            const sLink   m_link;
+            Point         m_start;
+            Point         m_end;
             
+        public:
+            
+            //! Constructor.
+            /** You should never call this method except if you really know what you're doing.
+             */
+            Controler(sLink link) :
+            m_link(link)
+            {
+                ;
+            }
+            
+            //! The destructor.
+            /** You should never call this method except if you really know what you're doing.
+             */
+            virtual ~Controler()
+            {
+                ;
+            }
+            
+            //! The controler maker.
+            /** The function creates an controler with arguments.
+             */
+            template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
+            {
+                shared_ptr<CtrlClass> ctrl = make_shared<CtrlClass>(forward<Args>(arguments)...);
+                if(ctrl && ctrl->getLink())
+                {
+                    Attr::sManager from = ctrl->getLink()->getBoxFrom();
+                    Attr::sManager to   = ctrl->getLink()->getBoxTo();
+                    if(from && to)
+                    {
+                        from->bind(ctrl);
+                        to->bind(ctrl);
+                    }
+                }
+                return ctrl;
+            }
+            
+            //! Retrieve the link.
+            /** The funtion retrieves the link.
+             @return The link.
+             */
+            sLink getLink() const noexcept
+            {
+                return m_link;
+            }
+            
+            //! Receive the notification that an attribute has changed.
+            /** Sublass of Attr::Manager::Listener must implement this virtual function to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+             @param manager		The Attr::Manager that manages the attribute.
+             @param attr		The attribute that has been modified.
+             @param type		The type of notification as specified in the Attr::Manager::NotificationType enum,
+             */
+            void attributeNotify(Attr::sManager manager, sAttr attr, Attr::Manager::Notification type) override;
+            
+            //! The redraw function that should be override.
+            /** The function is called by the link when it should be repainted.
+             */
+            virtual void redraw() = 0;
+        };
     };
 }
 

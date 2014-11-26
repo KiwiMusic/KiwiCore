@@ -191,6 +191,50 @@ namespace Kiwi
             dico->clear(Tag::to);
         }
     }
+    
+    // ================================================================================ //
+    //                                  LINK CONTROLER                                  //
+    // ================================================================================ //
+    
+    void Link::Controler::attributeNotify(Attr::sManager manager, sAttr attr, Attr::Manager::Notification type)
+    {
+        if(manager == m_link->getBoxFrom())
+        {
+            m_start = m_link->getBoxFrom()->getControler()->getOutletPosition(m_link->getOutletIndex());
+            Point bs = m_start;
+            Point be = m_end;
+            if(bs.x() > be.x())
+            {
+                bs.x(be.x());
+                be.x(m_start.x());
+            }
+            if(bs.y() > be.y())
+            {
+                bs.y(be.y());
+                be.y(m_start.y());
+            }
+            //setBounds(bs.x() - 1., bs.y() - 1., max(be.x() - bs.x() + 2., 2.), max(be.y() - bs.y() + 2., 2.));
+        }
+        if(manager == m_link->getBoxTo())
+        {
+            m_end   = m_link->getBoxTo()->getControler()->getInletPosition(m_link->getInletIndex());
+            Point bs = m_start;
+            Point be = m_end;
+            if(bs.x() > be.x())
+            {
+                bs.x(be.x());
+                be.x(m_start.x());
+            }
+            if(bs.y() > be.y())
+            {
+                bs.y(be.y());
+                be.y(m_start.y());
+            }
+            bs.y(bs.y() - 10);
+            be.y(be.y() + 10);
+            //setBounds(bs.x() - 1., bs.y() - 1., max(be.x() - bs.x() + 2., 2.), max(be.y() - bs.y() + 2., 2.));
+        }
+    }
 }
 
 

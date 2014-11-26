@@ -41,18 +41,7 @@ namespace Kiwi
     m_type(0 | type),
     m_stack_count(0)
     {
-		// Color attributes
-		addAttribute(Attr::create<AttrColor>(Tag::create("bgcolor"), Tag::create("Background Color"), Tag::create("Color"), (ElemVector){1., 1., 1, 1.}));
-		
-		/*
-		// Color attributes
-		elems = {1., 1., 1, 1.};
-		addAttribute<AttributePoint>(Tag::create("bgcolor"), elems, "Background Color", "Color");
-		elems = {0., 0., 0, 1.};
-		addAttribute<AttributePoint>(Tag::create("bdcolor"), elems, "Border Color", "Color");
-		elems = {0., 0., 0, 1.};
-		addAttribute<AttributePoint>(Tag::create("textcolor"), elems, "Text Color", "Color");
-         */
+        ;
     }
     
     Box::~Box()
@@ -200,6 +189,15 @@ namespace Kiwi
             if(controler)
             {
                 controler->sizeChanged();
+            }
+        }
+        
+        else if(attr == AttrBox::color_background || AttrBox::color_border || AttrBox::color_text)
+        {
+            sControler controler = getControler();
+            if(controler)
+            {
+                controler->redraw();
             }
         }
 		return true;
@@ -525,19 +523,19 @@ namespace Kiwi
     
     void Box::Controler::paint(sBox box, Doodle& d, bool edit, bool selected)
     {
-        d.setFont(Font("Menelo", 13, Font::Normal));
-        d.setColor(Color(1., 1., 1., 1.));
+        d.setFont(box->getFont());
+        d.setColor(box->getBackgroundColor());
         d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
         if(!(box->getType() & Behavior::Graphic))
         {
-            d.setColor({0.3, 0.3, 0.3, 1.});
-            d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), Font::Justification::CentredLeft);
+            d.setColor(box->getTextColor());
+            d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), box->getFontJustification());
         }
         else
         {
             box->draw(d);
         }
-        d.setColor({0.4, 0.4, 0.4, 1.});
+        d.setColor(box->getBorderColor());
         d.drawRectangle(0.5, 0.5, d.getWidth()-1., d.getHeight()-1., 1., 2.5);
         
         if(edit)
@@ -582,6 +580,7 @@ namespace Kiwi
     }
 #undef KIO_HEIGHT
 #undef KIO_WIDTH
+    
     // ================================================================================ //
     //                                      BOX FACTORY                                 //
     // ================================================================================ //
@@ -599,6 +598,7 @@ namespace Kiwi
         {
             tname = Tag::create(name);
         }
+        
         lock_guard<mutex> guard(m_prototypes_mutex);
         auto it = m_prototypes.find(tname);
         if(it != m_prototypes.end())
