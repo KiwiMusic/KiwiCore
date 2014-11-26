@@ -34,10 +34,7 @@
 // - See how to format the expression
 // - Box should deletes it owns connections at deletion
 namespace Kiwi
-{
-    class Instance;
-    class Page;
-    
+{    
     // ================================================================================ //
     //                                      BOX                                         //
     // ================================================================================ //
@@ -62,84 +59,23 @@ namespace Kiwi
             Graphic     = 1<<4
         };
         
-        class Inlet
-        {
-        public:
-            enum Type
-            {
-                DataCold    = 0,
-                DataHot     = 1,
-                Signal      = 2,
-                Error       = 3
-            };
-        private:
-            
-            friend class Box;
-            vector<Socket>  m_sockets;
-            const Type      m_type;
-            const string    m_description;
-        
-            Inlet(Type type, string description) noexcept :
-            m_type(type),
-            m_description(description)
-            {
-                ;
-            }
-        public:
-            ~Inlet()
-            {
-                m_sockets.clear();
-            }
-        };
-        
-        
-        class Outlet
-        {
-        public:
-            
-            enum Type
-            {
-                Data    = 0,
-                Signal  = 2,
-                Error   = 3
-            };
-        private:
-            
-            friend class Box;
-            vector<Socket>  m_sockets;
-            const Type      m_type;
-            const string    m_description;
-            
-            Outlet(Type type, string description) noexcept :
-            m_type(type),
-            m_description(description)
-            {
-                ;
-            }
-        public:
-            ~Outlet()
-            {
-                m_sockets.clear();
-            }
-        };
-        
     private:
         friend bool Link::connect() const noexcept;
         friend bool Link::disconnect() const noexcept;
         
-        const wInstance             m_instance;
-        const wPage                 m_page;
-        const sTag                  m_name;
-        const unsigned long         m_id;
-        const unsigned long         m_type;
-        sTag                        m_text;
+        const wInstance     m_instance;
+        const wPage         m_page;
+        const sTag          m_name;
+        const unsigned long m_id;
+        const unsigned long m_type;
+        sTag                m_text;
         
-        vector<unique_ptr<Outlet>>  m_outlets;
-        vector<unique_ptr<Inlet>>   m_inlets;
-        atomic_ullong               m_stack_count;
-        mutable mutex               m_io_mutex;
+        vector<uOutlet>     m_outlets;
+        vector<uInlet>      m_inlets;
+        atomic_ullong       m_stack_count;
+        mutable mutex       m_io_mutex;
         
-        weak_ptr<Controler>         m_controler;
+        weak_ptr<Controler> m_controler;
     public:
         
         //! Constructor.
@@ -267,7 +203,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_description;
+                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->getDescription();
             }
             else
             {
@@ -285,7 +221,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_type;
+                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->getType();
             }
             else
             {
@@ -298,12 +234,12 @@ namespace Kiwi
          @param index The inlet index.
          @param sockets A vetcor of socket to fill.
          */
-        inline void getInletSockets(unsigned long index, vector<Socket>& sockets) const noexcept
+        inline void getInletSockets(unsigned long index, vector<shared_ptr<Socket>>& sockets) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                sockets = m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_sockets;
+                //sockets = m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->m_sockets;
             }
             else
             {
@@ -331,7 +267,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_description;
+                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->getDescription();
             }
             else
             {
@@ -349,7 +285,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_type;
+                return m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->getType();
             }
             else
             {
@@ -362,12 +298,12 @@ namespace Kiwi
          @param index The outlet index.
          @param sockets A vetcor of socket to fill.
          */
-        inline void getOutletSockets(unsigned long index, vector<Socket>& sockets) const noexcept
+        inline void getOutletSockets(unsigned long index, vector<shared_ptr<Socket>>& sockets) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                sockets = m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_sockets;
+                //sockets = m_outlets[(vector<unique_ptr<Outlet>>::size_type)index]->m_sockets;
             }
             else
             {
@@ -722,10 +658,15 @@ namespace Kiwi
              */
             void setSelectedStatus(bool status);
             
-            //! The redraw function that should be override.
-            /** The function is called by the box when it should be repainted.
+            //! The inlets notification function that should be override.
+            /** TThe function is called by the box when its inlets changed.
              */
-            virtual void redraw() = 0;
+            void inletsChanged();
+            
+            //! The outlets notification function that should be override.
+            /** TThe function is called by the box when its outlets changed.
+             */
+            void outletsChanged();
             
             //! The position notification function that should be override.
             /** The function is called by the box when its position changed.
@@ -736,6 +677,11 @@ namespace Kiwi
             /** The function is called by the box when its size changed.
              */
             virtual void sizeChanged() = 0;
+            
+            //! The redraw function that should be override.
+            /** The function is called by the box when it should be repainted.
+             */
+            virtual void redraw() = 0;
             
             //! The default paint method.
             /** The default function paint a default box with the background, border, inlets, outlets and text.

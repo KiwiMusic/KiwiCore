@@ -100,6 +100,16 @@ namespace Kiwi
     typedef shared_ptr<const AttrTag>   scAttrTag;
     typedef weak_ptr<const AttrTag>     wcAttrTag;
     
+    class Socket;
+    typedef shared_ptr<Socket>      sSocket;
+    typedef shared_ptr<const Socket>scSocket;
+    
+    class Inlet;
+    typedef unique_ptr<Inlet>       uInlet;
+    
+    class Outlet;
+    typedef unique_ptr<Outlet>      uOutlet;
+    
     class Link;
     typedef shared_ptr<Link>        sLink;
     typedef shared_ptr<const Link>  scLink;

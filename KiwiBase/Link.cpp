@@ -31,7 +31,7 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    sLink Link::create(Socket const& from, Socket const& to)
+    sLink Link::create(const sSocket from, const sSocket to)
     {
         return make_shared<Link>(from, to);
     }
@@ -93,7 +93,7 @@ namespace Kiwi
                 
                 if(from && to)
                 {
-                    return Link::create({from, outlet}, {to, inlet});
+                    return Link::create(make_shared<Socket>(from, outlet), make_shared<Socket>(to, inlet));
                 }
             }
             
@@ -107,14 +107,14 @@ namespace Kiwi
         {
             if(link->getOutletIndex() < newbox->getNumberOfOutlets())
             {
-                return create({newbox, link->getOutletIndex()}, link->getTo());
+                return create(make_shared<Socket>(newbox, link->getOutletIndex()), link->getSocketTo());
             }
         }
         else if(link && link->getBoxTo() == oldbox)
         {
             if(link->getInletIndex() < newbox->getNumberOfInlets())
             {
-                return create(link->getFrom(), {newbox, link->getInletIndex()});
+                return create(link->getSocketFrom(), make_shared<Socket>(newbox, link->getInletIndex()));
             }
         }
         return nullptr;
@@ -133,12 +133,12 @@ namespace Kiwi
         sBox to     = getBoxTo();
         if(from && to && from != to && from->getPage() == to->getPage() && getOutletIndex() < from->getNumberOfOutlets() && getInletIndex() < to->getNumberOfInlets())
         {
-            vector<Socket> sockets;
+            vector<shared_ptr<Socket>> sockets;
             from->getOutletSockets(getOutletIndex(), sockets);
-            for(vector<Socket>::size_type i = 0; i < sockets.size(); i++)
+            for(vector<shared_ptr<Socket>>::size_type i = 0; i < sockets.size(); i++)
             {
-                sBox receiver = sockets[i].box.lock();
-                if(receiver && receiver == to && sockets[i].index == getInletIndex())
+                sBox receiver = sockets[i]->box.lock();
+                if(receiver && receiver == to && sockets[i]->index == getInletIndex())
                 {
                     return false;
                 }

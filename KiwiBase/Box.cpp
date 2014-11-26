@@ -118,12 +118,12 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_outlets.size())
         {
-            for(vector<unique_ptr<Outlet>>::size_type i = 0; i < m_outlets[index]->m_sockets.size(); i++)
+            for(unsigned long i = 0; i < m_outlets[index]->size(); i++)
             {
-                sBox receiver       = m_outlets[index]->m_sockets[i].box.lock();
+                sBox receiver       = m_outlets[index]->getBox(i);
+                unsigned long inlet = m_outlets[index]->getInletIndex(i);
                 if(receiver)
                 {
-                    unsigned long inlet = m_outlets[index]->m_sockets[i].index;
                     if(++receiver->m_stack_count < 256)
                     {
                         if(!receiver->receive(inlet, elements))
@@ -211,7 +211,11 @@ namespace Kiwi
     {
         lock_guard<mutex> guard(m_io_mutex);
         m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
-        redraw();
+        sControler controler = getControler();
+        if(controler)
+        {
+            controler->inletsChanged();
+        }
     }
     
     void Box::insertInlet(unsigned long index, Inlet::Type type, string const& description)
@@ -226,7 +230,12 @@ namespace Kiwi
         {
             m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, description)));
         }
-        redraw();
+        
+        sControler controler = getControler();
+        if(controler)
+        {
+            controler->inletsChanged();
+        }
     }
     
     void Box::removeInlet(unsigned long index)
@@ -234,23 +243,31 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_inlets.size())
         {
-            m_inlets.erase(m_inlets.begin()+(long)index);
-            
             vector<sLink> links;
             sPage page = getPage();
             sBox me = getShared();
+            Socket socket = {me, index};
             if(page)
             {
                 page->getLinks(links);
                 for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                 {
-                    if(links[i]->getBoxTo() == me && links[i]->getInletIndex() == index)
+                    int zaza;
+                    /*
+                    if(links[i]->getSocketTo() == socket)
                     {
                         page->removeLink(links[i]);
                     }
+                     */
                 }
             }
-            redraw();
+            m_inlets.erase(m_inlets.begin()+(long)index);
+            
+            sControler controler = getControler();
+            if(controler)
+            {
+                controler->inletsChanged();
+            }
         }
     }
     
@@ -262,7 +279,11 @@ namespace Kiwi
     {
         lock_guard<mutex> guard(m_io_mutex);
         m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
-        redraw();
+        sControler controler = getControler();
+        if(controler)
+        {
+            controler->outletsChanged();
+        }
     }
     
     void Box::insertOutlet(unsigned long index, Outlet::Type type, string const& description)
@@ -276,7 +297,11 @@ namespace Kiwi
         {
             m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
         }
-        redraw();
+        sControler controler = getControler();
+        if(controler)
+        {
+            controler->outletsChanged();
+        }
     }
     
     void Box::removeOutlet(unsigned long index)
@@ -284,23 +309,32 @@ namespace Kiwi
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_outlets.size())
         {
-            m_outlets.erase(m_outlets.begin()+(long)index);
-            
             vector<sLink> links;
             sPage page = getPage();
             sBox me = getShared();
+            Socket socket = {me, index};
             if(page)
             {
                 page->getLinks(links);
                 for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                 {
-                    if(links[i]->getBoxFrom() == me && links[i]->getOutletIndex() == index)
+                    int zaza;
+                    /*
+                    if(links[i]->getSocketFrom() == socket)
                     {
                         page->removeLink(links[i]);
                     }
+                     */
                 }
             }
-            redraw();
+            
+            m_outlets.erase(m_outlets.begin()+(long)index);
+            
+            sControler controler = getControler();
+            if(controler)
+            {
+                controler->outletsChanged();
+            }
         }
         
     }
@@ -312,17 +346,7 @@ namespace Kiwi
             if(inlet < getNumberOfInlets())
             {
                 lock_guard<mutex> guard(m_io_mutex);
-                for(vector<Socket>::size_type i = 0; i < m_inlets[inlet]->m_sockets.size(); i++)
-                {
-                    sBox sender  = m_inlets[inlet]->m_sockets[i].box.lock();
-                    if(sender && sender == box && m_inlets[inlet]->m_sockets[i].index == outlet)
-                    {
-                        return false;
-                    }
-                }
-                
-                m_inlets[inlet]->m_sockets.push_back({box, outlet});
-                return true;
+                return m_inlets[inlet]->append(box, outlet);
             }
         }
         return false;
@@ -335,16 +359,7 @@ namespace Kiwi
             if(outlet < getNumberOfOutlets())
             {
                 lock_guard<mutex> guard(m_io_mutex);
-                for(vector<Socket>::size_type i = 0; i < m_outlets[outlet]->m_sockets.size(); i++)
-                {
-                    sBox receiver  = m_outlets[outlet]->m_sockets[i].box.lock();
-                    if(receiver && receiver == box && m_outlets[outlet]->m_sockets[i].index == inlet)
-                    {
-                        return false;
-                    }
-                }
-                m_outlets[outlet]->m_sockets.push_back({box, inlet});
-                return true;
+                return m_outlets[outlet]->append(box, inlet);;
             }
         }
         return false;
@@ -357,16 +372,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(inlet < m_inlets.size())
             {
-                for(vector<Socket>::size_type i = 0; i < m_inlets[inlet]->m_sockets.size(); i++)
-                {
-                    sBox sender  = m_inlets[inlet]->m_sockets[i].box.lock();
-                    if(sender && sender == box && m_inlets[inlet]->m_sockets[i].index == outlet)
-                    {
-                        m_inlets[inlet]->m_sockets.erase(m_inlets[inlet]->m_sockets.begin()+(long)i);
-                        return true;
-                    }
-                }
-                return false;
+                return m_inlets[inlet]->erase(box, outlet);
             }
         }
         return false;
@@ -379,16 +385,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(outlet < m_outlets.size())
             {
-                for(vector<Socket>::size_type i = 0; i < m_outlets[outlet]->m_sockets.size(); i++)
-                {
-                    sBox receiver  = m_outlets[outlet]->m_sockets[i].box.lock();
-                    if(receiver && receiver == box && m_outlets[outlet]->m_sockets[i].index == inlet)
-                    {
-                        m_outlets[outlet]->m_sockets.erase(m_outlets[outlet]->m_sockets.begin()+(long)i);
-                        return true;
-                    }
-                }
-                return false;
+                return m_outlets[outlet]->erase(box, inlet);
             }
         }
         return false;
@@ -519,6 +516,22 @@ namespace Kiwi
             return true;
         }
         return false;
+    }
+    
+    void Box::Controler::inletsChanged()
+    {
+        if(m_edition)
+        {
+            redraw();
+        }
+    }
+    
+    void Box::Controler::outletsChanged()
+    {
+        if(m_edition)
+        {
+            redraw();
+        }
     }
     
     void Box::Controler::paint(sBox box, Doodle& d, bool edit, bool selected)

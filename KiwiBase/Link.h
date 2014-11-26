@@ -25,18 +25,13 @@
 #define __DEF_KIWI_LINK__
 
 #include "Attribute.h"
+#include "Iolets.h"
 
 namespace Kiwi
 {
     // ================================================================================ //
     //                                      LINK                                        //
     // ================================================================================ //
-    
-    struct Socket
-    {
-        wBox          box;
-        unsigned long index;
-    };
     
     //! The link is used to create a connection between boxes.
     /**
@@ -45,8 +40,8 @@ namespace Kiwi
     class Link
     {
     private:
-        const Socket    m_from;
-        const Socket    m_to;
+        const sSocket   m_from;
+        const sSocket   m_to;
         vector<Point>   m_points;
         
     public:
@@ -54,7 +49,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Link(Socket const& from, Socket const& to) noexcept :
+        Link(const sSocket from, const sSocket to) noexcept :
         m_from(from), m_to(to)
         {
             ;
@@ -74,7 +69,7 @@ namespace Kiwi
          @param to      The to socket.
          @return The link.
          */
-        static sLink create(Socket const& from, Socket const& to);
+        static sLink create(const sSocket from, const sSocket to);
         
         //! The link creation method with a dico.
         /** The function allocates a link with a page and a dico.
@@ -97,7 +92,7 @@ namespace Kiwi
         /** The function retrieves from socket.
          @return The socket.
          */
-        inline Socket getFrom() const noexcept
+        inline sSocket getSocketFrom() const noexcept
         {
             return m_from;
         }
@@ -106,7 +101,7 @@ namespace Kiwi
         /** The function retrieves to socket.
          @return The socket.
          */
-        inline Socket getTo() const noexcept
+        inline sSocket getSocketTo() const noexcept
         {
             return m_to;
         }
@@ -117,7 +112,7 @@ namespace Kiwi
          */
         inline sBox getBoxFrom() const noexcept
         {
-            return m_from.box.lock();
+            return m_from->box.lock();
         }
         
         //! Retrieve the input box.
@@ -126,7 +121,7 @@ namespace Kiwi
          */
         inline sBox getBoxTo() const noexcept
         {
-            return m_to.box.lock();
+            return m_to->box.lock();
         }
         
         //! Retrieve the index of the outlet of the link.
@@ -135,7 +130,7 @@ namespace Kiwi
          */
         inline unsigned long getOutletIndex() const noexcept
         {
-            return m_from.index;
+            return m_from->index;
         }
         
         //! Retrieve the index of the inlet of the link.
@@ -144,7 +139,7 @@ namespace Kiwi
          */
         inline unsigned long getInletIndex() const noexcept
         {
-            return m_to.index;
+            return m_to->index;
         }
         
         //! Retrieve if the link is valid.
