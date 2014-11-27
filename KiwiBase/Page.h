@@ -334,7 +334,8 @@ namespace Kiwi
          @see Page::Listener
          @see Box::Controler
          */
-        class Controler : public Page::Listener, public enable_shared_from_this<Controler>
+        class Controler : public Page::Listener,
+						  public enable_shared_from_this<Controler>
         {
         private:
             const sPage     m_page;

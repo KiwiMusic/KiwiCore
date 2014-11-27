@@ -59,14 +59,15 @@ namespace Kiwi
 		 */
 		enum Style
 		{
-			Default = 0,	///< Indicates that the attribute should be displayed in a default style depending on its Type.
-			Text,			///< Indicates that the attribute should be displayed in a text style
-			List,			///< Indicates that the attribute should be displayed in a list of same or mixed elements style
-			Enum,			///< Indicates that the attribute should be displayed in an enum style
-			Number,			///< Indicates that the attribute should be displayed in a number style
-			Toggle,			///< Indicates that the attribute should be displayed in a onoff toggle style
-			Color,			///< Indicates that the attribute should be displayed in a color style
-			Filepath		///< Indicates that the attribute should be displayed in a filepath style
+			Default			= 0,	///< Indicates that the attribute should be displayed in a default style depending on its Type.
+			Text			= 1,	///< Indicates that the attribute should be displayed in a text style
+			List			= 2,	///< Indicates that the attribute should be displayed in a list of same or mixed elements style
+			Enum			= 3,	///< Indicates that the attribute should be displayed in an enum style
+			NumberLong		= 4,	///< Indicates that the attribute should be displayed in a number style (without floating point)
+			NumberDouble	= 5,	///< Indicates that the attribute should be displayed in a number style (with floating point)
+			Toggle			= 6,	///< Indicates that the attribute should be displayed in a onoff toggle style
+			Color			= 7,	///< Indicates that the attribute should be displayed in a color style
+			Filepath		= 8		///< Indicates that the attribute should be displayed in a filepath style
 		};
 		
     private:
@@ -608,7 +609,7 @@ namespace Kiwi
         long m_value;
     public:
 		AttrLong(sTag name, sTag label, sTag category, long default_value = 0, long behavior = 0) :
-        Attr(name, label, category, Attr::Style::Number, {default_value}, behavior) {;}
+        Attr(name, label, category, Attr::Style::NumberLong, {default_value}, behavior) {;}
 		virtual ~AttrLong() {};
         virtual void get(ElemVector& elements) const noexcept;
         virtual void set(ElemVector const& elements) override;
@@ -628,7 +629,7 @@ namespace Kiwi
         double m_value;
     public:
 		AttrDouble(sTag name, sTag label, sTag category, double default_value = 0, long behavior = 0) :
-        Attr(name, label, category, Attr::Style::Number, {default_value}, behavior) {;}
+        Attr(name, label, category, Attr::Style::NumberDouble, {default_value}, behavior) {;}
 		virtual ~AttrDouble() {};
         virtual void get(ElemVector& elements) const noexcept;
         virtual void set(ElemVector const& elements) override;
