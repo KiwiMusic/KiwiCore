@@ -104,7 +104,7 @@ namespace Kiwi
         dico->set(Tag::id, getId());
     }
     
-    void Box::redraw()
+    void Box::redraw() const noexcept
     {
         sControler controler = getControler();
         if(controler)
@@ -181,6 +181,15 @@ namespace Kiwi
             if(controler)
             {
                 controler->positionChanged();
+                lock_guard<mutex> guard(m_io_mutex);
+                for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
+                {
+                    m_inlets[i]->boxChanged();
+                }
+                for(vector<uOutlet>::size_type i = 0; i < m_outlets.size(); i++)
+                {
+                    m_outlets[i]->boxChanged();
+                }
             }
         }
         else if(attr == AttrBox::appearance_size)
@@ -189,6 +198,15 @@ namespace Kiwi
             if(controler)
             {
                 controler->sizeChanged();
+                lock_guard<mutex> guard(m_io_mutex);
+                for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
+                {
+                    m_inlets[i]->boxChanged();
+                }
+                for(vector<uOutlet>::size_type i = 0; i < m_outlets.size(); i++)
+                {
+                    m_outlets[i]->boxChanged();
+                }
             }
         }
         

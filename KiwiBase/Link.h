@@ -38,6 +38,11 @@ namespace Kiwi
      */
     class Link : public enable_shared_from_this<Link>
     {
+    public:
+        class Controler;
+        typedef shared_ptr<Controler>   sControler;
+        typedef weak_ptr<Controler>     wControler;
+        
     private:
         const wBox      m_box_from;
         const wBox      m_box_to;
@@ -45,6 +50,7 @@ namespace Kiwi
         const unsigned long m_index_intlet;
         vector<Point>   m_points;
         
+        wControler      m_controler;
     public:
         
         //! The constructor.
@@ -127,6 +133,15 @@ namespace Kiwi
             return m_index_intlet;
         }
         
+        //! Retrieve the controler that manages the box.
+        /** The function retrieves the controler that manages the box.
+         @return The controler that manages the box.
+         */
+        inline sControler getControler() const noexcept
+        {
+            return m_controler.lock();
+        }
+        
         //! Connect the link.
         /** The function connects link.
          @return True if the link has been connected, otherwise false.
@@ -145,6 +160,22 @@ namespace Kiwi
          */
         void write(sDico dico) const noexcept;
         
+        //! Notify that the inlet has changed.
+        /** The function is called by the inlet when it changed.
+         */
+        void inletChanged() const noexcept;
+        
+        //! Notify that the outlet has changed.
+        /** The function is called by the outlet when it changed.
+         */
+        void outletChanged() const noexcept;
+        
+        //! Set the controler of the box.
+        /** The function sets the controler of the box.
+         @param ctrl    The controler.
+         */
+        void setControler(sControler ctrl);
+        
         // ================================================================================ //
         //                                  LINK CONTROLER                                  //
         // ================================================================================ //
@@ -153,7 +184,7 @@ namespace Kiwi
         /**
          The link controler...
          */
-        class Controler : public Attr::Manager::Listener
+        class Controler
         {
         private:
             const sLink   m_link;
@@ -184,18 +215,7 @@ namespace Kiwi
              */
             template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
             {
-                shared_ptr<CtrlClass> ctrl = make_shared<CtrlClass>(forward<Args>(arguments)...);
-                if(ctrl && ctrl->getLink())
-                {
-                    Attr::sManager from = ctrl->getLink()->getBoxFrom();
-                    Attr::sManager to   = ctrl->getLink()->getBoxTo();
-                    if(from && to)
-                    {
-                        from->bind(ctrl);
-                        to->bind(ctrl);
-                    }
-                }
-                return ctrl;
+                return make_shared<CtrlClass>(forward<Args>(arguments)...);
             }
             
             //! Retrieve the link.
@@ -207,13 +227,16 @@ namespace Kiwi
                 return m_link;
             }
             
-            //! Receive the notification that an attribute has changed.
-            /** Sublass of Attr::Manager::Listener must implement this virtual function to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
-             @param manager		The Attr::Manager that manages the attribute.
-             @param attr		The attribute that has been modified.
-             @param type		The type of notification as specified in the Attr::Manager::NotificationType enum,
+            //! Notify that the inlet has changed.
+            /** The function is called by the link when its inlet changed.
              */
-            void attributeNotify(Attr::sManager manager, sAttr attr, Attr::Manager::Notification type) override;
+            void inletChanged();
+            
+            
+            //! Notify that the outlet has changed.
+            /** The function is called by the link when its outlet changed.
+             */
+            void outletChanged();
             
             //! The redraw function that should be override.
             /** The function is called by the link when it should be repainted.

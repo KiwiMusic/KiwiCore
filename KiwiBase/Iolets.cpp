@@ -78,6 +78,14 @@ namespace Kiwi
         return false;
     }
     
+    void Inlet::boxChanged() const noexcept
+    {
+        for(unsigned long i = 0; i < getNumberOfLinks(); i++)
+        {
+            m_links[i]->inletChanged();
+        }
+    }
+    
     // ================================================================================ //
     //                                      OUTLET                                      //
     // ================================================================================ //
@@ -128,6 +136,14 @@ namespace Kiwi
             }
         }
         return false;
+    }
+    
+    void Outlet::boxChanged() const noexcept
+    {
+        for(unsigned long i = 0; i < getNumberOfLinks(); i++)
+        {
+            m_links[i]->outletChanged();
+        }
     }
 }
 

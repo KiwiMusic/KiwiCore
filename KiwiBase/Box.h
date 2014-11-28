@@ -46,10 +46,9 @@ namespace Kiwi
 	class Box : public AttrBox
     {
     public:
-        class Listener;
         class Controler;
-        typedef shared_ptr<Listener>    sListener;
         typedef shared_ptr<Controler>   sControler;
+        typedef weak_ptr<Controler>     wControler;
         
         enum Behavior
         {
@@ -75,7 +74,7 @@ namespace Kiwi
         atomic_ullong       m_stack_count;
         mutable mutex       m_io_mutex;
         
-        weak_ptr<Controler> m_controler;
+        wControler          m_controler;
     public:
         
         //! Constructor.
@@ -203,7 +202,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->getDescription();
+                return m_inlets[(vector<uInlet>::size_type)index]->getDescription();
             }
             else
             {
@@ -221,29 +220,11 @@ namespace Kiwi
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                return m_inlets[(vector<unique_ptr<Inlet>>::size_type)index]->getType();
+                return m_inlets[(vector<uInlet>::size_type)index]->getType();
             }
             else
             {
                 return Inlet::Type::Error;
-            }
-        }
-        
-        //! Retrieve the links of an inlet.
-        /** The functions retrieves the links of an inlet.
-         @param index The inlet index.
-         @param links A vetcor of link to fill.
-         */
-        inline void getInletLinks(unsigned long index, vector<shared_ptr<Link>>& links) const noexcept
-        {
-            links.clear();
-            lock_guard<mutex> guard(m_io_mutex);
-            if(index < m_inlets.size())
-            {
-                for(unsigned long i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
-                {
-                    links.push_back(m_inlets[index]->getLink(i));
-                }
             }
         }
         
@@ -290,24 +271,6 @@ namespace Kiwi
             else
             {
                 return Outlet::Type::Error;
-            }
-        }
-        
-        //! Retrieve the links of an outlet.
-        /** The functions retrieves the links of an outlet.
-         @param index The outlet index.
-         @param links A vetcor of link to fill.
-         */
-        inline void getOutletLinks(unsigned long index, vector<shared_ptr<Link>>& links) const noexcept
-        {
-            links.clear();
-            lock_guard<mutex> guard(m_io_mutex);
-            if(index < m_outlets.size())
-            {
-                for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
-                {
-                    links.push_back(m_outlets[index]->getLink(i));
-                }
             }
         }
         
@@ -358,7 +321,7 @@ namespace Kiwi
         //! Send a notification to the page that the box should be redraw.
         /** The function sends a notification to the page that the box should be redraw.
          */
-        void    redraw();
+        void    redraw() const noexcept;
         
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
