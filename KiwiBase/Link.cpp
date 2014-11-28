@@ -31,6 +31,26 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
+    Link::Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept :
+    m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
+    {
+        if(from && to)
+        {
+            Box::sControler from_ctrl   = getBoxFrom()->getControler();
+            Box::sControler to_ctrl     = getBoxTo()->getControler();
+            if(from_ctrl && to_ctrl)
+            {
+                m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.add(to_ctrl->getInletPosition(getInletIndex()));
+            }
+        }
+    }
+    
+    Link::~Link()
+    {
+        
+    }
+    
     sLink Link::create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
     {
         return make_shared<Link>(from, outlet, to, inlet);
@@ -174,21 +194,49 @@ namespace Kiwi
         }
     }
     
-    void Link::inletChanged() const noexcept
+    void Link::inletChanged() noexcept
     {
-        sControler ctrl = getControler();
-        if(ctrl)
+        sBox from   = getBoxFrom();
+        sBox to     = getBoxTo();
+        if(from && to)
         {
-            ctrl->inletChanged();
+            Box::sControler from_ctrl   = getBoxFrom()->getControler();
+            Box::sControler to_ctrl     = getBoxTo()->getControler();
+            if(from_ctrl && to_ctrl)
+            {
+                m_path.clear();
+                m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.add(to_ctrl->getInletPosition(getInletIndex()));
+                
+                sControler ctrl = getControler();
+                if(ctrl)
+                {
+                    ctrl->boundsChanged();
+                }
+            }
         }
     }
     
-    void Link::outletChanged() const noexcept
+    void Link::outletChanged() noexcept
     {
-        sControler ctrl = getControler();
-        if(ctrl)
+        sBox from   = getBoxFrom();
+        sBox to     = getBoxTo();
+        if(from && to)
         {
-            ctrl->outletChanged();
+            Box::sControler from_ctrl   = getBoxFrom()->getControler();
+            Box::sControler to_ctrl     = getBoxTo()->getControler();
+            if(from_ctrl && to_ctrl)
+            {
+                m_path.clear();
+                m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.add(to_ctrl->getInletPosition(getInletIndex()));
+                
+                sControler ctrl = getControler();
+                if(ctrl)
+                {
+                    ctrl->boundsChanged();
+                }
+            }
         }
     }
     
@@ -201,42 +249,9 @@ namespace Kiwi
     //                                  LINK CONTROLER                                  //
     // ================================================================================ //
     
-    void Link::Controler::inletChanged()
+    void Link::Controler::paint(sLink link, Doodle& d, bool selected)
     {
-        m_start = m_link->getBoxFrom()->getControler()->getOutletPosition(m_link->getOutletIndex());
-        Point bs = m_start;
-        Point be = m_end;
-        if(bs.x() > be.x())
-        {
-            bs.x(be.x());
-            be.x(m_start.x());
-        }
-        if(bs.y() > be.y())
-        {
-            bs.y(be.y());
-            be.y(m_start.y());
-        }
-        redraw();
-    }
-    
-    void Link::Controler::outletChanged()
-    {
-        m_end   = m_link->getBoxTo()->getControler()->getInletPosition(m_link->getInletIndex());
-        Point bs = m_start;
-        Point be = m_end;
-        if(bs.x() > be.x())
-        {
-            bs.x(be.x());
-            be.x(m_start.x());
-        }
-        if(bs.y() > be.y())
-        {
-            bs.y(be.y());
-            be.y(m_start.y());
-        }
-        bs.y(bs.y() - 10);
-        be.y(be.y() + 10);
-        redraw();
+        
     }
 }
 

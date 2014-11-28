@@ -181,7 +181,7 @@ namespace Kiwi
             if(controler)
             {
                 controler->positionChanged();
-                lock_guard<mutex> guard(m_io_mutex);
+                //lock_guard<mutex> guard(m_io_mutex);
                 for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
                 {
                     m_inlets[i]->boxChanged();
@@ -198,7 +198,7 @@ namespace Kiwi
             if(controler)
             {
                 controler->sizeChanged();
-                lock_guard<mutex> guard(m_io_mutex);
+                //lock_guard<mutex> guard(m_io_mutex);
                 for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
                 {
                     m_inlets[i]->boxChanged();

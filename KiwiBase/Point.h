@@ -165,7 +165,7 @@ namespace Kiwi
             return *this;
         }
         
-        inline Point& operator-(Point const& pt) noexcept
+        inline Point operator-(Point const& pt) noexcept
         {
             return Point(*this) -= pt;
         }
@@ -177,7 +177,7 @@ namespace Kiwi
             return *this;
         }
         
-        inline Point& operator-(double const value) noexcept
+        inline Point operator-(double const value) noexcept
         {
             return Point(*this) -= value;
         }

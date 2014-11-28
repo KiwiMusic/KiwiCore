@@ -26,6 +26,7 @@
 
 #include "Point.h"
 #include "Rectangle.h"
+#include "Path.h"
 #include "Color.h"
 
 namespace Kiwi

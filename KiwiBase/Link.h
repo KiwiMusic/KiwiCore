@@ -48,7 +48,7 @@ namespace Kiwi
         const wBox      m_box_to;
         const unsigned long m_index_outlet;
         const unsigned long m_index_intlet;
-        vector<Point>   m_points;
+        Path            m_path;
         
         wControler      m_controler;
     public:
@@ -56,19 +56,12 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept :
-        m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
-        {
-            ;
-        }
+        Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept;
         
         //! The destructor.
         /** You should never use this method.
          */
-        ~Link()
-        {
-            ;
-        }
+        ~Link();
         
         //! The link creation method with sockets.
         /** The function allocates a link, checks if the link is valid and returns it. If the link isn't valid it returns an invalid pointer.
@@ -163,12 +156,48 @@ namespace Kiwi
         //! Notify that the inlet has changed.
         /** The function is called by the inlet when it changed.
          */
-        void inletChanged() const noexcept;
+        void inletChanged() noexcept;
         
         //! Notify that the outlet has changed.
         /** The function is called by the outlet when it changed.
          */
-        void outletChanged() const noexcept;
+        void outletChanged() noexcept;
+        
+        //! Retrieve the position of the link.
+        /** The function retrieves the position of the link as a point.
+         @return The position of the link as a point.
+         */
+        inline Point getPosition() const noexcept
+        {
+            return m_path.getPosition();
+        }
+        
+        //! Retrieve the size of the link.
+        /** The function retrieves the size of the link as a point.
+         @return The size of the link as a point.
+         */
+        inline Point getSize() const noexcept
+        {
+            return m_path.getSize();
+        }
+        
+        //! Retrieve the bounds of the link.
+        /** The function retrieves the bounds of the link as a rectangle.
+         @return The bounds of the link as a rectangle.
+         */
+        inline Rectangle getBounds() const noexcept
+        {
+            return m_path.getBounds();
+        }
+        
+        //! Retrieve the path of the link.
+        /** The function retrieves the path of the link.
+         @return The path of the link.
+         */
+        inline void getPath(Path &path) const noexcept
+        {
+            path = m_path;
+        }
         
         //! Set the controler of the box.
         /** The function sets the controler of the box.
@@ -188,8 +217,6 @@ namespace Kiwi
         {
         private:
             const sLink   m_link;
-            Point         m_start;
-            Point         m_end;
             
         public:
             
@@ -215,7 +242,12 @@ namespace Kiwi
              */
             template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
             {
-                return make_shared<CtrlClass>(forward<Args>(arguments)...);
+                shared_ptr<CtrlClass> ctrl =  make_shared<CtrlClass>(forward<Args>(arguments)...);
+                if(ctrl && ctrl->m_link)
+                {
+                    ctrl->m_link->setControler(ctrl);
+                }
+                return ctrl;
             }
             
             //! Retrieve the link.
@@ -227,21 +259,23 @@ namespace Kiwi
                 return m_link;
             }
             
-            //! Notify that the inlet has changed.
-            /** The function is called by the link when its inlet changed.
+            //! The bounds notification function that should be override.
+            /** The function is called by the link when its bounds changed.
              */
-            void inletChanged();
-            
-            
-            //! Notify that the outlet has changed.
-            /** The function is called by the link when its outlet changed.
-             */
-            void outletChanged();
+            virtual void boundsChanged() = 0;
             
             //! The redraw function that should be override.
             /** The function is called by the link when it should be repainted.
              */
             virtual void redraw() = 0;
+            
+            //! The default paint method.
+            /** The default function paint a default link.
+             @param link        The link to draw.
+             @param d           The doodle to draw in.
+             @param selected    If the link is selected
+             */
+            static void paint(sLink link, Doodle& d, bool selected = false);
         };
     };
 }

@@ -40,10 +40,8 @@ namespace Kiwi
     class Rectangle
     {
     private:
-        double m_x;
-        double m_y;
-        double m_width;
-        double m_height;
+        Point m_position;
+        Point m_size;
         
     public:
         
@@ -51,7 +49,7 @@ namespace Kiwi
         /** The function initialize a rectangle.
          */
         Rectangle() noexcept :
-        m_x(0.), m_y(0.), m_width(0.), m_height(0.)
+        m_position(0., 0.), m_size(0., 0.)
         {
             ;
         }
@@ -60,7 +58,7 @@ namespace Kiwi
         /** The function initialize a rectangle with four double values.
          */
         Rectangle(const double x, const double y, const double width, const double height) noexcept :
-        m_x(x), m_y(y), m_width(width), m_height(height)
+        m_position(x, y), m_size(width, height)
         {
             ;
         }
@@ -69,7 +67,7 @@ namespace Kiwi
         /** The function initialize a rectangle at zero origin with four double values.
          */
         Rectangle(Point const& position, Point const& size) noexcept :
-        m_x(position.x()), m_y(position.y()), m_width(size.x()), m_height(size.y())
+        m_position(position), m_size(size)
         {
             ;
         }
@@ -81,37 +79,67 @@ namespace Kiwi
         
         inline double x() const noexcept
         {
-            return m_x;
+            return m_position.x();
         }
         
         inline double y() const noexcept
         {
-            return m_y;
+            return m_position.y();
         }
         
         inline double width() const noexcept
         {
-            return m_width;
+            return m_size.x();
         }
         
         inline double height() const noexcept
         {
-            return m_height;
+            return m_size.y();
         }
         
         inline Point position() const noexcept
         {
-            return Point(m_x, m_y);
+            return m_position;
         }
         
         inline Point size() const noexcept
         {
-            return Point(m_width, m_height);
+            return m_size;
+        }
+        
+        inline void x(double x) noexcept
+        {
+            m_position.x(x);
+        }
+        
+        inline void y(double y) noexcept
+        {
+            m_position.y(y);
+        }
+        
+        inline void width(double width) noexcept
+        {
+            m_size.x(width);
+        }
+        
+        inline void height(double height) noexcept
+        {
+            m_size.y(height);
+        }
+        
+        inline void position(Point const& position) noexcept
+        {
+            m_position = position;
+        }
+        
+        inline void size(Point const& size) noexcept
+        {
+            m_size = size;
         }
         
         inline bool contains(Point const& pt) const noexcept
         {
-            return pt.x() >= m_x && pt.y() >= m_y && pt.x() < m_x + m_width && pt.y() < m_y + m_height;
+            return pt.x() >= m_position.x() && pt.y() >= m_position.y() && pt.x() < m_position.x() + m_size.x() && pt.y() < m_position.y() + m_size.y();
         }
         
         inline Rectangle& operator=(ElemVector const& elements) noexcept
@@ -119,26 +147,26 @@ namespace Kiwi
             const ElemVector::size_type size = elements.size();
             if(size && elements[0].isNumber())
             {
-                m_x = (double)elements[0];
+                m_position.x((double)elements[0]);
             }
             if(size > 1 && elements[1].isNumber())
             {
-                m_y = (double)elements[1];
+                m_position.y((double)elements[1]);
             }
             if(size > 2 && elements[2].isNumber())
             {
-                m_width = (double)elements[1];
+                m_size.x((double)elements[1]);
             }
             if(size > 2 && elements[3].isNumber())
             {
-                m_height = (double)elements[1];
+                m_size.y((double)elements[1]);
             }
             return *this;
         }
         
         inline operator ElemVector() const noexcept
         {
-            return {m_x, m_y, m_width, m_height};
+            return {m_position.x(), m_position.y(), m_size.x(), m_size.y()};
         }
         
     };
