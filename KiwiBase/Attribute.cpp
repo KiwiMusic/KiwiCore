@@ -47,6 +47,12 @@ namespace Kiwi
     {
         m_frozen_values.clear();
     }
+    
+    void Attr::setDefaultValues(ElemVector const& elements)
+    {
+        m_default_values = elements;
+        set(m_default_values);
+    }
 	
 	void Attr::setBehavior(long behavior) noexcept
 	{
@@ -241,6 +247,27 @@ namespace Kiwi
         }
 	}
 	
+    void Attr::Manager::setAttributeDefaultValues(sTag name, ElemVector const& elements)
+    {
+        m_attrs_mutex.lock();
+        auto it = m_attrs.find(name);
+		if(it != m_attrs.end())
+        {
+            sAttr attr = it->second;
+            if(attr && !attr->isDisabled())
+            {
+                attr->setDefaultValues(elements);
+				m_attrs_mutex.unlock();
+				
+				if(attributeValueChanged(attr))
+				{
+					sendNotification(attr, Notification::ValueChanged);
+				}
+            }
+        }
+		m_attrs_mutex.unlock();
+    }
+    
 	bool Attr::Manager::setAttributeValue(sTag name, ElemVector const& elements)
 	{
 		m_attrs_mutex.lock();
@@ -366,6 +393,10 @@ namespace Kiwi
             if(attr)
             {
                 attr->read(dico);
+                if(attributeValueChanged(attr))
+                {
+                    sendNotification(attr, Notification::ValueChanged);
+                }
             }
         }
 	}

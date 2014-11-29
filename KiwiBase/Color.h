@@ -107,6 +107,26 @@ namespace Kiwi
             return m_alpha;
         }
         
+        void red(const double value) noexcept
+        {
+            m_red = clip(value, 0., 1.);
+        }
+        
+        void green(const double value) noexcept
+        {
+            m_green = clip(value, 0., 1.);
+        }
+        
+        void blue(const double value) noexcept
+        {
+            m_blue = clip(value, 0., 1.);
+        }
+        
+        void alpha(const double value) noexcept
+        {
+            m_alpha = clip(value, 0., 1.);
+        }
+        
         inline Color& operator=(ElemVector const& elements) noexcept
         {
             const ElemVector::size_type size = elements.size();

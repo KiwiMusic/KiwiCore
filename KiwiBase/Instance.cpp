@@ -24,6 +24,7 @@
 #include "Instance.h"
 #include "../KiwiBoxes/Arithmetic.h"
 #include "../KiwiBoxes/ArithmeticTilde.h"
+#include "../KiwiBoxes/Gui.h"
 
 namespace Kiwi
 {
@@ -53,6 +54,7 @@ namespace Kiwi
         if(!libraries_loaded)
         {
             arithmetic();
+            gui();
             libraries_loaded = true;
         }
         return make_shared<Instance>();

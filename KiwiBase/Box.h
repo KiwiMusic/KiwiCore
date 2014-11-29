@@ -397,6 +397,16 @@ namespace Kiwi
         {
             
         }
+        
+        //! Notify the manager that the values of an attribute has changed.
+		/** The function notifies the manager that the values of an attribute has changed.
+		 @param attr The attribute that has changed.
+		 @return pass true to notify changes to listeners, false if you don't want them to be notified
+		 */
+        virtual bool attributeChanged(sAttr attr)
+        {
+            return true;
+        }
 		
 		//! Notify the manager that the values of an attribute has changed.
 		/** The function notifies the manager that the values of an attribute has changed.
@@ -662,6 +672,13 @@ namespace Kiwi
          @param     box The prototype of the box.
          */
         static void addPrototype(unique_ptr<Box> box, string const& name = "");
+        
+        // ================================================================================ //
+        //                                      BOX COMMON TAG                              //
+        // ================================================================================ //
+        
+        static const sTag Tag_bang;
+        static const sTag Tag_set;
     };
     
     inline string toString(scBox box)

@@ -121,6 +121,8 @@ namespace Kiwi
             drawText(text, rect.x(), rect.y(), rect.width(), rect.height(), j, wrap);
         }
         
+        virtual inline void drawLine(double x1, double y1, double x2, double y2, double thickness) = 0;
+        
         virtual inline void drawRectangle(double x, double y, double w, double h, double thickness, double rounded = 0.) = 0;
         
         virtual inline void drawRectangle(Rectangle const& rect, double thickness, double rounded = 0.)

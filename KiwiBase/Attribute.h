@@ -78,7 +78,7 @@ namespace Kiwi
         const sTag          m_category;			///< The category of the attribute.
         const Style         m_style;			///< The style of the attribute.
 		const long			m_order;			///< The order of the attribute.
-		const ElemVector    m_default_values;	///< The default value of the attribute.
+		ElemVector          m_default_values;	///< The default value of the attribute.
         atomic_long         m_behavior;			///< The behavior of the attribute.
 		ElemVector          m_frozen_values;    ///< The frozen value of the attribute.
         
@@ -288,6 +288,11 @@ namespace Kiwi
 		 */
 		void setDefaultValues();
         
+        //! Resets the attribute values to default values.
+		/** Resets the attribute values to its default values.
+		 */
+		void setDefaultValues(ElemVector const& elements);
+        
         //! Resets the attribute values to frozen values.
 		/** Resets the attribute values to its frozen values.
 		 */
@@ -388,6 +393,13 @@ namespace Kiwi
              @param name The name of the attribute to remove.
              */
             void removeAttribute(sTag name);
+            
+            //! Set the attribute's default values.
+            /** The function sets the attribute's  default values.
+             @param name The name of the attribute.
+             @param elements The new default values of the attribute.
+             */
+            void setAttributeDefaultValues(sTag name, ElemVector const& elements);
             
             //! Set the attribute behavior.
             /** The function sets the attribute behaviors.
@@ -725,11 +737,6 @@ namespace Kiwi
             return m_value;
         }
 	};
-    
-    typedef shared_ptr<AttrPoint>       sAttrPoint;
-    typedef weak_ptr<AttrPoint>         wAttrPoint;
-    typedef shared_ptr<const AttrPoint> scAttrPoint;
-    typedef weak_ptr<const AttrPoint>   wcAttrPoint;
     
 	//! The rectangle attribute is an attribute that is particulary suitable to represent a position and a size.
 	/** The rectangle attribute holds four double values suitable to represent a rectangle, its default display style will obviously be a Attr::Style::List.

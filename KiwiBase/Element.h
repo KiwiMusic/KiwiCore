@@ -106,13 +106,22 @@ namespace Kiwi
             m_val.m_long = 0;
         }
         
+        //! Constructor with a boolean value.
+        /** The function allocates the element with a long value from a casted boolean value.
+         */
+        Element(const bool value) noexcept
+        {
+            m_type = LONG;
+            m_val.m_long = (long)value;
+        }
+        
         //! Constructor with an int value.
         /** The function allocates the element with a long value from a casted int value.
          */
         Element(const int value) noexcept
         {
             m_type = LONG;
-            m_val.m_long = value;
+            m_val.m_long = (long)value;
         }
         
         //! Constructor with a long value.
@@ -307,6 +316,26 @@ namespace Kiwi
             return m_type == DICO;
         }
         
+        //! Cast the element to a boolean.
+        /** The function casts the element to a boolean.
+         @return An boolean value if the element is a digit otherwise 0.
+         */
+        inline operator bool() const noexcept
+        {
+            if(m_type == LONG)
+            {
+                return (bool)m_val.m_long;
+            }
+            else if(m_type == DOUBLE)
+            {
+                return (bool)m_val.m_double;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        
         //! Cast the element to an int.
         /** The function casts the element to an int.
          @return An int value if the element is a digit otherwise 0.
@@ -475,6 +504,18 @@ namespace Kiwi
             return *this;
         }
         
+        //! Set up the element with a boolean value.
+        /** The function sets up the element with a long value from a casted boolean value.
+         @param value   The boolean value.
+         @return An element.
+         */
+        inline Element& operator=(const bool value) noexcept
+        {
+            changeType(LONG);
+            m_val.m_long = (long)value;
+            return *this;
+        }
+        
         //! Set up the element with a int value.
         /** The function sets up the element with a long value from a casted int value.
          @param value   The int value.
@@ -636,6 +677,16 @@ namespace Kiwi
             return false;
         }
         
+        //! Compare the element with a boolean value.
+        /** The function compares the element with a boolean value.
+         @param value   The boolean value.
+         @return true if the element hold the boolean value otherwise false.
+         */
+        inline bool operator==(const bool value) const noexcept
+        {
+            return m_type == LONG && m_val.m_long == (long)value;
+        }
+        
         //! Compare the element with an int value.
         /** The function compares the element with an int value.
          @param value   The int value.
@@ -744,6 +795,16 @@ namespace Kiwi
         inline bool operator!=(const Element& other) const noexcept
         {
             return !(*this == other);
+        }
+        
+        //! Compare the element with a boolean value.
+        /** The function compares the element with a boolean value.
+         @param value   The boolean value.
+         @return true if the element differ from the boolean value otherwise false.
+         */
+        inline bool operator!=(const bool value) const noexcept
+        {
+            return !(*this == value);
         }
         
         //! Compare the element with an int value.

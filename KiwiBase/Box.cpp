@@ -28,6 +28,8 @@
 namespace Kiwi
 {
     map<sTag, unique_ptr<Box>>  Box::m_prototypes;
+    const sTag Box::Tag_bang    = Tag::create("bang");
+    const sTag Box::Tag_set     = Tag::create("set");
     
     // ================================================================================ //
     //                                      BOX                                         //
@@ -175,6 +177,10 @@ namespace Kiwi
 	
 	bool Box::attributeValueChanged(sAttr attr)
 	{
+        if(!this->attributeChanged(attr))
+        {
+            return false;
+        }
         if(attr == AttrBox::appearance_position)
         {
             sControler controler = getControler();
@@ -209,7 +215,6 @@ namespace Kiwi
                 }
             }
         }
-        
         else if(attr == AttrBox::color_background || AttrBox::color_border || AttrBox::color_text)
         {
             sControler controler = getControler();
