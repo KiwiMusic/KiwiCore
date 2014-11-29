@@ -71,9 +71,9 @@ namespace Kiwi
         /** The function retrieves the number of boxes in the binding list of the beacon.
          @return The number of boxes binded to the beacon.
          */
-        inline size_t size() const noexcept
+        inline unsigned long size() const noexcept
         {
-            return (size_t)m_boxes.size();
+            return (unsigned long)m_boxes.size();
         }
         
         //! Retrieve an box from the binding list of the beacon.

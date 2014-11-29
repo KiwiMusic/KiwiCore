@@ -138,7 +138,7 @@ namespace Kiwi
          @param     The name of the beacon to retrieve.
          @return    The beacon that match with the name.
          */
-        sBeacon createBeacon(string const& name);
+        sBeacon createBeacon(string const& name) const;
         
         //! Create a box.
         /** The function instantiates a box with a dico.

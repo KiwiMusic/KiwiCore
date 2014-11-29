@@ -46,9 +46,9 @@ namespace Kiwi
         m_boxes.clear();
     }
     
-    sBeacon Page::createBeacon(string const& name)
+    sBeacon Page::createBeacon(string const& name) const
     {
-        sInstance instance = m_instance.lock();
+        sInstance instance = getInstance();
         if(instance)
         {
             return instance->createBeacon(name);

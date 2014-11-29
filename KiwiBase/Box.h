@@ -316,6 +316,13 @@ namespace Kiwi
          */
         void write(sDico dico) const;
         
+        //! Create a beacon.
+        /** This function retrieves a beacon in the scope of the instance.
+         @param     The name of the beacon to retrieve.
+         @return    The beacon that match with the name.
+         */
+        sBeacon createBeacon(string const& name) const;
+        
     protected:
         
         //! Send a notification to the page that the box should be redraw.

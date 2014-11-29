@@ -274,7 +274,7 @@ namespace Kiwi
         {
             if(index < (unsigned long)m_links.size())
             {
-                return m_links[(vector<sLink>::size_type)index]->getBoxFrom();
+                return m_links[(vector<sLink>::size_type)index]->getBoxTo();
             }
             else
             {

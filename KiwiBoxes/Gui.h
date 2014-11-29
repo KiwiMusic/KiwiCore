@@ -45,11 +45,20 @@ namespace Kiwi
         Allocate(Bang);
     };
     
+    // ================================================================================ //
+    //                                      TOGGLE                                      //
+    // ================================================================================ //
+    
     class Toggle : public Box
     {
     private:
-        bool       m_value;
-        sAttrColor m_cross_color;
+        const sAttrColor    m_color_cross_on;
+        const sAttrColor    m_color_cross_off;
+        const sAttrTag      m_tag_receive;
+        const sAttrTag      m_tag_send;
+        sBeacon             m_beacon_receive;
+        sBeacon             m_beacon_send;
+        bool  m_value;
     public:
  
         Toggle(sPage page);
@@ -58,13 +67,42 @@ namespace Kiwi
         bool receive(Event::Mouse const& event) override;
         bool draw(Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
+        void send() const;
         Allocate(Toggle);
+    };
+    
+    // ================================================================================ //
+    //                                      SLIDER                                      //
+    // ================================================================================ //
+    
+    class Slider : public Box
+    {
+    private:
+        const sAttrColor    m_color_on;
+        const sAttrColor    m_color_off;
+        const sAttrColor    m_color_knob;
+        const sAttrTag      m_tag_receive;
+        const sAttrTag      m_tag_send;
+        sBeacon             m_beacon_receive;
+        sBeacon             m_beacon_send;
+        double              m_value;
+    public:
+        
+        Slider(sPage page);
+        ~Slider();
+        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(Event::Mouse const& event) override;
+        bool draw(Doodle& doodle) const override;
+        bool attributeChanged(sAttr attr) override;
+        void send() const;
+        Allocate(Slider);
     };
     
     inline void gui()
     {
         Box::addPrototype(unique_ptr<Box>(new Bang(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Toggle(nullptr)));
+        Box::addPrototype(unique_ptr<Box>(new Slider(nullptr)));
     }
 }
 

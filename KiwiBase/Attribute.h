@@ -660,7 +660,7 @@ namespace Kiwi
     private:
         sTag m_value;
     public:
-		AttrTag(sTag name, sTag label, sTag category, sTag default_value = 0, long behavior = 0) :
+		AttrTag(sTag name, sTag label, sTag category, sTag default_value = nullptr, long behavior = 0) :
         Attr(name, label, category, Attr::Style::Text, {default_value}, behavior) {;}
 		virtual ~AttrTag() {};
         virtual void get(ElemVector& elements) const noexcept;
