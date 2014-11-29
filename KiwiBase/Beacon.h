@@ -140,6 +140,14 @@ namespace Kiwi
              */
             sBeacon createBeacon(string const& name);
         };
+        
+        //! The beacon creation method.
+        /** The function allocates beacon for a box.
+         @param box     The box that want to create the beacon.
+         @param name    The name of the beacon.
+         @return The beacon.
+         */
+        static sBeacon create(sBox box, string const& name);
     };
     
     inline string toString(sBeacon __val)

@@ -136,6 +136,10 @@ namespace Kiwi
         {
             drawRectangle(rect.x(), rect.y(), rect.width(), rect.height(), rounded);
         }
+        
+        virtual inline void drawEllipse(double x, double y, double width, double height, double thickness = 0.) = 0;
+        
+        virtual inline void fillEllipse(double x, double y, double width, double height) = 0;
     };
 }
 

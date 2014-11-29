@@ -95,19 +95,6 @@ namespace Kiwi
         return nullptr;
     }
     
-    sBeacon Box::createBeacon(string const& name) const
-    {
-        sPage page = getPage();
-        if(page)
-        {
-            return page->createBeacon(name);
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
-    
     void Box::write(sDico dico) const
     {
         this->save(dico);

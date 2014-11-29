@@ -23,6 +23,7 @@
 
 
 #include "Beacon.h"
+#include "Instance.h"
 
 namespace Kiwi
 {
@@ -85,6 +86,19 @@ namespace Kiwi
             sBeacon newBeacon = make_shared<Beacon>(name);
             m_beacons[name] = newBeacon;
             return newBeacon;
+        }
+    }
+    
+    sBeacon Beacon::create(sBox box, string const& name)
+    {
+        sInstance instance = box->getInstance();
+        if(instance)
+        {
+            return instance->createBeacon(name);
+        }
+        else
+        {
+            return nullptr;
         }
     }
 }

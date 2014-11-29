@@ -29,6 +29,7 @@
 #include "Event.h"
 #include "Doodle.h"
 #include "Beacon.h"
+#include "Clock.h"
 
 // TODO
 // - See how to format the expression
@@ -310,18 +311,19 @@ namespace Kiwi
             return false;
         }
         
+        //! ...
+        /** ....
+         */
+        virtual void tick()
+        {
+            ;
+        }
+        
         //! Write the box in a dico.
         /** The function writes the box in a dico.
          @param dico The dico.
          */
         void write(sDico dico) const;
-        
-        //! Create a beacon.
-        /** This function retrieves a beacon in the scope of the instance.
-         @param     The name of the beacon to retrieve.
-         @return    The beacon that match with the name.
-         */
-        sBeacon createBeacon(string const& name) const;
         
     protected:
         
