@@ -25,7 +25,11 @@
 #include "Gui.h"
 
 namespace Kiwi
-{    
+{
+    // ================================================================================ //
+    //                                      BANG                                        //
+    // ================================================================================ //
+    
     Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse),
     m_color_circle(Attr::create<AttrColor>(Tag::create("circlecolor"),
                                             Tag::create("Circle Color"),
@@ -87,8 +91,7 @@ namespace Kiwi
             send();
             m_led = true;
             redraw();
-            Clock clock(getShared());
-            clock.delay(100.);
+            Clock clock(getShared(), 150.);
             return true;
         }
         return false;

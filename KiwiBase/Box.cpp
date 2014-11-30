@@ -117,13 +117,14 @@ namespace Kiwi
     
     void Box::send(unsigned long index, ElemVector const& elements) const noexcept
     {
-        lock_guard<mutex> guard(m_io_mutex);
+        m_io_mutex.lock();
         if(index < m_outlets.size())
         {
             for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
             {
                 sBox receiver       = m_outlets[index]->getBox(i);
                 unsigned long inlet = m_outlets[index]->getInletIndex(i);
+                m_io_mutex.unlock();
                 if(receiver)
                 {
                     if(++receiver->m_stack_count < 256)
@@ -171,8 +172,10 @@ namespace Kiwi
                     }
                     receiver->m_stack_count--;
                 }
+                m_io_mutex.unlock();
             }
         }
+        m_io_mutex.unlock();
     }
 	
 	bool Box::attributeValueChanged(sAttr attr)

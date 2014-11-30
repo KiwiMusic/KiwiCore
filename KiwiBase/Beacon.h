@@ -85,9 +85,19 @@ namespace Kiwi
         {
             lock_guard<mutex> guard(m_mutex);
             auto it = m_boxes.begin();
-            while(--index && it != m_boxes.end())
+            while(index && it != m_boxes.end())
+            {
                 ++it;
-            return it->lock();
+                --index;
+            }
+            if(it != m_boxes.end())
+            {
+                return it->lock();
+            }
+            else
+            {
+                return nullptr;
+            }
         }
         
         //! Add an boxes in the binding list of the beacon.

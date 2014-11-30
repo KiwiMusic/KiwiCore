@@ -32,6 +32,8 @@
 
 #define AllocateDouble(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (double)dico->get(Tag::arguments)); }
 
+#define AllocateTag(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (sTag)dico->get(Tag::arguments)); }
+
 #define AllocateElement(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, dico->get(Tag::arguments)); }
 
 #define AllocateElemVector(boxclass) sBox allocate(sPage page, sDico dico) const override { ElemVector elements; dico->get(Tag::arguments, elements);return make_shared<boxclass>(page, elements); }

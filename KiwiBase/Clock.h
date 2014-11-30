@@ -24,43 +24,36 @@
 #ifndef __DEF_KIWI_CLOCK__
 #define __DEF_KIWI_CLOCK__
 
-#include "Tools.h"
+#include "Element.h"
 
 namespace Kiwi
 {
     class Clock
     {
     private:
-        sBox m_box;
-        //template<class... arguments> static void tick(Clock* clock, unsigned long ms, sBox box, arguments&&... argument);
+        static void tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements);
         static void tick(Clock* clock, unsigned long ms, sBox box);
     public:
-        Clock(sBox box) :
-        m_box(box)
+        Clock(sBox box, const unsigned long ms)
+        {
+            if(box)
+            {
+                thread(tick, this, ms, box).detach();
+            }
+        }
+        
+        Clock(sBox box, const unsigned long ms, ElemVector const& elements)
+        {
+            if(box)
+            {
+                thread(tick_elements, this, ms, box, elements).detach();
+            }
+        }
+        
+        ~Clock()
         {
             ;
         }
-        
-        Clock()
-        {
-            ;
-        }
-        
-        inline void delay(const unsigned long ms)
-        {
-            if(m_box)
-            {
-                thread(tick, this, ms, m_box).detach();
-            }
-        }
-        /*
-        template<class... Args> inline void delay(const unsigned long ms, Args&&... arguments)
-        {
-            if(m_box)
-            {
-                thread(this, ms, m_box, forward<Args>(arguments)...).detach();
-            }
-        }*/
     };
 };
 

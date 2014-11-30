@@ -27,15 +27,14 @@
 
 namespace Kiwi
 {
-    /*
-    template<class... arguments> void Clock::tick(Clock* clock, unsigned long ms, sBox box, arguments&&... argument)
+    void Clock::tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements)
     {
         if(clock && box)
         {
             this_thread::sleep_for(std::chrono::milliseconds(ms));
             box->tick();
         }
-    }*/
+    }
     
     void Clock::tick(Clock* clock, unsigned long ms, sBox box)
     {

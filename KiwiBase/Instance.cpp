@@ -25,6 +25,7 @@
 #include "../KiwiBoxes/Arithmetic.h"
 #include "../KiwiBoxes/ArithmeticTilde.h"
 #include "../KiwiBoxes/Gui.h"
+#include "../KiwiBoxes/Wireless.h"
 
 namespace Kiwi
 {
@@ -55,6 +56,7 @@ namespace Kiwi
         {
             arithmetic();
             gui();
+            wireless();
             libraries_loaded = true;
         }
         return make_shared<Instance>();
