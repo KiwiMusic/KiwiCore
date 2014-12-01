@@ -88,10 +88,14 @@ namespace Kiwi
             const int       x;
             const int       y;
             const long      modifiers;
-            const double    wheel;
+            const double    wheel_x;
+			const double	wheel_y;
+			const bool		wasClicked;
+			const int		down_x;
+			const int		down_y;
             
-            Mouse(Type _type, int _x, int _y, long _mod, double _wheel) noexcept
-            : type(_type), x(_x), y(_y), modifiers(_mod), wheel(_wheel)
+            Mouse(Type _type, int _x, int _y, long _mod, double _wheel_x, double _wheel_y, bool _wasClicked, int _down_x, int _down_y) noexcept
+            : type(_type), x(_x), y(_y), modifiers(_mod), wheel_x(_wheel_x), wheel_y(_wheel_y), wasClicked(_wasClicked), down_x(_down_x), down_y(_down_y)
             {
                 ;
             }
@@ -179,7 +183,7 @@ namespace Kiwi
                 text += "DoubleClick ";
                 break;
             default:
-                text += "Wheel (" + toString(event.wheel) + ") ";
+                text += "Wheel (" + toString(event.wheel_x) + ", " + toString(event.wheel_y) + ") ";
                 break;
         }
         text += "[" + toString(event.x) + " " + toString(event.y) + "] ";

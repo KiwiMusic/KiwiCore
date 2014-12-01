@@ -36,8 +36,8 @@ namespace Kiwi
     {
         if(from && to)
         {
-            Box::sControler from_ctrl   = getBoxFrom()->getControler();
-            Box::sControler to_ctrl     = getBoxTo()->getControler();
+            Box::sController from_ctrl   = getBoxFrom()->getController();
+            Box::sController to_ctrl     = getBoxTo()->getController();
             if(from_ctrl && to_ctrl)
             {
                 m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
@@ -200,15 +200,15 @@ namespace Kiwi
         sBox to     = getBoxTo();
         if(from && to)
         {
-            Box::sControler from_ctrl   = getBoxFrom()->getControler();
-            Box::sControler to_ctrl     = getBoxTo()->getControler();
+            Box::sController from_ctrl   = getBoxFrom()->getController();
+            Box::sController to_ctrl     = getBoxTo()->getController();
             if(from_ctrl && to_ctrl)
             {
                 m_path.clear();
                 m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
                 m_path.add(to_ctrl->getInletPosition(getInletIndex()));
                 
-                sControler ctrl = getControler();
+                sController ctrl = getController();
                 if(ctrl)
                 {
                     ctrl->boundsChanged();
@@ -223,15 +223,15 @@ namespace Kiwi
         sBox to     = getBoxTo();
         if(from && to)
         {
-            Box::sControler from_ctrl   = getBoxFrom()->getControler();
-            Box::sControler to_ctrl     = getBoxTo()->getControler();
+            Box::sController from_ctrl   = getBoxFrom()->getController();
+            Box::sController to_ctrl     = getBoxTo()->getController();
             if(from_ctrl && to_ctrl)
             {
                 m_path.clear();
                 m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
                 m_path.add(to_ctrl->getInletPosition(getInletIndex()));
                 
-                sControler ctrl = getControler();
+                sController ctrl = getController();
                 if(ctrl)
                 {
                     ctrl->boundsChanged();
@@ -240,19 +240,28 @@ namespace Kiwi
         }
     }
     
-    void Link::setControler(sControler ctrl)
+    void Link::setController(sController ctrl)
     {
-        m_controler = ctrl;
+        m_controller = ctrl;
     }
     
     // ================================================================================ //
     //                                  LINK CONTROLER                                  //
     // ================================================================================ //
     
-    void Link::Controler::paint(sLink link, Doodle& d, bool selected)
+    void Link::Controller::paint(sLink link, Doodle& d, bool selected)
     {
         
     }
+	
+	void Link::Controller::setSelectedStatus(bool status)
+	{
+		if(m_selected != status)
+		{
+			m_selected = status;
+			redraw();
+		}
+	}
 }
 
 

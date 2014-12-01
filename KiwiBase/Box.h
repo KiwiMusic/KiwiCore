@@ -46,9 +46,9 @@ namespace Kiwi
 	class Box : public AttrBox
     {
     public:
-        class Controler;
-        typedef shared_ptr<Controler>   sControler;
-        typedef weak_ptr<Controler>     wControler;
+        class Controller;
+        typedef shared_ptr<Controller>   sController;
+        typedef weak_ptr<Controller>     wController;
         
         enum Behavior
         {
@@ -74,7 +74,7 @@ namespace Kiwi
         atomic_ullong       m_stack_count;
         mutable mutex       m_io_mutex;
         
-        wControler          m_controler;
+        wController          m_controller;
     public:
         
         //! Constructor.
@@ -128,13 +128,13 @@ namespace Kiwi
             return m_page.lock();
         }
         
-        //! Retrieve the controler that manages the box.
-        /** The function retrieves the controler that manages the box.
-         @return The controler that manages the box.
+        //! Retrieve the controller that manages the box.
+        /** The function retrieves the controller that manages the box.
+         @return The controller that manages the box.
          */
-        inline sControler getControler() const noexcept
+        inline sController getController() const noexcept
         {
-            return m_controler.lock();
+            return m_controller.lock();
         }
         
         //! Retrieve the name of the box.
@@ -450,11 +450,11 @@ namespace Kiwi
          */
         bool disconnectOutlet(sLink link);
         
-        //! Set the controler of the box.
-        /** The function sets the controler of the box.
-         @param ctrl    The controler.
+        //! Set the controller of the box.
+        /** The function sets the controller of the box.
+         @param ctrl    The controller.
          */
-        void setControler(sControler ctrl);
+        void setController(sController ctrl);
         
     public:
         
@@ -462,20 +462,21 @@ namespace Kiwi
         //                                  BOX CONTROLER                                   //
         // ================================================================================ //
         
-        //! The box controler .
+        //! The box controller .
         /**
-         The box controler...
+         The box controller...
          */
-        class Controler
+        class Controller
         {
         public:
             enum Type
             {
-                Inside  = 0,
-                Inlet   = 1,
-                Outlet  = 2,
-                Corner  = 3,
-                Border  = 4
+				Outside = 0,
+                Inside  = 1,
+                Inlet   = 2,
+                Outlet  = 3,
+                Corner  = 4,
+                Border  = 5
             };
             
             enum Border
@@ -496,16 +497,18 @@ namespace Kiwi
             
             struct Hit
             {
-                Type            type;
+				Type            type = Type::Outside;
                 unsigned long   index;
             };
             
         private:
             
             const sBox  m_box;
+			const bool  m_boxgui;
+			const bool  m_boxdsp;
             const bool  m_want_mouse_focus;
             const bool  m_want_keyboard_focus;
-            
+			
             bool    m_edition;
             bool    m_selected;
         public:
@@ -513,10 +516,12 @@ namespace Kiwi
             //! Constructor.
             /** You should never call this method except if you really know what you're doing.
              */
-            Controler(sBox box) :
+            Controller(sBox box) :
             m_box(box),
-            m_want_mouse_focus(box->getType() & Box::Mouse),
-            m_want_keyboard_focus(box->getType() & Box::Keyboard),
+            m_boxgui(box->getType() & Box::Graphic),
+            m_boxdsp(box->getType() & Box::Signal),
+			m_want_mouse_focus(box->getType() & Box::Mouse),
+			m_want_keyboard_focus(box->getType() & Box::Keyboard),
             m_edition(true),
             m_selected(false)
             {
@@ -526,20 +531,20 @@ namespace Kiwi
             //! The destructor.
             /** You should never call this method except if you really know what you're doing.
              */
-            virtual ~Controler()
+            virtual ~Controller()
             {
                 ;
             }
             
-            //! The controler maker.
-            /** The function creates an controler with arguments.
+            //! The controller maker.
+            /** The function creates an controller with arguments.
              */
             template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
             {
                 shared_ptr<CtrlClass> ctrl = make_shared<CtrlClass>(forward<Args>(arguments)...);
                 if(ctrl && ctrl->m_box)
                 {
-                    ctrl->m_box->setControler(ctrl);
+                    ctrl->m_box->setController(ctrl);
                 }
                 return ctrl;
             }
@@ -579,7 +584,25 @@ namespace Kiwi
             {
                 return m_selected;
             }
-            
+			
+			//! Retrieve if the box is a graphical object.
+			/** The function retrieves if the box is a graphical object.
+			 @return true if the box is a graphical object otherwise false.
+			 */
+			inline bool isGUI() const noexcept
+			{
+				return m_boxgui;
+			}
+			
+			//! Retrieve if the box is a DSP object.
+			/** The function retrieves if the box is a DSP object.
+			 @return true if the box is a DSP object otherwise false.
+			 */
+			inline bool isDSP() const noexcept
+			{
+				return m_boxdsp;
+			}
+			
             //! Retrieve if the box wants the mouse focus.
             /** The function retrieves if the box wants the mouse focus.
              @return true if the box wants the mouse focus otherwise false.
@@ -597,7 +620,7 @@ namespace Kiwi
             {
                 return m_want_keyboard_focus;
             }
-            
+			
             //! Retrieve the position of an inlet.
             /** The function retrieves the position of an inlet.
              @param index The index of the inlet.
@@ -620,18 +643,18 @@ namespace Kiwi
             
             //! Notify that the page is in edition.
             /** The function notifies that page is in edition to redraw the box.
-             @param true if page is in edition, otherwise false.
+             @param status true if page is in edition, otherwise false.
              */
             void setEditionStatus(bool status);
             
             //! Notify that the box is selected.
             /** The function notifies that the box is selected to redraw the box.
-             @param true if the box is selected, otherwise false.
+             @param status true if the box is selected, otherwise false.
              */
             void setSelectedStatus(bool status);
             
             //! The inlets notification function that should be override.
-            /** TThe function is called by the box when its inlets changed.
+            /** The function is called by the box when its inlets changed.
              */
             void inletsChanged();
             
@@ -643,18 +666,23 @@ namespace Kiwi
             //! The position notification function that should be override.
             /** The function is called by the box when its position changed.
              */
-            virtual void positionChanged() = 0;
-            
+			virtual void positionChanged() {};
+				
             //! The size notification function that should be override.
             /** The function is called by the box when its size changed.
              */
-            virtual void sizeChanged() = 0;
-            
+			virtual void sizeChanged() {};
+			
+			//! The size notification function that should be override.
+			/** The function is called by the box when its size changed.
+			 */
+			virtual void editionStatusChanged() {};
+			
             //! The redraw function that should be override.
             /** The function is called by the box when it should be repainted.
              */
-            virtual void redraw() = 0;
-            
+			virtual void redraw() {};
+				
             //! The default paint method.
             /** The default function paint a default box with the background, border, inlets, outlets and text.
              @param paper       A doodle to draw.

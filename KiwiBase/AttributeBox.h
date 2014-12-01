@@ -173,7 +173,16 @@ namespace Kiwi
         {
             return Rectangle(appearance_position->get(), appearance_size->get());
         }
-        
+		
+		//! Retrieves if the box should be hidden when the page is locked.
+		/** The function retrieves if the box should be hidden when the page is locked.
+		 @return True if the box should be hidden when the page is locked, false otherwise.
+		 */
+		inline bool getHiddenOnLock() const noexcept
+		{
+			return appearance_hidden->get();
+		}
+		
         //! Retrieve the presentation size of the box.
         /** The function retrieves the size of the box as a point.
          @return The size of the box as a point.

@@ -87,24 +87,12 @@ namespace Kiwi
             if(box)
             {
                 m_boxes.push_back(box);
-                m_boxes_mutex.unlock();
-                
-                m_listeners_mutex.lock();
-                auto it = m_listeners.begin();
-                while(it != m_listeners.end())
-                {
-                    if((*it).expired())
-                    {
-                        it = m_listeners.erase(it);
-                    }
-                    else
-                    {
-                        Page::sListener listener = (*it).lock();
-                        listener->boxHasBeenCreated(shared_from_this(), box);
-                        ++it;
-                    }
-                }
-                m_listeners_mutex.unlock();
+				m_boxes_mutex.unlock();
+				
+				sController ctrl = getController();
+				if (ctrl)
+					ctrl->boxHasBeenCreated(box);
+				
                 return box;
             }
             else
@@ -135,48 +123,23 @@ namespace Kiwi
                     m_links_mutex.lock();
                     for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
                     {
-                        sLink newconnect = Link::create(m_links[i], oldbox, newbox);
-                        if(newconnect)
+                        sLink newlink = Link::create(m_links[i], oldbox, newbox);
+                        if(newlink)
                         {
                             sLink oldlink  = m_links[i];
-                            m_links[i]        = newconnect;
+                            m_links[i]     = newlink;
                             oldlink->disconnect();
-                            
-                            m_listeners_mutex.lock();
-                            auto it = m_listeners.begin();
-                            while(it != m_listeners.end())
-                            {
-                                if((*it).expired())
-                                {
-                                    it = m_listeners.erase(it);
-                                }
-                                else
-                                {
-                                    Page::sListener listener = (*it).lock();
-                                    listener->linkHasBeenReplaced(shared_from_this(), oldlink, newconnect);
-                                    ++it;
-                                }
-                            }
-                            m_listeners_mutex.unlock();
+							
+							sController ctrl = getController();
+							if (ctrl)
+								ctrl->linkHasBeenReplaced(oldlink, newlink);
                         }
                     }
-                    
-                    m_listeners_mutex.lock();
-                    auto it = m_listeners.begin();
-                    while(it != m_listeners.end())
-                    {
-                        if((*it).expired())
-                        {
-                            it = m_listeners.erase(it);
-                        }
-                        else
-                        {
-                            Page::sListener listener = (*it).lock();
-                            listener->boxHasBeenReplaced(shared_from_this(), oldbox, newbox);
-                            ++it;
-                        }
-                    }
-                    m_listeners_mutex.unlock();
+					
+					sController ctrl = getController();
+					if (ctrl)
+						ctrl->boxHasBeenReplaced(oldbox, newbox);
+					
                     m_links_mutex.unlock();
                 }
             }
@@ -200,22 +163,10 @@ namespace Kiwi
                     oldlink->disconnect();
                     m_links.erase(m_links.begin()+(long)i);
                     --i;
-                    m_listeners_mutex.lock();
-                    auto it = m_listeners.begin();
-                    while(it != m_listeners.end())
-                    {
-                        if((*it).expired())
-                        {
-                            it = m_listeners.erase(it);
-                        }
-                        else
-                        {
-                            Page::sListener listener = (*it).lock();
-                            listener->linkHasBeenRemoved(shared_from_this(), oldlink);
-                            ++it;
-                        }
-                    }
-                    m_listeners_mutex.unlock();
+					
+					sController ctrl = getController();
+					if (ctrl)
+						ctrl->linkHasBeenRemoved(oldlink);
                 }
             }
             m_links_mutex.unlock();
@@ -223,23 +174,10 @@ namespace Kiwi
             m_boxes.erase(m_boxes.begin()+(long)position);
             m_boxe_id = box->getId();
             m_boxes_mutex.unlock();
-            
-            m_listeners_mutex.lock();
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                if((*it).expired())
-                {
-                    it = m_listeners.erase(it);
-                }
-                else
-                {
-                    Page::sListener listener = (*it).lock();
-                    listener->boxHasBeenRemoved(shared_from_this(), box);
-                    ++it;
-                }
-            }
-            m_listeners_mutex.unlock();
+			
+			sController ctrl = getController();
+			if (ctrl)
+				ctrl->boxHasBeenRemoved(box);
         }
         else
         {
@@ -276,23 +214,10 @@ namespace Kiwi
             m_links_mutex.lock();
             m_links.push_back(link);
             m_links_mutex.unlock();
-            
-            m_listeners_mutex.lock();
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                if((*it).expired())
-                {
-                    it = m_listeners.erase(it);
-                }
-                else
-                {
-                    Page::sListener listener = (*it).lock();
-                    listener->linkHasBeenCreated(shared_from_this(), link);
-                    ++it;
-                }
-            }
-            m_listeners_mutex.unlock();
+			
+			sController ctrl = getController();
+			if (ctrl)
+				ctrl->linkHasBeenCreated(link);
             
             return link;
         }
@@ -320,23 +245,10 @@ namespace Kiwi
         {
             m_links[position]->disconnect();
             m_links.erase(m_links.begin()+(long)position);
-            
-            m_listeners_mutex.lock();
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
-            {
-                if((*it).expired())
-                {
-                    it = m_listeners.erase(it);
-                }
-                else
-                {
-                    Page::sListener listener = (*it).lock();
-                    listener->linkHasBeenRemoved(shared_from_this(), link);
-                    ++it;
-                }
-            }
-            m_listeners_mutex.unlock();
+			
+			sController ctrl = getController();
+			if (ctrl)
+				ctrl->linkHasBeenRemoved(link);
         }
     }
     
@@ -492,43 +404,657 @@ namespace Kiwi
     {
         return m_dsp_running;
     }
-    
-    void Page::bind(shared_ptr<Page::Listener> listener)
-    {
-        lock_guard<mutex> guard(m_listeners_mutex);
-        m_listeners.insert(listener);
-    }
-    
-    void Page::unbind(shared_ptr<Page::Listener> listener)
-    {
-        lock_guard<mutex> guard(m_listeners_mutex);
-        m_listeners.erase(listener);
-    }
+	
+	void Page::setController(sController ctrl)
+	{
+		m_controller = ctrl;
+	}
     
     // ================================================================================ //
     //                                  PAGE CONTROLER                                  //
     // ================================================================================ //
     
-    Page::Controler::Controler(sPage page) noexcept :
-    m_page(page)
+    Page::Controller::Controller(sPage page) noexcept :
+    m_page(page),
+	m_zoom(100),
+	m_locked(false),
+	m_presentation(false),
+	m_display_grid(true),
+	m_snap_to_grid(false)
     {
         
     }
     
-    Page::Controler::~Controler()
+    Page::Controller::~Controller()
     {
         m_boxes.clear();
     }
-    
-    void Page::Controler::bind()
-    {
-        m_page->bind(shared_from_this());
-    }
-    
-    void Page::Controler::unbind()
-    {
-        m_page->unbind(shared_from_this());
-    }
+	
+	void Page::Controller::setZoom(long zoom)
+	{
+		m_zoom = clip(zoom, (long)1, (long)1000);
+	}
+	
+	void Page::Controller::setLockStatus(bool locked)
+	{
+		if(m_locked != locked)
+		{
+			m_locked = locked;
+			
+			for(size_t i = 0; i < m_boxes.size(); i++)
+				m_boxes[i]->setEditionStatus(!m_locked);
+			
+			unSelectAll();
+			
+			lockStatusChanged();
+		}
+	}
+	
+	void Page::Controller::setPresentationStatus(bool presentation)
+	{
+		m_presentation = presentation;
+	}
+	
+	void Page::Controller::setGridDisplayedStatus(bool display)
+	{
+		m_display_grid = display;
+	}
+	
+	void Page::Controller::setSnapToGridStatus(bool snap)
+	{
+		m_snap_to_grid = snap;
+	}
+	
+	void Page::Controller::addBoxController(Box::sController box)
+	{
+		m_boxes.push_back(box);
+	}
+	
+	void Page::Controller::removeBoxController(Box::sController box)
+	{
+		for(vector<Box::sController>::size_type i = 0; i < m_boxes.size(); i++)
+		{
+			if(box == m_boxes[i])
+			{
+				m_boxes.erase(m_boxes.begin()+i);
+			}
+		}
+	}
+	
+	Box::sController Page::Controller::getBoxController(sBox box) const noexcept
+	{
+		if(box)
+		{
+			for(vector<Box::sController>::size_type i = 0; i < m_boxes.size(); i++)
+			{
+				if(box == m_boxes[i]->getBox())
+				{
+					return m_boxes[i];
+				}
+			}
+		}
+		
+		return nullptr;
+	}
+	
+	Box::sController Page::Controller::getBoxController(Point const& pt) const noexcept
+	{
+		Box::Controller::Hit hit;
+		for(size_t i = m_boxes.size(); i; i--)
+		{
+			if(m_boxes[i-1]->isHit(pt, hit))
+			{
+				return m_boxes[i-1];
+			}
+		}
+		return nullptr;
+	}
+	
+	void Page::Controller::addLinkController(Link::sController link)
+	{
+		m_links.push_back(link);
+	}
+	
+	void Page::Controller::removeLinkController(Link::sController link)
+	{
+		for(vector<Link::sController>::size_type i = 0; i < m_links.size(); i++)
+		{
+			if(link == m_links[i])
+			{
+				m_links.erase(m_links.begin()+i);
+			}
+		}
+	}
+	
+	Link::sController Page::Controller::getLinkController(sLink link) const noexcept
+	{
+		if(link)
+		{
+			for(vector<Link::sController>::size_type i = 0; i < m_links.size(); i++)
+			{
+				if(link == m_links[i]->getLink())
+				{
+					return m_links[i];
+				}
+			}
+		}
+		
+		return nullptr;
+	}
+	
+	void Page::Controller::unSelectAll()
+	{
+		if(isSomethingSelected())
+		{
+			unSelectAllBoxes(false);
+			unSelectAllLinks(false);
+			selectionChanged();
+		}
+	}
+	
+	void Page::Controller::deleteSelection()
+	{
+		bool sendChange = false;
+		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+		{
+			Box::sController box = (*it).lock();
+			if (box)
+			{
+				getPage()->removeBox(box->getBox());
+				sendChange = true;
+			}
+		}
+		
+		m_boxes_selected.clear();
+		
+		for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
+		{
+			Link::sController link = (*it).lock();
+			if (link)
+			{
+				getPage()->removeLink(link->getLink());
+				sendChange = true;
+			}
+		}
+		
+		m_links_selected.clear();
+		
+		if (sendChange)
+			selectionChanged();
+	}
+	
+	bool Page::Controller::addAllLinksToSelection()
+	{
+		if(m_links_selected.size() != m_links.size())
+		{
+			for(vector<Link::sController>::size_type i = 0; i < m_links.size(); i++)
+			{
+				if(m_links_selected.insert(m_links[i]).second)
+				{
+					m_links[i]->setSelectedStatus(true);
+				}
+			}
+			selectionChanged();
+			return true;
+		}
+		return false;
+	}
+	
+	
+	bool Page::Controller::addAllBoxesToSelection()
+	{
+		if(m_boxes_selected.size() != m_boxes.size())
+		{
+			for(vector<Box::sController>::size_type i = 0; i < m_boxes.size(); i++)
+			{
+				if(m_boxes_selected.insert(m_boxes[i]).second)
+				{
+					m_boxes[i]->setSelectedStatus(true);
+				}
+			}
+			selectionChanged();
+			return true;
+		}
+		return false;
+	}
+	
+	bool Page::Controller::unSelectAllBoxes(const bool notify)
+	{
+		bool sendChange = false;
+		
+		if(!m_boxes_selected.empty())
+		{
+			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+			{
+				Box::sController box = (*it).lock();
+				if(box)
+				{
+					box->setSelectedStatus(false);
+					sendChange = true;
+				}
+			}
+			m_boxes_selected.clear();
+			
+			if (notify && sendChange)
+				selectionChanged();
+			
+			return true;
+		}
+		return false;
+	}
+	
+	bool Page::Controller::unSelectAllLinks(const bool notify)
+	{
+		bool sendChange = false;
+		
+		if(!m_links_selected.empty())
+		{
+			for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
+			{
+				Link::sController link = (*it).lock();
+				if(link)
+				{
+					link->setSelectedStatus(false);
+					sendChange = true;
+				}
+			}
+			m_links_selected.clear();
+			
+			if (notify && sendChange)
+				selectionChanged();
+			
+			return true;
+		}
+		return false;
+	}
+	
+	bool Page::Controller::isBoxInSelection(Box::sController box)
+	{
+		return box && (m_boxes_selected.find(box) != m_boxes_selected.end());
+	}
+	
+	bool Page::Controller::isLinkInSelection(Link::sController link)
+	{
+		return link && (m_links_selected.find(link) != m_links_selected.end());
+	}
+	
+	bool Page::Controller::addBoxToSelection(Box::sController box)
+	{
+		if(box && m_boxes_selected.insert(box).second)
+		{
+			box->setSelectedStatus(true);
+			selectionChanged();
+			return true;
+		}
+		return false;
+	}
+	
+	bool Page::Controller::addLinkToSelection(Link::sController link)
+	{
+		if(link && m_links_selected.insert(link).second)
+		{
+			link->setSelectedStatus(true);
+			selectionChanged();
+			return true;
+		}
+		return false;
+	}
+	
+	bool Page::Controller::selectOnlyBox(Box::sController box)
+	{
+		if (box)
+		{
+			if(!m_boxes_selected.empty())
+			{
+				for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+				{
+					Box::sController box2 = (*it).lock();
+					if(box2)
+					{
+						box2->setSelectedStatus(false);
+					}
+				}
+				m_boxes_selected.clear();
+			}
+			
+			if(m_boxes_selected.insert(box).second)
+			{
+				box->setSelectedStatus(true);
+				return true;
+			}
+			
+			selectionChanged();
+		}
+		
+		return false;
+	}
+	
+	bool Page::Controller::selectOnlyLink(Link::sController link)
+	{
+		if (link)
+		{
+			if(!m_links_selected.empty())
+			{
+				for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
+				{
+					Link::sController link2 = (*it).lock();
+					if(link2)
+					{
+						link2->setSelectedStatus(false);
+					}
+				}
+				m_links_selected.clear();
+			}
+			
+			if(m_links_selected.insert(link).second)
+			{
+				link->setSelectedStatus(true);
+				return true;
+			}
+			
+			selectionChanged();
+		}
+		
+		return false;
+	}
+	
+	bool Page::Controller::removeBoxFromSelection(Box::sController box)
+	{
+		if(box && m_boxes_selected.erase(box))
+		{
+			box->setSelectedStatus(false);
+			selectionChanged();
+			return true;
+		}
+		return false;
+	}
+	
+	bool Page::Controller::removeLinkFromSelection(Link::sController link)
+	{
+		if(link && m_links_selected.erase(link))
+		{
+			link->setSelectedStatus(false);
+			selectionChanged();
+			return true;
+		}
+		return false;
+	}
+	
+	void Page::Controller::addToSelectionBasedOnModifiers(Box::sController box, bool selOnly)
+	{
+		if (selOnly)
+		{
+			selectOnlyBox(box);
+		}
+		else if (isBoxInSelection(box))
+		{
+			removeBoxFromSelection(box);
+		}
+		else
+		{
+			addBoxToSelection(box);
+		}
+	}
+	
+	void Page::Controller::addToSelectionBasedOnModifiers(Link::sController link, bool selOnly)
+	{
+		if (selOnly)
+		{
+			selectOnlyLink(link);
+		}
+		else if (isLinkInSelection(link))
+		{
+			removeLinkFromSelection(link);
+		}
+		else
+		{
+			addLinkToSelection(link);
+		}
+	}
+	
+	bool Page::Controller::selectOnMouseDown(Box::sController box, bool selOnly)
+	{
+		/*
+		 if (isBoxInSelection(box))
+			return ! modifiers.isPopupMenu();
+		 */
+		
+		if (isBoxInSelection(box))
+			return true;
+		
+		addToSelectionBasedOnModifiers(box, selOnly);
+		return false;
+	}
+	
+	bool Page::Controller::selectOnMouseDown(Link::sController link, bool selOnly)
+	{
+		/*
+		 if (isLinkInSelection(link))
+			return ! modifiers.isPopupMenu();
+		 */
+		
+		if (isLinkInSelection(link))
+			return true;
+		
+		addToSelectionBasedOnModifiers(link, selOnly);
+		return false;
+	}
+	
+	void Page::Controller::selectOnMouseUp (Box::sController box, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod)
+	{
+		if (resultOfMouseDownSelectMethod && ! boxWasDragged)
+			addToSelectionBasedOnModifiers(box, selOnly);
+	}
+	
+	
+	void Page::Controller::selectOnMouseUp(Link::sController link, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod)
+	{
+		if (resultOfMouseDownSelectMethod && ! boxWasDragged)
+			addToSelectionBasedOnModifiers(link, selOnly);
+	}
+	
+	void Page::Controller::updateSelectedBoxesBounds()
+	{
+		m_boxes_bounds.clear();
+		
+		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+		{
+			Box::sController jbox = (*it).lock();
+			if(jbox)
+			{
+				m_boxes_bounds.push_back(jbox->getBox()->getBounds());
+			}
+		}
+	}
+	
+	sTag positiona = Tag::create("position");
+	
+	void Page::Controller::dragSelectedBoxes(double dx, double dy)
+	{
+		unsigned int i = 0;
+		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+		{
+			Box::sController box = (*it).lock();
+			if(box)
+			{
+				if(i < m_boxes_bounds.size())
+				{
+					ElemVector pos = {m_boxes_bounds[i].x() + dx, m_boxes_bounds[i].y() + dy};
+					box->getBox()->setAttributeValue(positiona, pos);
+				}
+			}
+			i++;
+		}
+	}
+	
+	void Page::Controller::mouseDown(const Event::Mouse& e)
+	{
+		m_box_is_dragging = false;
+		
+		m_templinks.clear();
+		
+		bool isShiftDown = (e.modifiers & Event::Mouse::Modifier::Shift);
+		bool isCmdDown = (e.modifiers & Event::Mouse::Modifier::Cmd);
+		
+		Point pt(e.x, e.y);
+		HitTest hit(getPage()->getController(), pt);
+		
+		if (hit.hasHittedBox())
+		{
+			Box::sController box = hit.getHittedBox();
+			Box::Controller::Hit boxhit = hit.getBoxHit();
+			
+			if(boxhit.type == Box::Controller::Inlet)
+			{
+				m_templinks.push_back(TempLink(box->getBox(), pt, pt, boxhit.index, false));
+				Console::post("templink created");
+			}
+			else if(boxhit.type == Box::Controller::Outlet)
+			{
+				m_templinks.push_back(TempLink(box->getBox(), pt, pt, boxhit.index, true));
+				Console::post("templink created");
+			}
+			else if(boxhit.type == Box::Controller::Inside)
+			{
+				if (isCmdDown)
+				{
+					box->getBox()->receive(e);
+				}
+				else
+				{
+					m_mousedown_select_status = selectOnMouseDown(box, !isShiftDown);
+					
+					if(e.modifiers & Event::Mouse::Modifier::Popup)
+					{
+						// show box contextual menu
+					}
+				}
+			}
+		}
+		else if(hit.hasHittedLink())
+		{
+			Console::post("link Hitted !!!");
+			
+		}
+		else if(isCmdDown)
+		{
+			setLockStatus(!getLockStatus());
+		}
+		else if(!isShiftDown)
+		{
+			unSelectAll();
+		}
+		
+		updateSelectedBoxesBounds();
+	}
+	
+	void Page::Controller::mouseUp(const Event::Mouse& e)
+	{
+		bool isShiftDown = (e.modifiers & Event::Mouse::Modifier::Shift);
+		HitTest hit(getPage()->getController(), Point(e.x, e.y));
+		
+		if (hit.hasHittedBox())
+		{
+			Box::sController box = hit.getHittedBox();
+			Box::Controller::Hit boxhit = hit.getBoxHit();
+			
+			if(hasTempLinks())
+			{
+				TempLink templink = m_templinks[0];
+				sBox from, to;
+				long in, out;
+				
+				if(boxhit.type == Box::Controller::Inlet && templink.isAttachedToOutlet())
+				{
+					from = templink.getAttachedBox();
+					to = box->getBox();
+					in = boxhit.index;
+					out = templink.getAttachedIOIndex();
+				}
+				else if(boxhit.type == Box::Controller::Outlet && !templink.isAttachedToOutlet())
+				{
+					from = box->getBox();
+					to = templink.getAttachedBox();
+					in = templink.getAttachedIOIndex();
+					out = boxhit.index;
+				}
+				sLink link = Link::create(from, out, to, in);
+				getPage()->addLink(link);
+				
+				Console::post("link created");
+			}
+			else if(boxhit.type == Box::Controller::Inside)
+			{
+				selectOnMouseUp(box, !isShiftDown, m_box_is_dragging, m_mousedown_select_status);
+			}
+		}
+		
+		if(hasTempLinks())
+		{
+			m_templinks.clear();
+			Console::post("temp link deleted");
+			redraw();
+		}
+	}
+	
+	void Page::Controller::mouseDrag(const Event::Mouse& e)
+	{
+		m_box_is_dragging = ! e.wasClicked;
+		
+		if(hasTempLinks())
+		{
+			HitTest hit(getPage()->getController(), Point(e.x, e.y));
+			
+			if (hit.hasHittedBox())
+			{
+				Box::sController box = hit.getHittedBox();
+				Box::Controller::Hit boxhit = hit.getBoxHit();
+				
+				if(boxhit.type == Box::Controller::Inlet)
+					mouseHoverIO(true, boxhit.index);
+				
+				else if(boxhit.type == Box::Controller::Outlet)
+					mouseHoverIO(false, boxhit.index);
+			}
+			
+			m_templinks[0].setEndCoord(Point(e.x, e.y));
+			redraw();
+			return;
+		}
+		else
+		{
+			if(!(e.modifiers & Event::Mouse::Modifier::Popup))
+			{
+				dragSelectedBoxes(e.x - e.down_x, e.y - e.down_y);
+			}
+		}
+	}
+	
+	void Page::Controller::mouseMove(const Event::Mouse& e)
+	{
+		HitTest hit(getPage()->getController(), Point(e.x, e.y));
+		
+		if (hit.hasHittedBox())
+		{
+			Box::sController box = hit.getHittedBox();
+			Box::Controller::Hit boxhit = hit.getBoxHit();
+			
+			if(boxhit.type == Box::Controller::Inlet)
+				mouseHoverIO(true, boxhit.index);
+				
+			else if(boxhit.type == Box::Controller::Outlet)
+				mouseHoverIO(false, boxhit.index);
+		}
+		else if(hit.hasHittedLink())
+		{
+			Console::post("link Hitted !!!");
+		}
+	}
+	
+	void Page::Controller::mouseDoubleClick(const Event::Mouse& e)
+	{
+		
+	}
 }
 
 

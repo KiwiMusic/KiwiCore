@@ -39,18 +39,18 @@ namespace Kiwi
     class Link : public enable_shared_from_this<Link>
     {
     public:
-        class Controler;
-        typedef shared_ptr<Controler>   sControler;
-        typedef weak_ptr<Controler>     wControler;
+        class Controller;
+        typedef shared_ptr<Controller>   sController;
+        typedef weak_ptr<Controller>     wController;
         
     private:
-        const wBox      m_box_from;
-        const wBox      m_box_to;
+        const wBox			m_box_from;
+        const wBox			m_box_to;
         const unsigned long m_index_outlet;
         const unsigned long m_index_intlet;
-        Path            m_path;
+        Path				m_path;
         
-        wControler      m_controler;
+        wController			m_controller;
     public:
         
         //! The constructor.
@@ -126,13 +126,13 @@ namespace Kiwi
             return m_index_intlet;
         }
         
-        //! Retrieve the controler that manages the box.
-        /** The function retrieves the controler that manages the box.
-         @return The controler that manages the box.
+        //! Retrieve the controller that manages the box.
+        /** The function retrieves the controller that manages the box.
+         @return The controller that manages the box.
          */
-        inline sControler getControler() const noexcept
+        inline sController getController() const noexcept
         {
-            return m_controler.lock();
+            return m_controller.lock();
         }
         
         //! Connect the link.
@@ -199,53 +199,67 @@ namespace Kiwi
             path = m_path;
         }
         
-        //! Set the controler of the box.
-        /** The function sets the controler of the box.
-         @param ctrl    The controler.
+        //! Set the controller of the box.
+        /** The function sets the controller of the box.
+         @param ctrl    The controller.
          */
-        void setControler(sControler ctrl);
+        void setController(sController ctrl);
         
         // ================================================================================ //
         //                                  LINK CONTROLER                                  //
         // ================================================================================ //
         
-        //! The link controler .
+        //! The link controller .
         /**
-         The link controler...
+         The link controller...
          */
-        class Controler
+        class Controller
         {
         private:
-            const sLink   m_link;
+            const sLink		m_link;
+			bool			m_selected;
             
         public:
-            
+			
+			enum HitType
+			{
+				Outside		= 0,
+				Inside		= 1,
+				InletPin	= 2,
+				OutletPin	= 3
+			};
+			
+			struct Hit
+			{
+				HitType   type = HitType::Outside;
+			};
+			
             //! Constructor.
             /** You should never call this method except if you really know what you're doing.
              */
-            Controler(sLink link) :
+            Controller(sLink link) :
             m_link(link)
             {
                 ;
             }
-            
+			
             //! The destructor.
             /** You should never call this method except if you really know what you're doing.
              */
-            virtual ~Controler()
+            virtual ~Controller()
             {
                 ;
             }
             
-            //! The controler maker.
-            /** The function creates an controler with arguments.
+            //! The controller maker.
+            /** The function creates an controller with arguments.
              */
             template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
             {
                 shared_ptr<CtrlClass> ctrl =  make_shared<CtrlClass>(forward<Args>(arguments)...);
                 if(ctrl && ctrl->m_link)
                 {
-                    ctrl->m_link->setControler(ctrl);
+                    ctrl->m_link->setController(ctrl);
                 }
                 return ctrl;
             }
@@ -258,7 +272,31 @@ namespace Kiwi
             {
                 return m_link;
             }
-            
+			
+			//! Notify that the link is selected.
+			/** The function notifies that the link is selected and needs to be redrawn.
+			 @param status true if the link is selected, otherwise false.
+			 */
+			void setSelectedStatus(bool status);
+			
+			//! Retrieve if the link is selected.
+			/** The function retrieves if the link is selected.
+			 @param True if the link is selected, otherwise false.
+			 */
+			inline bool getSelectedStatus() const noexcept
+			{
+				return m_selected;
+			}
+			
+			//! Retrieve if the link is hit by a point.
+			/** The function retrieves if the link is hit by a point.
+			 @return true if the link is hit by a point, otherwise false.
+			 */
+			virtual bool isHit(Point const& pt, Hit& hit) const noexcept
+			{
+				return false;
+			}
+			
             //! The bounds notification function that should be override.
             /** The function is called by the link when its bounds changed.
              */
