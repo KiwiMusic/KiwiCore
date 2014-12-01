@@ -257,6 +257,15 @@ namespace Kiwi
     {
         
     }
+	
+	void Link::Controller::setSelectedStatus(bool status)
+	{
+		if(m_selected != status)
+		{
+			m_selected = status;
+			redraw();
+		}
+	}
     
     bool Link::compareBoxToPositions(sLink link1, sLink link2)
     {
