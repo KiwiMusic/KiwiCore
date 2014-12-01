@@ -45,25 +45,25 @@ namespace Kiwi
     public:
         
         //! Constructor.
-        /** The function initialize a point at zero origin.
+        /** The function initializes a point at zero origin.
          */
         Point() noexcept;
         
         //! Constructor.
-        /** The function initialize a point with two double values.
+        /** The function initializes a point with two double values.
          @param x The abscissa.
          @param y The ordinate.
          */
         Point(const double x, const double y) noexcept;
         
         //! Constructor.
-        /** The function initialize a point a vector of elements.
+        /** The function initializes a point a vector of elements.
          @param elements A vector of elements with two numbers for the abscissa and the ordinate.
          */
         Point(ElemVector const& elements) noexcept;
         
         //! Constructor.
-        /** The function initialize another point.
+        /** The function initializes another point.
          */
         Point(Point const& pt) noexcept;
         
@@ -90,8 +90,8 @@ namespace Kiwi
             m_y = y;
         }
         
-        //! Retrieve the abscissa value.
-        /** The function retrieves the abscissa value.
+        //! Retrieve the abscissa.
+        /** The function retrieves the abscissa.
          @return The abscissa.
          */
         inline double x() const noexcept
@@ -99,31 +99,13 @@ namespace Kiwi
             return m_x;
         }
         
-        //! Retrieve the ordinate value.
-        /** The function retrieves the ordinate value.
+        //! Retrieve the ordinate.
+        /** The function retrieves the ordinate.
          @return The ordinate.
          */
         inline double y() const noexcept
         {
             return m_y;
-        }
-        
-        //! Set the abscissa and the ordinate with a vector of elements.
-        /** The function sets the abscissa and the ordinate with a vector of elements.
-         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
-         @return The point.
-         */
-        inline Point& operator=(ElemVector const& elements) noexcept
-        {
-            if(!elements.empty() && elements[0].isNumber())
-            {
-                m_x = (double)elements[0];
-            }
-            if(elements.size() > 1 && elements[1].isNumber())
-            {
-                m_y = (double)elements[1];
-            }
-            return *this;
         }
         
         //! Set the abscissa and the ordinate with another point.
@@ -138,6 +120,16 @@ namespace Kiwi
             return *this;
         }
         
+        //! Set the abscissa and the ordinate with a vector of elements.
+        /** The function sets the abscissa and the ordinate with a vector of elements.
+         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
+         @return The point.
+         */
+        inline Point& operator=(ElemVector const& elements) noexcept
+        {
+            return *this = Point(elements);
+        }
+        
         //! Set the abscissa and the ordinate with a value.
         /** The function sets the abscissa and the ordinate with a value.
          @param value The value.
@@ -147,24 +139,6 @@ namespace Kiwi
         {
             m_x = value;
             m_y = value;
-            return *this;
-        }
-        
-        //! Increment the abscissa and the ordinate with a vector of elements.
-        /** The function increments the abscissa and the ordinate with a vector of elements.
-         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
-         @return The point.
-         */
-        inline Point& operator+=(ElemVector const& elements) noexcept
-        {
-            if(!elements.empty() && elements[0].isNumber())
-            {
-                m_x += (double)elements[0];
-            }
-            if(elements.size() > 1 && elements[1].isNumber())
-            {
-                m_y += (double)elements[1];
-            }
             return *this;
         }
         
@@ -180,6 +154,16 @@ namespace Kiwi
             return *this;
         }
         
+        //! Increment the abscissa and the ordinate with a vector of elements.
+        /** The function increments the abscissa and the ordinate with a vector of elements.
+         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
+         @return The point.
+         */
+        inline Point& operator+=(ElemVector const& elements) noexcept
+        {
+            return *this += Point(elements);
+        }
+        
         //! Increment the abscissa and the ordinate with a value.
         /** The function increments the abscissa and the ordinate with a value.
          @param value The value.
@@ -189,24 +173,6 @@ namespace Kiwi
         {
             m_x += value;
             m_y += value;
-            return *this;
-        }
-        
-        //! Decrement the abscissa and the ordinate with a vector of elements.
-        /** The function decrements the abscissa and the ordinate with a vector of elements.
-         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
-         @return The point.
-         */
-        inline Point& operator-=(ElemVector const& elements) noexcept
-        {
-            if(!elements.empty() && elements[0].isNumber())
-            {
-                m_x -= (double)elements[0];
-            }
-            if(elements.size() > 1 && elements[1].isNumber())
-            {
-                m_y -= (double)elements[1];
-            }
             return *this;
         }
         
@@ -222,16 +188,14 @@ namespace Kiwi
             return *this;
         }
         
-        //! Decrement the abscissa and the ordinate with a value.
-        /** The function decrements the abscissa and the ordinate with a value.
-         @param pt Another point.
+        //! Decrement the abscissa and the ordinate with a vector of elements.
+        /** The function decrements the abscissa and the ordinate with a vector of elements.
+         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
          @return The point.
          */
-        inline Point& operator-=(double const value) noexcept
+        inline Point& operator-=(ElemVector const& elements) noexcept
         {
-            m_x -= value;
-            m_y -= value;
-            return *this;
+            return *this -= Point(elements);
         }
         
         //! Multiply the abscissa and the ordinate with a vector of elements.
@@ -241,14 +205,18 @@ namespace Kiwi
          */
         inline Point& operator*=(ElemVector const& elements) noexcept
         {
-            if(!elements.empty() && elements[0].isNumber())
-            {
-                m_x *= (double)elements[0];
-            }
-            if(elements.size() > 1 && elements[1].isNumber())
-            {
-                m_y *= (double)elements[1];
-            }
+            return *this *= Point(elements);
+        }
+        
+        //! Decrement the abscissa and the ordinate with a value.
+        /** The function decrements the abscissa and the ordinate with a value.
+         @param pt Another point.
+         @return The point.
+         */
+        inline Point& operator-=(double const value) noexcept
+        {
+            m_x -= value;
+            m_y -= value;
             return *this;
         }
         
@@ -276,24 +244,6 @@ namespace Kiwi
             return *this;
         }
         
-        //! Divide the abscissa and the ordinate with a vector of elements.
-        /** The function divides the abscissa and the ordinate with a vector of elements.
-         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
-         @return The point.
-         */
-        inline Point& operator/=(ElemVector const& elements) noexcept
-        {
-            if(!elements.empty() && elements[0].isNumber())
-            {
-                m_x /= (double)elements[0];
-            }
-            if(elements.size() > 1 && elements[1].isNumber())
-            {
-                m_y /= (double)elements[1];
-            }
-            return *this;
-        }
-        
         //! Divide the abscissa and the ordinate with another point.
         /** The function divides the abscissa and the ordinate with another point.
          @param value The value.
@@ -304,6 +254,16 @@ namespace Kiwi
             m_x /= pt.m_x;
             m_y /= pt.m_y;
             return *this;
+        }
+        
+        //! Divide the abscissa and the ordinate with a vector of elements.
+        /** The function divides the abscissa and the ordinate with a vector of elements.
+         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
+         @return The point.
+         */
+        inline Point& operator/=(ElemVector const& elements) noexcept
+        {
+            return *this /= Point(elements);
         }
         
         //! Divide the abscissa and the ordinate with a value.

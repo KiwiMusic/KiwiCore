@@ -42,16 +42,9 @@ namespace Kiwi
     }
     
     Point::Point(ElemVector const& elements) noexcept :
-    m_x(0.), m_y(0.)
+    m_x(!elements.empty() ? (double)elements[0] : 0.), m_y(elements.size() > 1 ? (double)elements[1] : 0.)
     {
-        if(!elements.empty() && elements[0].isNumber())
-        {
-            m_x = (double)elements[0];
-        }
-        if(elements.size() > 1 && elements[1].isNumber())
-        {
-            m_y = (double)elements[1];
-        }
+        ;
     }
     
     Point::Point(Point const& pt) noexcept :
