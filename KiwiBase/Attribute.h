@@ -267,12 +267,6 @@ namespace Kiwi
 		 @see read
 		 */
 		void write(sDico dico) const noexcept;
-
-		//! Sorts a vector of attribute pointers alphabetically and according to their order in their category.
-		/** This function sorts a vector of attribute pointers alphabetically and according to their order in their category.
-		 @param  attrs   The attributes to be sorted.
-		 */
-		static void sort(vector<sAttr>& attrs);
 	
 	protected:
 		
@@ -583,6 +577,24 @@ namespace Kiwi
 		
 		typedef shared_ptr<Attr::Manager> sManager;
 		typedef shared_ptr<const Attr::Manager> scManager;
+        
+        //! Attribute comparaison.
+        /** This function compare the attributes by their order or by the name of their label.
+         @param  attr1  The first attribute.
+         @param  attr2  The second attribute.
+         @return true if the the first attribute before the sedond attribute.
+         */
+        static inline bool compareOrderOrLabel(sAttr const& attr1, sAttr const& attr2)
+        {
+            if(attr1->getCategory() == attr2->getCategory())
+            {
+                if(attr1->getOrder() > 0 && attr2->getOrder() > 0)
+                {
+                    return attr1->getOrder() < attr2->getOrder();
+                }
+            }
+            return attr1->getLabel()->getName() < attr2->getLabel()->getName();
+        }
     };
 	
 	

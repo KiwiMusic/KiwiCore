@@ -29,6 +29,7 @@
 #include "Event.h"
 #include "Doodle.h"
 #include "Beacon.h"
+#include "Clock.h"
 
 // TODO
 // - See how to format the expression
@@ -215,7 +216,7 @@ namespace Kiwi
          @param index The inlet index.
          @return The type.
          */
-        inline Inlet::Type getInletType(unsigned long index) const noexcept
+        inline IoType getInletType(unsigned long index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
@@ -224,7 +225,7 @@ namespace Kiwi
             }
             else
             {
-                return Inlet::Type::Error;
+                return IoType::Both;
             }
         }
         
@@ -261,7 +262,7 @@ namespace Kiwi
          @param index The inlet index.
          @return The type.
          */
-        inline Outlet::Type getOutletType(unsigned long index) const noexcept
+        inline IoType getOutletType(unsigned long index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
@@ -270,7 +271,7 @@ namespace Kiwi
             }
             else
             {
-                return Outlet::Type::Error;
+                return IoType::Both;
             }
         }
         
@@ -310,18 +311,19 @@ namespace Kiwi
             return false;
         }
         
+        //! ...
+        /** ....
+         */
+        virtual void tick()
+        {
+            ;
+        }
+        
         //! Write the box in a dico.
         /** The function writes the box in a dico.
          @param dico The dico.
          */
         void write(sDico dico) const;
-        
-        //! Create a beacon.
-        /** This function retrieves a beacon in the scope of the instance.
-         @param     The name of the beacon to retrieve.
-         @return    The beacon that match with the name.
-         */
-        sBeacon createBeacon(string const& name) const;
         
     protected:
         
@@ -342,7 +344,7 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    addInlet(Inlet::Type type, string const& description = "");
+        void    addInlet(IoType type, IoPolarity polarity, string const& description = "");
         
         //! Insert a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -350,7 +352,7 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    insertInlet(unsigned long index, Inlet::Type type, string const& description = "");
+        void    insertInlet(unsigned long index, IoType type, IoPolarity polarity, string const& description = "");
         
         //! Remove an inlet from the box.
         /** The function removes an inlet from the box.
@@ -363,7 +365,7 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    addOutlet(Outlet::Type type, string const& description = "");
+        void    addOutlet(IoType type, string const& description = "");
         
         //! Insert a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -371,7 +373,7 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    insertOutlet(unsigned long index, Outlet::Type type, string const& description = "");
+        void    insertOutlet(unsigned long index, IoType type, string const& description = "");
         
         //! Remove an outlet.
         /** The function removes an outlet.
@@ -712,8 +714,15 @@ namespace Kiwi
         //                                      BOX COMMON TAG                              //
         // ================================================================================ //
         
+        static const sTag Tag_arguments;
         static const sTag Tag_bang;
+        static const sTag Tag_id;
+        static const sTag Tag_name;
+        static const sTag Tag_ninlets;
+        static const sTag Tag_noutlets;
         static const sTag Tag_set;
+        static const sTag Tag_text;
+        
     };
     
     inline string toString(scBox box)

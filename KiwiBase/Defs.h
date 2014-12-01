@@ -56,6 +56,10 @@ namespace Kiwi
     typedef float sample;
 #endif
     
+    class Clock;
+    typedef shared_ptr<Clock>       sClock;
+    typedef weak_ptr<Clock>         wClock;
+    
     class Tag;
     typedef shared_ptr<const Tag>   sTag;
     typedef weak_ptr<const Tag>     wTag;

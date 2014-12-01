@@ -22,6 +22,7 @@
 */
 
 #include "Iolets.h"
+#include "Box.h"
 
 namespace Kiwi
 {
@@ -117,6 +118,7 @@ namespace Kiwi
                 }
             }
             m_links.push_back(link);
+            sort(m_links.begin(), m_links.end(), Link::compareBoxToPositions);
             return true;
         }
         return false;

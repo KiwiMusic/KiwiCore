@@ -28,8 +28,15 @@
 namespace Kiwi
 {
     map<sTag, unique_ptr<Box>>  Box::m_prototypes;
-    const sTag Box::Tag_bang    = Tag::create("bang");
-    const sTag Box::Tag_set     = Tag::create("set");
+    
+    const sTag Box::Tag_arguments   = Tag::create("arguments");
+    const sTag Box::Tag_bang        = Tag::create("bang");
+    const sTag Box::Tag_id          = Tag::create("id");
+    const sTag Box::Tag_name        = Tag::create("name");
+    const sTag Box::Tag_ninlets     = Tag::create("ninlets");
+    const sTag Box::Tag_noutlets    = Tag::create("noutlets");
+    const sTag Box::Tag_set         = Tag::create("set");
+    const sTag Box::Tag_text        = Tag::create("text");
     
     // ================================================================================ //
     //                                      BOX                                         //
@@ -54,14 +61,14 @@ namespace Kiwi
     
     sBox Box::create(sPage page, sDico dico)
     {
-        sTag name = dico->get(Tag::name);
+        sTag name = dico->get(Tag_name);
         if(name)
         {
             lock_guard<mutex> guard(m_prototypes_mutex);
             auto it = m_prototypes.find(name);
             if(it != m_prototypes.end())
             {
-                sTag text = dico->get(Tag::text);
+                sTag text = dico->get(Tag_text);
                 if(text)
                 {
                     sDico other = Dico::create();
@@ -79,7 +86,7 @@ namespace Kiwi
                 sBox box = it->second->allocate(page, dico);
                 if(box)
                 {
-                    box->m_text = dico->get(Tag::text);
+                    box->m_text = dico->get(Tag_text);
                     box->load(dico);
 					box->Attr::Manager::read(dico);
                     return box;
@@ -95,87 +102,69 @@ namespace Kiwi
         return nullptr;
     }
     
-    sBeacon Box::createBeacon(string const& name) const
-    {
-        sPage page = getPage();
-        if(page)
-        {
-            return page->createBeacon(name);
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
-    
     void Box::write(sDico dico) const
     {
         this->save(dico);
         Attr::Manager::write(dico);
-        dico->set(Tag::name, getName());
-        dico->set(Tag::ninlets, getNumberOfInlets());
-        dico->set(Tag::noutlets,getNumberOfOutlets());
-        dico->set(Tag::text, getText());
-        dico->set(Tag::id, getId());
+        dico->set(Tag_name, getName());
+        dico->set(Tag_ninlets, getNumberOfInlets());
+        dico->set(Tag_noutlets,getNumberOfOutlets());
+        dico->set(Tag_text, getText());
+        dico->set(Tag_id, getId());
     }
     
     void Box::redraw() const noexcept
     {
-        sController controller = getController();
-        if(controller)
+        sControler controler = getControler();
+        if(controler)
         {
-            controller->redraw();
+            controler->redraw();
         }
     }
     
     void Box::send(unsigned long index, ElemVector const& elements) const noexcept
     {
-        lock_guard<mutex> guard(m_io_mutex);
+        m_io_mutex.lock();
         if(index < m_outlets.size())
         {
             for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
             {
                 sBox receiver       = m_outlets[index]->getBox(i);
                 unsigned long inlet = m_outlets[index]->getInletIndex(i);
+                m_io_mutex.unlock();
                 if(receiver)
                 {
                     if(++receiver->m_stack_count < 256)
                     {
-                        if(!receiver->receive(inlet, elements))
+                        if(!elements.empty() && elements[0].isTag() && toString(elements[0])[0] == '@')
                         {
-                            if(!elements.empty() && elements[0].isTag())
-                            {
-                                ElemVector attrvec;
-                                attrvec.assign(elements.begin()+1, elements.end());
-                                if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
-                                {
-                                    Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                                }
-                            }
-                            else
+                            ElemVector attrvec;
+                            attrvec.assign(elements.begin()+1, elements.end());
+                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
                             {
                                 Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
                             }
+                        }
+                        else if(!receiver->receive(inlet, elements))
+                        {
+                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
                         }
                     }
                     else if(receiver->m_stack_count  == 256)
                     {
                         Console::error(receiver, "Stack overflow");
-                        if(!receiver->receive(inlet, elements))
+                        if(!elements.empty() && elements[0].isTag() && toString(elements[0])[0] == '@')
                         {
-                            if(!elements.empty() && elements[0].isTag())
-                            {
-                                ElemVector attrvec;
-                                attrvec.assign(elements.begin()+1, elements.end());
-                                if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
-                                {
-                                    Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                                }
-                            }
-                            else
+                            ElemVector attrvec;
+                            attrvec.assign(elements.begin()+1, elements.end());
+                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
                             {
                                 Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
                             }
+                        }
+                        else if(!receiver->receive(inlet, elements))
+                        {
+                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
                         }
                     }
                     else
@@ -184,8 +173,10 @@ namespace Kiwi
                     }
                     receiver->m_stack_count--;
                 }
+                m_io_mutex.unlock();
             }
         }
+        m_io_mutex.unlock();
     }
 	
 	bool Box::attributeValueChanged(sAttr attr)
@@ -196,10 +187,10 @@ namespace Kiwi
         }
         if(attr == AttrBox::appearance_position)
         {
-            sController controller = getController();
-            if(controller)
+            sControler controler = getControler();
+            if(controler)
             {
-                controller->positionChanged();
+                controler->positionChanged();
                 //lock_guard<mutex> guard(m_io_mutex);
                 for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
                 {
@@ -213,10 +204,10 @@ namespace Kiwi
         }
         else if(attr == AttrBox::appearance_size)
         {
-            sController controller = getController();
-            if(controller)
+            sControler controler = getControler();
+            if(controler)
             {
-                controller->sizeChanged();
+                controler->sizeChanged();
                 //lock_guard<mutex> guard(m_io_mutex);
                 for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
                 {
@@ -230,10 +221,10 @@ namespace Kiwi
         }
         else if(attr == AttrBox::color_background || AttrBox::color_border || AttrBox::color_text)
         {
-            sController controller = getController();
-            if(controller)
+            sControler controler = getControler();
+            if(controler)
             {
-                controller->redraw();
+                controler->redraw();
             }
         }
 		return true;
@@ -243,35 +234,35 @@ namespace Kiwi
     //                                      INLETS                                      //
     // ================================================================================ //
     
-    void Box::addInlet(Inlet::Type type, string const& description)
+    void Box::addInlet(IoType type, IoPolarity polarity, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
-        m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
-        sController controller = getController();
-        if(controller)
+        m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, polarity, description)));
+        sControler controler = getControler();
+        if(controler)
         {
-            controller->inletsChanged();
+            controler->inletsChanged();
         }
     }
     
-    void Box::insertInlet(unsigned long index, Inlet::Type type, string const& description)
+    void Box::insertInlet(unsigned long index, IoType type, IoPolarity polarity, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
         if(index >= m_inlets.size())
         {
             index = m_inlets.size();
-            m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, description)));
+            m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, polarity, description)));
         }
         else
         {
-            m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, description)));
+            m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, polarity, description)));
             int zaza; // Notify Links that they must change their indices
         }
         
-        sController controller = getController();
-        if(controller)
+        sControler controler = getControler();
+        if(controler)
         {
-            controller->inletsChanged();
+            controler->inletsChanged();
         }
     }
     
@@ -290,10 +281,10 @@ namespace Kiwi
             }
             m_inlets.erase(m_inlets.begin()+(long)index);
             
-            sController controller = getController();
-            if(controller)
+            sControler controler = getControler();
+            if(controler)
             {
-                controller->inletsChanged();
+                controler->inletsChanged();
             }
         }
     }
@@ -302,18 +293,18 @@ namespace Kiwi
     //                                      OUTLETS                                     //
     // ================================================================================ //
     
-    void Box::addOutlet(Outlet::Type type, string const& description)
+    void Box::addOutlet(IoType type, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
         m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
-        sController controller = getController();
-        if(controller)
+        sControler controler = getControler();
+        if(controler)
         {
-            controller->outletsChanged();
+            controler->outletsChanged();
         }
     }
     
-    void Box::insertOutlet(unsigned long index, Outlet::Type type, string const& description)
+    void Box::insertOutlet(unsigned long index, IoType type, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
         if(index >= m_outlets.size())
@@ -325,10 +316,10 @@ namespace Kiwi
             m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
             int zaza; // Notify Links that they must change their indices
         }
-        sController controller = getController();
-        if(controller)
+        sControler controler = getControler();
+        if(controler)
         {
-            controller->outletsChanged();
+            controler->outletsChanged();
         }
     }
     
@@ -347,10 +338,10 @@ namespace Kiwi
             }
             m_outlets.erase(m_outlets.begin()+(long)index);
             
-            sController controller = getController();
-            if(controller)
+            sControler controler = getControler();
+            if(controler)
             {
-                controller->outletsChanged();
+                controler->outletsChanged();
             }
         }
         
@@ -396,26 +387,25 @@ namespace Kiwi
         return false;
     }
     
-    void Box::setController(sController ctrl)
+    void Box::setControler(sControler ctrl)
     {
-        m_controller = ctrl;
+        m_controler = ctrl;
     }
     
     // ================================================================================ //
     //                                  BOX CONTROLER                                   //
     // ================================================================================ //
     
-    void Box::Controller::setEditionStatus(bool status)
+    void Box::Controler::setEditionStatus(bool status)
     {
         if(m_edition != status)
         {
             m_edition = status;
-			editionStatusChanged();
-			redraw();
+            redraw();
         }
     }
     
-    void Box::Controller::setSelectedStatus(bool status)
+    void Box::Controler::setSelectedStatus(bool status)
     {
         if(m_selected != status)
         {
@@ -427,7 +417,7 @@ namespace Kiwi
 #define KIO_HEIGHT 3.
 #define KIO_WIDTH 5.
     
-    Point Box::Controller::getInletPosition(unsigned long index) const noexcept
+    Point Box::Controler::getInletPosition(unsigned long index) const noexcept
     {
         const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
@@ -438,7 +428,7 @@ namespace Kiwi
         return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
     }
     
-    Point Box::Controller::getOutletPosition(unsigned long index) const noexcept
+    Point Box::Controler::getOutletPosition(unsigned long index) const noexcept
     {
         const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
@@ -449,7 +439,7 @@ namespace Kiwi
         return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
     }
     
-    bool Box::Controller::isHit(Point const& pt, Hit& hit) const noexcept
+    bool Box::Controler::isHit(Point const& pt, Hit& hit) const noexcept
     {
         const Rectangle bounds = m_box->getBounds();
         if(bounds.contains(pt))
@@ -524,7 +514,7 @@ namespace Kiwi
         return false;
     }
     
-    void Box::Controller::inletsChanged()
+    void Box::Controler::inletsChanged()
     {
         if(m_edition)
         {
@@ -532,7 +522,7 @@ namespace Kiwi
         }
     }
     
-    void Box::Controller::outletsChanged()
+    void Box::Controler::outletsChanged()
     {
         if(m_edition)
         {
@@ -540,7 +530,7 @@ namespace Kiwi
         }
     }
     
-    void Box::Controller::paint(sBox box, Doodle& d, bool edit, bool selected)
+    void Box::Controler::paint(sBox box, Doodle& d, bool edit, bool selected)
     {
         d.setFont(box->getFont());
         d.setColor(box->getBackgroundColor());

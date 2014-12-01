@@ -22,12 +22,28 @@
 */
 
 
-#include "Tag.h"
+#include "Clock.h"
+#include "Box.h"
 
 namespace Kiwi
 {
-    unordered_map<string, sTag> Tag::m_tags;
-    mutex Tag::m_mutex;
+    void Clock::tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements)
+    {
+        if(clock && box)
+        {
+            this_thread::sleep_for(chrono::milliseconds(ms));
+            box->tick();
+        }
+    }
+    
+    void Clock::tick(Clock* clock, unsigned long ms, sBox box)
+    {
+        if(clock && box)
+        {
+            this_thread::sleep_for(chrono::milliseconds(ms));
+            box->tick();
+        }
+    }
 }
 
 

@@ -42,9 +42,7 @@ namespace Kiwi
     {
     private:
         const string        m_name;
-        unordered_set<wBox,
-        weak_ptr_hash<Box>,
-		weak_ptr_equal<Box>>m_boxes;
+        vector<wBox>        m_boxes;
         mutable mutex       m_mutex;
     public:
         
@@ -73,6 +71,7 @@ namespace Kiwi
          */
         inline unsigned long size() const noexcept
         {
+            lock_guard<mutex> guard(m_mutex);
             return (unsigned long)m_boxes.size();
         }
         
@@ -81,13 +80,17 @@ namespace Kiwi
          @param index   The position of the box in the binding list from 0 to the number of boxes in the binding list -1.
          @return        The pointer of the binded boxes or NULL is the index is less than 0 or greater or equal to the number of boxes in the binding list.
          */
-        inline sBox getBox(int index) const noexcept
+        inline sBox getBox(unsigned long index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
-            auto it = m_boxes.begin();
-            while(--index && it != m_boxes.end())
-                ++it;
-            return it->lock();
+            if(index < m_boxes.size())
+            {
+                return m_boxes[index].lock();
+            }
+            else
+            {
+                return nullptr;
+            }
         }
         
         //! Add an boxes in the binding list of the beacon.
@@ -118,9 +121,20 @@ namespace Kiwi
         class Factory
         {
         private:
+            friend Beacon;
             unordered_map<string,
             sBeacon>    m_beacons;
             mutex       m_factory_mutex;
+            
+        protected:
+            
+            //! Beacon creator.
+            /** This function checks if a beacon with this name has already been created and returns it, otherwise it creates a new beacon with this name.
+             @param     The name of the beacon to retrieve.
+             @return    The beacon that match with the name.
+             */
+            sBeacon createBeacon(string const& name);
+            
         public:
             
             //! The constructor.
@@ -132,14 +146,15 @@ namespace Kiwi
             /** You should never use this method except if you really know what you do.
              */
             ~Factory();
-            
-            //! Beacon creator.
-            /** This function checks if a beacon with this name has already been created and returns it, otherwise it creates a new beacon with this name.
-             @param     The name of the beacon to retrieve.
-             @return    The beacon that match with the name.
-             */
-            sBeacon createBeacon(string const& name);
         };
+        
+        //! The beacon creation method.
+        /** The function allocates beacon for a box.
+         @param box     The box that want to create the beacon.
+         @param name    The name of the beacon.
+         @return The beacon.
+         */
+        static sBeacon create(sBox box, string const& name);
     };
     
     inline string toString(sBeacon __val)

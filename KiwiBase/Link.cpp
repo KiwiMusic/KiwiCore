@@ -26,7 +26,11 @@
 #include "Page.h"
 
 namespace Kiwi
-{    
+{
+    
+    const sTag Link::Tag_from        = Tag::create("from");
+    const sTag Link::Tag_to          = Tag::create("to");
+    
     // ================================================================================ //
     //                                      LINK                                        //
     // ================================================================================ //
@@ -36,8 +40,8 @@ namespace Kiwi
     {
         if(from && to)
         {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
+            Box::sControler from_ctrl   = getBoxFrom()->getControler();
+            Box::sControler to_ctrl     = getBoxTo()->getControler();
             if(from_ctrl && to_ctrl)
             {
                 m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
@@ -65,7 +69,7 @@ namespace Kiwi
             unsigned long from_id, to_id;
             
             ElemVector elements;
-            dico->get(Tag::from, elements);
+            dico->get(Tag_from, elements);
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
                 from_id = elements[0];
@@ -76,7 +80,7 @@ namespace Kiwi
                 return nullptr;
             }
             
-            dico->get(Tag::to, elements);
+            dico->get(Tag_to, elements);
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
                 to_id   = elements[0];
@@ -184,13 +188,13 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            dico->set(Tag::from, {from->getId(), getOutletIndex()});
-            dico->set(Tag::to, {to->getId(), getInletIndex()});
+            dico->set(Tag_from, {from->getId(), getOutletIndex()});
+            dico->set(Tag_to, {to->getId(), getInletIndex()});
         }
         else
         {
-            dico->clear(Tag::from);
-            dico->clear(Tag::to);
+            dico->clear(Tag_from);
+            dico->clear(Tag_to);
         }
     }
     
@@ -200,15 +204,15 @@ namespace Kiwi
         sBox to     = getBoxTo();
         if(from && to)
         {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
+            Box::sControler from_ctrl   = getBoxFrom()->getControler();
+            Box::sControler to_ctrl     = getBoxTo()->getControler();
             if(from_ctrl && to_ctrl)
             {
                 m_path.clear();
                 m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
                 m_path.add(to_ctrl->getInletPosition(getInletIndex()));
                 
-                sController ctrl = getController();
+                sControler ctrl = getControler();
                 if(ctrl)
                 {
                     ctrl->boundsChanged();
@@ -223,15 +227,15 @@ namespace Kiwi
         sBox to     = getBoxTo();
         if(from && to)
         {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
+            Box::sControler from_ctrl   = getBoxFrom()->getControler();
+            Box::sControler to_ctrl     = getBoxTo()->getControler();
             if(from_ctrl && to_ctrl)
             {
                 m_path.clear();
                 m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
                 m_path.add(to_ctrl->getInletPosition(getInletIndex()));
                 
-                sController ctrl = getController();
+                sControler ctrl = getControler();
                 if(ctrl)
                 {
                     ctrl->boundsChanged();
@@ -240,28 +244,47 @@ namespace Kiwi
         }
     }
     
-    void Link::setController(sController ctrl)
+    void Link::setControler(sControler ctrl)
     {
-        m_controller = ctrl;
+        m_controler = ctrl;
     }
     
     // ================================================================================ //
     //                                  LINK CONTROLER                                  //
     // ================================================================================ //
     
-    void Link::Controller::paint(sLink link, Doodle& d, bool selected)
+    void Link::Controler::paint(sLink link, Doodle& d, bool selected)
     {
         
     }
-	
-	void Link::Controller::setSelectedStatus(bool status)
-	{
-		if(m_selected != status)
-		{
-			m_selected = status;
-			redraw();
-		}
-	}
+    
+    bool Link::compareBoxToPositions(sLink link1, sLink link2)
+    {
+        if(link1 && link2)
+        {
+            sBox box1 = link1->getBoxTo();
+            sBox box2 = link2->getBoxTo();
+            if(box1 && box2)
+            {
+                const Point pt1 = box1->getPosition();
+                const Point pt2 = box2->getPosition();
+                if(pt1.x() > pt2.x())
+                {
+                    return true;
+                }
+                else if(pt1.x() == pt2.x())
+                {
+                    return pt1.y() >= pt2.y();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+    
 }
 
 

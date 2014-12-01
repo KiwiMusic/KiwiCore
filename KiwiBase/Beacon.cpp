@@ -23,6 +23,7 @@
 
 
 #include "Beacon.h"
+#include "Instance.h"
 
 namespace Kiwi
 {
@@ -45,7 +46,10 @@ namespace Kiwi
         if(box)
         {
             lock_guard<mutex> guard(m_mutex);
-            m_boxes.insert(box);
+            if(find_weak(m_boxes.begin(), m_boxes.end(), box) == m_boxes.end())
+            {
+                m_boxes.push_back(box);
+            }
         }
     }
     
@@ -54,7 +58,11 @@ namespace Kiwi
         if(box)
         {
             lock_guard<mutex> guard(m_mutex);
-            m_boxes.erase(box);
+            auto it = find_weak(m_boxes.begin(), m_boxes.end(), box);
+            if(it == m_boxes.end())
+            {
+                m_boxes.erase(it);
+            }
         }
     }
     
@@ -85,6 +93,19 @@ namespace Kiwi
             sBeacon newBeacon = make_shared<Beacon>(name);
             m_beacons[name] = newBeacon;
             return newBeacon;
+        }
+    }
+    
+    sBeacon Beacon::create(sBox box, string const& name)
+    {
+        sInstance instance = box->getInstance();
+        if(instance)
+        {
+            return instance->createBeacon(name);
+        }
+        else
+        {
+            return nullptr;
         }
     }
 }

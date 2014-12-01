@@ -25,11 +25,34 @@
 #include "Gui.h"
 
 namespace Kiwi
-{    
-    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse)
+{
+    // ================================================================================ //
+    //                                      BANG                                        //
+    // ================================================================================ //
+    
+    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse),
+    m_color_circle(Attr::create<AttrColor>(Tag::create("circlecolor"),
+                                            Tag::create("Circle Color"),
+                                            Tag::create("Color"),
+                                            (ElemVector){0.4, 0.4, 0.4, 1.})),
+    m_color_led(Attr::create<AttrColor>(Tag::create("ledcolor"),
+                                            Tag::create("Led Color"),
+                                            Tag::create("Color"),
+                                            (ElemVector){0.6, 0.6, 0.6, 1.})),
+    m_tag_receive(Attr::create<AttrTag>(Tag::create("receivename"),
+                                            Tag::create("Receive Name"),
+                                            Tag::create("Behavior"))),
+    m_tag_send(Attr::create<AttrTag>(Tag::create("sendname"),
+                                            Tag::create("Send Name"),
+                                            Tag::create("Behavior"))),
+    m_led(false)
     {
-        addInlet(Inlet::DataHot, "Flash (anything)");
-        addOutlet(Outlet::Data, "Output (bang)");
+        addInlet(IoType::Data, IoPolarity::Hot, "Flash (anything)");
+        addOutlet(IoType::Data, "Output (bang)");
+        addAttribute(m_color_circle);
+        addAttribute(m_color_led);
+        addAttribute(m_tag_receive);
+        addAttribute(m_tag_send);
         setAttributeDefaultValues(Tag_size, {20., 20.});
     }
     
@@ -38,11 +61,38 @@ namespace Kiwi
         ;
     }
     
+    void Bang::send() const
+    {
+        ElemVector elements = {Tag_bang};
+        Box::send(0, elements);
+        if(m_beacon_send)
+        {
+            for(unsigned long i = 0; i < m_beacon_send->size(); i++)
+            {
+                sBox box = m_beacon_send->getBox(i);
+                if(box)
+                {
+                    box->receive(0, elements);
+                }
+            }
+        }
+    }
+    
+    void Bang::tick()
+    {
+        m_led = false;
+        redraw();
+    }
+    
     bool Bang::receive(unsigned long index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
-            send(0, {Tag_bang});
+            send();
+            m_led = true;
+            redraw();
+            Clock::create(getShared(), 150.);
+            return true;
         }
         return false;
     }
@@ -51,7 +101,15 @@ namespace Kiwi
     {
         if(event.type == Event::Mouse::Down)
         {
-            send(0, {Tag_bang});
+            send();
+            m_led = true;
+            redraw();
+            return true;
+        }
+        else if(event.type == Event::Mouse::Up)
+        {
+            m_led = false;
+            redraw();
             return true;
         }
         return false;
@@ -59,11 +117,58 @@ namespace Kiwi
     
     bool Bang::draw(Doodle& doodle) const
     {
+        const double size1 = getSize().x() * 0.25;
+        const double size2 = getSize().x() * 0.5;
+        
+        doodle.setColor(m_color_circle->get());
+        doodle.drawEllipse(size1, size1, size2, size2, 1.5);
+        if(m_led)
+        {
+            doodle.setColor(m_color_led->get());
+            doodle.fillEllipse(size1 + 1.5, size1 + 1.5, size2 - 3., size2 - 3.);
+        }
+        
         return true;
     }
     
     bool Bang::attributeChanged(sAttr attr)
     {
+        if(attr == m_color_circle)
+        {
+            redraw();
+        }
+        else if(attr == m_tag_receive)
+        {
+            if(m_tag_receive->get())
+            {
+                sBeacon newbeacon = Beacon::create(getShared(), toString(m_tag_receive->get()));
+                if(m_beacon_receive != newbeacon)
+                {
+                    if(m_beacon_receive)
+                    {
+                        m_beacon_receive->unbind(getShared());
+                        m_beacon_receive = newbeacon;
+                        m_beacon_receive->bind(getShared());
+                    }
+                }
+            }
+            else if(m_beacon_receive)
+            {
+                m_beacon_receive->unbind(getShared());
+                m_beacon_receive = nullptr;
+            }
+        }
+        else if(attr == m_tag_send)
+        {
+            if(m_tag_send->get())
+            {
+                m_beacon_send = Beacon::create(getShared(), toString(m_tag_send->get()));
+            }
+            else
+            {
+                m_beacon_send = nullptr;
+            }
+        }
         return true;
     }
     
@@ -88,8 +193,8 @@ namespace Kiwi
                                             Tag::create("Behavior"))),
     m_value(false)
     {
-        addInlet(Inlet::DataHot, "Active/Desactive (bang, int or float)");
-        addOutlet(Outlet::Data, "Boolean 0 or 1 (float)");
+        addInlet(IoType::Data, IoPolarity::Hot, "Active/Desactive (bang, int or float)");
+        addOutlet(IoType::Data, "Boolean 0 or 1 (float)");
         addAttribute(m_color_cross_on);
         addAttribute(m_color_cross_off);
         addAttribute(m_tag_receive);
@@ -104,7 +209,8 @@ namespace Kiwi
     
     void Toggle::send() const
     {
-        Box::send(0, {m_value});
+        ElemVector elements = {m_value};
+        Box::send(0, elements);
         if(m_beacon_send)
         {
             for(unsigned long i = 0; i < m_beacon_send->size(); i++)
@@ -112,7 +218,7 @@ namespace Kiwi
                 sBox box = m_beacon_send->getBox(i);
                 if(box)
                 {
-                    box->receive(0, {m_value});
+                    box->receive(0, elements);
                 }
             }
         }
@@ -196,7 +302,7 @@ namespace Kiwi
         {
             if(m_tag_receive->get())
             {
-                sBeacon newbeacon = createBeacon(toString(m_tag_receive->get()));
+                sBeacon newbeacon = Beacon::create(getShared(), toString(m_tag_receive->get()));
                 if(m_beacon_receive != newbeacon)
                 {
                     if(m_beacon_receive)
@@ -217,7 +323,7 @@ namespace Kiwi
         {
             if(m_tag_send->get())
             {
-                m_beacon_send = createBeacon(toString(m_tag_send->get()));
+                m_beacon_send = Beacon::create(getShared(), toString(m_tag_send->get()));
             }
             else
             {
@@ -252,8 +358,8 @@ namespace Kiwi
                                         Tag::create("Behavior"))),
     m_value(false)
     {
-        addInlet(Inlet::DataHot, "New value (int or float)");
-        addOutlet(Outlet::Data, "Mapped value (float)");
+        addInlet(IoType::Data, IoPolarity::Hot, "New value (int or float)");
+        addOutlet(IoType::Data, "Mapped value (float)");
         addAttribute(m_color_on);
         addAttribute(m_color_off);
         addAttribute(m_color_knob);
@@ -269,8 +375,8 @@ namespace Kiwi
     
     void Slider::send() const
     {
-        Box::send(0, {m_value});
-        /*
+        ElemVector elements = {m_value};
+        Box::send(0, elements);
         if(m_beacon_send)
         {
             for(unsigned long i = 0; i < m_beacon_send->size(); i++)
@@ -278,10 +384,10 @@ namespace Kiwi
                 sBox box = m_beacon_send->getBox(i);
                 if(box)
                 {
-                    box->receive(0, {m_value});
+                    box->receive(0, elements);
                 }
             }
-        }*/
+        }
     }
     
     bool Slider::receive(unsigned long index, ElemVector const& elements)
@@ -352,7 +458,7 @@ namespace Kiwi
         {
             if(m_tag_receive->get())
             {
-                sBeacon newbeacon = createBeacon(toString(m_tag_receive->get()));
+                sBeacon newbeacon = Beacon::create(getShared(), toString(m_tag_receive->get()));
                 if(m_beacon_receive != newbeacon)
                 {
                     if(m_beacon_receive)
@@ -373,7 +479,7 @@ namespace Kiwi
         {
             if(m_tag_send->get())
             {
-                m_beacon_send = createBeacon(toString(m_tag_send->get()));
+                m_beacon_send = Beacon::create(getShared(), toString(m_tag_send->get()));
             }
             else
             {

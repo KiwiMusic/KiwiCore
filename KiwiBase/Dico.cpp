@@ -589,7 +589,7 @@ namespace Kiwi
             }
         }
         dico->set(Tag::create(key), elements);
-        dico->set(Tag::text, Tag::create(text));
+        dico->set(Box::Tag_text, Tag::create(text));
     }
 }
 

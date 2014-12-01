@@ -32,8 +32,21 @@ namespace Kiwi
     //                                      GUI                                         //
     // ================================================================================ //
     
+    // ================================================================================ //
+    //                                      BANG                                        //
+    // ================================================================================ //
+    
     class Bang : public Box
     {
+    private:
+        const sAttrColor    m_color_circle;
+        const sAttrColor    m_color_led;
+        const sAttrTag      m_tag_receive;
+        const sAttrTag      m_tag_send;        
+        sBeacon             m_beacon_receive;
+        sBeacon             m_beacon_send;
+        
+        atomic_bool         m_led;
     public:
         
         Bang(sPage page);
@@ -42,6 +55,8 @@ namespace Kiwi
         bool receive(Event::Mouse const& event) override;
         bool draw(Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
+        void send() const;
+        void tick() override;
         Allocate(Bang);
     };
     

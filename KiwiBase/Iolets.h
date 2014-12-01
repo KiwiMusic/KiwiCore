@@ -28,6 +28,19 @@
 
 namespace Kiwi
 {
+    enum IoType
+    {
+        Data    = 0,
+        Signal  = 1,
+        Both    = 2
+    };
+    
+    enum IoPolarity
+    {
+        Cold   = 0,
+        Hot    = 1
+    };
+    
     // ================================================================================ //
     //                                      INLET                                       //
     // ================================================================================ //
@@ -38,27 +51,21 @@ namespace Kiwi
      */
     class Inlet
     {
-    public:
-        enum Type
-        {
-            DataCold    = 0,
-            DataHot     = 1,
-            Signal      = 2,
-            Error       = 3
-        };
     private:
         
-        vector<sLink>   m_links;
-        const Type      m_type;
-        const string    m_description;
-    
+        vector<sLink>       m_links;
+        const IoType        m_type;
+        const IoPolarity    m_polarity;
+        const string        m_description;
+        
     public:
         
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Inlet(Type type, string description) noexcept :
+        Inlet(IoType type, IoPolarity polarity, string description) noexcept :
         m_type(type),
+        m_polarity(polarity),
         m_description(description)
         {
             ;
@@ -76,9 +83,18 @@ namespace Kiwi
         /** The functions retrieves the type of the inlet.
          @return The type of the inlet.
          */
-        inline Type getType() const noexcept
+        inline IoType getType() const noexcept
         {
             return m_type;
+        }
+        
+        //! Retrieve the polarity of the inlet.
+        /** The functions retrieves the polarity of the inlet.
+         @return The polarity of the inlet.
+         */
+        inline IoPolarity getPolarity() const noexcept
+        {
+            return m_polarity;
         }
         
         //! Retrieve the description of the inlet.
@@ -188,25 +204,17 @@ namespace Kiwi
      */
     class Outlet
     {
-    public:
-        enum Type
-        {
-            Data    = 0,
-            Signal  = 2,
-            Error   = 3
-        };
-        
     private:
         vector<sLink> m_links;
-        const Type      m_type;
-        const string    m_description;
+        const IoType  m_type;
+        const string  m_description;
         
     public:
         
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Outlet(Type type, string description) noexcept :
+        Outlet(IoType type, string description) noexcept :
         m_type(type),
         m_description(description)
         {
@@ -225,7 +233,7 @@ namespace Kiwi
         /** The functions retrieves the type of the outlet.
          @return The type of the outlet.
          */
-        inline Type getType() const noexcept
+        inline IoType getType() const noexcept
         {
             return m_type;
         }
