@@ -48,8 +48,9 @@ namespace Kiwi
         friend Box::Box(sPage page, string const& name, unsigned long type);
 		
 		class Controller;
-		typedef shared_ptr<Controller>   sController;
-		typedef weak_ptr<Controller>     wController;
+		typedef shared_ptr<Controller>			sController;
+		typedef weak_ptr<Controller>			wController;
+		typedef shared_ptr<const Controller>	scController;
 		
     private:
         const wInstance             m_instance;
@@ -276,7 +277,7 @@ namespace Kiwi
          @see Page::Listener
          @see Box::Controller
          */
-        class Controller
+		class Controller : public enable_shared_from_this<Controller>
         {
         private:
             const sPage						m_page;
@@ -308,7 +309,7 @@ namespace Kiwi
 					Link	= 3
 				};
 				
-				HitTest(sController owner, Point const& pt) : m_owner(owner)
+				HitTest(scController owner, Point const& pt) : m_owner(owner)
 				{
 					m_hittype = Type::Nothing;
 					m_box.reset();
@@ -345,7 +346,7 @@ namespace Kiwi
 				{
 					m_hittype = Type::Nothing;
 					m_link.reset();
-
+					
 					Link::Controller::Hit hit;
 					for(size_t i = m_owner->m_links.size(); i; i--)
 					{
@@ -353,7 +354,7 @@ namespace Kiwi
 						{
 							m_link = m_owner->m_links[i-1];
 							m_hittype = Type::Link;
-							break;
+							return true;
 						}
 					}
 					return false;
@@ -411,7 +412,7 @@ namespace Kiwi
 				Box::Controller::Hit	m_box_hit;
 				Link::wController		m_link;
 				Link::Controller::Hit	m_link_hit;
-				const sController		m_owner;
+				scController			m_owner;
 			};
 			
 			//! Constructor.
