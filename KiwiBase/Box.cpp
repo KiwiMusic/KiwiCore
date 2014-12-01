@@ -115,10 +115,10 @@ namespace Kiwi
     
     void Box::redraw() const noexcept
     {
-        sControler controler = getControler();
-        if(controler)
+        sController controller = getController();
+        if(controller)
         {
-            controler->redraw();
+            controller->redraw();
         }
     }
     
@@ -187,10 +187,10 @@ namespace Kiwi
         }
         if(attr == AttrBox::appearance_position)
         {
-            sControler controler = getControler();
-            if(controler)
+            sController controller = getController();
+            if(controller)
             {
-                controler->positionChanged();
+                controller->positionChanged();
                 //lock_guard<mutex> guard(m_io_mutex);
                 for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
                 {
@@ -204,10 +204,10 @@ namespace Kiwi
         }
         else if(attr == AttrBox::appearance_size)
         {
-            sControler controler = getControler();
-            if(controler)
+            sController controller = getController();
+            if(controller)
             {
-                controler->sizeChanged();
+                controller->sizeChanged();
                 //lock_guard<mutex> guard(m_io_mutex);
                 for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
                 {
@@ -221,10 +221,10 @@ namespace Kiwi
         }
         else if(attr == AttrBox::color_background || AttrBox::color_border || AttrBox::color_text)
         {
-            sControler controler = getControler();
-            if(controler)
+            sController controller = getController();
+            if(controller)
             {
-                controler->redraw();
+                controller->redraw();
             }
         }
 		return true;
@@ -238,10 +238,10 @@ namespace Kiwi
     {
         lock_guard<mutex> guard(m_io_mutex);
         m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, polarity, description)));
-        sControler controler = getControler();
-        if(controler)
+        sController controller = getController();
+        if(controller)
         {
-            controler->inletsChanged();
+            controller->inletsChanged();
         }
     }
     
@@ -259,10 +259,10 @@ namespace Kiwi
             int zaza; // Notify Links that they must change their indices
         }
         
-        sControler controler = getControler();
-        if(controler)
+        sController controller = getController();
+        if(controller)
         {
-            controler->inletsChanged();
+            controller->inletsChanged();
         }
     }
     
@@ -281,10 +281,10 @@ namespace Kiwi
             }
             m_inlets.erase(m_inlets.begin()+(long)index);
             
-            sControler controler = getControler();
-            if(controler)
+            sController controller = getController();
+            if(controller)
             {
-                controler->inletsChanged();
+                controller->inletsChanged();
             }
         }
     }
@@ -297,10 +297,10 @@ namespace Kiwi
     {
         lock_guard<mutex> guard(m_io_mutex);
         m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
-        sControler controler = getControler();
-        if(controler)
+        sController controller = getController();
+        if(controller)
         {
-            controler->outletsChanged();
+            controller->outletsChanged();
         }
     }
     
@@ -316,10 +316,10 @@ namespace Kiwi
             m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
             int zaza; // Notify Links that they must change their indices
         }
-        sControler controler = getControler();
-        if(controler)
+        sController controller = getController();
+        if(controller)
         {
-            controler->outletsChanged();
+            controller->outletsChanged();
         }
     }
     
@@ -338,10 +338,10 @@ namespace Kiwi
             }
             m_outlets.erase(m_outlets.begin()+(long)index);
             
-            sControler controler = getControler();
-            if(controler)
+            sController controller = getController();
+            if(controller)
             {
-                controler->outletsChanged();
+                controller->outletsChanged();
             }
         }
         
@@ -387,16 +387,16 @@ namespace Kiwi
         return false;
     }
     
-    void Box::setControler(sControler ctrl)
+    void Box::setController(sController ctrl)
     {
-        m_controler = ctrl;
+        m_controller = ctrl;
     }
     
     // ================================================================================ //
     //                                  BOX CONTROLER                                   //
     // ================================================================================ //
     
-    void Box::Controler::setEditionStatus(bool status)
+    void Box::Controller::setEditionStatus(bool status)
     {
         if(m_edition != status)
         {
@@ -405,7 +405,7 @@ namespace Kiwi
         }
     }
     
-    void Box::Controler::setSelectedStatus(bool status)
+    void Box::Controller::setSelectedStatus(bool status)
     {
         if(m_selected != status)
         {
@@ -417,7 +417,7 @@ namespace Kiwi
 #define KIO_HEIGHT 3.
 #define KIO_WIDTH 5.
     
-    Point Box::Controler::getInletPosition(unsigned long index) const noexcept
+    Point Box::Controller::getInletPosition(unsigned long index) const noexcept
     {
         const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
@@ -428,7 +428,7 @@ namespace Kiwi
         return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
     }
     
-    Point Box::Controler::getOutletPosition(unsigned long index) const noexcept
+    Point Box::Controller::getOutletPosition(unsigned long index) const noexcept
     {
         const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
@@ -439,7 +439,7 @@ namespace Kiwi
         return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
     }
     
-    bool Box::Controler::isHit(Point const& pt, Hit& hit) const noexcept
+    bool Box::Controller::isHit(Point const& pt, Hit& hit) const noexcept
     {
         const Rectangle bounds = m_box->getBounds();
         if(bounds.contains(pt))
@@ -514,7 +514,7 @@ namespace Kiwi
         return false;
     }
     
-    void Box::Controler::inletsChanged()
+    void Box::Controller::inletsChanged()
     {
         if(m_edition)
         {
@@ -522,7 +522,7 @@ namespace Kiwi
         }
     }
     
-    void Box::Controler::outletsChanged()
+    void Box::Controller::outletsChanged()
     {
         if(m_edition)
         {
@@ -530,7 +530,7 @@ namespace Kiwi
         }
     }
     
-    void Box::Controler::paint(sBox box, Doodle& d, bool edit, bool selected)
+    void Box::Controller::paint(sBox box, Doodle& d, bool edit, bool selected)
     {
         d.setFont(box->getFont());
         d.setColor(box->getBackgroundColor());

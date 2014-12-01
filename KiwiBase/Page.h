@@ -748,6 +748,11 @@ namespace Kiwi
 			 */
 			virtual void mouseExitIO() {};
         };
+        
+        static const sTag Tag_box;
+        static const sTag Tag_boxes;
+        static const sTag Tag_link;
+        static const sTag Tag_links;
     };
     
 }
