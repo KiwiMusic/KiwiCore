@@ -278,8 +278,6 @@ namespace Kiwi
          */
         class Controller
         {
-		public:
-			class TempLink;
         private:
             const sPage						m_page;
 			
@@ -292,73 +290,13 @@ namespace Kiwi
 			set<Link::wController,
 			owner_less<Link::wController>>	m_links_selected;
 			
-			vector<TempLink>				m_templinks;
-			
 			long m_zoom;
 			bool m_locked;
 			bool m_presentation;
 			bool m_display_grid;
 			bool m_snap_to_grid;
 			
-			bool	m_box_is_dragging;
-			bool	m_mousedown_select_status;
-			
         public:
-			class TempLink
-			{
-			private:
-				const sBox	m_attached_box;
-				const bool	m_attached_to_outlet;
-				const long	m_io_index;
-				Point		m_coord_start;
-				Point		m_coord_end;
-			public:
-				TempLink(sBox attachedBox, Point startCoord, Point endCoord, long index, bool fromOutlet) :
-				m_attached_box(attachedBox),
-				m_attached_to_outlet(fromOutlet),
-				m_io_index(index),
-				m_coord_start(startCoord),
-				m_coord_end(startCoord)
-				{
-					;
-				}
-				
-				inline Point getStartCoord() const noexcept
-				{
-					return m_coord_start;
-				}
-				
-				inline Point getEndCoord() const noexcept
-				{
-					return m_coord_end;
-				}
-				
-				inline void setStartCoord(Point const& pt) noexcept
-				{
-					m_coord_start = pt;
-				}
-				
-				inline void setEndCoord(Point const& pt) noexcept
-				{
-					m_coord_end = pt;
-				}
-				
-				inline bool isAttachedToOutlet() const noexcept
-				{
-					return m_attached_to_outlet;
-				}
-				
-				inline long getAttachedIOIndex() const noexcept
-				{
-					return m_io_index;
-				}
-				
-				inline sBox getAttachedBox() const noexcept
-				{
-					return m_attached_box;
-				}
-			};
-			
 			class HitTest
 			{
 			public:
@@ -411,7 +349,7 @@ namespace Kiwi
 					Link::Controller::Hit hit;
 					for(size_t i = m_owner->m_links.size(); i; i--)
 					{
-						if(m_owner->m_links[i-1]->isHit(pt, hit))
+						if(m_owner->m_links[i-1]->isHit(pt, m_link_hit))
 						{
 							m_link = m_owner->m_links[i-1];
 							m_hittype = Type::Link;
@@ -641,37 +579,7 @@ namespace Kiwi
 				return !m_boxes_selected.empty();
 			}
 			
-			//! Retrieves if there are one or more temporary links.
-			/** The function retrieves if there are one or more temporary links.
-			 @return True if there are one or more temporary links, false there is any temporary links.
-			 */
-			inline bool hasTempLinks()
-			{
-				return !m_templinks.empty();
-			}
-			
-			//! Retrieves if there are one or more temporary links.
-			/** The function retrieves if there are one or more temporary links.
-			 @return True if there are one or more temporary links, false there is any temporary links.
-			 */
-			inline TempLink* getTempLink(const unsigned long index = 0) const
-			{
-				if (index < m_templinks.size())
-				{
-					return (TempLink*)&m_templinks[index];
-				}
-				
-				return nullptr;
-			}
-			
         protected:
-			void mouseDown(const Event::Mouse& e);
-			void mouseUp(const Event::Mouse& e);
-			void mouseDrag(const Event::Mouse& e);
-			void mouseMove(const Event::Mouse& e);
-			void mouseDoubleClick(const Event::Mouse& e);
-			//void mouseWheelMove(const Event::Mouse& e, const MouseWheelDetails& wheel);
-			//bool keyPressed(const KeyPress& key, Component* origin);
 			
 			void addBoxController(Box::sController box);
 			void removeBoxController(Box::sController box);
@@ -718,7 +626,6 @@ namespace Kiwi
 			bool selectOnMouseDown(Link::sController link, bool selOnly);
 			void selectOnMouseUp(Link::sController link, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod);
 
-			
 			void updateSelectedBoxesBounds();
 			
 			void dragSelectedBoxes(double dx, double dy);
