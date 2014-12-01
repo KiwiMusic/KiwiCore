@@ -27,15 +27,13 @@
 #include "Tools.h"
 #include "Console.h"
 
-// TODO
-// - Put the tag in the classes
 namespace Kiwi
 {
     // ================================================================================ //
     //                                      TAG                                         //
     // ================================================================================ //
     
-    //! The tag is an unique object that matchs to a "unique" string (in the scope of all the kiwi application).
+    //! The tag is an unique object that matchs to a "unique" string in the scope of all the kiwi applications.
     /**
      The tag are uniques and matchs to a string. If you create a tag with a string that already matchs to a tag, the creation function will return this tag, otherwise it will create a new tag.
      @see TagFactory
@@ -76,14 +74,7 @@ namespace Kiwi
         
         static unordered_map<string, sTag> m_tags;
         static mutex                       m_mutex;
-		
-		struct less_than_compare
-		{
-			inline bool operator() (const sTag& tag1, const sTag& tag2)
-			{
-				return (tag1->getName() < tag2->getName());
-			}
-		};
+
     public:
         
         //! Tag creator.
@@ -107,30 +98,16 @@ namespace Kiwi
             }
         }
 		
-		//! Sorts a vector of tag pointers alphabetically
-		/** This function sorts a vector of tag pointers alphabetically
-		 @param  tags   The tags to be sorted.
-		 */
-		static void sort(vector<sTag>& tags)
-		{
-			std::sort(tags.begin(), tags.end(), less_than_compare());
-		}
-		
-        static sTag text;
-        static sTag box;
-        static sTag boxes;
-        static sTag link;
-        static sTag links;
-        static sTag id;
-        static sTag from;
-        static sTag to;
-        static sTag name;
-        static sTag ninlets;
-        static sTag noutlets;
-        static sTag set;
-        static sTag null;
-        static sTag arguments;
-        
+        //! Tag comparaison by alphabetic order.
+        /** This function compares the strings of the tags.
+         @param  tag1  The first tag.
+         @param  tag2  The second tag.
+         @return true if the the first tag before the sedond one in the alphabetic order.
+         */
+        static inline bool compareAlphabetic(const sTag& tag1, const sTag& tag2)
+        {
+            return tag1->getName() < tag2->getName();
+        }
     };
 	
     inline string toString(sTag __val)

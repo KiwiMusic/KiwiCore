@@ -23,10 +23,14 @@
 
 #include "Page.h"
 #include "Instance.h"
-#include "../KiwiDsp/DspContext.h"
 
 namespace Kiwi
 {
+    
+    const sTag Page::Tag_box        = Tag::create("box");
+    const sTag Page::Tag_boxes      = Tag::create("boxes");
+    const sTag Page::Tag_link       = Tag::create("link");
+    const sTag Page::Tag_links      = Tag::create("links");
     
     // ================================================================================ //
     //                                      PAGE                                        //
@@ -34,7 +38,7 @@ namespace Kiwi
     
     Page::Page(sInstance instance) :
     m_instance(instance),
-    m_dsp_context(make_shared<DspContext>()),
+    m_dsp_context(nullptr),
     m_boxe_id(1)
     {
         ;
@@ -44,19 +48,6 @@ namespace Kiwi
     {
         m_links.clear();
         m_boxes.clear();
-    }
-    
-    sBeacon Page::createBeacon(string const& name) const
-    {
-        sInstance instance = getInstance();
-        if(instance)
-        {
-            return instance->createBeacon(name);
-        }
-        else
-        {
-            return nullptr;
-        }
     }
     
     sPage Page::create(sInstance instance, sDico dico)
@@ -346,20 +337,20 @@ namespace Kiwi
         {
             map<unsigned long, unsigned long> m_ids_mapper;
             ElemVector boxes;
-            dico->get(Tag::boxes, boxes);
+            dico->get(Tag_boxes, boxes);
             for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
             {
                 sDico subdico = boxes[i];
                 if(subdico)
                 {
-                    subdico = subdico->get(Tag::box);
+                    subdico = subdico->get(Tag_box);
                     if(subdico)
                     {
                         sBox box = createBox(subdico);
                     
-                        if(dico->has(Tag::links) && box && subdico->has(Tag::id))
+                        if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
                         {
-                            unsigned long _id = subdico->get(Tag::id);
+                            unsigned long _id = subdico->get(Box::Tag_id);
                             if(box->getId() != _id)
                             {
                                 m_ids_mapper[_id] = box->getId();
@@ -371,30 +362,30 @@ namespace Kiwi
             }
             
             ElemVector links;
-            dico->get(Tag::links, links);
+            dico->get(Tag_links, links);
             for(vector<sLink>::size_type i = 0; i < links.size(); i++)
             {
                 sDico subdico = links[i];
                 if(subdico)
                 {
-                    subdico = subdico->get(Tag::link);
+                    subdico = subdico->get(Tag_link);
                     if(subdico)
                     {
                         ElemVector elem;
-                        subdico->get(Tag::from, elem);
+                        subdico->get(Link::Tag_from, elem);
                         if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
                         {
                             if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
                             {
-                                subdico->set(Tag::from, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+                                subdico->set(Link::Tag_from, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
                             }
                         }
-                        subdico->get(Tag::to, elem);
+                        subdico->get(Link::Tag_to, elem);
                         if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
                         {
                             if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
                             {
-                                subdico->set(Tag::to, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+                                subdico->set(Link::Tag_to, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
                             }
                         }
                         createLink(subdico);
@@ -425,12 +416,12 @@ namespace Kiwi
                 if(box && subbox)
                 {
                     m_boxes[i]->write(subbox);
-                    box->set(Tag::box, subbox);
+                    box->set(Tag_box, subbox);
                     elements.push_back(box);
                 }
             }
             m_boxes_mutex.unlock();
-            dico->set(Tag::boxes, elements);
+            dico->set(Tag_boxes, elements);
             
             elements.clear();
       
@@ -442,17 +433,18 @@ namespace Kiwi
                 if(link && sublink)
                 {
                     m_links[i]->write(sublink);
-                    link->set(Tag::link, sublink);
+                    link->set(Tag_link, sublink);
                     elements.push_back(link);
                 }
             }
             m_links_mutex.unlock();
-            dico->set(Tag::links, elements);
+            dico->set(Tag_links, elements);
         }
     }
     
     bool Page::startDsp(unsigned long samplerate, unsigned long vectorsize)
     {
+        /*
         m_dsp_context->clear();
         m_dsp_context->setSamplerate(samplerate);
         m_dsp_context->setVectorsize((long)vectorsize);
@@ -474,18 +466,18 @@ namespace Kiwi
         catch(sBox box)
         {
             Console::error(box, "something appened with me... sniff !");
-        }
+        }*/
         return true;
     }
     
     void Page::tickDsp() const noexcept
     {
-        m_dsp_context->tick();
+        //m_dsp_context->tick();
     }
     
     void Page::stopDsp()
     {
-        m_dsp_context->clear();
+        //m_dsp_context->clear();
     }
     
     bool Page::isDspRunning() const noexcept

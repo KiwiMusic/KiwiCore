@@ -277,7 +277,14 @@ namespace Kiwi
              */
             static void paint(sLink link, Doodle& d, bool selected = false);
         };
+        
+        static const sTag Tag_from;
+        static const sTag Tag_to;
+        
+        static bool compareBoxToPositions(sLink link1, sLink link2);
     };
+    
+    
 }
 
 

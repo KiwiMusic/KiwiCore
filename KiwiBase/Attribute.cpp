@@ -166,29 +166,6 @@ namespace Kiwi
         }
     }
 	
-	void Attr::sort(vector<sAttr>& attrs)
-	{
-		struct less_than_compare
-		{
-			inline bool operator() (const sAttr& attr1, const sAttr& attr2)
-			{
-				if(attr1->getCategory() == attr2->getCategory())
-				{
-					// defined order in a same category sorts attrs by order
-					if(attr1->getOrder() > 0 && attr2->getOrder() > 0)
-					{
-						return (attr1->getOrder() < attr2->getOrder());
-					}
-				}
-				
-				// sort attribute by label
-				return (attr1->getLabel()->getName() < attr2->getLabel()->getName());
-			}
-		};
-		
-		std::sort(attrs.begin(), attrs.end(), less_than_compare());
-	}
-	
 	// ================================================================================ //
 	//                                 ATTRIBUTES MANAGER								//
 	// ================================================================================ //
@@ -505,7 +482,9 @@ namespace Kiwi
 		}
 		
 		if(sortAlphabetically)
-			Tag::sort(names);
+        {
+            sort(names.begin(), names.end(), Tag::compareAlphabetic);
+        }
     }
     
     bool Attr::Manager::hasCategory(sTag name) const noexcept
@@ -536,7 +515,9 @@ namespace Kiwi
 		}
 		
 		if (sorted)
-			Attr::sort(attrs);
+        {
+            sort(attrs.begin(), attrs.end(), compareOrderOrLabel);
+        }
 	}
 	
 	void Attr::Manager::bind(shared_ptr<Attr::Manager::Listener> listener)

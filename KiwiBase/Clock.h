@@ -28,12 +28,32 @@
 
 namespace Kiwi
 {
+    // ================================================================================ //
+    //                                      CLOCK                                       //
+    // ================================================================================ //
+    
+    //! The clock is used to defer the execution of a function.
+    /**
+     The clock can be used by a box to call of one of the tick funtions after a specific delay. The clock creates a new thread and detach a new thread that will sleep for a specific time before calling the tick funtion of the box.
+     @see Box.
+     */
     class Clock
     {
     private:
-        static void tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements);
+        
+        //! The function that will be call be the thread.
+        /** You should never use this method except if you really know what you do.
+         */
         static void tick(Clock* clock, unsigned long ms, sBox box);
-    public:
+        
+        //! The function that will be call be the thread.
+        /** You should never use this method except if you really know what you do.
+         */
+        static void tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements);
+        
+        //! The constructor.
+        /** You should never use this method except if you really know what you do.
+         */
         Clock(sBox box, const unsigned long ms)
         {
             if(box)
@@ -42,6 +62,9 @@ namespace Kiwi
             }
         }
         
+        //! The constructor.
+        /** You should never use this method except if you really know what you do.
+         */
         Clock(sBox box, const unsigned long ms, ElemVector const& elements)
         {
             if(box)
@@ -50,9 +73,35 @@ namespace Kiwi
             }
         }
         
+        //! The destructor.
+        /** You should never use this method except if you really know what you do.
+         */
         ~Clock()
         {
             ;
+        }
+    
+    public:
+        
+        //! Clock creator.
+        /** This function create a new clock.
+         @param  box    The box that will be used.
+         @param  ms     The delay time in milliseconds.
+         */
+        static inline void create(sBox box, const unsigned long ms)
+        {
+            Clock clock(box, ms);
+        }
+        
+        //! Clock creator.
+        /** This function create a new clock.
+         @param  box        The box that will be used.
+         @param  elements   The elements that will be send to the function.
+         @param  ms         The delay time in milliseconds.
+         */
+        static inline void create(sBox box, ElemVector const& elements, const unsigned long ms)
+        {
+            Clock clock(box, ms, elements);
         }
     };
 };

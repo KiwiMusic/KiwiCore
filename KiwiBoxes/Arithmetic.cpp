@@ -31,16 +31,16 @@ namespace Kiwi
     {
         m_first     = 0.;
         m_second    = 0.;
-        addInlet(Inlet::DataHot, input1 + " (int or float)");
+        addInlet(IoType::Data, IoPolarity::Hot, input1 + " (int or float)");
         if(!elements.empty() && (elements[0].isDouble() || elements[0].isLong()))
         {
             m_second = elements[0];
         }
         else
         {
-            addInlet(Inlet::DataCold, input2 + " (int or float)");
+            addInlet(IoType::Data, IoPolarity::Cold, input2 + " (int or float)");
         }
-        addOutlet(Outlet::Data, output + " (float)");
+        addOutlet(IoType::Data, output + " (float)");
     }
     
     Arithmetic::~Arithmetic()
@@ -69,7 +69,7 @@ namespace Kiwi
                         m_second = elements[0];
                     }
                 }
-                else if(elements[0] == Tag::set)
+                else if(elements[0] == Tag_set)
                 {
                     if(!index)
                     {
@@ -125,9 +125,9 @@ namespace Kiwi
         for(size_t i = 0; i < m_values.size(); i++)
         {
             m_parser.DefineVar("i" + toString(i+1), &m_values[i]);
-            addInlet(Inlet::DataHot, "i" + toString(i+1) + " (int or float)");
+            addInlet(IoType::Data, IoPolarity::Hot, "i" + toString(i+1) + " (int or float)");
         }
-        addOutlet(Outlet::Data, "result (float)");
+        addOutlet(IoType::Data, "result (float)");
         m_parser.SetExpr(expr);
     }
     
@@ -150,7 +150,7 @@ namespace Kiwi
                 }
                 catch (mu::Parser::exception_type &e)
                 {
-                    std::cout << e.GetMsg() << std::endl;
+                    cout << e.GetMsg() << endl;
                 }
                 
                 send(0, {result});

@@ -41,6 +41,14 @@ namespace Kiwi
         return position;
     }
     
+    template <class _InputIterator, class _Tp> inline _InputIterator find_weak(_InputIterator __first, _InputIterator __last, const _Tp& __value_)
+    {
+        for (; __first != __last; ++__first)
+            if ((*__first).lock() == __value_)
+                break;
+        return __first;
+    }
+    
     template <typename Type> Type clip(const Type& n, const Type& lower, const Type& upper)
     {
         return max(lower, min(n, upper));

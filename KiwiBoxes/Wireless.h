@@ -32,6 +32,10 @@ namespace Kiwi
     //                                      STORAGE                                     //
     // ================================================================================ //
     
+    // ================================================================================ //
+    //                                      INT                                         //
+    // ================================================================================ //
+    
     class Int : public Box
     {
     private:
@@ -112,7 +116,9 @@ namespace Kiwi
     {
         Box::addPrototype(unique_ptr<Box>(new Int(nullptr, {})));
         Box::addPrototype(unique_ptr<Box>(new Send(nullptr, nullptr)));
+        Box::addPrototype(unique_ptr<Box>(new Send(nullptr, nullptr)), "s");
         Box::addPrototype(unique_ptr<Box>(new Receive(nullptr, nullptr)));
+        Box::addPrototype(unique_ptr<Box>(new Receive(nullptr, nullptr)), "r");
         Box::addPrototype(unique_ptr<Box>(new Value(nullptr, nullptr)));
     }
 }

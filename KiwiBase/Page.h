@@ -133,13 +133,6 @@ namespace Kiwi
             links = m_links;
         }
         
-        //! Create a beacon.
-        /** This function retrieves a beacon in the scope of the instance.
-         @param     The name of the beacon to retrieve.
-         @return    The beacon that match with the name.
-         */
-        sBeacon createBeacon(string const& name) const;
-        
         //! Create a box.
         /** The function instantiates a box with a dico.
          @param dico        The dico that defines a box.
@@ -371,6 +364,11 @@ namespace Kiwi
         };
         
         typedef shared_ptr<Controler>    sControler;
+        
+        static const sTag Tag_box;
+        static const sTag Tag_boxes;
+        static const sTag Tag_link;
+        static const sTag Tag_links;
     };
     
 }

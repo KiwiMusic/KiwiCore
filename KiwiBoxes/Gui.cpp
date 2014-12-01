@@ -47,8 +47,8 @@ namespace Kiwi
                                             Tag::create("Behavior"))),
     m_led(false)
     {
-        addInlet(Inlet::DataHot, "Flash (anything)");
-        addOutlet(Outlet::Data, "Output (bang)");
+        addInlet(IoType::Data, IoPolarity::Hot, "Flash (anything)");
+        addOutlet(IoType::Data, "Output (bang)");
         addAttribute(m_color_circle);
         addAttribute(m_color_led);
         addAttribute(m_tag_receive);
@@ -91,7 +91,7 @@ namespace Kiwi
             send();
             m_led = true;
             redraw();
-            Clock clock(getShared(), 150.);
+            Clock::create(getShared(), 150.);
             return true;
         }
         return false;
@@ -193,8 +193,8 @@ namespace Kiwi
                                             Tag::create("Behavior"))),
     m_value(false)
     {
-        addInlet(Inlet::DataHot, "Active/Desactive (bang, int or float)");
-        addOutlet(Outlet::Data, "Boolean 0 or 1 (float)");
+        addInlet(IoType::Data, IoPolarity::Hot, "Active/Desactive (bang, int or float)");
+        addOutlet(IoType::Data, "Boolean 0 or 1 (float)");
         addAttribute(m_color_cross_on);
         addAttribute(m_color_cross_off);
         addAttribute(m_tag_receive);
@@ -358,8 +358,8 @@ namespace Kiwi
                                         Tag::create("Behavior"))),
     m_value(false)
     {
-        addInlet(Inlet::DataHot, "New value (int or float)");
-        addOutlet(Outlet::Data, "Mapped value (float)");
+        addInlet(IoType::Data, IoPolarity::Hot, "New value (int or float)");
+        addOutlet(IoType::Data, "Mapped value (float)");
         addAttribute(m_color_on);
         addAttribute(m_color_off);
         addAttribute(m_color_knob);

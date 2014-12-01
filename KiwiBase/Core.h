@@ -28,15 +28,15 @@
 
 #define Allocate(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page); }
 
-#define AllocateLong(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (long)dico->get(Tag::arguments)); }
+#define AllocateLong(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (long)dico->get(Tag_arguments)); }
 
-#define AllocateDouble(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (double)dico->get(Tag::arguments)); }
+#define AllocateDouble(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (double)dico->get(Tag_arguments)); }
 
-#define AllocateTag(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (sTag)dico->get(Tag::arguments)); }
+#define AllocateTag(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (sTag)dico->get(Tag_arguments)); }
 
-#define AllocateElement(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, dico->get(Tag::arguments)); }
+#define AllocateElement(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, dico->get(Tag_arguments)); }
 
-#define AllocateElemVector(boxclass) sBox allocate(sPage page, sDico dico) const override { ElemVector elements; dico->get(Tag::arguments, elements);return make_shared<boxclass>(page, elements); }
+#define AllocateElemVector(boxclass) sBox allocate(sPage page, sDico dico) const override { ElemVector elements; dico->get(Tag_arguments, elements);return make_shared<boxclass>(page, elements); }
 
 #endif
 

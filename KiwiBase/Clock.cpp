@@ -31,7 +31,7 @@ namespace Kiwi
     {
         if(clock && box)
         {
-            this_thread::sleep_for(std::chrono::milliseconds(ms));
+            this_thread::sleep_for(chrono::milliseconds(ms));
             box->tick();
         }
     }
@@ -40,7 +40,7 @@ namespace Kiwi
     {
         if(clock && box)
         {
-            this_thread::sleep_for(std::chrono::milliseconds(ms));
+            this_thread::sleep_for(chrono::milliseconds(ms));
             box->tick();
         }
     }

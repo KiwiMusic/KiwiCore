@@ -28,21 +28,6 @@ namespace Kiwi
 {
     unordered_map<string, sTag> Tag::m_tags;
     mutex Tag::m_mutex;
-    
-    sTag Tag::text        = Tag::create("text");
-    sTag Tag::box         = Tag::create("box");
-    sTag Tag::boxes       = Tag::create("boxes");
-    sTag Tag::link        = Tag::create("link");
-    sTag Tag::links       = Tag::create("links");
-    sTag Tag::id          = Tag::create("id");
-    sTag Tag::from        = Tag::create("from");
-    sTag Tag::to          = Tag::create("to");
-    sTag Tag::name        = Tag::create("name");
-    sTag Tag::ninlets     = Tag::create("ninlets");
-    sTag Tag::noutlets    = Tag::create("noutlets");
-    sTag Tag::set         = Tag::create("set");
-    sTag Tag::null        = Tag::create("null");
-    sTag Tag::arguments   = Tag::create("arguments");
 }
 
 
