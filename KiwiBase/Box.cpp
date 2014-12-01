@@ -401,7 +401,7 @@ namespace Kiwi
         if(m_edition != status)
         {
             m_edition = status;
-            redraw();
+            editionStatusChanged();
         }
     }
     
@@ -410,7 +410,7 @@ namespace Kiwi
         if(m_selected != status)
         {
             m_selected = status;
-            redraw();
+            editionStatusChanged();
         }
     }
 

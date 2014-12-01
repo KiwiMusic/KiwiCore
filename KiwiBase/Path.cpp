@@ -122,4 +122,9 @@ namespace Kiwi
         return bounds;
         
     }
+    
+    bool Path::contains(Point const& pt) const noexcept
+    {
+        
+    }
 }

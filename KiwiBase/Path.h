@@ -125,6 +125,10 @@ namespace Kiwi
          @return The bounds of the path.
          */
         Rectangle getBounds() const noexcept;
+        
+        bool contains(Point const& pt) const noexcept;
+        
+        bool intersect(Point const& pt) const noexcept;
     };
 }
 

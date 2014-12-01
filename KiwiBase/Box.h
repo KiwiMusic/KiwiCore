@@ -658,12 +658,12 @@ namespace Kiwi
             //! The inlets notification function that should be override.
             /** The function is called by the box when its inlets changed.
              */
-            void inletsChanged();
+            virtual void inletsChanged();
             
             //! The outlets notification function that should be override.
             /** TThe function is called by the box when its outlets changed.
              */
-            void outletsChanged();
+            virtual void outletsChanged();
             
             //! The position notification function that should be override.
             /** The function is called by the box when its position changed.
