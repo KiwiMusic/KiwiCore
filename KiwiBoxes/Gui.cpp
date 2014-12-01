@@ -91,7 +91,7 @@ namespace Kiwi
             send();
             m_led = true;
             redraw();
-            Clock::create(getShared(), 150.);
+            Clock::create(getShared(), 150);
             return true;
         }
         return false;

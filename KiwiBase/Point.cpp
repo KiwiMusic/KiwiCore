@@ -25,5 +25,37 @@
 
 namespace Kiwi
 {
-    ;
+    // ================================================================================ //
+    //                                      POINT                                       //
+    // ================================================================================ //
+    
+    Point::Point() noexcept :
+    m_x(0.), m_y(0.)
+    {
+        ;
+    }
+    
+    Point::Point(const double x, const double y) noexcept :
+    m_x(x), m_y(y)
+    {
+        ;
+    }
+    
+    Point::Point(ElemVector const& elements) noexcept :
+    m_x(!elements.empty() ? (double)elements[0] : 0.), m_y(elements.size() > 1 ? (double)elements[1] : 0.)
+    {
+        ;
+    }
+    
+    Point::Point(Point const& pt) noexcept :
+    m_x(pt.m_x), m_y(pt.m_y)
+    {
+        ;
+    }
+    
+    Point::~Point()
+    {
+        ;
+    }
+    
 }
