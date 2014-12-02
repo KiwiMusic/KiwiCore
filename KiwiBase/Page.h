@@ -25,6 +25,7 @@
 #define __DEF_KIWI_PAGE__
 
 #include "Box.h"
+#include "AttributePage.h"
 
 // TODO
 // - Add the attributes
@@ -41,8 +42,8 @@ namespace Kiwi
     /**
      The page is the counterpart of the max patcher or the pd canvas...
      */
-    class Page : public enable_shared_from_this<Page>
-    {
+    class Page : public AttrPage
+	{
     public:
         class Listener;
         friend Box::Box(sPage page, string const& name, unsigned long type);
@@ -86,7 +87,25 @@ namespace Kiwi
          @return The page.
          */
         static sPage create(sInstance instance, sDico dico = nullptr);
-        
+		
+		//! Retrieve the sPage.
+		/** The function sPage.
+		 @return The sPage.
+		 */
+		inline sPage getShared() noexcept
+		{
+			return static_pointer_cast<Page>(shared_from_this());
+		}
+		
+		//! Retrieve the scPage.
+		/** The function scPage.
+		 @return The scPage.
+		 */
+		inline scPage getShared() const noexcept
+		{
+			return static_pointer_cast<const Page>(shared_from_this());
+		}
+		
         //! Retrieve the instance that manages the page.
         /** The function retrieves the instance that manages the page.
          @return The instance that manages the page.

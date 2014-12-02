@@ -73,7 +73,7 @@ namespace Kiwi
                     break;
                 }
             }
-            sBox box = Box::create(shared_from_this(), dico);
+            sBox box = Box::create(getShared(), dico);
             m_boxe_id++;
             if(box)
             {
@@ -104,7 +104,7 @@ namespace Kiwi
             {
                 unsigned long current_box_id = m_boxe_id;
                 m_boxe_id = oldbox->getId();
-                sBox newbox = Box::create(shared_from_this(), dico);
+                sBox newbox = Box::create(getShared(), dico);
                 m_boxe_id = current_box_id;
                 if(newbox)
                 {
@@ -219,7 +219,7 @@ namespace Kiwi
     {
         if(dico)
         {
-            sLink link = Link::create(shared_from_this(), dico);
+            sLink link = Link::create(getShared(), dico);
             if(link)
             {
                 return addLink(link);
