@@ -95,36 +95,35 @@ namespace Kiwi
     
     Rectangle Path::getBounds() const noexcept
     {
-        Rectangle bounds(0., 0., 0., 0.);
+        Point position(0., 0.);
+        Point size(0., 0.);
         if(!m_points.empty())
         {
-            
-            bounds.position(m_points[0]);
-            bounds.size(m_points[0]);
+            position = m_points[0];
+            size = m_points[0];
             
             for(vector<Point>::size_type i = 1; i < m_points.size(); i++)
             {
-                if(m_points[i].x() < bounds.x())
+                if(m_points[i].x() < position.x())
                 {
-                    bounds.x(m_points[i].x());
+                    position.x(m_points[i].x());
                 }
-                else if(m_points[i].x() > bounds.width())
+                else if(m_points[i].x() > size.x())
                 {
-                    bounds.width(m_points[i].x());
+                    size.x(m_points[i].x());
                 }
                 
-                if(m_points[i].y() < bounds.y())
+                if(m_points[i].y() < position.y())
                 {
-                    bounds.y(m_points[i].y());
+                    position.y(m_points[i].y());
                 }
-                else if(m_points[i].y() > bounds.height())
+                else if(m_points[i].y() > size.y())
                 {
-                    bounds.height(m_points[i].y());
+                    size.y(m_points[i].y());
                 }
             }
         }
-        bounds.size(bounds.size() - bounds.position());
-        return bounds;
+        return Rectangle(position, size - position);
         
     }
     

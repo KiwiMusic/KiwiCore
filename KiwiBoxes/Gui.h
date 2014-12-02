@@ -83,7 +83,8 @@ namespace Kiwi
     {
     private:
         double m_value;
-        string m_text_value;
+        double m_increment;
+        double m_last_y;
     public:
         
         Number(sPage page);

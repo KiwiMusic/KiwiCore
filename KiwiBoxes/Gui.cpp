@@ -224,8 +224,7 @@ namespace Kiwi
     // ================================================================================ //
     
     Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard),
-    m_value(0.),
-    m_text_value(toString(0.))
+    m_value(0.)
     {
         addInlet(IoType::Data, IoPolarity::Hot, "New value and Ouput (int, float or bang)");
         addOutlet(IoType::Data, "Value (float)");
@@ -245,15 +244,12 @@ namespace Kiwi
             {
                 m_value = elements[0];
                 Box::send(0, {m_value});
-                m_text_value = toString(m_value);
                 redraw();
                 return true;
             }
             else if(elements[0] == Tag_bang)
             {
-                m_value = !m_value;
                 Box::send(0, {m_value});
-                redraw();
                 return true;
             }
             else if(elements[0] == Tag_set)
@@ -261,7 +257,6 @@ namespace Kiwi
                 if(elements.size() > 1 && elements[1].isNumber())
                 {
                     m_value = elements[0];
-                    m_text_value = toString(m_value);
                     redraw();
                     return true;
                 }
@@ -278,7 +273,60 @@ namespace Kiwi
     {
         if(event.type == Event::Mouse::Down)
         {
-            
+            if(event.x < 14)
+            {
+                send(0, {m_value});
+            }
+            else
+            {
+                string value = to_string(m_value);
+                string text;
+                unsigned long pos = 0;
+                const int _x = event.x - 14.;
+                Point size(0., 0.);
+                while(_x > size.x() && pos < value.size())
+                {
+                    text += value[pos];
+                    size = Font::getStringSize(getFont(), text);
+                    pos++;
+                }
+                if(text.find('.') != string::npos)
+                {
+                    for(unsigned long i = 0; i < text.size(); i++)
+                    {
+                        if(text[i] != '.')
+                        {
+                            text[i] = '0';
+                        }
+                    }
+                    text.push_back('1');
+                    m_increment = stod(text) * 10.;
+                    cout << toString(m_increment) << endl;
+                }
+                else
+                {
+                    for(unsigned long i = 0; i < text.size(); i++)
+                    {
+                        text[i] = '0';
+                    }
+                    text.insert(text.begin(), '1');
+                    m_increment = stod(text) / 10.;
+                }
+                m_last_y = event.y;
+            }
+        }
+        else if(event.type == Event::Mouse::Drag)
+        {
+            if(m_last_y > event.y)
+            {
+                m_value += m_increment;
+            }
+            else if(m_last_y < event.y)
+            {
+                 m_value -= m_increment;
+            }
+            m_last_y = event.y;
+            redraw();
         }
         return false;
     }
@@ -293,12 +341,13 @@ namespace Kiwi
     {
         const Point size = getSize();
         doodle.setColor(Color(0.1, 0.2, 0.3, 1.));
-        doodle.fillRectangle(0., 0., 12, size.y());
+        doodle.fillRectangle(3., 0., 9, size.y());
+        doodle.fillRectangle(0., 0., 9, size.y(), 3.);
         doodle.setColor(color_border->get());
         doodle.fillEllipse(3., size.y() * 0.5 - 3., 6., 6.);
         doodle.setFont(getFont());
         doodle.setColor(getTextColor());
-        doodle.drawText(m_text_value, 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+        doodle.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
         return true;
     }
     

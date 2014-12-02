@@ -171,9 +171,9 @@ namespace Kiwi
          */
         virtual void fillAll() = 0;
         
-        virtual void drawText(string const& text, double x, double y, double w, double h, Font::Justification j, bool wrap = true) = 0;
+        virtual void drawText(string const& text, double x, double y, double w, double h, Font::Justification j, bool wrap = false) = 0;
         
-        virtual void drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap = true)
+        virtual void drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap = false)
         {
             drawText(text, rect.x(), rect.y(), rect.width(), rect.height(), j, wrap);
         }
