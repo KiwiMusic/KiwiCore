@@ -29,6 +29,11 @@ namespace Kiwi
     {
         ;
     }
+    
+    Path::Path(Path const& path) noexcept
+    {
+        m_points = path.m_points;
+    }
 
     Path::Path(Point const& pt) noexcept
     {
@@ -39,7 +44,7 @@ namespace Kiwi
     {
         for(ElemVector::size_type i = 0; i < elements.size(); i += 2)
         {
-            if(i+1 < elements.size() && elements[i].isNumber() && elements[i+1].isNumber())
+            if(i+1 < elements.size())
             {
                 m_points.push_back(Point((double)elements[i], (double)elements[i+1]));
             }

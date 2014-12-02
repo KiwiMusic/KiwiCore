@@ -41,11 +41,6 @@ namespace Kiwi
     private:
         const sAttrColor    m_color_circle;
         const sAttrColor    m_color_led;
-        const sAttrTag      m_tag_receive;
-        const sAttrTag      m_tag_send;        
-        sBeacon             m_beacon_receive;
-        sBeacon             m_beacon_send;
-        
         atomic_bool         m_led;
     public:
         
@@ -55,7 +50,6 @@ namespace Kiwi
         bool receive(Event::Mouse const& event) override;
         bool draw(Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
-        void send() const;
         void tick() override;
         Allocate(Bang);
     };
@@ -69,10 +63,6 @@ namespace Kiwi
     private:
         const sAttrColor    m_color_cross_on;
         const sAttrColor    m_color_cross_off;
-        const sAttrTag      m_tag_receive;
-        const sAttrTag      m_tag_send;
-        sBeacon             m_beacon_receive;
-        sBeacon             m_beacon_send;
         bool  m_value;
     public:
  
@@ -82,8 +72,28 @@ namespace Kiwi
         bool receive(Event::Mouse const& event) override;
         bool draw(Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
-        void send() const;
         Allocate(Toggle);
+    };
+    
+    // ================================================================================ //
+    //                                      NUMBER                                      //
+    // ================================================================================ //
+    
+    class Number : public Box
+    {
+    private:
+        double m_value;
+        string m_text_value;
+    public:
+        
+        Number(sPage page);
+        ~Number();
+        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(Event::Mouse const& event) override;
+        bool receive(Event::Keyboard const& event) override;
+        bool draw(Doodle& doodle) const override;
+        bool attributeChanged(sAttr attr) override;
+        Allocate(Number);
     };
     
     // ================================================================================ //
@@ -117,6 +127,7 @@ namespace Kiwi
     {
         Box::addPrototype(unique_ptr<Box>(new Bang(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Toggle(nullptr)));
+        Box::addPrototype(unique_ptr<Box>(new Number(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Slider(nullptr)));
     }
 }

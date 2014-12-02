@@ -158,7 +158,11 @@ namespace Kiwi
     {
         ElemVector elements;
         dico->get(m_name, elements);
-        set(elements);
+        if(!elements.empty())
+        {
+            int zaza; 
+            set(elements);
+        }
         dico->get(Attr::frozen_attributes, elements);
         if(find(elements.begin(), elements.end(), m_name) != elements.end())
         {
