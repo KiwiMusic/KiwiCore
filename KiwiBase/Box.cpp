@@ -89,6 +89,11 @@ namespace Kiwi
                     box->m_text = dico->get(Tag_text);
                     box->load(dico);
 					box->Attr::Manager::read(dico);
+                    if(!dico->has(Tag_size) && !(box->getType() & Graphic))
+                    {
+                        Kiwi::Point size = Font::getStringSize(box->getFont(), toString(box->getText()));
+                        box->setAttributeValue(Tag_size, {max(size.x() + 6., 25.), box->getSize().y()});
+                    }
                     return box;
                 }
             }

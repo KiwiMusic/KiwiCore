@@ -43,12 +43,17 @@ namespace Kiwi
         
     public:
         //! Constructor.
-        /** The function initialize a point at zero origin.
+        /** The function initialize an empty path.
          */
         Path() noexcept;
         
         //! Constructor.
-        /** The function initialize another point.
+        /** The function initialize a path with another.
+         */
+        Path(Path const& path) noexcept;
+        
+        //! Constructor.
+        /** The function initialize a point.
          */
         Path(Point const& pt) noexcept;
         

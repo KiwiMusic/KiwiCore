@@ -39,43 +39,18 @@ namespace Kiwi
                                             Tag::create("Led Color"),
                                             Tag::create("Color"),
                                             (ElemVector){0.6, 0.6, 0.6, 1.})),
-    m_tag_receive(Attr::create<AttrTag>(Tag::create("receivename"),
-                                            Tag::create("Receive Name"),
-                                            Tag::create("Behavior"))),
-    m_tag_send(Attr::create<AttrTag>(Tag::create("sendname"),
-                                            Tag::create("Send Name"),
-                                            Tag::create("Behavior"))),
     m_led(false)
     {
         addInlet(IoType::Data, IoPolarity::Hot, "Flash (anything)");
         addOutlet(IoType::Data, "Output (bang)");
         addAttribute(m_color_circle);
         addAttribute(m_color_led);
-        addAttribute(m_tag_receive);
-        addAttribute(m_tag_send);
         setAttributeDefaultValues(Tag_size, {20., 20.});
     }
     
     Bang::~Bang()
     {
         ;
-    }
-    
-    void Bang::send() const
-    {
-        ElemVector elements = {Tag_bang};
-        Box::send(0, elements);
-        if(m_beacon_send)
-        {
-            for(unsigned long i = 0; i < m_beacon_send->size(); i++)
-            {
-                sBox box = m_beacon_send->getBox(i);
-                if(box)
-                {
-                    box->receive(0, elements);
-                }
-            }
-        }
     }
     
     void Bang::tick()
@@ -88,7 +63,7 @@ namespace Kiwi
     {
         if(!elements.empty())
         {
-            send();
+            Box::send(0, {Tag_bang});
             m_led = true;
             redraw();
             Clock::create(getShared(), 150);
@@ -101,7 +76,7 @@ namespace Kiwi
     {
         if(event.type == Event::Mouse::Down)
         {
-            send();
+            Box::send(0, {Tag_bang});
             m_led = true;
             redraw();
             return true;
@@ -137,38 +112,6 @@ namespace Kiwi
         {
             redraw();
         }
-        else if(attr == m_tag_receive)
-        {
-            if(m_tag_receive->get())
-            {
-                sBeacon newbeacon = Beacon::create(getShared(), toString(m_tag_receive->get()));
-                if(m_beacon_receive != newbeacon)
-                {
-                    if(m_beacon_receive)
-                    {
-                        m_beacon_receive->unbind(getShared());
-                        m_beacon_receive = newbeacon;
-                        m_beacon_receive->bind(getShared());
-                    }
-                }
-            }
-            else if(m_beacon_receive)
-            {
-                m_beacon_receive->unbind(getShared());
-                m_beacon_receive = nullptr;
-            }
-        }
-        else if(attr == m_tag_send)
-        {
-            if(m_tag_send->get())
-            {
-                m_beacon_send = Beacon::create(getShared(), toString(m_tag_send->get()));
-            }
-            else
-            {
-                m_beacon_send = nullptr;
-            }
-        }
         return true;
     }
     
@@ -185,43 +128,18 @@ namespace Kiwi
                                             Tag::create("Cross Color Off"),
                                             Tag::create("Color"),
                                             (ElemVector){0.6, 0.6, 0.6, 1.})),
-    m_tag_receive(Attr::create<AttrTag>(Tag::create("receivename"),
-                                            Tag::create("Receive Name"),
-                                            Tag::create("Behavior"))),
-    m_tag_send(Attr::create<AttrTag>(Tag::create("sendname"),
-                                            Tag::create("Send Name"),
-                                            Tag::create("Behavior"))),
     m_value(false)
     {
         addInlet(IoType::Data, IoPolarity::Hot, "Active/Desactive (bang, int or float)");
         addOutlet(IoType::Data, "Boolean 0 or 1 (float)");
         addAttribute(m_color_cross_on);
         addAttribute(m_color_cross_off);
-        addAttribute(m_tag_receive);
-        addAttribute(m_tag_send);
         setAttributeDefaultValues(Tag_size, {20., 20.});
     }
     
     Toggle::~Toggle()
     {
         ;
-    }
-    
-    void Toggle::send() const
-    {
-        ElemVector elements = {m_value};
-        Box::send(0, elements);
-        if(m_beacon_send)
-        {
-            for(unsigned long i = 0; i < m_beacon_send->size(); i++)
-            {
-                sBox box = m_beacon_send->getBox(i);
-                if(box)
-                {
-                    box->receive(0, elements);
-                }
-            }
-        }
     }
     
     bool Toggle::receive(unsigned long index, ElemVector const& elements)
@@ -231,14 +149,14 @@ namespace Kiwi
             if(elements[0].isNumber())
             {
                 m_value = elements[0];
-                send();
+                Box::send(0, {m_value});
                 redraw();
                 return true;
             }
             else if(elements[0] == Tag_bang)
             {
                 m_value = !m_value;
-                send();
+                Box::send(0, {m_value});
                 redraw();
                 return true;
             }
@@ -264,7 +182,7 @@ namespace Kiwi
         if(event.type == Event::Mouse::Down)
         {
             m_value = !m_value;
-            send();
+            Box::send(0, {m_value});
             redraw();
             return true;
         }
@@ -298,39 +216,95 @@ namespace Kiwi
         {
             redraw();
         }
-        else if(attr == m_tag_receive)
+        return true;
+    }
+    
+    // ================================================================================ //
+    //                                      NUMBER                                      //
+    // ================================================================================ //
+    
+    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard),
+    m_value(0.),
+    m_text_value(toString(0.))
+    {
+        addInlet(IoType::Data, IoPolarity::Hot, "New value and Ouput (int, float or bang)");
+        addOutlet(IoType::Data, "Value (float)");
+        setAttributeDefaultValues(Tag_size, {50., 20.});
+    }
+    
+    Number::~Number()
+    {
+        ;
+    }
+    
+    bool Number::receive(unsigned long index, ElemVector const& elements)
+    {
+        if(!elements.empty())
         {
-            if(m_tag_receive->get())
+            if(elements[0].isNumber())
             {
-                sBeacon newbeacon = Beacon::create(getShared(), toString(m_tag_receive->get()));
-                if(m_beacon_receive != newbeacon)
+                m_value = elements[0];
+                Box::send(0, {m_value});
+                m_text_value = toString(m_value);
+                redraw();
+                return true;
+            }
+            else if(elements[0] == Tag_bang)
+            {
+                m_value = !m_value;
+                Box::send(0, {m_value});
+                redraw();
+                return true;
+            }
+            else if(elements[0] == Tag_set)
+            {
+                if(elements.size() > 1 && elements[1].isNumber())
                 {
-                    if(m_beacon_receive)
-                    {
-                        m_beacon_receive->unbind(getShared());
-                        m_beacon_receive = newbeacon;
-                        m_beacon_receive->bind(getShared());
-                    }
+                    m_value = elements[0];
+                    m_text_value = toString(m_value);
+                    redraw();
+                    return true;
+                }
+                else
+                {
+                    Console::error(getShared(), "The message \"set\" implies a number after it.");
                 }
             }
-            else if(m_beacon_receive)
-            {
-                m_beacon_receive->unbind(getShared());
-                m_beacon_receive = nullptr;
-            }
         }
-        else if(attr == m_tag_send)
+        return false;
+    }
+    
+    bool Number::receive(Event::Mouse const& event)
+    {
+        if(event.type == Event::Mouse::Down)
         {
-            if(m_tag_send->get())
-            {
-                m_beacon_send = Beacon::create(getShared(), toString(m_tag_send->get()));
-            }
-            else
-            {
-                m_beacon_send = nullptr;
-            }
+            
         }
+        return false;
+    }
+    
+    bool Number::receive(Event::Keyboard const& event)
+    {
+        
+        return false;
+    }
+    
+    bool Number::draw(Doodle& doodle) const
+    {
+        const Point size = getSize();
+        doodle.setColor(Color(0.1, 0.2, 0.3, 1.));
+        doodle.fillRectangle(0., 0., 12, size.y());
+        doodle.setColor(color_border->get());
+        doodle.fillEllipse(3., size.y() * 0.5 - 3., 6., 6.);
+        doodle.setFont(getFont());
+        doodle.setColor(getTextColor());
+        doodle.drawText(m_text_value, 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
         return true;
+    }
+    
+    bool Number::attributeChanged(sAttr attr)
+    {
+        return false;
     }
     
     // ================================================================================ //
