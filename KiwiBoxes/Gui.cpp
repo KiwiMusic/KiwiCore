@@ -269,6 +269,10 @@ namespace Kiwi
                     Console::error(getShared(), "The message \"set\" implies a number after it.");
                 }
             }
+            else if(elements[0] == Tag_focus)
+            {
+                grabKeyboardFocus();
+            }
             m_edition = false;
         }
         return false;
@@ -282,50 +286,54 @@ namespace Kiwi
             if(event.getX() < 14)
             {
                 send(0, {m_value});
+                m_edition = false;
             }
-            else
+            else if(!m_edition)
             {
-                string value = to_string(m_value);
-                string text;
-                unsigned long pos = 0;
-                const int _x = event.getX() - 14.;
-                Point size(0., 0.);
-                while(_x > size.x() && pos < value.size())
+                string text = Font::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
+                for(unsigned long i = 0; i < text.size(); i++)
                 {
-                    text += value[pos];
-                    size = Font::getStringSize(getFont(), text);
-                    pos++;
+                    if(text[i] != '.')
+                        text[i] = '0';
                 }
-                
                 if(text.find('.') != string::npos)
                 {
-                    for(unsigned long i = 0; i < text.size(); i++)
-                    {
-                        if(text[i] != '.')
-                        {
-                            text[i] = '0';
-                        }
-                    }
                     text.push_back('1');
-                    m_increment = stod(text) * 10.;
+                    m_increment = stod(text);
                 }
                 else
                 {
                     m_increment = 1.;
                 }
                 m_last_y = event.getY();
+                m_edition = false;
             }
-            m_edition = false;
             return true;
         }
         else if(event.isDrag())
         {
-            event.setMouseUnlimited(true);
-            m_value += m_increment * (m_last_y - event.getY());
-            m_last_y = event.getY();
-            send(0, {m_value});
-            redraw();
-            m_edition = false;
+            if(!m_edition)
+            {
+                event.setMouseUnlimited(true);
+                m_value += m_increment * (m_last_y - event.getY());
+                m_last_y = event.getY();
+                send(0, {m_value});
+                redraw();
+            }
+            else
+            {
+                double x1 = event.getDownX() - 14.;
+                double x2 = event.getX() - 14.;
+                if(x2 < x1)
+                {
+                    const double temp = x1;
+                    x1 = x2;
+                    x2 = temp;
+                }
+                m_selection = Font::getStringPosition(getFont(), m_text, x1, x2);
+                redraw();
+            }
+            
             return true;
         }
         else
@@ -409,11 +417,16 @@ namespace Kiwi
         doodle.setColor(color_border->get());
         doodle.drawLine(12., 0., 12., size.y(), 1.);
         doodle.setFont(getFont());
-        doodle.setColor(getTextColor());
         if(m_edition)
         {
+            doodle.setColor(getTextColor());
             doodle.drawText(m_text, 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
-            if(m_maker)
+            if(m_selection.y() != 0.)
+            {
+                doodle.setColor(Color(0.1, 0.2, 0.3, 0.25));
+                doodle.fillRectangle(m_selection.x() + 14., 3., m_selection.y() + 14., size.y() - 3.);
+            }
+            else if(m_maker)
             {
                 Point pt = Font::getStringSize(getFont(), m_text);
                 doodle.drawLine(pt.x()+15., 3., pt.x()+15., size.y() - 3., 1.);
@@ -421,6 +434,7 @@ namespace Kiwi
         }
         else
         {
+            doodle.setColor(getTextColor());
            doodle.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
         }
         

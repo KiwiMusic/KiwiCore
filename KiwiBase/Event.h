@@ -334,6 +334,11 @@ namespace Kiwi
                 return m_character;
             }
             
+            inline bool isWideCharacter() const noexcept
+            {
+                return cin.narrow(m_character, 0);
+            }
+            
             inline bool isAlphabetic() const noexcept
             {
                 return isalpha(m_character);

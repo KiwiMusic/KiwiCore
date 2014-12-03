@@ -336,10 +336,15 @@ namespace Kiwi
         
     protected:
         
-        //! Send a notification to the page that the box should be redraw.
-        /** The function sends a notification to the page that the box should be redraw.
+        //! Send a notification to the controler that the box should be redraw.
+        /** The function sends a notification to the controler that the box should be redraw.
          */
         void    redraw() const noexcept;
+        
+        //! Send a notification to the controler that the box should be redraw.
+        /** The function sends a notification to the controler that the box should be redraw.
+         */
+        void    grabKeyboardFocus() const noexcept;
         
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
@@ -693,6 +698,11 @@ namespace Kiwi
             /** The function is called by the box when it should be repainted.
              */
 			virtual void redraw() {};
+            
+            //! The grab focus function that should be override.
+            /** The function is called by the box when it want to grab keyboard focus.
+             */
+			virtual void grabKeyboardFocus() {};
 				
             //! The default paint method.
             /** The default function paint a default box with the background, border, inlets, outlets and text.
@@ -726,6 +736,7 @@ namespace Kiwi
         static const sTag Tag_arguments;
         static const sTag Tag_bang;
         static const sTag Tag_id;
+        static const sTag Tag_focus;
         static const sTag Tag_name;
         static const sTag Tag_ninlets;
         static const sTag Tag_noutlets;

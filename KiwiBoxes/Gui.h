@@ -88,6 +88,7 @@ namespace Kiwi
         bool   m_edition;
         string m_text;
         bool   m_maker;
+        Point  m_selection;
     public:
         
         Number(sPage page);
