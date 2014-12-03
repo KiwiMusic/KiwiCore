@@ -74,14 +74,14 @@ namespace Kiwi
     
     bool Bang::receive(Event::Mouse const& event)
     {
-        if(event.type == Event::Mouse::Down)
+        if(event.isDown())
         {
             Box::send(0, {Tag_bang});
             m_led = true;
             redraw();
             return true;
         }
-        else if(event.type == Event::Mouse::Up)
+        else if(event.isUp())
         {
             m_led = false;
             redraw();
@@ -179,7 +179,7 @@ namespace Kiwi
     
     bool Toggle::receive(Event::Mouse const& event)
     {
-        if(event.type == Event::Mouse::Down)
+        if(event.isDown())
         {
             m_value = !m_value;
             Box::send(0, {m_value});
@@ -224,11 +224,16 @@ namespace Kiwi
     // ================================================================================ //
     
     Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard),
-    m_value(0.)
+    m_value(0.),
+    m_increment(0.),
+    m_last_y(0.),
+    m_edition(false)
     {
         addInlet(IoType::Data, IoPolarity::Hot, "New value and Ouput (int, float or bang)");
         addOutlet(IoType::Data, "Value (float)");
+        addOutlet(IoType::Data, "Tab key pressed (bang)");
         setAttributeDefaultValues(Tag_size, {50., 20.});
+        setFont(getFont());
     }
     
     Number::~Number()
@@ -265,94 +270,184 @@ namespace Kiwi
                     Console::error(getShared(), "The message \"set\" implies a number after it.");
                 }
             }
+            else if(elements[0] == Tag_focus)
+            {
+                grabKeyboardFocus();
+            }
+            m_edition = false;
         }
         return false;
     }
     
     bool Number::receive(Event::Mouse const& event)
     {
-        if(event.type == Event::Mouse::Down)
+        if(event.isDown())
         {
-            if(event.x < 14)
+            event.setMouseUnlimited(false);
+            if(event.getX() < 14)
             {
                 send(0, {m_value});
+                m_edition = false;
             }
-            else
+            else if(!m_edition)
             {
-                string value = to_string(m_value);
-                string text;
-                unsigned long pos = 0;
-                const int _x = event.x - 14.;
-                Point size(0., 0.);
-                while(_x > size.x() && pos < value.size())
+                string text = Text::Editor::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
+                for(unsigned long i = 0; i < text.size(); i++)
                 {
-                    text += value[pos];
-                    size = Font::getStringSize(getFont(), text);
-                    pos++;
+                    if(text[i] != '.')
+                        text[i] = '0';
                 }
                 if(text.find('.') != string::npos)
                 {
-                    for(unsigned long i = 0; i < text.size(); i++)
-                    {
-                        if(text[i] != '.')
-                        {
-                            text[i] = '0';
-                        }
-                    }
                     text.push_back('1');
-                    m_increment = stod(text) * 10.;
-                    cout << toString(m_increment) << endl;
+                    m_increment = stod(text);
                 }
                 else
                 {
-                    for(unsigned long i = 0; i < text.size(); i++)
-                    {
-                        text[i] = '0';
-                    }
-                    text.insert(text.begin(), '1');
-                    m_increment = stod(text) / 10.;
+                    m_increment = 1.;
                 }
-                m_last_y = event.y;
+                m_last_y = event.getY();
+                m_edition = false;
             }
+            return true;
         }
-        else if(event.type == Event::Mouse::Drag)
+        else if(event.isDrag())
         {
-            if(m_last_y > event.y)
+            if(!m_edition)
             {
-                m_value += m_increment;
+                event.setMouseUnlimited(true);
+                m_value += m_increment * (m_last_y - event.getY());
+                m_last_y = event.getY();
+                send(0, {m_value});
+                redraw();
             }
-            else if(m_last_y < event.y)
+            else
             {
-                 m_value -= m_increment;
+                double x1 = event.getDownX() - 14.;
+                double x2 = event.getX() - 14.;
+                if(x2 < x1)
+                {
+                    const double temp = x1;
+                    x1 = x2;
+                    x2 = temp;
+                }
+                m_selection = Text::Editor::getStringPosition(getFont(), m_text, x1, x2);
+                redraw();
             }
-            m_last_y = event.y;
-            redraw();
+            
+            return true;
+        }
+        else
+        {
+            event.setMouseUnlimited(false);
+            return false;
         }
         return false;
     }
     
     bool Number::receive(Event::Keyboard const& event)
     {
-        
-        return false;
+        if(m_edition && event.isEscape())
+        {
+            m_value = stod(m_text);
+            m_edition = false;
+            m_text.clear();
+            redraw();
+        }
+        else if(m_edition && event.isReturn())
+        {
+            m_value = stod(m_text);
+            send(0, {m_value});
+            m_edition = false;
+            m_text.clear();
+            redraw();
+        }
+        else if(m_edition && event.isTab())
+        {
+            m_value = stod(m_text);
+            send(1, {Tag_bang});
+            send(0, {m_value});
+            m_text.clear();
+            redraw();
+        }
+        else if(m_edition && event.isBackspace())
+        {
+            m_text.pop_back();
+            redraw();
+        }
+        else
+        {
+            m_text.push_back(event.getCharacter());
+            redraw();
+            if(!m_edition)
+            {
+                m_edition = true;
+                m_maker   = true;
+                Clock::create(getShared(), 500.);
+            }
+        }
+        return true;
+    }
+    
+    bool Number::receive(Event::Focus::Type event)
+    {
+        if(event == Event::Focus::Out && m_edition && !m_text.empty())
+        {
+            m_value = stod(m_text);
+            send(0, {m_value});
+            m_edition = false;
+            m_text.clear();
+            redraw();
+        }
+        return true;
+    }
+    
+    void Number::tick()
+    {
+        if(m_edition)
+        {
+            m_maker = !m_maker;
+            redraw();
+            Clock::create(getShared(), 500.);
+        }
     }
     
     bool Number::draw(Doodle& doodle) const
     {
         const Point size = getSize();
-        doodle.setColor(Color(0.1, 0.2, 0.3, 1.));
-        doodle.fillRectangle(3., 0., 9, size.y());
-        doodle.fillRectangle(0., 0., 9, size.y(), 3.);
         doodle.setColor(color_border->get());
-        doodle.fillEllipse(3., size.y() * 0.5 - 3., 6., 6.);
+        doodle.drawLine(12., 0., 12., size.y(), 1.);
         doodle.setFont(getFont());
-        doodle.setColor(getTextColor());
-        doodle.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+        if(m_edition)
+        {
+            doodle.setColor(getTextColor());
+            doodle.drawText(m_text, 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+            if(m_selection.y() != 0.)
+            {
+                doodle.setColor(Color(0.1, 0.2, 0.3, 0.25));
+                doodle.fillRectangle(m_selection.x() + 14., 3., m_selection.y() + 14., size.y() - 3.);
+            }
+            else if(m_maker)
+            {
+                Point pt = Text::getStringSize(getFont(), m_text);
+                doodle.drawLine(pt.x()+15., 3., pt.x()+15., size.y() - 3., 1.);
+            }
+        }
+        else
+        {
+            doodle.setColor(getTextColor());
+           doodle.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+        }
+        
         return true;
     }
     
     bool Number::attributeChanged(sAttr attr)
     {
+        if(attr == font_face || attr == font_name || attr == font_size)
+        {
+            setFont(getFont());
+        }
         return false;
     }
     
@@ -450,7 +545,7 @@ namespace Kiwi
     
     bool Slider::receive(Event::Mouse const& event)
     {
-        if(event.type == Event::Mouse::Down)
+        if(event.isDown())
         {
             m_value = !m_value;
             send();

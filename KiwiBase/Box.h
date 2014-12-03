@@ -28,6 +28,7 @@
 #include "AttributeBox.h"
 #include "Event.h"
 #include "Doodle.h"
+#include "Text.h"
 #include "Beacon.h"
 #include "Clock.h"
 
@@ -302,6 +303,15 @@ namespace Kiwi
             return false;
         }
         
+        //! The receive method that should be override.
+        /** The function shoulds perform some stuff. Return false if you don't want the focus event then the box manager will notifiy other keyboard listener if needed, othersize return true.
+         @param event    A focus event.
+         */
+        virtual bool receive(Event::Focus::Type event)
+        {
+            return false;
+        }
+        
         //! The paint method that should be override.
         /** The function shoulds draw some stuff in the doodle. Return false if you don't want to draw then the box manager will draw the text of the box, othersize return true.
          @param doodle    A doodle to draw.
@@ -327,10 +337,15 @@ namespace Kiwi
         
     protected:
         
-        //! Send a notification to the page that the box should be redraw.
-        /** The function sends a notification to the page that the box should be redraw.
+        //! Send a notification to the controler that the box should be redraw.
+        /** The function sends a notification to the controler that the box should be redraw.
          */
         void    redraw() const noexcept;
+        
+        //! Send a notification to the controler that the box should be redraw.
+        /** The function sends a notification to the controler that the box should be redraw.
+         */
+        void    grabKeyboardFocus() const noexcept;
         
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
@@ -685,6 +700,11 @@ namespace Kiwi
             /** The function is called by the box when it should be repainted.
              */
 			virtual void redraw() {};
+            
+            //! The grab focus function that should be override.
+            /** The function is called by the box when it want to grab keyboard focus.
+             */
+			virtual void grabKeyboardFocus() {};
 				
             //! The default paint method.
             /** The default function paint a default box with the background, border, inlets, outlets and text.
@@ -718,6 +738,7 @@ namespace Kiwi
         static const sTag Tag_arguments;
         static const sTag Tag_bang;
         static const sTag Tag_id;
+        static const sTag Tag_focus;
         static const sTag Tag_name;
         static const sTag Tag_ninlets;
         static const sTag Tag_noutlets;

@@ -32,6 +32,7 @@ namespace Kiwi
     const sTag Box::Tag_arguments   = Tag::create("arguments");
     const sTag Box::Tag_bang        = Tag::create("bang");
     const sTag Box::Tag_id          = Tag::create("id");
+    const sTag Box::Tag_focus       = Tag::create("focus");
     const sTag Box::Tag_name        = Tag::create("name");
     const sTag Box::Tag_ninlets     = Tag::create("ninlets");
     const sTag Box::Tag_noutlets    = Tag::create("noutlets");
@@ -91,7 +92,7 @@ namespace Kiwi
 					box->Attr::Manager::read(dico);
                     if(!dico->has(Tag_size) && !(box->getType() & Graphic))
                     {
-                        Point size = Font::getStringSize(box->getFont(), toString(box->getText()));
+                        Point size = Text::getStringSize(box->getFont(), toString(box->getText()));
                         box->setAttributeValue(Tag_size, {max(ceil(size.x()) + 6., 25.), box->getSize().y()});
                     }
                     return box;
@@ -124,6 +125,15 @@ namespace Kiwi
         if(controller)
         {
             controller->redraw();
+        }
+    }
+    
+    void Box::grabKeyboardFocus() const noexcept
+    {
+        sController controller = getController();
+        if(controller)
+        {
+            controller->grabKeyboardFocus();
         }
     }
     

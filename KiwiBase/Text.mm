@@ -21,7 +21,7 @@
  ==============================================================================
 */
 
-#include "Doodle.h"
+#include "Text.h"
 #include "TargetConditionals.h"
 
 #if TARGET_OS_MAC
@@ -29,7 +29,7 @@
 
 namespace Kiwi
 {
-    Point Font::getStringSize(Font const& font, string const& text) noexcept
+    Point Text::getStringSize(Font const& font, string const& text) noexcept
     {
         NSString *message = [NSString stringWithCString:text.c_str() encoding:[NSString defaultCStringEncoding]];
         NSString *fontname = [NSString stringWithCString:font.name.c_str() encoding:[NSString defaultCStringEncoding]];

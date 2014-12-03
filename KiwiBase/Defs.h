@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <cwchar>
 #include <iostream>
 #include <iomanip>
 #include <fstream>

@@ -28,62 +28,10 @@
 #include "Rectangle.h"
 #include "Path.h"
 #include "Color.h"
+#include "Font.h"
 
 namespace Kiwi
 {
-    // ================================================================================ //
-    //                                      FONT                                        //
-    // ================================================================================ //
-    
-    class Font
-    {
-    public:
-        enum Justification
-        {
-            Left                    = 1,
-            Right                   = 2,
-            HorizontallyCentered    = 4,
-            Top                     = 8,
-            TopLeft                 = 9,
-            TopRight                = 10,
-            CentredTop              = 12,
-            Bottom                  = 16,
-            BottomLeft              = 17,
-            BottomRight             = 18,
-            CentredBottom           = 20,
-            VerticallyCentred       = 32,
-            CentredLeft             = 33,
-            CentredRight            = 34,
-            Centred                 = 36,
-            HorizontallyJustified   = 64,
-        };
-        
-        enum Face
-        {
-            Normal      = 0,
-            Bold        = 1,
-            Italic      = 2,
-            Underlined  = 4
-        };
-        
-        string          name;
-        unsigned long   size;
-        Face            face;
-        
-        Font(string const& _name, unsigned long _size, Face _face = Normal) noexcept :
-        name(_name), size(_size), face(_face)
-        {
-            ;
-        }
-        
-        ~Font()
-        {
-            ;
-        }
-        
-        static Point getStringSize(Font const& font, string const& text) noexcept;
-    };
-    
     // ================================================================================ //
     //                                      DOODLE                                      //
     // ================================================================================ //
