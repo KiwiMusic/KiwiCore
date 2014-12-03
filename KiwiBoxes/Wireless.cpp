@@ -84,7 +84,7 @@ namespace Kiwi
     
     bool Int::receive(Event::Mouse const& event)
     {
-        if(event.type == Event::Mouse::DoubleClick)
+        if(event.isDoubleClick())
         {
             send(0, {m_value});
             return true;

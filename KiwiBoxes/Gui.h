@@ -85,6 +85,9 @@ namespace Kiwi
         double m_value;
         double m_increment;
         double m_last_y;
+        bool   m_edition;
+        string m_text;
+        bool   m_maker;
     public:
         
         Number(sPage page);
@@ -92,8 +95,10 @@ namespace Kiwi
         bool receive(unsigned long index, ElemVector const& elements) override;
         bool receive(Event::Mouse const& event) override;
         bool receive(Event::Keyboard const& event) override;
+        bool receive(Event::Focus::Type event) override;
         bool draw(Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
+        void tick() override;
         Allocate(Number);
     };
     

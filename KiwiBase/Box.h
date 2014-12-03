@@ -302,6 +302,15 @@ namespace Kiwi
             return false;
         }
         
+        //! The receive method that should be override.
+        /** The function shoulds perform some stuff. Return false if you don't want the focus event then the box manager will notifiy other keyboard listener if needed, othersize return true.
+         @param event    A focus event.
+         */
+        virtual bool receive(Event::Focus::Type event)
+        {
+            return false;
+        }
+        
         //! The paint method that should be override.
         /** The function shoulds draw some stuff in the doodle. Return false if you don't want to draw then the box manager will draw the text of the box, othersize return true.
          @param doodle    A doodle to draw.
