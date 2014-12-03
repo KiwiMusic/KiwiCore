@@ -147,9 +147,9 @@ namespace Kiwi
             return m_name;
         }
         
-        //! Retrieve the text of the box.
-        /** The function retrieves the text of the box as a tag.
-         @return The text of the box as a tag.
+        //! Retrieve the id of the box.
+        /** The function retrieves the id of the box as a tag.
+         @return The text of the id as a tag.
          */
         inline unsigned long getId() const noexcept
         {
@@ -499,6 +499,7 @@ namespace Kiwi
             
             struct Hit
             {
+				sBox			box;
 				Type            type = Type::Outside;
                 unsigned long   index;
             };

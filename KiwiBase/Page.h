@@ -143,7 +143,25 @@ namespace Kiwi
             lock_guard<mutex> guard(m_boxes_mutex);
             boxes = m_boxes;
         }
-        
+		
+		//! Retrieves box with id.
+		/** The function attempts to retrieves a box from the page with an id.
+		 @param boxID   The box id to find
+		 @return		The  box with this id, or nullptr if no any box has this id.
+		 */
+		sBox getBoxWithId(const unsigned long boxID) const
+		{
+			lock_guard<mutex> guard(m_boxes_mutex);
+			for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
+			{
+				if(boxID == m_boxes[i]->getId())
+				{
+					return m_boxes[i];
+				}
+			}
+			return nullptr;
+		}
+		
         //! Get the number of links.
         /** The function retrieves the number of links in the page.
          @return The number of links in the page.
@@ -354,6 +372,7 @@ namespace Kiwi
 						if(m_owner->m_boxes[i-1]->isHit(pt, m_box_hit))
 						{
 							m_box = m_owner->m_boxes[i-1];
+							m_box_hit.box = m_box.lock()->getBox();
 							m_hittype = Type::Box;
 							return true;
 						}
@@ -596,6 +615,24 @@ namespace Kiwi
 			 */
 			inline bool isSomethingSelected()
 			{
+				return !m_boxes_selected.empty() || !m_links_selected.empty();
+			}
+			
+			//! Retrieves if some boxes are currently selected.
+			/** The function retrieves if some boxes are currently selected.
+			 @return True if some boxes are currently selected, false if no box is selected.
+			 */
+			inline bool isAnyBoxSelected()
+			{
+				return !m_boxes_selected.empty();
+			}
+			
+			//! Retrieves if some links are currently selected.
+			/** The function retrieves if some links are currently selected.
+			 @return True if some links are currently selected, false if no box is selected.
+			 */
+			inline bool isAnyLinksSelected()
+			{
 				return !m_boxes_selected.empty();
 			}
 			
@@ -648,7 +685,23 @@ namespace Kiwi
 
 			void updateSelectedBoxesBounds();
 			
-			void dragSelectedBoxes(double dx, double dy);
+			void moveSelectedBoxes(Point const& delta);
+			
+			//! Retrieve the selected boxes (including links) as a dico
+			/** The function retrieve the selected boxes (including links) as a dico.
+			 You may use it to copy selection to clipboard.
+			 @param dico The dico to fill.
+			*/
+			void getSelectedBoxesDico(sDico dico);
+			
+			//! Adds boxes to the page from a dico
+			/** The function adds boxes to the page from a dico
+			 The dico must be formated with getSelectedBoxesDico
+			 @param dico The dico.
+			 @param shift Shift the position of the boxes.
+			 @return True if the page has been modified, false otherwise
+			 */
+			bool addBoxesFromDico(sDico dico, Point const& shift = Point());
 			
 			//! The redraw function that must be overriden to be notified when the page needs to be redrawn.
 			/** The function is called by the page when it needs to be repainted.
