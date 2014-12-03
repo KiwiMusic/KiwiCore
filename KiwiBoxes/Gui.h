@@ -79,7 +79,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    class Number : public Box
+    class Number : public Box, public Text::Editor
     {
     private:
         double m_value;

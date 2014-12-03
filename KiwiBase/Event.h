@@ -111,16 +111,17 @@ namespace Kiwi
             const Point     m_wheel_offset;
             const long      m_modifiers;
 			const bool		m_was_clicked;
+            const unsigned long m_nclicks;
 			
         public:
-            Mouse(Type type, int x, int y, long mod, double wheel_x, double wheel_y, bool was_clicked, int down_x, int down_y) noexcept
-            : m_type(type), m_position(x, y), m_position_down(down_x, down_y), m_wheel_offset(wheel_x, wheel_y), m_modifiers(mod), m_was_clicked(was_clicked)
+            Mouse(Type type, int x, int y, long mod, double wheel_x, double wheel_y, bool was_clicked, int down_x, int down_y, unsigned long nclicks) noexcept
+            : m_type(type), m_position(x, y), m_position_down(down_x, down_y), m_wheel_offset(wheel_x, wheel_y), m_modifiers(mod), m_was_clicked(was_clicked), m_nclicks(nclicks)
             {
                 ;
             }
             
-            Mouse(Type type, Point position, long mod, Point wheel, bool was_clicked, Point down_position) noexcept
-            : m_type(type), m_position(position), m_position_down(down_position), m_wheel_offset(wheel), m_modifiers(mod), m_was_clicked(was_clicked)
+            Mouse(Type type, Point position, long mod, Point wheel, bool was_clicked, Point down_position, unsigned long nclicks) noexcept
+            : m_type(type), m_position(position), m_position_down(down_position), m_wheel_offset(wheel), m_modifiers(mod), m_was_clicked(was_clicked), m_nclicks(nclicks)
             {
                 ;
             }
@@ -280,6 +281,11 @@ namespace Kiwi
                 return m_was_clicked;
             }
             
+            inline unsigned long getNumberOfClicks() const noexcept
+            {
+                return m_nclicks;
+            }
+            
             virtual void setMouseUnlimited(bool isLimited, bool visibleUntilLimits = false) const = 0;
         };
         
@@ -302,7 +308,7 @@ namespace Kiwi
                 Return  = 0x0d,
                 Tab     = 9,
                 Delete  = 0xF728,
-                Backsace= 0x7f,
+                Backspace= 0x7f,
                 Insert  = -1,
                 Up      = 0xF700,
                 Down    = 0xF701,
@@ -329,14 +335,43 @@ namespace Kiwi
                 ;
             }
             
-            inline wchar_t getCharacter() const noexcept
+            inline char getCharacter() const noexcept
+            {
+                char nchar;
+                if(wcstombs(&nchar, &m_character, sizeof(char)) != -1)
+                {
+                    return nchar;
+                }
+                else
+                {
+                    nchar = ' ';
+                    return nchar;
+                }
+            }
+            
+            inline bool isCharacter() const noexcept
+            {
+                char nchar;
+                if(wcstombs(&nchar, &m_character, sizeof(char)) != -1)
+                {
+                    return true;
+                }
+                return false;
+            }
+            
+            inline wchar_t getWideCharacter() const noexcept
             {
                 return m_character;
             }
             
             inline bool isWideCharacter() const noexcept
             {
-                return cin.narrow(m_character, 0);
+                char nchar;
+                if(wcstombs(&nchar, &m_character, sizeof(char)) == -1)
+                {
+                    return true;
+                }
+                return false;
             }
             
             inline bool isAlphabetic() const noexcept
@@ -379,9 +414,9 @@ namespace Kiwi
                 return m_character == 0xF728;
             }
             
-            inline bool isBacksace() const noexcept
+            inline bool isBackspace() const noexcept
             {
-                return m_character == Backsace;
+                return m_character == Backspace;
             }
             
             inline bool isInsert() const noexcept

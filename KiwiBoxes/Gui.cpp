@@ -233,6 +233,7 @@ namespace Kiwi
         addOutlet(IoType::Data, "Value (float)");
         addOutlet(IoType::Data, "Tab key pressed (bang)");
         setAttributeDefaultValues(Tag_size, {50., 20.});
+        setFont(getFont());
     }
     
     Number::~Number()
@@ -290,7 +291,7 @@ namespace Kiwi
             }
             else if(!m_edition)
             {
-                string text = Font::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
+                string text = Text::Editor::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
                 for(unsigned long i = 0; i < text.size(); i++)
                 {
                     if(text[i] != '.')
@@ -330,7 +331,7 @@ namespace Kiwi
                     x1 = x2;
                     x2 = temp;
                 }
-                m_selection = Font::getStringPosition(getFont(), m_text, x1, x2);
+                m_selection = Text::Editor::getStringPosition(getFont(), m_text, x1, x2);
                 redraw();
             }
             
@@ -369,7 +370,7 @@ namespace Kiwi
             m_text.clear();
             redraw();
         }
-        else if(m_edition && event.isBacksace())
+        else if(m_edition && event.isBackspace())
         {
             m_text.pop_back();
             redraw();
@@ -428,7 +429,7 @@ namespace Kiwi
             }
             else if(m_maker)
             {
-                Point pt = Font::getStringSize(getFont(), m_text);
+                Point pt = Text::getStringSize(getFont(), m_text);
                 doodle.drawLine(pt.x()+15., 3., pt.x()+15., size.y() - 3., 1.);
             }
         }
@@ -443,6 +444,10 @@ namespace Kiwi
     
     bool Number::attributeChanged(sAttr attr)
     {
+        if(attr == font_face || attr == font_name || attr == font_size)
+        {
+            setFont(getFont());
+        }
         return false;
     }
     
