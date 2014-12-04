@@ -401,7 +401,39 @@ namespace Kiwi
         }
         return false;
     }
-    
+	
+	void Box::getInletLinks(vector<sLink> links, unsigned long index)
+	{
+		links.clear();
+		
+		if (index < getNumberOfInlets())
+		{
+			lock_guard<mutex> guard(m_io_mutex);
+			const unsigned long nLinks = m_inlets[index]->getNumberOfLinks();
+			for (int i = 0; i < nLinks; i++)
+			{
+				sLink link = m_inlets[index]->getLink(i);
+				links.push_back(link);
+			}
+		}
+	}
+	
+	void Box::getOutletLinks(vector<sLink> links, unsigned long index)
+	{
+		links.clear();
+		
+		if (index < getNumberOfOutlets())
+		{
+			lock_guard<mutex> guard(m_io_mutex);
+			const unsigned long nLinks = m_outlets[index]->getNumberOfLinks();
+			for (int i = 0; i < nLinks; i++)
+			{
+				sLink link = m_outlets[index]->getLink(i);
+				links.push_back(link);
+			}
+		}
+	}
+	
     void Box::setController(sController ctrl)
     {
         m_controller = ctrl;
