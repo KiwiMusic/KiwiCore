@@ -268,7 +268,6 @@ namespace Kiwi
                                 m_ids_mapper[_id] = box->getId();
                             }
                         }
-                            
                     }
                 }
             }
@@ -436,7 +435,7 @@ namespace Kiwi
 			for(size_t i = 0; i < m_boxes.size(); i++)
 				m_boxes[i]->setEditionStatus(!m_locked);
 			
-			unSelectAll();
+			unselectAll();
 			
 			lockStatusChanged();
 		}
@@ -534,12 +533,12 @@ namespace Kiwi
 		return nullptr;
 	}
 	
-	void Page::Controller::unSelectAll()
+	void Page::Controller::unselectAll()
 	{
 		if(isSomethingSelected())
 		{
-			unSelectAllBoxes(false);
-			unSelectAllLinks(false);
+			unselectAllBoxes(false);
+			unselectAllLinks(false);
 			selectionChanged();
 		}
 	}
@@ -610,7 +609,7 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Page::Controller::unSelectAllBoxes(const bool notify)
+	bool Page::Controller::unselectAllBoxes(const bool notify)
 	{
 		bool sendChange = false;
 		
@@ -635,7 +634,7 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Page::Controller::unSelectAllLinks(const bool notify)
+	bool Page::Controller::unselectAllLinks(const bool notify)
 	{
 		bool sendChange = false;
 		
@@ -772,79 +771,6 @@ namespace Kiwi
 		return false;
 	}
 	
-	void Page::Controller::addToSelectionBasedOnModifiers(Box::sController box, bool selOnly)
-	{
-		if (selOnly)
-		{
-			selectOnlyBox(box);
-		}
-		else if (isBoxInSelection(box))
-		{
-			removeBoxFromSelection(box);
-		}
-		else
-		{
-			addBoxToSelection(box);
-		}
-	}
-	
-	void Page::Controller::addToSelectionBasedOnModifiers(Link::sController link, bool selOnly)
-	{
-		if (selOnly)
-		{
-			selectOnlyLink(link);
-		}
-		else if (isLinkInSelection(link))
-		{
-			removeLinkFromSelection(link);
-		}
-		else
-		{
-			addLinkToSelection(link);
-		}
-	}
-	
-	bool Page::Controller::selectOnMouseDown(Box::sController box, bool selOnly)
-	{
-		/*
-		 if (isBoxInSelection(box))
-			return ! modifiers.isPopupMenu();
-		 */
-		
-		if (isBoxInSelection(box))
-			return true;
-		
-		addToSelectionBasedOnModifiers(box, selOnly);
-		return false;
-	}
-	
-	bool Page::Controller::selectOnMouseDown(Link::sController link, bool selOnly)
-	{
-		/*
-		 if (isLinkInSelection(link))
-			return ! modifiers.isPopupMenu();
-		 */
-		
-		if (isLinkInSelection(link))
-			return true;
-		
-		addToSelectionBasedOnModifiers(link, selOnly);
-		return false;
-	}
-	
-	void Page::Controller::selectOnMouseUp (Box::sController box, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod)
-	{
-		if (resultOfMouseDownSelectMethod && ! boxWasDragged)
-			addToSelectionBasedOnModifiers(box, selOnly);
-	}
-	
-	
-	void Page::Controller::selectOnMouseUp(Link::sController link, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod)
-	{
-		if (resultOfMouseDownSelectMethod && ! boxWasDragged)
-			addToSelectionBasedOnModifiers(link, selOnly);
-	}
-	
 	void Page::Controller::updateSelectedBoxesBounds()
 	{
 		m_boxes_bounds.clear();
@@ -859,24 +785,168 @@ namespace Kiwi
 		}
 	}
 	
-	sTag positiona = Tag::create("position");
-	
-	void Page::Controller::dragSelectedBoxes(double dx, double dy)
+	Rectangle Page::Controller::getSelectedBoxesBounds()
 	{
-		unsigned int i = 0;
-		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+		// to do !
+		return Rectangle();
+	}
+	
+	void Page::Controller::getBoxesInRect(vector<sBox> boxes, Rectangle const& rect)
+	{
+		// to do !
+		boxes.clear();
+	}
+	
+	void Page::Controller::moveSelectedBoxes(Point const& delta)
+	{
+		if (isAnyBoxSelected())
 		{
-			Box::sController box = (*it).lock();
-			if(box)
+			unsigned int i = 0;
+			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 			{
-				if(i < m_boxes_bounds.size())
+				Box::sController box = (*it).lock();
+				if(box)
 				{
-					ElemVector pos = {m_boxes_bounds[i].x() + dx, m_boxes_bounds[i].y() + dy};
-					box->getBox()->setAttributeValue(positiona, pos);
+					Point boxpos = box->getBox()->getPosition();
+					boxpos += delta;
+					box->getBox()->setAttributeValue(AttrBox::Tag_position, {boxpos.x(), boxpos.y()});
+				}
+				i++;
+			}
+		}
+	}
+	
+	void Page::Controller::getSelectedBoxesDico(sDico dico)
+	{
+		string text;
+		if (isAnyBoxSelected())
+		{
+			ElemVector elements;
+			vector<sBox> boxes;
+			unsigned int i = 0;
+			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+			{
+				Box::sController boxctrl = (*it).lock();
+				if(boxctrl)
+				{
+					sBox box = boxctrl->getBox();
+					if (box)
+					{
+						sDico boxdico = Dico::create();
+						sDico subbox = Dico::create();
+						if(boxdico && subbox)
+						{
+							box->write(subbox);
+							boxdico->set(Tag_box, subbox);
+							elements.push_back(boxdico);
+							boxes.push_back(box);
+						}
+					}
+				}
+				i++;
+			}
+			dico->set(Tag_boxes, elements);
+			
+			elements.clear();
+			
+			for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
+			{
+				sDico linkdico = Dico::create();
+				sDico sublinkdico = Dico::create();
+				if(linkdico && sublinkdico)
+				{
+					sLink link = m_links[i]->getLink();
+					if (link)
+					{
+						sBox boxFrom = link->getBoxFrom();
+						sBox boxTo = link->getBoxTo();
+						if (find(boxes.begin(), boxes.end(), boxFrom) != boxes.end() &&
+							find(boxes.begin(), boxes.end(), boxTo) != boxes.end())
+						{
+							link->write(sublinkdico);
+							linkdico->set(Tag_link, sublinkdico);
+							elements.push_back(linkdico);
+						}
+					}
 				}
 			}
-			i++;
+			dico->set(Tag_links, elements);
+			boxes.clear();
 		}
+	}
+	
+	bool Page::Controller::addBoxesFromDico(sDico dico, Point const& shift)
+	{
+		sPage page = getPage();
+		bool pageModified = false;
+		if (page)
+		{
+			map<unsigned long, unsigned long> m_ids_mapper;
+			ElemVector boxes;
+			dico->get(Tag_boxes, boxes);
+			for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
+			{
+				sDico subdico = boxes[i];
+				if(subdico)
+				{
+					subdico = subdico->get(Tag_box);
+					if(subdico)
+					{
+						sBox box = page->createBox(subdico);
+						if (box)
+						{
+							const Point pos = box->getPosition();
+							box->setAttributeValue(AttrBox::Tag_position, {pos.x() + shift.x(), pos.y() + shift.y()});
+							
+							if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
+							{
+								unsigned long _id = subdico->get(Box::Tag_id);
+								if(box->getId() != _id)
+								{
+									m_ids_mapper[_id] = box->getId();
+								}
+							}
+							
+							pageModified = true;
+						}
+					}
+				}
+			}
+			
+			ElemVector links;
+			dico->get(Tag_links, links);
+			for(vector<sLink>::size_type i = 0; i < links.size(); i++)
+			{
+				sDico subdico = links[i];
+				if(subdico)
+				{
+					subdico = subdico->get(Tag_link);
+					if(subdico)
+					{
+						ElemVector elem;
+						subdico->get(Link::Tag_from, elem);
+						if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
+						{
+							if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+							{
+								subdico->set(Link::Tag_from, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+							}
+						}
+						subdico->get(Link::Tag_to, elem);
+						if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
+						{
+							if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+							{
+								subdico->set(Link::Tag_to, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+							}
+						}
+						page->createLink(subdico);
+					}
+				}
+			}
+		}
+		
+		return pageModified;
 	}
 }
 

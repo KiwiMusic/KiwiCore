@@ -72,7 +72,14 @@ namespace Kiwi
          @param The point to add.
          */
         void add(Point const& pt) noexcept;
-        
+		
+		//! Sets a point of the path.
+		/** The function sets a point of the path.
+		 @param index The index of the point to replace.
+		 @param The new point.
+		 */
+		void setPoint(unsigned long index, Point const& pt) noexcept;
+		
         //! Clear the path.
         /** The function clears a point to the path.
          */
@@ -134,6 +141,21 @@ namespace Kiwi
         bool contains(Point const& pt) const noexcept;
         
         bool intersect(Point const& pt) const noexcept;
+		
+		//! Copy path.
+		/** The function returns a path which is the copy of another path.
+		 @param path Another path.
+		 @return The path.
+		 */
+		inline Path copy() noexcept
+		{
+			Path p;
+			Console::post("=====");
+			for(int i = 0; i < m_points.size(); i++)
+				p.add(get(i));
+				
+			return p;
+		}
     };
 }
 

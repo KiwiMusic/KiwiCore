@@ -60,6 +60,14 @@ namespace Kiwi
     {
         m_points.push_back(pt);
     }
+	
+	void Path::setPoint(unsigned long index, Point const& pt) noexcept
+	{
+		if(index < size())
+		{
+			m_points[index] = pt;
+		}
+	}
     
     void Path::clear() noexcept
     {

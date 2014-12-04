@@ -96,7 +96,7 @@ namespace Kiwi
         font_justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0)),
         
         // Color //
-        color_editing_background(Attr::create<AttrColor>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag_Color, (ElemVector){1., 1., 1, 1.})),
+        color_editing_background(Attr::create<AttrColor>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag_Color, (ElemVector){0.8, 0.8, 0.8, 1.})),
         color_locked_background(Attr::create<AttrColor>(Tag_locked_bgcolor, Tag_Locked_Background_Color, Tag_Color, (ElemVector){0.4, 0.4, 0.4, 1.})),
 		
 		// Editing //
@@ -111,6 +111,9 @@ namespace Kiwi
             // Color //
             addAttribute(color_editing_background);
             addAttribute(color_locked_background);
+			
+			// Editing //
+			addAttribute(editing_grid_size);
         }
         
         ~AttrPage()
@@ -118,27 +121,27 @@ namespace Kiwi
             ;
         }
         
-        //! Retrieve if the font of the box.
-        /** The function retrieves the font of the box.
-         @return The font of the box.
+        //! Retrieve the default font for boxes of the page.
+        /** The function retrieves the default font for boxes of the page.
+         @return The default font for boxes of the page.
          */
         inline Font getFont() const noexcept
         {
             return Font(toString(font_name->get()), font_size->get(), (Font::Face)font_face->get());
         }
         
-        //! Retrieve if the font justification of the box.
-        /** The function retrieves the font justification of the box.
-         @return The font justification of the box.
+        //! Retrieve the default font justification for boxes of the page.
+		/** The function retrieves the default font justification for boxes of the page.
+		 @return The default font justification for boxes of the page.
          */
         inline Font::Justification getFontJustification() const noexcept
         {
             return (Font::Justification)font_justification->get();
         }
         
-        //! Retrieve if the background color of the box.
-        /** The function retrieves the background color of the box.
-         @return The background color of the box.
+        //! Retrieve if the background color of the page when unlocked.
+        /** The function retrieves the background color of the page when unlocked
+         @return The Unlocked background color of the page.
          */
         inline Color getEditingBgColor() const noexcept
         {
@@ -146,12 +149,21 @@ namespace Kiwi
         }
 		
 		//! Retrieve if the locked background color.
-		/** The function retrieves the background color of the box.
-		 @return The background color of the box.
+		/** The function retrieves the locked background color of the page.
+		 @return The locked background color of the page.
 		 */
 		inline Color getLockedBgColor() const noexcept
 		{
 			return color_locked_background->get();
+		}
+		
+		//! Retrieve the grid size attribute value.
+		/** The function retrieve the grid size attribute value.
+		 @return The grid size attribute value.
+		 */
+		inline long getGridSize() const noexcept
+		{
+			return editing_grid_size->get();
 		}
     };
 }
