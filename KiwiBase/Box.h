@@ -229,7 +229,25 @@ namespace Kiwi
                 return IoType::Both;
             }
         }
-        
+		
+		//! Retrieve the type of an inlet.
+		/** The functions retrieves the type of an inlet.
+		 @param index The inlet index.
+		 @return The type.
+		 */
+		inline IoPolarity getInletPolarity(unsigned long index) const noexcept
+		{
+			lock_guard<mutex> guard(m_io_mutex);
+			if(index < m_inlets.size())
+			{
+				return m_inlets[(vector<uInlet>::size_type)index]->getPolarity();
+			}
+			else
+			{
+				return IoPolarity::Hot;
+			}
+		}
+		
         //! Retrieve the number of outlets of the box.
         /** The functions retrieves the number of outlets of the box.
          @return The number of outlets.
