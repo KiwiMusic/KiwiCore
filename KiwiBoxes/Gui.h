@@ -82,8 +82,8 @@ namespace Kiwi
     class Message : public Box, public Text::Editor
     {
     private:
-        ElemVector m_elements;
-        string     m_text;
+        ElemVector      m_elements;
+        vector<string>  m_text;
     public:
         
         Message(sPage page);

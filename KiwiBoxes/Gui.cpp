@@ -251,21 +251,59 @@ namespace Kiwi
     {
         if(Text::Editor::receive(event))
         {
-            Text::Editor::getText(m_text);
-            cout << m_text << endl;
-            const Point textsize = Text::getStringSize(getFont(), m_text);
-            if(textsize.x() > getSize().x() - 6.)
+            const Font font = getFont();
+            string text;
+            m_text.clear();
+            Text::Editor::getText(text);
+            string::size_type pos = 0;
+            double nwidth = 0., nheight = 0;
+            cout << "text  : "<< text << endl;
+            while(pos != string::npos)
             {
-                Attr::Manager::setAttributeValue(Tag_size, {textsize.x() + 6, getSize().y()});
+                string line;
+                string::size_type next = text.find('\n', pos);
+                if(next != string::npos)
+                {
+                    line.assign(text.begin() + pos, text.begin() + next);
+                    cout << "new  : "<< line << endl;
+                }
+                else
+                {
+                    line.assign(text.begin() + pos, text.end());
+                    cout << "last  : "<< line << endl;
+                }
+                m_text.push_back(line);
+                const Point textsize = Text::getStringSize(font, line);
+                if(textsize.x() > nwidth)
+                {
+                    nwidth = textsize.x();
+                }
+                if(textsize.y() > nheight)
+                {
+                    nheight = textsize.y();
+                }
+                if(next != string::npos)
+                {
+                    pos = ++next;
+                }
+                else
+                {
+                    pos = next;
+                }
             }
-            else if(textsize.y() > getSize().y() - 6.)
+            if(nwidth + 6 > getSize().x())
             {
-                Attr::Manager::setAttributeValue(Tag_size, {getSize().x(), textsize.y() + 6});
+                Attr::Manager::setAttributeValue(Tag_size, {nwidth + 6, max(nheight * m_text.size() + 6, 20.)});
+            }
+            else if(nheight * m_text.size() + 6 != getSize().y())
+            {
+                Attr::Manager::setAttributeValue(Tag_size, {getSize().x(), max(nheight * m_text.size() + 6, 20.)});
             }
             else
             {
                 redraw();
             }
+            
         }
         return true;
     }
@@ -278,10 +316,14 @@ namespace Kiwi
     bool Message::draw(Doodle& doodle) const
     {
         const Point size = getSize();
+        const double text_height = size.y() /  (double)m_text.size();
         doodle.setFont(getFont());
         doodle.setColor(color_text->get());
+        for(vector<string>::size_type i = 0; i < m_text.size(); i++)
+        {
+            doodle.drawText(m_text[i], 3., text_height * i, size.x() - 3, text_height, Font::VerticallyCentred);
+        }
         
-        doodle.drawText(m_text, 3., 0., size.x() - 3, size.y(), Font::VerticallyCentred);
         return true;
     }
     
