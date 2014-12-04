@@ -25,5 +25,8 @@
 
 namespace Kiwi
 {
-    ;
+    void Doodle::drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap)
+    {
+        drawText(text, rect.x(), rect.y(), rect.width(), rect.height(), j, wrap);
+    }
 }

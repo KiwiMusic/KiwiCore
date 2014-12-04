@@ -220,6 +220,124 @@ namespace Kiwi
     }
     
     // ================================================================================ //
+    //                                      MESSAGE                                     //
+    // ================================================================================ //
+    
+    Message::Message(sPage page) : Box(page, "message", Graphic | Mouse | Keyboard)
+    {
+        addInlet(IoType::Data, IoPolarity::Hot, "Messages and Ouput (anything)");
+        addInlet(IoType::Data, IoPolarity::Hot, "Messages without Ouput (anything)");
+        addOutlet(IoType::Data, "Messages (anything)");
+        setAttributeDefaultValues(Tag_size, {50., 20.});
+        setFont(getFont());
+    }
+    
+    Message::~Message()
+    {
+        m_elements.clear();
+    }
+    
+    bool Message::receive(unsigned long index, ElemVector const& elements)
+    {
+        return false;
+    }
+    
+    bool Message::receive(Event::Mouse const& event)
+    {
+        return false;
+    }
+    
+    bool Message::receive(Event::Keyboard const& event)
+    {
+        if(Text::Editor::receive(event))
+        {
+            const Font font = getFont();
+            string text;
+            m_text.clear();
+            Text::Editor::getText(text);
+            string::size_type pos = 0;
+            double nwidth = 0., nheight = 0;
+            cout << "text  : "<< text << endl;
+            while(pos != string::npos)
+            {
+                string line;
+                string::size_type next = text.find('\n', pos);
+                if(next != string::npos)
+                {
+                    line.assign(text.begin() + pos, text.begin() + next);
+                    cout << "new  : "<< line << endl;
+                }
+                else
+                {
+                    line.assign(text.begin() + pos, text.end());
+                    cout << "last  : "<< line << endl;
+                }
+                m_text.push_back(line);
+                const Point textsize = Text::getStringSize(font, line);
+                if(textsize.x() > nwidth)
+                {
+                    nwidth = textsize.x();
+                }
+                if(textsize.y() > nheight)
+                {
+                    nheight = textsize.y();
+                }
+                if(next != string::npos)
+                {
+                    pos = ++next;
+                }
+                else
+                {
+                    pos = next;
+                }
+            }
+            if(nwidth + 6 > getSize().x())
+            {
+                Attr::Manager::setAttributeValue(Tag_size, {nwidth + 6, max(nheight * m_text.size() + 6, 20.)});
+            }
+            else if(nheight * m_text.size() + 6 != getSize().y())
+            {
+                Attr::Manager::setAttributeValue(Tag_size, {getSize().x(), max(nheight * m_text.size() + 6, 20.)});
+            }
+            else
+            {
+                redraw();
+            }
+            
+        }
+        return true;
+    }
+    
+    bool Message::receive(Event::Focus::Type event)
+    {
+        return Text::Editor::receive(event);
+    }
+    
+    bool Message::draw(Doodle& doodle) const
+    {
+        const Point size = getSize();
+        const double text_height = size.y() /  (double)m_text.size();
+        doodle.setFont(getFont());
+        doodle.setColor(color_text->get());
+        for(vector<string>::size_type i = 0; i < m_text.size(); i++)
+        {
+            doodle.drawText(m_text[i], 3., text_height * i, size.x() - 3, text_height, Font::VerticallyCentred);
+        }
+        
+        return true;
+    }
+    
+    bool Message::attributeChanged(sAttr attr)
+    {
+        return true;
+    }
+    
+    void Message::tick()
+    {
+        
+    }
+    
+    // ================================================================================ //
     //                                      NUMBER                                      //
     // ================================================================================ //
     
@@ -281,67 +399,64 @@ namespace Kiwi
     
     bool Number::receive(Event::Mouse const& event)
     {
-        if(event.isDown())
+        if(!m_edition)
         {
-            event.setMouseUnlimited(false);
-            if(event.getX() < 14)
+            if(event.isDown())
             {
-                send(0, {m_value});
-                m_edition = false;
+                event.setMouseUnlimited(false);
+                if(event.getX() < 14)
+                {
+                    send(0, {m_value});
+                    m_edition = false;
+                }
+                else if(!m_edition)
+                {
+                    string text = Text::Editor::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
+                    for(unsigned long i = 0; i < text.size(); i++)
+                    {
+                        if(text[i] != '.')
+                            text[i] = '0';
+                    }
+                    if(text.find('.') != string::npos)
+                    {
+                        text.push_back('1');
+                        m_increment = stod(text);
+                    }
+                    else
+                    {
+                        m_increment = 1.;
+                    }
+                    m_last_y = event.getY();
+                    m_edition = false;
+                }
+                return true;
             }
-            else if(!m_edition)
+            else if(event.isDrag())
             {
-                string text = Text::Editor::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
-                for(unsigned long i = 0; i < text.size(); i++)
+                if(!m_edition)
                 {
-                    if(text[i] != '.')
-                        text[i] = '0';
+                    event.setMouseUnlimited(true);
+                    m_value += m_increment * (m_last_y - event.getY());
+                    m_last_y = event.getY();
+                    send(0, {m_value});
+                    redraw();
                 }
-                if(text.find('.') != string::npos)
-                {
-                    text.push_back('1');
-                    m_increment = stod(text);
-                }
-                else
-                {
-                    m_increment = 1.;
-                }
-                m_last_y = event.getY();
-                m_edition = false;
-            }
-            return true;
-        }
-        else if(event.isDrag())
-        {
-            if(!m_edition)
-            {
-                event.setMouseUnlimited(true);
-                m_value += m_increment * (m_last_y - event.getY());
-                m_last_y = event.getY();
-                send(0, {m_value});
-                redraw();
+                
+                return true;
             }
             else
             {
-                double x1 = event.getDownX() - 14.;
-                double x2 = event.getX() - 14.;
-                if(x2 < x1)
-                {
-                    const double temp = x1;
-                    x1 = x2;
-                    x2 = temp;
-                }
-                m_selection = Text::Editor::getStringPosition(getFont(), m_text, x1, x2);
-                redraw();
+                event.setMouseUnlimited(false);
+                return false;
             }
-            
-            return true;
+
         }
         else
         {
-            event.setMouseUnlimited(false);
-            return false;
+            if(Text::Editor::receive(event))
+            redraw();
         }
+        
         return false;
     }
     
