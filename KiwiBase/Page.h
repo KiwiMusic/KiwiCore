@@ -398,7 +398,7 @@ namespace Kiwi
 					return false;
 				}
 				
-				Box::sController getHittedBox()
+				Box::sController getHitBox()
 				{
 					if (m_hittype == Type::Box && !m_box.expired())
 					{
@@ -425,7 +425,7 @@ namespace Kiwi
 					return Link::Controller::Hit();
 				}
 				
-				Link::sController getHittedLink()
+				Link::sController getHitLink()
 				{
 					if (m_hittype == Type::Link && !m_link.expired())
 					{
@@ -434,12 +434,12 @@ namespace Kiwi
 					return nullptr;
 				}
 				
-				inline bool hasHittedBox() const noexcept
+				inline bool hasHitBox() const noexcept
 				{
 					return m_hittype == Type::Box;
 				}
 				
-				inline bool hasHittedLink() const noexcept
+				inline bool hasHitLink() const noexcept
 				{
 					return m_hittype == Type::Link;
 				}
@@ -657,34 +657,43 @@ namespace Kiwi
 			//! Unselects all boxes and links.
 			/** The function unselects all boxes and links.
 			 */
-			void unSelectAll();
+			void unselectAll();
 			
 			bool addAllBoxesToSelection();
 			bool addAllLinksToSelection();
 			
-			bool unSelectAllBoxes(bool notify);
-			bool unSelectAllLinks(bool notify);
+			bool unselectAllBoxes(bool notify);
+			bool unselectAllLinks(bool notify);
 			
 			bool isBoxInSelection(Box::sController box);
 			bool addBoxToSelection(Box::sController box);
 			bool selectOnlyBox(Box::sController box);
 			bool removeBoxFromSelection(Box::sController box);
 			
-			void addToSelectionBasedOnModifiers(Box::sController box, bool selOnly);
-			bool selectOnMouseDown(Box::sController box, bool selOnly);
-			void selectOnMouseUp(Box::sController box, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod);
-			
 			bool isLinkInSelection(Link::sController link);
 			bool addLinkToSelection(Link::sController link);
 			bool selectOnlyLink(Link::sController link);
 			bool removeLinkFromSelection(Link::sController link);
-			
-			void addToSelectionBasedOnModifiers(Link::sController link, bool selOnly);
-			bool selectOnMouseDown(Link::sController link, bool selOnly);
-			void selectOnMouseUp(Link::sController link, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod);
 
 			void updateSelectedBoxesBounds();
 			
+			//! Retrieves the selected boxes bounds.
+			/** The function retrieves the selected boxes bounds.
+			 @return The selected boxes bounds as a rectangle.
+			 */
+			Rectangle getSelectedBoxesBounds();
+			
+			//! Gets the boxes contained in a given rectangle.
+			/** The function retrieves the boxes contained in a given rectangle.
+			 @param boxes A vector of boxes to fill.
+			 @param rect  The rectangle.
+			 */
+			void getBoxesInRect(vector<sBox> boxes, Rectangle const& rect);
+			
+			//! Moves the boxes that are currently selected by given value.
+			/** The function moves the boxes that are currently selected by given value.
+			 @param delta A shift amount delta.
+			 */
 			void moveSelectedBoxes(Point const& delta);
 			
 			//! Retrieve the selected boxes (including links) as a dico

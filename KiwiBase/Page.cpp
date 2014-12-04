@@ -435,7 +435,7 @@ namespace Kiwi
 			for(size_t i = 0; i < m_boxes.size(); i++)
 				m_boxes[i]->setEditionStatus(!m_locked);
 			
-			unSelectAll();
+			unselectAll();
 			
 			lockStatusChanged();
 		}
@@ -533,12 +533,12 @@ namespace Kiwi
 		return nullptr;
 	}
 	
-	void Page::Controller::unSelectAll()
+	void Page::Controller::unselectAll()
 	{
 		if(isSomethingSelected())
 		{
-			unSelectAllBoxes(false);
-			unSelectAllLinks(false);
+			unselectAllBoxes(false);
+			unselectAllLinks(false);
 			selectionChanged();
 		}
 	}
@@ -609,7 +609,7 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Page::Controller::unSelectAllBoxes(const bool notify)
+	bool Page::Controller::unselectAllBoxes(const bool notify)
 	{
 		bool sendChange = false;
 		
@@ -634,7 +634,7 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Page::Controller::unSelectAllLinks(const bool notify)
+	bool Page::Controller::unselectAllLinks(const bool notify)
 	{
 		bool sendChange = false;
 		
@@ -771,79 +771,6 @@ namespace Kiwi
 		return false;
 	}
 	
-	void Page::Controller::addToSelectionBasedOnModifiers(Box::sController box, bool selOnly)
-	{
-		if (selOnly)
-		{
-			selectOnlyBox(box);
-		}
-		else if (isBoxInSelection(box))
-		{
-			removeBoxFromSelection(box);
-		}
-		else
-		{
-			addBoxToSelection(box);
-		}
-	}
-	
-	void Page::Controller::addToSelectionBasedOnModifiers(Link::sController link, bool selOnly)
-	{
-		if (selOnly)
-		{
-			selectOnlyLink(link);
-		}
-		else if (isLinkInSelection(link))
-		{
-			removeLinkFromSelection(link);
-		}
-		else
-		{
-			addLinkToSelection(link);
-		}
-	}
-	
-	bool Page::Controller::selectOnMouseDown(Box::sController box, bool selOnly)
-	{
-		/*
-		 if (isBoxInSelection(box))
-			return ! modifiers.isPopupMenu();
-		 */
-		
-		if (isBoxInSelection(box))
-			return true;
-		
-		addToSelectionBasedOnModifiers(box, selOnly);
-		return false;
-	}
-	
-	bool Page::Controller::selectOnMouseDown(Link::sController link, bool selOnly)
-	{
-		/*
-		 if (isLinkInSelection(link))
-			return ! modifiers.isPopupMenu();
-		 */
-		
-		if (isLinkInSelection(link))
-			return true;
-		
-		addToSelectionBasedOnModifiers(link, selOnly);
-		return false;
-	}
-	
-	void Page::Controller::selectOnMouseUp (Box::sController box, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod)
-	{
-		if (resultOfMouseDownSelectMethod && ! boxWasDragged)
-			addToSelectionBasedOnModifiers(box, selOnly);
-	}
-	
-	
-	void Page::Controller::selectOnMouseUp(Link::sController link, bool selOnly, const bool boxWasDragged, const bool resultOfMouseDownSelectMethod)
-	{
-		if (resultOfMouseDownSelectMethod && ! boxWasDragged)
-			addToSelectionBasedOnModifiers(link, selOnly);
-	}
-	
 	void Page::Controller::updateSelectedBoxesBounds()
 	{
 		m_boxes_bounds.clear();
@@ -856,6 +783,18 @@ namespace Kiwi
 				m_boxes_bounds.push_back(jbox->getBox()->getBounds());
 			}
 		}
+	}
+	
+	Rectangle Page::Controller::getSelectedBoxesBounds()
+	{
+		// to do !
+		return Rectangle();
+	}
+	
+	void Page::Controller::getBoxesInRect(vector<sBox> boxes, Rectangle const& rect)
+	{
+		// to do !
+		boxes.clear();
 	}
 	
 	void Page::Controller::moveSelectedBoxes(Point const& delta)
