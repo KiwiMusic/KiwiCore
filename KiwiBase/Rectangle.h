@@ -462,12 +462,51 @@ namespace Kiwi
             m_position += pt * 0.5;
             m_size     -= pt;
         }
-        
+		
+		/** Returns a rectangle that is larger than this one by a given amount.
+		 Effectively, the rectangle returned is (x - pt.x, y - pt.y, w + pt.x * 2, h + pt.y * 2).
+		 */
+		Rectangle expanded(Point const& pt) const noexcept
+		{
+			Point pos = m_position;
+			Point size = m_size;
+			pos -= pt * 0.5;
+			size += pt;
+			return Rectangle(pos, size);
+		}
+		
+		/** Returns a rectangle that is larger than this one by a given amount.
+		 Effectively, the rectangle returned is (x - delta, y - delta, w + delta * 2, h + delta * 2).
+		 */
+		Rectangle expanded(const double delta) const noexcept
+		{
+			return expanded(Point(delta, delta));
+		}
+		
         inline operator ElemVector() const noexcept
         {
             return {m_position.x(), m_position.y(), m_size.x(), m_size.y()};
         }
-        
+		
+		/** Returns a rectangle that is larger than this one by a given amount.
+		 Effectively, the rectangle returned is (x + pt.x, y + pt.y, w - pt.x * 2, h - pt.y * 2).
+		 */
+		Rectangle reduced(Point const& pt) const noexcept
+		{
+			Point pos = m_position;
+			Point size = m_size;
+			pos += pt * 0.5;
+			size -= pt;
+			return Rectangle(pos, size);
+		}
+
+		/** Returns a rectangle that is larger than this one by a given amount.
+		 Effectively, the rectangle returned is (x - delta, y - delta, w + delta * 2, h + delta * 2).
+		 */
+		Rectangle reduced(const double delta) const noexcept
+		{
+			return reduced(Point(delta, delta));
+		}
     };
 }
 
