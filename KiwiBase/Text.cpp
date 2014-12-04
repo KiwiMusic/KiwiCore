@@ -99,14 +99,22 @@ namespace Kiwi
         {
             if(m_marker_start != m_marker_end)
             {
+                if(m_marker_start != m_text.begin())
+                    --m_marker_start;
                 m_marker_start = m_text.erase(m_marker_start, m_marker_end);
             }
-            m_marker_start = m_text.insert(m_marker_start, 4, ' ');
+            m_marker_start = m_text.insert(m_marker_start, '\t');
+            if(m_marker_start != m_text.end())
+                ++m_marker_start;
             m_marker_end = m_marker_start;
         }
         else if(event.isBackspace())
         {
+            if(m_marker_start != m_text.begin())
+                --m_marker_start;
             m_marker_start = m_text.erase(m_marker_start, m_marker_end);
+            if(m_marker_start != m_text.end())
+                ++m_marker_start;
             m_marker_end = m_marker_start;
         }
         else if(event.isCharacter())
@@ -116,6 +124,8 @@ namespace Kiwi
                 m_marker_start = m_text.erase(m_marker_start, m_marker_end);
             }
             m_marker_start = m_text.insert(m_marker_start, event.getCharacter());
+            if(m_marker_start != m_text.end())
+                ++m_marker_start;
             m_marker_end = m_marker_start;
         }
         return true;

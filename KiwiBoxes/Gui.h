@@ -76,6 +76,29 @@ namespace Kiwi
     };
     
     // ================================================================================ //
+    //                                      MESSAGE                                     //
+    // ================================================================================ //
+    
+    class Message : public Box, public Text::Editor
+    {
+    private:
+        ElemVector m_elements;
+        string     m_text;
+    public:
+        
+        Message(sPage page);
+        ~Message();
+        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(Event::Mouse const& event) override;
+        bool receive(Event::Keyboard const& event) override;
+        bool receive(Event::Focus::Type event) override;
+        bool draw(Doodle& doodle) const override;
+        bool attributeChanged(sAttr attr) override;
+        void tick() override;
+        Allocate(Message);
+    };
+    
+    // ================================================================================ //
     //                                      NUMBER                                      //
     // ================================================================================ //
     
@@ -134,6 +157,7 @@ namespace Kiwi
     {
         Box::addPrototype(unique_ptr<Box>(new Bang(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Toggle(nullptr)));
+        Box::addPrototype(unique_ptr<Box>(new Message(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Number(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Slider(nullptr)));
     }

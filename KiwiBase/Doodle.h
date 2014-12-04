@@ -114,17 +114,31 @@ namespace Kiwi
          */
         virtual void setFont(Font const& font) = 0;
         
-        //! Fills the doodle with a color.
-        /** The function fill the entire doodle with a color.
+        //! Fill the doodle with a color.
+        /** The function fills the entire doodle with a color.
          */
         virtual void fillAll() = 0;
         
-        virtual void drawText(string const& text, double x, double y, double w, double h, Font::Justification j, bool wrap = false) = 0;
+        //! Draw a line of text within a rectangle.
+        /** The function draws a line of text within a rectangle.
+         @param text The text.
+         @param x The abscissa of the rectangle.
+         @param y The ordinate of the rectangle.
+         @param w The width of the rectangle.
+         @param h The height of the rectangle.
+         @param j The justification.
+         @param truncated If the text should be truncated if it goes out the boundaries.
+         */
+        virtual void drawText(string const& text, double x, double y, double w, double h, Kiwi::Font::Justification j, bool truncated = false) = 0;
         
-        virtual void drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap = false)
-        {
-            drawText(text, rect.x(), rect.y(), rect.width(), rect.height(), j, wrap);
-        }
+        //! Draw a line of text within a rectangle.
+        /** The function draws a line of text within a rectangle.
+         @param text The text.
+         @param rect The rectangle.
+         @param j The justification.
+         @param truncated If the text should be truncated if it goes out the boundaries.
+         */
+        virtual void drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap = false);
         
         virtual inline void drawLine(double x1, double y1, double x2, double y2, double thickness) = 0;
         
