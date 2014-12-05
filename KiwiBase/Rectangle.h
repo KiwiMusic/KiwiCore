@@ -438,7 +438,15 @@ namespace Kiwi
         {
             return pt.x() >= m_position.x() && pt.y() >= m_position.y() && pt.x() < m_position.x() + m_size.x() && pt.y() < m_position.y() + m_size.y();
         }
-        
+		
+		inline bool overlaps(Rectangle const& other) const noexcept
+		{
+			return x() + width() > other.x()
+			&& y() + height() > other.y()
+			&& x() < other.x() + other.width()
+			&& y() < other.y() + other.height();
+		}
+		
         inline void expand(double const value) noexcept
         {
             m_position -= value * 0.5;
