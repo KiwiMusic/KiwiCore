@@ -320,13 +320,17 @@ namespace Kiwi
             const sPage						m_page;
 			
 			vector<Box::sController>		m_boxes;
+			mutable mutex					m_boxes_mutex;
 			set<Box::wController,
 			owner_less<Box::wController>>	m_boxes_selected;
+			mutable mutex					m_boxes_selected_mutex;
 			vector<Rectangle>				m_boxes_bounds;
 			
 			vector<Link::sController>		m_links;
+			mutable mutex					m_links_mutex;
 			set<Link::wController,
 			owner_less<Link::wController>>	m_links_selected;
+			mutable mutex					m_links_selected_mutex;
 			
 			long m_zoom;
 			bool m_locked;
@@ -532,6 +536,26 @@ namespace Kiwi
 			inline sPage getPage() const noexcept
 			{
 				return m_page;
+			}
+			
+			//! Get box controllers.
+			/** The function retrieves the box controllers of the page.
+			 @param boxes   A vector of box controllers.
+			 */
+			void getBoxes(vector<Box::sController>& boxes) const
+			{
+				lock_guard<mutex> guard(m_boxes_mutex);
+				boxes = m_boxes;
+			}
+			
+			//! Get link controllers.
+			/** The function retrieves the link controllers of the page.
+			 @param boxes   A vector of link controllers.
+			 */
+			void getLinks(vector<Link::sController>& links) const
+			{
+				lock_guard<mutex> guard(m_links_mutex);
+				links = m_links;
 			}
 			
 			//! Retrieve the zoom of the page.
