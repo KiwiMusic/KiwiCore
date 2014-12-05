@@ -752,6 +752,7 @@ namespace Kiwi
 	
 	bool Page::Controller::selectOnly(Box::sController box)
 	{
+		unselectAllLinks();
 		if (box)
 		{
 			if(!m_boxes_selected.empty())
@@ -781,6 +782,7 @@ namespace Kiwi
 	
 	bool Page::Controller::selectOnly(Link::sController link)
 	{
+		unselectAllBoxes();
 		if (link)
 		{
 			if(!m_links_selected.empty())
