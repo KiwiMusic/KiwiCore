@@ -533,13 +533,28 @@ namespace Kiwi
 		return nullptr;
 	}
 	
-	void Page::Controller::unselectAll()
+	void Page::Controller::getSelection(vector<Box::sController>& boxes, vector<Link::sController>& links) const noexcept
+	{
+		boxes.clear();
+		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+			if (Box::sController box = (*it).lock())
+				boxes.push_back(box);
+				
+		links.clear();
+		for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
+			if (Link::sController link = (*it).lock())
+				links.push_back(link);
+	}
+	
+	void Page::Controller::unselectAll(const bool notify)
 	{
 		if(isSomethingSelected())
 		{
 			unselectAllBoxes(false);
 			unselectAllLinks(false);
-			selectionChanged();
+			
+			if (notify)
+				selectionChanged();
 		}
 	}
 	
@@ -574,7 +589,7 @@ namespace Kiwi
 			selectionChanged();
 	}
 	
-	bool Page::Controller::addAllLinksToSelection()
+	bool Page::Controller::selectAllLinks()
 	{
 		if(m_links_selected.size() != m_links.size())
 		{
@@ -592,7 +607,7 @@ namespace Kiwi
 	}
 	
 	
-	bool Page::Controller::addAllBoxesToSelection()
+	bool Page::Controller::selectAllBoxes()
 	{
 		if(m_boxes_selected.size() != m_boxes.size())
 		{
@@ -659,39 +674,83 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Page::Controller::isBoxInSelection(Box::sController box)
+	bool Page::Controller::isSelected(Box::sController box)
 	{
 		return box && (m_boxes_selected.find(box) != m_boxes_selected.end());
 	}
 	
-	bool Page::Controller::isLinkInSelection(Link::sController link)
+	bool Page::Controller::isSelected(Link::sController link)
 	{
 		return link && (m_links_selected.find(link) != m_links_selected.end());
 	}
 	
-	bool Page::Controller::addBoxToSelection(Box::sController box)
+	void Page::Controller::select(vector<Box::sController>& boxes)
+	{
+		bool notify = false;
+		if(!boxes.empty())
+		{
+			for (auto it = boxes.begin() ; it != boxes.end(); ++it)
+			{
+				Box::sController box = *it;
+				
+				if (!isSelected(box))
+				{
+					select(box, false);
+					notify = true;
+				}
+			}
+			
+			if (notify)
+				selectionChanged();
+		}
+	}
+	
+	void Page::Controller::select(vector<Link::sController>& links)
+	{
+		bool notify = false;
+		if(!links.empty())
+		{
+			for (auto it = links.begin() ; it != links.end(); ++it)
+			{
+				Link::sController link = *it;
+				
+				if (!isSelected(link))
+				{
+					select(link, false);
+					notify = true;
+				}
+			}
+			
+			if (notify)
+				selectionChanged();
+		}
+	}
+	
+	bool Page::Controller::select(Box::sController box, const bool notify)
 	{
 		if(box && m_boxes_selected.insert(box).second)
 		{
 			box->setSelectedStatus(true);
-			selectionChanged();
+			if (notify)
+				selectionChanged();
 			return true;
 		}
 		return false;
 	}
 	
-	bool Page::Controller::addLinkToSelection(Link::sController link)
+	bool Page::Controller::select(Link::sController link, const bool notify)
 	{
 		if(link && m_links_selected.insert(link).second)
 		{
 			link->setSelectedStatus(true);
-			selectionChanged();
+			if (notify)
+				selectionChanged();
 			return true;
 		}
 		return false;
 	}
 	
-	bool Page::Controller::selectOnlyBox(Box::sController box)
+	bool Page::Controller::selectOnly(Box::sController box)
 	{
 		if (box)
 		{
@@ -720,7 +779,7 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Page::Controller::selectOnlyLink(Link::sController link)
+	bool Page::Controller::selectOnly(Link::sController link)
 	{
 		if (link)
 		{
@@ -749,18 +808,63 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Page::Controller::removeBoxFromSelection(Box::sController box)
+	void Page::Controller::unselect(vector<Box::sController>& boxes)
+	{
+		bool notify = false;
+		if(isSomethingSelected() && !boxes.empty())
+		{
+			for (auto it = boxes.begin() ; it != boxes.end(); ++it)
+			{
+				Box::sController box = *it;
+				
+				if (isSelected(box))
+				{
+					unselect(box, false);
+					notify = true;
+				}
+			}
+			
+			if (notify)
+				selectionChanged();
+		}
+	}
+	
+	void Page::Controller::unselect(vector<Link::sController>& links)
+	{
+		bool notify = false;
+		if(isSomethingSelected() && !links.empty())
+		{
+			for (auto it = links.begin() ; it != links.end(); ++it)
+			{
+				Link::sController link = *it;
+				
+				if (isSelected(link))
+				{
+					unselect(link, false);
+					notify = true;
+				}
+			}
+			
+			if (notify)
+				selectionChanged();
+		}
+	}
+	
+	bool Page::Controller::unselect(Box::sController box, const bool notify)
 	{
 		if(box && m_boxes_selected.erase(box))
 		{
 			box->setSelectedStatus(false);
-			selectionChanged();
+			
+			if(notify)
+				selectionChanged();
+			
 			return true;
 		}
 		return false;
 	}
 	
-	bool Page::Controller::removeLinkFromSelection(Link::sController link)
+	bool Page::Controller::unselect(Link::sController link, const bool notify)
 	{
 		if(link && m_links_selected.erase(link))
 		{
@@ -785,16 +889,28 @@ namespace Kiwi
 		}
 	}
 	
-	Rectangle Page::Controller::getSelectedBoxesBounds()
+	Rectangle Page::Controller::getSelectionBounds()
 	{
 		// to do !
 		return Rectangle();
 	}
 	
-	void Page::Controller::getBoxesInRect(vector<sBox> boxes, Rectangle const& rect)
+	void Page::Controller::getBoxesInRect(vector<Box::sController>& boxes, Rectangle const& rect) const noexcept
 	{
-		// to do !
 		boxes.clear();
+		
+		for(int i=0; i < m_boxes.size(); i++)
+		{
+			sBox box = m_boxes[i]->getBox();
+			if(box)
+			{
+				const Rectangle boxBounds = box->getBounds();
+				if(rect.overlaps(boxBounds))
+				{
+					boxes.push_back(m_boxes[i]);
+				}
+			}
+		}
 	}
 	
 	void Page::Controller::moveSelectedBoxes(Point const& delta)
