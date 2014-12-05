@@ -26,10 +26,48 @@
 
 namespace Kiwi
 {
+	// ================================================================================ //
+	//										PRINT                                       //
+	// ================================================================================ //
+	
+	Print::Print(sPage page, ElemVector const& value) : Box(page, "print", Mouse), m_name("print")
+	{
+		addInlet(IoType::Data, IoPolarity::Hot, "Anything to be printed in the kiwi console");
+		
+		if(value.size() >= 1)
+		{
+			m_name = toString(value[0]);
+		}
+	}
+	
+	Print::~Print()
+	{
+		;
+	}
+	
+	bool Print::receive(unsigned long index, ElemVector const& elements)
+	{
+		if(!elements.empty())
+		{
+			Console::error(toString(elements));
+		}
+		return false;
+	}
+	
+	bool Print::receive(Event::Mouse const& event)
+	{
+		if(event.isDoubleClick())
+		{
+			// brings kiwi console to front
+			return true;
+		}
+		return false;
+	}
+	
     // ================================================================================ //
     //                                      INT                                         //
     // ================================================================================ //
-    
+	
     Int::Int(sPage page, ElemVector const& value) : Box(page, "int", Mouse),
     m_init(!value.empty()),
     m_value(0)
