@@ -97,10 +97,10 @@ namespace Kiwi
         
         // Color //
         color_editing_background(Attr::create<AttrColor>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag_Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
-        color_locked_background(Attr::create<AttrColor>(Tag_locked_bgcolor, Tag_Locked_Background_Color, Tag_Color, (ElemVector){0.4, 0.4, 0.4, 1.})),
+        color_locked_background(Attr::create<AttrColor>(Tag_locked_bgcolor, Tag_Locked_Background_Color, Tag_Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
 		
 		// Editing //
-		editing_grid_size(Attr::create<AttrLong>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag_Editing, 15))
+		editing_grid_size(Attr::create<AttrLong>(Tag_gridsize, Tag_Grid_Size, Tag_Editing, 15))
         {
             // Font //
             addAttribute(font_name);

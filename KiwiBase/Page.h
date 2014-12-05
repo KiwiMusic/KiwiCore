@@ -181,6 +181,13 @@ namespace Kiwi
             lock_guard<mutex> guard(m_links_mutex);
             links = m_links;
         }
+		
+		//! Receives notification when an attribute value has changed.
+		/** The function receives notification when an attribute value has changed.
+		 @param attr The attribute.
+		 @return pass true to notify changes to listeners, false if you don't want them to be notified
+		 */
+		bool attributeValueChanged(sAttr attr) override;
         
         //! Create a beacon.
         /** This function retrieves a beacon in the scope of the instance.
@@ -647,7 +654,7 @@ namespace Kiwi
 			 */
 			inline bool isSomethingSelected()
 			{
-				return !m_boxes_selected.empty() || !m_links_selected.empty();
+				return isAnyBoxSelected() || isAnyLinksSelected();
 			}
 			
 			//! Retrieves if some boxes are currently selected.
@@ -656,6 +663,7 @@ namespace Kiwi
 			 */
 			inline bool isAnyBoxSelected()
 			{
+				lock_guard<mutex> guard(m_boxes_selected_mutex);
 				return !m_boxes_selected.empty();
 			}
 			
@@ -665,7 +673,8 @@ namespace Kiwi
 			 */
 			inline bool isAnyLinksSelected()
 			{
-				return !m_boxes_selected.empty();
+				lock_guard<mutex> guard(m_links_selected_mutex);
+				return !m_links_selected.empty();
 			}
 			
 			//! Retrieves the selected links and boxes.
@@ -849,6 +858,13 @@ namespace Kiwi
 			 @param connection  The connection.
 			 */
 			virtual void linkHasBeenReplaced(sLink oldlink, sLink newlink) {};
+			
+			//! Receives notification when an attribute value has changed.
+			/** The function receives notification when an attribute value has changed.
+			 @param attr The attribute.
+			 @return pass true to notify changes to listeners, false if you don't want them to be notified
+			 */
+			virtual bool pageAttributeValueChanged(sAttr attr) { return true; };
 			
         protected:
 			

@@ -175,6 +175,14 @@ namespace Kiwi
             m_boxes_mutex.unlock();
         }
     }
+	
+	bool Page::attributeValueChanged(sAttr attr)
+	{
+		if (!m_controller.expired())
+			m_controller.lock()->pageAttributeValueChanged(attr);
+		
+		return true;
+	}
     
     void Page::bringToFront(sBox box)
     {
@@ -418,7 +426,11 @@ namespace Kiwi
     
     Page::Controller::~Controller()
     {
+		m_boxes_selected.clear();
+		m_links_selected.clear();
+		
         m_boxes.clear();
+		m_links.clear();
     }
 	
 	void Page::Controller::setZoom(long zoom)
