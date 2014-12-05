@@ -754,6 +754,13 @@ namespace Kiwi
 			 */
 			void getBoxesInRect(vector<Box::sController>& boxes, Rectangle const& rect) const noexcept;
 			
+			//! Gets the links overlapped by a given rectangle.
+			/** The function retrieves the links overlapped by a given rectangle.
+			 @param links A vector of links to fill.
+			 @param rect  The rectangle.
+			 */
+			void getLinksInRect(vector<Link::sController>& links, Rectangle const& rect) const noexcept;
+			
 			//! Moves the boxes that are currently selected by given value.
 			/** The function moves the boxes that are currently selected by given value.
 			 @param delta A shift amount delta.

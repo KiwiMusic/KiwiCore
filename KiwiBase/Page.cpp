@@ -913,6 +913,24 @@ namespace Kiwi
 		}
 	}
 	
+	void Page::Controller::getLinksInRect(vector<Link::sController>& links, Rectangle const& rect) const noexcept
+	{
+		links.clear();
+		
+		for(int i=0; i < m_links.size(); i++)
+		{
+			sLink link = m_links[i]->getLink();
+			if(link)
+			{
+				const Rectangle linkBounds = link->getBounds();
+				if(rect.overlaps(linkBounds))
+				{
+					links.push_back(m_links[i]);
+				}
+			}
+		}
+	}
+	
 	void Page::Controller::moveSelectedBoxes(Point const& delta)
 	{
 		if (isAnyBoxSelected())
