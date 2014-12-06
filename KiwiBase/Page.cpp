@@ -407,6 +407,11 @@ namespace Kiwi
 	void Page::setController(sController ctrl)
 	{
 		m_controller = ctrl;
+		
+		// todo : make it smarter !
+		sDico dico = Dico::create();
+		write(dico);
+		read(dico);
 	}
     
     // ================================================================================ //
