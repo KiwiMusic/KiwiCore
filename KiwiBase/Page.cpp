@@ -799,10 +799,9 @@ namespace Kiwi
 			if(m_boxes_selected.insert(box).second)
 			{
 				box->setSelectedStatus(true);
+				selectionChanged();
 				return true;
 			}
-			
-			selectionChanged();
 		}
 		
 		return false;
