@@ -677,10 +677,15 @@ namespace Kiwi
 				return !m_links_selected.empty();
 			}
 			
-			//! Retrieves the selected links and boxes.
-			/** The function retrieves the selected links and boxes.
+			//! Retrieves the selected boxes.
+			/** The function retrieves the selected boxes.
 			 */
-			void getSelection(vector<Box::sController>& boxes, vector<Link::sController>& links) const noexcept;
+			void getSelection(vector<Box::sController>& boxes) const noexcept;
+			
+			//! Retrieves the selected links.
+			/** The function retrieves the selected links.
+			 */
+			void getSelection(vector<Link::sController>& links) const noexcept;
 			
 			//! Deletes all selected links and boxes.
 			/** The function deletes all selected links and boxes.

@@ -550,17 +550,28 @@ namespace Kiwi
 		return nullptr;
 	}
 	
-	void Page::Controller::getSelection(vector<Box::sController>& boxes, vector<Link::sController>& links) const noexcept
+	void Page::Controller::getSelection(vector<Box::sController>& boxes) const noexcept
 	{
 		boxes.clear();
 		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+		{
 			if (Box::sController box = (*it).lock())
+			{
 				boxes.push_back(box);
-				
+			}
+		}
+	}
+	
+	void Page::Controller::getSelection(vector<Link::sController>& links) const noexcept
+	{
 		links.clear();
 		for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
+		{
 			if (Link::sController link = (*it).lock())
+			{
 				links.push_back(link);
+			}
+		}
 	}
 	
 	void Page::Controller::unselectAll(const bool notify)
