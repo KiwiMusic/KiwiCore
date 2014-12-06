@@ -228,8 +228,14 @@ namespace Kiwi
         addInlet(IoType::Data, IoPolarity::Hot, "Messages and Ouput (anything)");
         addInlet(IoType::Data, IoPolarity::Hot, "Messages without Ouput (anything)");
         addOutlet(IoType::Data, "Messages (anything)");
-        setAttributeDefaultValues(Tag_size, {50., 20.});
-        setFont(getFont());
+        setAttributeDefaultValues(Tag_size, {80., 20.});
+        
+        Text::Editor::setFont(getFont());
+        Text::Editor::setJustification(Font::Justification::VerticallyCentred);
+        Text::Editor::setColor(color_text->get());
+        Text::Editor::setSize(getSize());
+        Text::Editor::setMargins(3., 3., 3., 3.);
+        Text::Editor::setBehavior(Text::Editor::WidthExpandable | Text::Editor::HeightResizable);
     }
     
     Message::~Message()
@@ -251,61 +257,10 @@ namespace Kiwi
     {
         if(Text::Editor::receive(event))
         {
-            const Font font = getFont();
-            string text;
-            m_text.clear();
-            Text::Editor::getText(text);
-            string::size_type pos = 0;
-            double nwidth = 0., nheight = 0;
-            cout << "text  : "<< text << endl;
-            while(pos != string::npos)
-            {
-                string line;
-                string::size_type next = text.find('\n', pos);
-                if(next != string::npos)
-                {
-                    line.assign(text.begin() + pos, text.begin() + next);
-                    cout << "new  : "<< line << endl;
-                }
-                else
-                {
-                    line.assign(text.begin() + pos, text.end());
-                    cout << "last  : "<< line << endl;
-                }
-                m_text.push_back(line);
-                const Point textsize = Text::getStringSize(font, line);
-                if(textsize.x() > nwidth)
-                {
-                    nwidth = textsize.x();
-                }
-                if(textsize.y() > nheight)
-                {
-                    nheight = textsize.y();
-                }
-                if(next != string::npos)
-                {
-                    pos = ++next;
-                }
-                else
-                {
-                    pos = next;
-                }
-            }
-            if(nwidth + 6 > getSize().x())
-            {
-                Attr::Manager::setAttributeValue(Tag_size, {nwidth + 6, max(nheight * m_text.size() + 6, 20.)});
-            }
-            else if(nheight * m_text.size() + 6 != getSize().y())
-            {
-                Attr::Manager::setAttributeValue(Tag_size, {getSize().x(), max(nheight * m_text.size() + 6, 20.)});
-            }
-            else
-            {
-                redraw();
-            }
-            
+            redraw();
+            return true;
         }
-        return true;
+        return false;
     }
     
     bool Message::receive(Event::Focus::Type event)
@@ -315,20 +270,24 @@ namespace Kiwi
     
     bool Message::draw(Doodle& doodle) const
     {
-        const Point size = getSize();
-        const double text_height = size.y() /  (double)m_text.size();
-        doodle.setFont(getFont());
-        doodle.setColor(color_text->get());
-        for(vector<string>::size_type i = 0; i < m_text.size(); i++)
-        {
-            doodle.drawText(m_text[i], 3., text_height * i, size.x() - 3, text_height, Font::VerticallyCentred);
-        }
-        
+        Text::Editor::draw(doodle);
         return true;
     }
     
     bool Message::attributeChanged(sAttr attr)
     {
+        if(attr == appearance_size)
+        {
+            Text::Editor::setSize(appearance_size->get());
+        }
+        else if(attr == color_text)
+        {
+            Text::Editor::setColor(color_text->get());
+        }
+        else if(attr == font_face || attr == font_name || attr == font_size)
+        {
+            Text::Editor::setFont(getFont());
+        }
         return true;
     }
     
@@ -351,7 +310,12 @@ namespace Kiwi
         addOutlet(IoType::Data, "Value (float)");
         addOutlet(IoType::Data, "Tab key pressed (bang)");
         setAttributeDefaultValues(Tag_size, {50., 20.});
-        setFont(getFont());
+
+        Text::Editor::setFont(getFont());
+        Text::Editor::setJustification(Font::Justification::VerticallyCentred);
+        Text::Editor::setColor(color_text->get());
+        Text::Editor::setSize(getSize());
+        Text::Editor::setMargins(3., 3., 3., 3.);
     }
     
     Number::~Number()
@@ -365,9 +329,8 @@ namespace Kiwi
         {
             if(elements[0].isNumber())
             {
-                m_value = elements[0];
+                Text::Editor::setText(toString((double)elements[0]));
                 Box::send(0, {m_value});
-                redraw();
                 return true;
             }
             else if(elements[0] == Tag_bang)
@@ -379,8 +342,7 @@ namespace Kiwi
             {
                 if(elements.size() > 1 && elements[1].isNumber())
                 {
-                    m_value = elements[0];
-                    redraw();
+                    Text::Editor::setText(toString((double)elements[1]));
                     return true;
                 }
                 else
@@ -551,7 +513,7 @@ namespace Kiwi
         else
         {
             doodle.setColor(getTextColor());
-           doodle.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+            doodle.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
         }
         
         return true;
@@ -559,9 +521,17 @@ namespace Kiwi
     
     bool Number::attributeChanged(sAttr attr)
     {
-        if(attr == font_face || attr == font_name || attr == font_size)
+        if(attr == appearance_size)
         {
-            setFont(getFont());
+            Text::Editor::setSize(appearance_size->get());
+        }
+        else if(attr == color_text)
+        {
+            Text::Editor::setColor(color_text->get());
+        }
+        else if(attr == font_face || attr == font_name || attr == font_size)
+        {
+            Text::Editor::setFont(getFont());
         }
         return false;
     }
