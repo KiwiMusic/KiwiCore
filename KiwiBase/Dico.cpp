@@ -165,7 +165,7 @@ namespace Kiwi
     {
         clear();
         ifstream file;
-        if(directoryname.size() && filename.size())
+        if(!directoryname.empty() && !filename.empty())
         {
 #ifdef _WINDOWS
             file.open(directoryname + "\\" + filename);

@@ -181,6 +181,13 @@ namespace Kiwi
             lock_guard<mutex> guard(m_links_mutex);
             links = m_links;
         }
+		
+		//! Receives notification when an attribute value has changed.
+		/** The function receives notification when an attribute value has changed.
+		 @param attr The attribute.
+		 @return pass true to notify changes to listeners, false if you don't want them to be notified
+		 */
+		bool attributeValueChanged(sAttr attr) override;
         
         //! Create a beacon.
         /** This function retrieves a beacon in the scope of the instance.
@@ -320,13 +327,17 @@ namespace Kiwi
             const sPage						m_page;
 			
 			vector<Box::sController>		m_boxes;
+			mutable mutex					m_boxes_mutex;
 			set<Box::wController,
 			owner_less<Box::wController>>	m_boxes_selected;
+			mutable mutex					m_boxes_selected_mutex;
 			vector<Rectangle>				m_boxes_bounds;
 			
 			vector<Link::sController>		m_links;
+			mutable mutex					m_links_mutex;
 			set<Link::wController,
 			owner_less<Link::wController>>	m_links_selected;
+			mutable mutex					m_links_selected_mutex;
 			
 			long m_zoom;
 			bool m_locked;
@@ -346,7 +357,38 @@ namespace Kiwi
 					Link	= 3
 				};
 				
-				HitTest(scController owner, Point const& pt) : m_owner(owner)
+				// create an invalid hittest
+				HitTest()
+				{
+					m_hittype = Type::Nothing;
+				}
+				
+				inline HitTest& operator=(HitTest& hit) noexcept
+				{
+					Console::post("======");
+					m_box.reset();
+					m_link.reset();
+					m_hittype = Type::Nothing;
+					m_owner = hit.getHitPage();
+					
+					if (hit.hasHitBox())
+					{
+						m_hittype = Type::Box;
+						m_box = hit.getHitBox();
+					}
+					else if (hit.hasHitLink())
+					{
+						m_hittype = Type::Link;
+						m_link = hit.getHitLink();
+					}
+					else if (hasHitPage())
+					{
+						m_hittype = Type::Page;
+					}
+					return *this;
+				}
+				
+				HitTest(sController owner, Point const& pt) : m_owner(owner)
 				{
 					m_hittype = Type::Nothing;
 					m_box.reset();
@@ -366,15 +408,18 @@ namespace Kiwi
 				{
 					m_hittype = Type::Nothing;
 					m_box.reset();
-
-					for(size_t i = m_owner->m_boxes.size(); i; i--)
+					
+					if (getHitPage())
 					{
-						if(m_owner->m_boxes[i-1]->isHit(pt, m_box_hit))
+						for(size_t i = getHitPage()->m_boxes.size(); i; i--)
 						{
-							m_box = m_owner->m_boxes[i-1];
-							m_box_hit.box = m_box.lock()->getBox();
-							m_hittype = Type::Box;
-							return true;
+							if(getHitPage()->m_boxes[i-1]->isHit(pt, m_box_hit))
+							{
+								m_box = getHitPage()->m_boxes[i-1];
+								m_box_hit.box = m_box.lock()->getBox();
+								m_hittype = Type::Box;
+								return true;
+							}
 						}
 					}
 					return false;
@@ -385,14 +430,17 @@ namespace Kiwi
 					m_hittype = Type::Nothing;
 					m_link.reset();
 					
-					Link::Controller::Hit hit;
-					for(size_t i = m_owner->m_links.size(); i; i--)
+					if (getHitPage())
 					{
-						if(m_owner->m_links[i-1]->isHit(pt, m_link_hit))
+						Link::Controller::Hit hit;
+						for(size_t i = getHitPage()->m_links.size(); i; i--)
 						{
-							m_link = m_owner->m_links[i-1];
-							m_hittype = Type::Link;
-							return true;
+							if(getHitPage()->m_links[i-1]->isHit(pt, m_link_hit))
+							{
+								m_link = getHitPage()->m_links[i-1];
+								m_hittype = Type::Link;
+								return true;
+							}
 						}
 					}
 					return false;
@@ -407,30 +455,35 @@ namespace Kiwi
 					return nullptr;
 				}
 				
-				Box::Controller::Hit getBoxHit()
+				Box::Controller::Hit getBoxHit() const noexcept
 				{
 					if (m_hittype == Type::Box && !m_box.expired())
-					{
 						return m_box_hit;
-					}
+
 					return Box::Controller::Hit();
 				}
 				
-				Link::Controller::Hit getLinkHit()
+				Link::Controller::Hit getLinkHit()  const
 				{
 					if (m_hittype == Type::Link && !m_link.expired())
-					{
 						return m_link_hit;
-					}
+
 					return Link::Controller::Hit();
 				}
 				
-				Link::sController getHitLink()
+				Link::sController getHitLink() const noexcept
 				{
 					if (m_hittype == Type::Link && !m_link.expired())
-					{
 						return m_link.lock();
-					}
+
+					return nullptr;
+				}
+				
+				inline sController getHitPage() const noexcept
+				{
+					if (!m_owner.expired())
+						return m_owner.lock();
+						
 					return nullptr;
 				}
 				
@@ -444,13 +497,18 @@ namespace Kiwi
 					return m_hittype == Type::Link;
 				}
 				
+				inline bool hasHitPage() const noexcept
+				{
+					return m_hittype == Type::Page;
+				}
+				
 			private:
 				Type					m_hittype;
 				Box::wController		m_box;
 				Box::Controller::Hit	m_box_hit;
 				Link::wController		m_link;
 				Link::Controller::Hit	m_link_hit;
-				scController			m_owner;
+				wController				m_owner;
 			};
 			
 			//! Constructor.
@@ -485,6 +543,26 @@ namespace Kiwi
 			inline sPage getPage() const noexcept
 			{
 				return m_page;
+			}
+			
+			//! Get box controllers.
+			/** The function retrieves the box controllers of the page.
+			 @param boxes   A vector of box controllers.
+			 */
+			void getBoxes(vector<Box::sController>& boxes) const
+			{
+				lock_guard<mutex> guard(m_boxes_mutex);
+				boxes = m_boxes;
+			}
+			
+			//! Get link controllers.
+			/** The function retrieves the link controllers of the page.
+			 @param boxes   A vector of link controllers.
+			 */
+			void getLinks(vector<Link::sController>& links) const
+			{
+				lock_guard<mutex> guard(m_links_mutex);
+				links = m_links;
 			}
 			
 			//! Retrieve the zoom of the page.
@@ -566,6 +644,183 @@ namespace Kiwi
 			 */
 			void setSnapToGridStatus(bool snap);
 			
+			// ================================================================================ //
+			//										SELECTION									//
+			// ================================================================================ //
+			
+			//! Retrieves if some boxes or links are currently selected.
+			/** The function retrieves if some boxes or links are currently selected.
+			 @return True if some boxes or links are currently selected, false if nothing is selected.
+			 */
+			inline bool isSomethingSelected()
+			{
+				return isAnyBoxSelected() || isAnyLinksSelected();
+			}
+			
+			//! Retrieves if some boxes are currently selected.
+			/** The function retrieves if some boxes are currently selected.
+			 @return True if some boxes are currently selected, false if no box is selected.
+			 */
+			inline bool isAnyBoxSelected()
+			{
+				lock_guard<mutex> guard(m_boxes_selected_mutex);
+				return !m_boxes_selected.empty();
+			}
+			
+			//! Retrieves if some links are currently selected.
+			/** The function retrieves if some links are currently selected.
+			 @return True if some links are currently selected, false if no box is selected.
+			 */
+			inline bool isAnyLinksSelected()
+			{
+				lock_guard<mutex> guard(m_links_selected_mutex);
+				return !m_links_selected.empty();
+			}
+			
+			//! Retrieves the selected boxes.
+			/** The function retrieves the selected boxes.
+			 */
+			void getSelection(vector<Box::sController>& boxes) const noexcept;
+			
+			//! Retrieves the selected links.
+			/** The function retrieves the selected links.
+			 */
+			void getSelection(vector<Link::sController>& links) const noexcept;
+			
+			//! Deletes all selected links and boxes.
+			/** The function deletes all selected links and boxes.
+			 */
+			void deleteSelection();
+			
+			//! Retrieves if a box is selected.
+			/** The function retrieve if a box is selected.
+			 */
+			bool isSelected(Box::sController box);
+			
+			//! Retrieves if a link is selected.
+			/** The function retrieve if a link is selected.
+			 */
+			bool isSelected(Link::sController link);
+			
+			//! Adds all boxes to selection.
+			/** The function adds all boxes to selection.
+			 */
+			bool selectAllBoxes();
+			
+			//! Adds all links to selection.
+			/** The function adds all links to selection.
+			 */
+			bool selectAllLinks();
+			
+			//! Selects a set of boxes.
+			/** The function selects a set of boxes.
+			 */
+			void select(vector<Box::sController>& boxes);
+			
+			//! Selects a set of links.
+			/** The function selects a set of links.
+			 */
+			void select(vector<Link::sController>& links);
+			
+			//! Adds a box to the selection.
+			/** The function adds a box to the selection.
+			 */
+			bool select(Box::sController box, const bool notify = true);
+			
+			//! Adds a link to the selection.
+			/** The function adds a link to the selection.
+			 */
+			bool select(Link::sController link, const bool notify = true);
+			
+			//! Clears the selection then the selects a box.
+			/** The function clears the selection then the selects a box.
+			 */
+			bool selectOnly(Box::sController box);
+			
+			//! Clears the selection then the selects a box.
+			/** The function clears the selection then the selects a box.
+			 */
+			bool selectOnly(Link::sController link);
+			
+			//! Unselects all boxes and links.
+			/** The function unselects all boxes and links.
+			 */
+			void unselectAll(const bool notify = true);
+			
+			//! Unselects all boxes.
+			/** The function unselects all boxes.
+			 */
+			bool unselectAllBoxes(const bool notify = true);
+			
+			//! Unselects all links.
+			/** The function unselects all links.
+			 */
+			bool unselectAllLinks(const bool notify = true);
+			
+			//! Unselects a set of boxes.
+			/** The function unselects a set of boxes.
+			 */
+			void unselect(vector<Box::sController>& boxes);
+			
+			//! Unselects a set of links.
+			/** The function unselects a set of links.
+			 */
+			void unselect(vector<Link::sController>& links);
+			
+			//! Removes a box from the selection.
+			/** The function unselects box.
+			 */
+			bool unselect(Box::sController box, const bool notify = true);
+			
+			//! Removes a link from the selection.
+			/** The function unselects link.
+			 */
+			bool unselect(Link::sController link, const bool notify = true);
+			
+			void updateSelectedBoxesBounds();
+			
+			//! Retrieves the selected boxes bounds.
+			/** The function retrieves the selected boxes bounds.
+			 @return The selected boxes bounds as a rectangle.
+			 */
+			Rectangle getSelectionBounds();
+			
+			//! Gets the boxes contained in a given rectangle.
+			/** The function retrieves the boxes contained in a given rectangle.
+			 @param boxes A vector of boxes to fill.
+			 @param rect  The rectangle.
+			 */
+			void getBoxesInRect(vector<Box::sController>& boxes, Rectangle const& rect) const noexcept;
+			
+			//! Gets the links overlapped by a given rectangle.
+			/** The function retrieves the links overlapped by a given rectangle.
+			 @param links A vector of links to fill.
+			 @param rect  The rectangle.
+			 */
+			void getLinksInRect(vector<Link::sController>& links, Rectangle const& rect) const noexcept;
+			
+			//! Moves the boxes that are currently selected by given value.
+			/** The function moves the boxes that are currently selected by given value.
+			 @param delta A shift amount delta.
+			 */
+			void moveSelectedBoxes(Point const& delta);
+			
+			//! Retrieve the selected boxes (including links) as a dico
+			/** The function retrieve the selected boxes (including links) as a dico.
+			 You may use it to copy selection to clipboard.
+			 @param dico The dico to fill.
+			 */
+			void getSelectedBoxesDico(sDico dico);
+			
+			//! Adds boxes to the page from a dico
+			/** The function adds boxes to the page from a dico
+			 The dico must be formated with getSelectedBoxesDico
+			 @param dico The dico.
+			 @param shift Shift the position of the boxes.
+			 @return True if the page has been modified, false otherwise
+			 */
+			bool addBoxesFromDico(sDico dico, Point const& shift = Point());
+			
 			//! Receive the notification that a box has been created.
 			/** The function is called by the page when a box has been created.
 			 @param page    The page.
@@ -609,32 +864,12 @@ namespace Kiwi
 			 */
 			virtual void linkHasBeenReplaced(sLink oldlink, sLink newlink) {};
 			
-			//! Retrieves if some boxes or links are currently selected.
-			/** The function retrieves if some boxes or links are currently selected.
-			 @return True if some boxes or links are currently selected, false if nothing is selected.
+			//! Receives notification when an attribute value has changed.
+			/** The function receives notification when an attribute value has changed.
+			 @param attr The attribute.
+			 @return pass true to notify changes to listeners, false if you don't want them to be notified
 			 */
-			inline bool isSomethingSelected()
-			{
-				return !m_boxes_selected.empty() || !m_links_selected.empty();
-			}
-			
-			//! Retrieves if some boxes are currently selected.
-			/** The function retrieves if some boxes are currently selected.
-			 @return True if some boxes are currently selected, false if no box is selected.
-			 */
-			inline bool isAnyBoxSelected()
-			{
-				return !m_boxes_selected.empty();
-			}
-			
-			//! Retrieves if some links are currently selected.
-			/** The function retrieves if some links are currently selected.
-			 @return True if some links are currently selected, false if no box is selected.
-			 */
-			inline bool isAnyLinksSelected()
-			{
-				return !m_boxes_selected.empty();
-			}
+			virtual bool pageAttributeValueChanged(sAttr attr) { return true; };
 			
         protected:
 			
@@ -648,69 +883,6 @@ namespace Kiwi
 			void removeLinkController(Link::sController link);
 			
 			Link::sController getLinkController(sLink link) const noexcept;
-			
-			//! Deletes all selected links and boxes.
-			/** The function deletes all selected links and boxes.
-			 */
-			void deleteSelection();
-			
-			//! Unselects all boxes and links.
-			/** The function unselects all boxes and links.
-			 */
-			void unselectAll();
-			
-			bool addAllBoxesToSelection();
-			bool addAllLinksToSelection();
-			
-			bool unselectAllBoxes(bool notify);
-			bool unselectAllLinks(bool notify);
-			
-			bool isBoxInSelection(Box::sController box);
-			bool addBoxToSelection(Box::sController box);
-			bool selectOnlyBox(Box::sController box);
-			bool removeBoxFromSelection(Box::sController box);
-			
-			bool isLinkInSelection(Link::sController link);
-			bool addLinkToSelection(Link::sController link);
-			bool selectOnlyLink(Link::sController link);
-			bool removeLinkFromSelection(Link::sController link);
-
-			void updateSelectedBoxesBounds();
-			
-			//! Retrieves the selected boxes bounds.
-			/** The function retrieves the selected boxes bounds.
-			 @return The selected boxes bounds as a rectangle.
-			 */
-			Rectangle getSelectedBoxesBounds();
-			
-			//! Gets the boxes contained in a given rectangle.
-			/** The function retrieves the boxes contained in a given rectangle.
-			 @param boxes A vector of boxes to fill.
-			 @param rect  The rectangle.
-			 */
-			void getBoxesInRect(vector<sBox> boxes, Rectangle const& rect);
-			
-			//! Moves the boxes that are currently selected by given value.
-			/** The function moves the boxes that are currently selected by given value.
-			 @param delta A shift amount delta.
-			 */
-			void moveSelectedBoxes(Point const& delta);
-			
-			//! Retrieve the selected boxes (including links) as a dico
-			/** The function retrieve the selected boxes (including links) as a dico.
-			 You may use it to copy selection to clipboard.
-			 @param dico The dico to fill.
-			*/
-			void getSelectedBoxesDico(sDico dico);
-			
-			//! Adds boxes to the page from a dico
-			/** The function adds boxes to the page from a dico
-			 The dico must be formated with getSelectedBoxesDico
-			 @param dico The dico.
-			 @param shift Shift the position of the boxes.
-			 @return True if the page has been modified, false otherwise
-			 */
-			bool addBoxesFromDico(sDico dico, Point const& shift = Point());
 			
 			//! The redraw function that must be overriden to be notified when the page needs to be redrawn.
 			/** The function is called by the page when it needs to be repainted.
@@ -726,16 +898,6 @@ namespace Kiwi
 			/** The function is called when the page has been locked/unlocked.
 			 */
 			virtual void lockStatusChanged() {};
-			
-			//! Called when the mouse enter in an box's inlet or outlet zone.
-			/** The function is called when the mouse enter in an box's inlet or outlet zone.
-			 */
-			virtual void mouseHoverIO(const bool overInlet, const unsigned long index) {};
-			
-			//! Called when the mouse enter in an box's inlet or outlet zone.
-			/** The function is called when the mouse enter in an box's inlet or outlet zone.
-			 */
-			virtual void mouseExitIO() {};
         };
         
         static const sTag Tag_box;

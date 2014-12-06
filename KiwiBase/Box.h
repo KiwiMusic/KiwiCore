@@ -293,6 +293,20 @@ namespace Kiwi
                 return IoType::Both;
             }
         }
+		
+		//! Retrieves the links connected to a box's inlet.
+		/** The function retrieves the links connected to a box's inlet.
+		 @param links	The vector of link to fill.
+		 @param index	The index of the inlet to query.
+		 */
+		void getInletLinks(vector<sLink> links, unsigned long index);
+		
+		//! Retrieves the links connected to a box's outlet.
+		/** The function retrieves the links connected to a box's outlet.
+		 @param links	The vector of link to fill.
+		 @param index	The index of the outlet to query.
+		 */
+		void getOutletLinks(vector<sLink> links, unsigned long index);
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff. Return false if the vector of element doesn't match with your method then the box will check if the vector match with attributes methods, othersize return true.
@@ -484,7 +498,7 @@ namespace Kiwi
          @return true if the link has been removed, otherwise false.
          */
         bool disconnectOutlet(sLink link);
-        
+
         //! Set the controller of the box.
         /** The function sets the controller of the box.
          @param ctrl    The controller.

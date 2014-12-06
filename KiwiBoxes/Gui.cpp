@@ -533,7 +533,7 @@ namespace Kiwi
         {
             Text::Editor::setFont(getFont());
         }
-        return false;
+        return true;
     }
     
     // ================================================================================ //

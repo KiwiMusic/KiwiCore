@@ -28,6 +28,27 @@
 
 namespace Kiwi
 {
+	// ================================================================================ //
+	//                                    APPLICATION									//
+	// ================================================================================ //
+	
+	// ================================================================================ //
+	//										PRINT                                       //
+	// ================================================================================ //
+	
+	class Print : public Box
+	{
+	private:
+		string m_name;
+	public:
+		
+		Print(sPage page, ElemVector const& value);
+		~Print();
+		bool receive(unsigned long index, ElemVector const& elements) override;
+		bool receive(Event::Mouse const& event) override;
+		AllocateElemVector(Print);
+	};
+	
     // ================================================================================ //
     //                                      STORAGE                                     //
     // ================================================================================ //
@@ -114,6 +135,7 @@ namespace Kiwi
     
     inline void wireless()
     {
+		Box::addPrototype(unique_ptr<Box>(new Print(nullptr, {})));
         Box::addPrototype(unique_ptr<Box>(new Int(nullptr, {})));
         Box::addPrototype(unique_ptr<Box>(new Send(nullptr, nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Send(nullptr, nullptr)), "s");

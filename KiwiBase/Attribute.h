@@ -519,7 +519,7 @@ namespace Kiwi
              */
 			virtual bool attributeValueChanged(sAttr attr)
 			{
-				return false;
+				return true;
 			}
 			
             // ================================================================================ //
