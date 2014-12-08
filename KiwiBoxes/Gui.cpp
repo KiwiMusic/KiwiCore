@@ -235,7 +235,7 @@ namespace Kiwi
         Text::Editor::setColor(color_text->get());
         Text::Editor::setSize(getSize());
         Text::Editor::setMargins(3., 3., 3., 3.);
-        Text::Editor::setBehavior(Text::Editor::WidthExpandable | Text::Editor::HeightResizable);
+        Text::Editor::setBehavior(Text::Editor::Wrapped);
     }
     
     Message::~Message()

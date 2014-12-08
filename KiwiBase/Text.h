@@ -42,23 +42,17 @@ namespace Kiwi
         class Editor;
     private:
         vector<string>              m_lines;
-        string::size_type           m_start_marker;
-        vector<string>::size_type   m_start_line;
-        string::size_type           m_end_marker;
-        vector<string>::size_type   m_end_line;
         
+        vector<string>::size_type   m_start_line;
+        string::size_type           m_start_marker;
+        vector<string>::size_type   m_end_line;
+        string::size_type           m_end_marker;
     public:
         
         //! Constructor.
         /** The function initialize a text with an empty text.
          */
         Text() noexcept;
-        
-        //! Constructor.
-        /** The function initialize a text with a defined text.
-         @param text The text.
-         */
-        Text(string const& text) noexcept;
         
         //! Destrcutor.
         /** The function does nothing.
@@ -116,20 +110,15 @@ namespace Kiwi
     public:
         enum Behavior
         {
-            WidthFixe       = 1<<0,
-            HeightFixe      = 1<<0,
-            SizeFixe        = 1<<0,
-            WidthExpandable = 1<<1,
-            WidthReducible  = 1<<2,
-            WidthResizable  = 1<<1 | 1<<2,
-            HeightExpandable= 1<<3,
-            HeightReducible = 1<<4,
-            HeightResizable = 1<<3 | 1<<4
+            Truncated   = 0,
+            Wrapped     = 1
         };
+        
     private:
         Font                m_font;
         Font::Justification m_justification;
         Color               m_color;
+        vector<string>      m_displayed_text;
         
         Point               m_size;
         double              m_margin_top;
@@ -138,13 +127,14 @@ namespace Kiwi
         double              m_margin_right;
         double              m_displayed_width;
         double              m_displayed_height;
+        double              m_line_spacing;
         
         long                m_behavior;
-        vector<string> m_displayed_text;
+        Point               m_text_size;
         
-        void updateBoundaries();
-        void breakLine(string const& text);
-        virtual bool shouldResize(double const width, double const height);
+        void updateBoundaries();        
+        void truncate();
+        void wrap();
     public:
         
         Editor();
@@ -155,14 +145,14 @@ namespace Kiwi
         void setJustification(Font::Justification const& j) noexcept;
         void setColor(Color const& color) noexcept;
         
-        void setBehavior(long flags) noexcept;
+        void setBehavior(Behavior behavior) noexcept;
         void setSize(Point const& size) noexcept;
         void setMargins(double const top, double const left, double const bottom, double const right) noexcept;
         void setMarginTop(double const top) noexcept;
         void setMarginLeft(double const left) noexcept;
         void setMarginBottom(double const bottom) noexcept;
         void setMarginRight(double const right) noexcept;
-        
+        void setLineSpacing(double const linespacing) noexcept;
         void setText(string const& text);
         
         bool receive(Event::Mouse const& event);

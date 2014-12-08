@@ -29,18 +29,13 @@ namespace Kiwi
     //                                      TEXT                                        //
     // ================================================================================ //
     
-    Text::Text() noexcept
+    Text::Text() noexcept :
+    m_start_line(0),
+    m_start_marker(0),
+    m_end_line(0),
+    m_end_marker(0)
     {
         m_lines.push_back("");
-        m_start_line    = m_end_line = 0;
-        m_start_marker  = m_end_marker = 0;
-    }
-    
-    Text::Text(string const& text) noexcept
-    {
-        m_lines.push_back("");
-        m_start_line    = m_end_line = 0;
-        m_start_marker  = m_end_marker = 0;
     }
     
     Text::~Text()
@@ -177,9 +172,9 @@ namespace Kiwi
     void Text::insertCharacter(const char c)
     {
         eraseSelection();
-        m_lines[m_start_line].insert(m_start_marker, 1, c);
         if(c == '\n')
         {
+            m_lines[m_start_line].insert(m_start_marker, 1, '\n');
             m_start_line++;
             m_lines.insert(m_lines.begin() + m_start_line, string(""));
             m_end_line      = m_start_line;
@@ -187,6 +182,7 @@ namespace Kiwi
         }
         else
         {
+            m_lines[m_start_line].insert(m_start_marker, 1, c);
             m_end_marker = ++m_start_marker;
         }
     }
@@ -202,7 +198,7 @@ namespace Kiwi
     m_margin_left(0.),
     m_margin_bottom(0.),
     m_margin_right(0.),
-    m_behavior(SizeFixe)
+    m_line_spacing(0.)
     {
         ;
     }
@@ -215,6 +211,7 @@ namespace Kiwi
     void Text::Editor::setFont(Font const& font) noexcept
     {
         m_font = font;
+        updateBoundaries();
     }
     
     void Text::Editor::setJustification(Font::Justification const& j) noexcept
@@ -233,11 +230,6 @@ namespace Kiwi
         m_displayed_width   = m_size.x() - m_margin_left - m_margin_right;
         m_displayed_height  = m_size.y() - m_margin_top  - m_margin_bottom;
         updateBoundaries();
-    }
-    
-    void Text::Editor::setBehavior(long flags) noexcept
-    {
-        m_behavior = 0 | flags;
     }
     
     void Text::Editor::setMargins(double const top, double const left, double const bottom, double const right) noexcept
@@ -279,6 +271,28 @@ namespace Kiwi
         updateBoundaries();
     }
     
+    void Text::Editor::setLineSpacing(double const linespacing) noexcept
+    {
+        m_line_spacing = linespacing;
+        updateBoundaries();
+    }
+    
+    void Text::Editor::setBehavior(Behavior behavior) noexcept
+    {
+        if(behavior != m_behavior)
+        {
+            m_behavior = behavior;
+            if(m_behavior)
+            {
+                wrap();
+            }
+            else
+            {
+                truncate();
+            }
+        }
+    }
+    
     void Text::Editor::setText(string const& text)
     {
         for(string::size_type i = 0; i < text.size(); i++)
@@ -288,64 +302,67 @@ namespace Kiwi
         updateBoundaries();
     }
     
-    bool Text::Editor::shouldResize(double const width, double const height)
+    void Text::Editor::truncate()
     {
-        return false;
-    }
-    
-    void Text::Editor::breakLine(string const& text)
-    {
-        string nline;
-        double displayed_width = m_size.x() - m_margin_left - m_margin_right;
-        for(string::size_type i = 0; i < text.size(); i++)
-        {
-            if(getStringSize(m_font, nline).x() > displayed_width)
-            {
-                m_displayed_text.push_back(nline);
-                nline.clear();
-                nline += text[i];
-            }
-            else
-            {
-                nline += text[i];
-            }
-        }
-        if(!nline.empty())
-        {
-            m_displayed_text.push_back(nline);
-        }
-    }
-    
-    void Text::Editor::updateBoundaries()
-    {
-        if(m_behavior != SizeFixe)
-        {
-            
-        }
-        int zaza;// Later figure out how to avoid clear
-        m_displayed_text.clear();
-        double displayed_width = m_size.x() - m_margin_left - m_margin_right;
         for(vector<string>::size_type i = 0; i < getNumberOfLines(); i++)
         {
             string line;
             getLine(i, line);
-            
-            const Point size = getStringSize(m_font, line);
-            if(size.x() > displayed_width)
+            Point size = getStringSize(m_font, line);
+            if(size.x() > m_displayed_width)
             {
-                if(line.find(' ') == string::npos)
+                line.replace(line.size() - 3, 3, "...");
+                size = getStringSize(m_font, line);
+                while(size.x() > m_displayed_width)
                 {
-                    breakLine(line);
+                    line.pop_back();
+                    line.replace(line.size() - 3, 3, "...");
                 }
-                else
-                {
-                    
-                }
+            }
+            m_displayed_text.push_back(line);
+        }
+    }
+    
+    void Text::Editor::wrap()
+    {
+        for(vector<string>::size_type i = 0; i < getNumberOfLines(); i++)
+        {
+            string line;
+            getLine(i, line);
+            Point size = getStringSize(m_font, line);
+            if(size.x() > m_displayed_width)
+            {
+                string nline;
+                
             }
             else
             {
                 m_displayed_text.push_back(line);
             }
+        }
+    }
+    
+    void Text::Editor::updateBoundaries()
+    {
+        m_text_size = Point(0., 0.);
+        for(vector<string>::size_type i = 0; i < getNumberOfLines(); i++)
+        {
+            string line;
+            getLine(i, line);
+            const Point line_size = getStringSize(m_font, line);
+            m_text_size.x(max(line_size.x(), m_text_size.x()));
+            m_text_size.y(m_text_size.y() + line_size.y() + m_line_spacing);
+        }
+        m_text_size.x(m_text_size.x() + m_margin_right + m_margin_left);
+        m_text_size.y(m_text_size.y() + m_margin_top + m_margin_bottom);
+        
+        if(m_behavior)
+        {
+            wrap();
+        }
+        else
+        {
+            truncate();
         }
     }
     
