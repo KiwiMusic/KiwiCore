@@ -30,20 +30,20 @@ namespace Kiwi
     //                                     METRO                                        //
     // ================================================================================ //
     
-    Metro::Metro(sPage page, ElemVector const& args) : Box(page, "metro")
+    Metro::Metro(sPage page, ElemVector const& elements) : Box(page, "metro"),
+    m_active(false)
     {
         addInlet(IoType::Data, IoPolarity::Hot, "Start/Stop Metronome");
-		addInlet(IoType::Data, IoPolarity::Cold, "Set Metronome Time Interval");
+        if(elements.empty())
+        {
+            addInlet(IoType::Data, IoPolarity::Cold, "Set Metronome Time Interval");
+            m_interval = 200.;
+        }
+        else
+        {
+            m_interval = max((double)elements[0], 1.);
+        }
         addOutlet(IoType::Data, "Output (bang) on Metronome Ticks");
-		
-		if (args.size() >= 1 && args[0].isNumber())
-		{
-			setInterval(args[0]);
-		}
-		else
-		{
-			setInterval(200);
-		}
     }
     
     Metro::~Metro()
@@ -54,43 +54,36 @@ namespace Kiwi
     void Metro::tick()
     {
 		Box::send(0, {Tag_bang});
-		
-		if (m_active)
-			Clock::create(getShared(), m_interval);
+		if(m_active)
+        {
+			m_clock = Clock::create(getShared(), m_interval);
+        }
     }
     
     bool Metro::receive(unsigned long index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
-			if (elements[0].isNumber())
+			if(elements[0].isNumber())
 			{
-				if (index == 0) // start/stop metro
+				if(!index)
 				{
-					const bool wasActive = m_active;
-					m_active = elements[0];
-					
-					if (!wasActive && m_active)
-						Clock::create(getShared(), m_interval);
+                    if(m_active != (bool)elements[0])
+                    {
+                        m_active = elements[0];
+                        if(m_active)
+                        {
+                            m_clock = Clock::create(getShared(), m_interval);
+                        }
+                    }
 				}
-				else if (index == 1) // set interval time
+				else
 				{
-					setInterval(elements[0]);
+					m_interval = max((double)elements[0], 1.);
 				}
+                return true;
 			}
-            return true;
         }
         return false;
-    }
-	
-    bool Metro::attributeChanged(sAttr attr)
-    {
-        return true;
-    }
-	
-	void Metro::setInterval(double interval)
-	{
-		m_interval = interval < 1. ? 1 : interval;
-	}
-}
+    }}
 

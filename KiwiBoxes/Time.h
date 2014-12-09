@@ -39,17 +39,16 @@ namespace Kiwi
     class Metro : public Box
     {
     private:
-		bool	m_active;
-		double	m_interval;
+		atomic_bool	m_active;
+		double      m_interval;
+        sClock      m_clock;
     public:
         
-        Metro(sPage page, ElemVector const& args = {});
+        Metro(sPage page, ElemVector const& elements = {});
         ~Metro();
         bool receive(unsigned long index, ElemVector const& elements) override;
-        bool attributeChanged(sAttr attr) override;
         void tick() override;
-		void setInterval(double interval);
-        Allocate(Metro);
+        AllocateElemVector(Metro);
     };
     
     inline void timing()

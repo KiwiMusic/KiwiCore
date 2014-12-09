@@ -66,7 +66,7 @@ namespace Kiwi
             Box::send(0, {Tag_bang});
             m_led = true;
             redraw();
-            Clock::create(getShared(), 150);
+            m_clock = Clock::create(getShared(), 150);
             return true;
         }
         return false;
@@ -460,7 +460,7 @@ namespace Kiwi
             {
                 m_edition = true;
                 m_maker   = true;
-                Clock::create(getShared(), 500.);
+                m_clock = Clock::create(getShared(), 500.);
             }
         }
         return true;
@@ -485,7 +485,7 @@ namespace Kiwi
         {
             m_maker = !m_maker;
             redraw();
-            Clock::create(getShared(), 500.);
+            m_clock = Clock::create(getShared(), 500.);
         }
     }
     

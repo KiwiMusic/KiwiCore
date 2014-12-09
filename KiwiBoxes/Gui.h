@@ -42,6 +42,7 @@ namespace Kiwi
         const sAttrColor    m_color_circle;
         const sAttrColor    m_color_led;
         atomic_bool         m_led;
+        sClock              m_clock;
     public:
         
         Bang(sPage page);
@@ -112,6 +113,7 @@ namespace Kiwi
         string m_text;
         bool   m_maker;
         Point  m_selection;
+        sClock m_clock;
     public:
         
         Number(sPage page);

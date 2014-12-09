@@ -198,7 +198,8 @@ namespace Kiwi
     m_margin_left(0.),
     m_margin_bottom(0.),
     m_margin_right(0.),
-    m_line_spacing(0.)
+    m_line_spacing(0.),
+    m_behavior(Wrapped)
     {
         ;
     }
@@ -332,8 +333,46 @@ namespace Kiwi
             Point size = getStringSize(m_font, line);
             if(size.x() > m_displayed_width)
             {
-                string nline;
-                
+                string nline, templine, word;
+                string::size_type pos = 0, pos_next;
+                pos_next = line.find(' ', pos);
+                while(pos_next != string::npos)
+                {
+                    word.assign(line, pos, pos_next - pos);
+                    size = getStringSize(m_font, word);
+                    if(size.x() > m_displayed_width)
+                    {
+                        for(string::size_type i = 0; i < word.size(); i++)
+                        {
+                            nline += word[i];
+                            size = getStringSize(m_font, nline);
+                            if(size.x() > m_displayed_width)
+                            {
+                                nline.pop_back();
+                                m_displayed_text.push_back(nline);
+                                pos += i - 1;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        templine += word;
+                        size = getStringSize(m_font, templine);
+                        if(size.x() > m_displayed_width)
+                        {
+                            m_displayed_text.push_back(nline);
+                            nline.clear();
+                            templine.clear();
+                        }
+                        else
+                        {
+                            nline.append(line, pos, pos_next - pos);
+                            pos = pos_next;
+                            pos_next = line.find(' ', pos);
+                        }
+                    }
+                }
             }
             else
             {

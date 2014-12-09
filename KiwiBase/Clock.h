@@ -40,7 +40,6 @@ namespace Kiwi
     class Clock
     {
     private:
-        
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
@@ -51,6 +50,7 @@ namespace Kiwi
          */
         static void tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements);
         
+    public:
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
@@ -88,9 +88,9 @@ namespace Kiwi
          @param  box    The box that will be used.
          @param  ms     The delay time in milliseconds.
          */
-        static inline void create(sBox box, const unsigned long ms)
+        static inline sClock create(sBox box, const unsigned long ms)
         {
-            Clock clock(box, ms);
+            return make_shared<Clock>(box, ms);
         }
         
         //! Clock creator.
@@ -99,9 +99,9 @@ namespace Kiwi
          @param  elements   The elements that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        static inline void create(sBox box, ElemVector const& elements, const unsigned long ms)
+        static inline sClock create(sBox box, ElemVector const& elements, const unsigned long ms)
         {
-            Clock clock(box, ms, elements);
+            return make_shared<Clock>(box, ms, elements);
         }
     };
 };
