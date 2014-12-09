@@ -54,9 +54,9 @@ namespace Kiwi
     
     void Metro::tick()
     {
-		Box::send(0, {Tag_bang});
 		if(m_active)
         {
+            Box::send(0, {Tag_bang});
 			m_clock->delay(getShared(), m_interval);
         }
     }
@@ -74,8 +74,8 @@ namespace Kiwi
                         m_active = elements[0];
                         if(m_active)
                         {
-                            m_clock->delay(getShared(), m_interval);
                             Box::send(0, {Tag_bang});
+                            m_clock->delay(getShared(), m_interval);
                         }
                     }
 				}

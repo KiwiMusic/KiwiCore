@@ -37,7 +37,7 @@ namespace Kiwi
      The clock can be used by a box to call of one of the tick funtions after a specific delay. The clock creates a new thread and detach a new thread that will sleep for a specific time before calling the tick funtion of the box.
      @see Box.
      */
-    class Clock
+    class Clock : public enable_shared_from_this<Clock>
     {
     private:
         atomic_ulong m_used;
@@ -45,12 +45,12 @@ namespace Kiwi
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void tick(Clock* clock, unsigned long ms, sBox box);
+        static void tick(wClock clock, unsigned long ms, wBox box);
         
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements);
+        static void tick_elements(wClock clock, unsigned long ms, wBox box, ElemVector const& elements);
         
     public:
         //! The constructor.
@@ -83,12 +83,9 @@ namespace Kiwi
          @param  box        The box that will be used.
          @param  ms         The delay time in milliseconds.
          */
-        inline void delay(sBox box, const unsigned long ms)
+        inline void delay(wBox box, const unsigned long ms)
         {
-            if(box)
-            {
-                thread(tick, this, ms, box).detach();
-            }
+            thread(tick, shared_from_this(), ms, box).detach();
         }
         
         //! Clock creator.
@@ -97,12 +94,9 @@ namespace Kiwi
          @param  elements   The elements that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        inline void delay(sBox box, ElemVector const& elements, const unsigned long ms)
+        inline void delay(wBox box, ElemVector const& elements, const unsigned long ms)
         {
-            if(box)
-            {
-                thread(tick_elements, this, ms, box, elements).detach();
-            }
+            thread(tick_elements, shared_from_this(), ms, box, elements).detach();
         }
     };
 };

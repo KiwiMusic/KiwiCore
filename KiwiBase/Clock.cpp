@@ -27,28 +27,48 @@
 
 namespace Kiwi
 {
-    void Clock::tick_elements(Clock* clock, unsigned long ms, sBox box, ElemVector const& elements)
+    void Clock::tick_elements(wClock clock, unsigned long ms, wBox box, ElemVector const& elements)
     {
-        if(clock && box)
+        sClock nclock = clock.lock();
+        if(nclock)
         {
-            clock->m_used++;
+            nclock->m_used++;
+            nclock.reset();
+            
             this_thread::sleep_for(chrono::milliseconds(ms));
-            if(!(--clock->m_used))
+            
+            nclock = clock.lock();
+            if(nclock)
             {
-                box->tick();
+                nclock->m_used--;
+                sBox nbox = box.lock();
+                if(!nclock->m_used && nbox)
+                {
+                    nbox->tick();
+                }
             }
         }
     }
     
-    void Clock::tick(Clock* clock, unsigned long ms, sBox box)
+    void Clock::tick(wClock clock, unsigned long ms, wBox box)
     {
-        if(clock && box)
+        sClock nclock = clock.lock();
+        if(nclock)
         {
-            clock->m_used++;
+            nclock->m_used++;
+            nclock.reset();
+            
             this_thread::sleep_for(chrono::milliseconds(ms));
-            if(!(--clock->m_used))
+            
+            nclock = clock.lock();
+            if(nclock)
             {
-                box->tick();
+                nclock->m_used--;
+                sBox nbox = box.lock();
+                if(!nclock->m_used && nbox)
+                {
+                    nbox->tick();
+                }
             }
         }
     }

@@ -546,7 +546,7 @@ namespace Kiwi
             
             struct Hit
             {
-				sBox			box;
+				wBox			box;
 				Type            type = Type::Outside;
                 unsigned long   index;
             };

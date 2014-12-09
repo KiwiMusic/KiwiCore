@@ -480,13 +480,11 @@ namespace Kiwi
 	
 	void Page::Controller::removeBoxController(Box::sController box)
 	{
-		for(vector<Box::sController>::size_type i = 0; i < m_boxes.size(); i++)
-		{
-			if(box == m_boxes[i])
-			{
-				m_boxes.erase(m_boxes.begin()+i);
-			}
-		}
+        auto it = find(m_boxes.begin(), m_boxes.end(), box);
+        if(it != m_boxes.end())
+        {
+            m_boxes.erase(it);
+        }
 	}
 	
 	Box::sController Page::Controller::getBoxController(sBox box) const noexcept
@@ -581,8 +579,10 @@ namespace Kiwi
 			unselectAllBoxes(false);
 			unselectAllLinks(false);
 			
-			if (notify)
+			if(notify)
+            {
 				selectionChanged();
+            }
 		}
 	}
 	
@@ -592,7 +592,7 @@ namespace Kiwi
 		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 		{
 			Box::sController box = (*it).lock();
-			if (box)
+			if(box)
 			{
 				getPage()->removeBox(box->getBox());
 				sendChange = true;
@@ -604,7 +604,7 @@ namespace Kiwi
 		for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
 		{
 			Link::sController link = (*it).lock();
-			if (link)
+			if(link)
 			{
 				getPage()->removeLink(link->getLink());
 				sendChange = true;
@@ -613,8 +613,10 @@ namespace Kiwi
 		
 		m_links_selected.clear();
 		
-		if (sendChange)
+		if(sendChange)
+        {
 			selectionChanged();
+        }
 	}
 	
 	bool Page::Controller::selectAllLinks()
