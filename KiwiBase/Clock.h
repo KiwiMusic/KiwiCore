@@ -40,6 +40,8 @@ namespace Kiwi
     class Clock
     {
     private:
+        atomic_ulong m_used;
+        
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
@@ -54,23 +56,9 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        Clock(sBox box, const unsigned long ms)
+        Clock() : m_used(0)
         {
-            if(box)
-            {
-                thread(tick, this, ms, box).detach();
-            }
-        }
-        
-        //! The constructor.
-        /** You should never use this method except if you really know what you do.
-         */
-        Clock(sBox box, const unsigned long ms, ElemVector const& elements)
-        {
-            if(box)
-            {
-                thread(tick_elements, this, ms, box, elements).detach();
-            }
+            ;
         }
         
         //! The destructor.
@@ -80,17 +68,27 @@ namespace Kiwi
         {
             ;
         }
-    
-    public:
         
         //! Clock creator.
         /** This function create a new clock.
-         @param  box    The box that will be used.
-         @param  ms     The delay time in milliseconds.
+         @return The clock.
          */
-        static inline sClock create(sBox box, const unsigned long ms)
+        static inline sClock create()
         {
-            return make_shared<Clock>(box, ms);
+            return make_shared<Clock>();
+        }
+        
+        //! Clock creator.
+        /** This function create a new clock.
+         @param  box        The box that will be used.
+         @param  ms         The delay time in milliseconds.
+         */
+        inline void delay(sBox box, const unsigned long ms)
+        {
+            if(box)
+            {
+                thread(tick, this, ms, box).detach();
+            }
         }
         
         //! Clock creator.
@@ -99,9 +97,12 @@ namespace Kiwi
          @param  elements   The elements that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        static inline sClock create(sBox box, ElemVector const& elements, const unsigned long ms)
+        inline void delay(sBox box, ElemVector const& elements, const unsigned long ms)
         {
-            return make_shared<Clock>(box, ms, elements);
+            if(box)
+            {
+                thread(tick_elements, this, ms, box, elements).detach();
+            }
         }
     };
 };

@@ -39,7 +39,8 @@ namespace Kiwi
                                             Tag::create("Led Color"),
                                             Tag::create("Color"),
                                             (ElemVector){0.6, 0.6, 0.6, 1.})),
-    m_led(false)
+    m_led(false),
+    m_clock(Clock::create())
     {
         addInlet(IoType::Data, IoPolarity::Hot, "Flash (anything)");
         addOutlet(IoType::Data, "Output (bang)");
@@ -66,7 +67,7 @@ namespace Kiwi
             Box::send(0, {Tag_bang});
             m_led = true;
             redraw();
-            m_clock = Clock::create(getShared(), 150);
+            m_clock->delay(getShared(), 150);
             return true;
         }
         return false;
@@ -304,7 +305,8 @@ namespace Kiwi
     m_value(0.),
     m_increment(0.),
     m_last_y(0.),
-    m_edition(false)
+    m_edition(false),
+    m_clock(Clock::create())
     {
         addInlet(IoType::Data, IoPolarity::Hot, "New value and Ouput (int, float or bang)");
         addOutlet(IoType::Data, "Value (float)");
@@ -460,7 +462,7 @@ namespace Kiwi
             {
                 m_edition = true;
                 m_maker   = true;
-                m_clock = Clock::create(getShared(), 500.);
+                m_clock->delay(getShared(), 500.);
             }
         }
         return true;
@@ -485,7 +487,7 @@ namespace Kiwi
         {
             m_maker = !m_maker;
             redraw();
-            m_clock = Clock::create(getShared(), 500.);
+            m_clock->delay(getShared(), 500.);
         }
     }
     

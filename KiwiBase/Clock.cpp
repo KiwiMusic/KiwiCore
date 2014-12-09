@@ -31,8 +31,12 @@ namespace Kiwi
     {
         if(clock && box)
         {
+            clock->m_used++;
             this_thread::sleep_for(chrono::milliseconds(ms));
-            box->tick();
+            if(!(--clock->m_used))
+            {
+                box->tick();
+            }
         }
     }
     
@@ -40,8 +44,12 @@ namespace Kiwi
     {
         if(clock && box)
         {
+            clock->m_used++;
             this_thread::sleep_for(chrono::milliseconds(ms));
-            box->tick();
+            if(!(--clock->m_used))
+            {
+                box->tick();
+            }
         }
     }
 }

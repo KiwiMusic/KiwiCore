@@ -31,7 +31,8 @@ namespace Kiwi
     // ================================================================================ //
     
     Metro::Metro(sPage page, ElemVector const& elements) : Box(page, "metro"),
-    m_active(false)
+    m_active(false),
+    m_clock(Clock::create())
     {
         addInlet(IoType::Data, IoPolarity::Hot, "Start/Stop Metronome");
         if(elements.empty())
@@ -56,7 +57,7 @@ namespace Kiwi
 		Box::send(0, {Tag_bang});
 		if(m_active)
         {
-			m_clock = Clock::create(getShared(), m_interval);
+			m_clock->delay(getShared(), m_interval);
         }
     }
     
@@ -73,7 +74,8 @@ namespace Kiwi
                         m_active = elements[0];
                         if(m_active)
                         {
-                            m_clock = Clock::create(getShared(), m_interval);
+                            m_clock->delay(getShared(), m_interval);
+                            Box::send(0, {Tag_bang});
                         }
                     }
 				}
