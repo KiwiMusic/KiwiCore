@@ -162,6 +162,16 @@ namespace Kiwi
         {
             return {m_red, m_green, m_blue, m_alpha};
         }
+        
+        inline Color brighter(const double value) const noexcept
+        {
+            return Color(red() + value, green() + value, blue() + value, alpha());
+        }
+        
+        inline Color darker(const double value) const noexcept
+        {
+            return Color(red() - value, green() - value, blue() - value, alpha());
+        }
     };
 }
 

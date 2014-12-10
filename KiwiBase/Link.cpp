@@ -264,30 +264,31 @@ namespace Kiwi
     
     void Link::Controller::paint(sLink link, Doodle& d, bool selected)
     {
-        /*
         Path path;
         link->getPath(path);
         if(path.size() > 1)
         {
-            Point pos = link->getPosition();
-            pos -= 10.;
-            Point pt = path.getPoint(0), next;
-            pt -=  pos;
-            Path p(pt);
+            Point pos = link->getPosition() - 10.;
+            Point pt = path.getPoint(0) - pos, next;
+            Path realpath(pt);
             for(unsigned long i = 0; i < path.size() - 1; i++)
             {
-                next = path.getPoint(i+1);
-                next -= pos;
+                next = path.getPoint(i+1) - pos;
+                double h;
                 if(pt.y() <= next.y())
                 {
-                    double h = max((next.y() - pt.y()) * 0.5, 15.);
-                    p.cubicTo(pt.x(), pt.y() + h, next.x(), next.y() - h, next.x(), next.y());
+                    h = max((next.y() - pt.y()) * 0.5, 15.);
+                  
                 }
                 else
                 {
-                    double h = max(15. / (pt.y() - next.y()), 15.);
-                    p.cubicTo(pt.x(), pt.y() + h, next.x(), next.y() - h, next.x(), next.y());
+                    h = max(15. / (pt.y() - next.y()), 15.);
                 }
+                Point ctrl1 = pt;
+                ctrl1.y(ctrl1.y() + h);
+                Point ctrl2 = next;
+                ctrl2.y(ctrl2.y() - h);
+                realpath.cubicTo(ctrl1, ctrl2, next);
                 pt = next;
             }
             
@@ -301,16 +302,53 @@ namespace Kiwi
                 color = Color(0.42, 0.42, 0.42, 1.);
             }
             
-            d.setColor(color.darker(0.6));
-            d.strokePath(p, PathStrokeType(2, PathStrokeType::curved, PathStrokeType::rounded));
-            
-            d.setColor(color.brighter(0.5));
-            d.strokePath(p, PathStrokeType(1, PathStrokeType::curved, PathStrokeType::rounded));
-        }*/
+            d.setColor(color.darker(0.2));
+            d.drawPath(realpath, 2.);
+            d.setColor(color.brighter(0.15));
+            d.drawPath(realpath, 1.);
+        }
     }
 
     bool Link::Controller::contains(Point const& point, Knock& knock) const noexcept
     {
+        Path path;
+        m_link->getPath(path);
+        if(path.size() > 1)
+        {
+            Point pos = m_link->getPosition() - 10.;
+            Point pt = path.getPoint(0) - pos, next;
+            Path realpath(pt);
+            for(unsigned long i = 0; i < path.size() - 1; i++)
+            {
+                next = path.getPoint(i+1) - pos;
+                double h;
+                if(pt.y() <= next.y())
+                {
+                    h = max((next.y() - pt.y()) * 0.5, 15.);
+                    
+                }
+                else
+                {
+                    h = max(15. / (pt.y() - next.y()), 15.);
+                }
+                Point ctrl1 = pt;
+                ctrl1.y(ctrl1.y() + h);
+                Point ctrl2 = next;
+                ctrl2.y(ctrl2.y() - h);
+                realpath.cubicTo(ctrl1, ctrl2, next);
+                pt = next;
+            }
+			
+			if(realpath.intersect(point - pos, 5.))
+            {
+                knock.m_link = m_link;
+                knock.m_part = Knock::Inside;
+				return true;
+            }
+		}
+		
+        knock.m_link.reset();
+        knock.m_part = Knock::Outside;
         return false;
     }
     

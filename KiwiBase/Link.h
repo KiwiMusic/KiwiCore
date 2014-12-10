@@ -219,7 +219,7 @@ namespace Kiwi
         private:
             const sLink		m_link;
 			bool			m_selected;
-            
+
         public:
 			
 			enum HitType

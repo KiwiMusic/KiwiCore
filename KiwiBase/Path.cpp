@@ -157,8 +157,126 @@ namespace Kiwi
         
     }
     
-    bool Path::contains(Point const& pt) const noexcept
+    bool Path::contains(Point const& point, double const tolerance) const noexcept
     {
-        
+        if(m_points.size() == 1)
+        {
+            
+        }
+        else if(m_points.size() > 1)
+        {
+            for(vector<Node>::size_type i = 0; i < m_points.size(); i++)
+            {
+                
+            }
+        }
+        return false;
+    }
+    
+    bool Path::intersect(Point const& pt, double const tolerance) const noexcept
+    {
+        if(m_points.size() == 1)
+        {
+            return pt.near(m_points[0].point, tolerance);
+        }
+        else if(m_points.empty())
+        {
+            Point previous;
+            for(vector<Node>::size_type i = 0; i < m_points.size(); i++)
+            {
+                Point current = m_points[i].point;
+                switch(m_points[i].mode)
+                {
+                    case Move:
+                        if(pt.near(current, tolerance))
+                        {
+                            return true;
+                        }
+                        break;
+                    case Linear:
+                        if(previous.x() < current.x() && previous.x() - tolerance <= pt.x() && current.x() + tolerance >= pt.x())
+                        {
+                            const double position = (current.x() - previous.x()) / (pt.x() - previous.x());
+                            if(previous.y() < current.y())
+                            {
+                                const double y = (current.y() - previous.y()) * position + previous.y();
+                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
+                                {
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                const double y = (previous.y() - current.y()) * position + current.y();
+                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                        else if(previous.x() + tolerance >= pt.x() && current.x() - tolerance <= pt.x())
+                        {
+                            const double position = (previous.x() - current.x()) / (pt.x() - current.x());
+                            if(previous.y() < current.y())
+                            {
+                                const double y = (current.y() - previous.y()) * position + previous.y();
+                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
+                                {
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                const double y = (previous.y() - current.y()) * position + current.y();
+                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                        break;
+                    case Cubic:
+                        int zaza;
+                        i += 2;
+                        if(i < m_points.size())
+                        {
+                            if(previous.x() < current.x() && previous.x() - tolerance <= pt.x() && current.x() + tolerance >= pt.x())
+                            {
+                                const double position = (current.x() - previous.x()) / (pt.x() - previous.x());
+                                Point begin(0., previous.y());
+                                Point ctrl1(m_points[i-2].point.x() - previous.x(), m_points[i-2].point.y());
+                                Point ctrl2(m_points[i-1].point.x() - previous.x(), m_points[i-1].point.y());
+                                Point end(current.x() - previous.x(), current.y());
+                                
+                                Point result = begin * pow(1. - position, 3.) + ctrl1 * 3. * position * pow(1. - position, 2.) + ctrl2 * 2 * pow(position, 2.) * (1. - position) + end * pow(position, 3.);
+                                if(result.near(pt, tolerance))
+                                {
+                                    return true;
+                                }
+                            }
+                            else if(previous.x() + tolerance >= pt.x() && current.x() - tolerance <= pt.x())
+                            {
+                                const double position = (previous.x() - current.x()) / (pt.x() - current.x());
+                                Point end(0., previous.y());
+                                Point ctrl2(m_points[i-2].point.x() - previous.x(), m_points[i-2].point.y());
+                                Point ctrl1(m_points[i-1].point.x() - previous.x(), m_points[i-1].point.y());
+                                Point begin(current.x() - previous.x(), current.y());
+                                
+                                Point result = begin * pow(1. - position, 3.) + ctrl1 * 3. * position * pow(1. - position, 2.) + ctrl2 * 2 * pow(position, 2.) * (1. - position) + end * pow(position, 3.);
+                                if(result.near(pt, tolerance))
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                        break;
+                        
+                    default:
+                        break;
+                }
+                previous = m_points[0].point;
+            }
+        }
+        return false;
     }
 }

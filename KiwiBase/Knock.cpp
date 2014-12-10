@@ -75,9 +75,8 @@ namespace Kiwi
                 ctrl->getLinks(links);
                 for(vector<Link::sController>::size_type i = links.size(); i; i--)
                 {
-                    int zaza;
                     Link::sController link = links[i-1];
-                    if(link)// && link->isHit(point, this))
+                    if(link && link->contains(point, *this))
                     {
                         return;
                     }

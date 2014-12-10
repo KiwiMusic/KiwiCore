@@ -208,9 +208,9 @@ namespace Kiwi
          */
         Rectangle getBounds() const noexcept;
         
-        bool contains(Point const& pt) const noexcept;
+        bool contains(Point const& point, double const tolerance) const noexcept;
         
-        bool intersect(Point const& pt) const noexcept;
+        bool intersect(Point const& pt, double const tolerance) const noexcept;
     };
 }
 

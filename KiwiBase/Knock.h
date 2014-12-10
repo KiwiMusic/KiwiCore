@@ -38,6 +38,7 @@ namespace Kiwi
      */
     class Knock
     {
+        friend class Link;
     public:
         enum Border
         {
