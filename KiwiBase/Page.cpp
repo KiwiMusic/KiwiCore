@@ -598,7 +598,6 @@ namespace Kiwi
 				sendChange = true;
 			}
 		}
-		
 		m_boxes_selected.clear();
 		
 		for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
@@ -610,7 +609,6 @@ namespace Kiwi
 				sendChange = true;
 			}
 		}
-		
 		m_links_selected.clear();
 		
 		if(sendChange)
@@ -657,7 +655,6 @@ namespace Kiwi
 	bool Page::Controller::unselectAllBoxes(const bool notify)
 	{
 		bool sendChange = false;
-		
 		if(!m_boxes_selected.empty())
 		{
 			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
@@ -671,8 +668,10 @@ namespace Kiwi
 			}
 			m_boxes_selected.clear();
 			
-			if (notify && sendChange)
+			if(notify && sendChange)
+            {
 				selectionChanged();
+            }
 			
 			return true;
 		}
@@ -682,7 +681,6 @@ namespace Kiwi
 	bool Page::Controller::unselectAllLinks(const bool notify)
 	{
 		bool sendChange = false;
-		
 		if(!m_links_selected.empty())
 		{
 			for(auto it = m_links_selected.begin(); it != m_links_selected.end(); ++it)
@@ -696,8 +694,10 @@ namespace Kiwi
 			}
 			m_links_selected.clear();
 			
-			if (notify && sendChange)
+			if(notify && sendChange)
+            {
 				selectionChanged();
+            }
 			
 			return true;
 		}
@@ -719,19 +719,18 @@ namespace Kiwi
 		bool notify = false;
 		if(!boxes.empty())
 		{
-			for (auto it = boxes.begin() ; it != boxes.end(); ++it)
+			for(auto it = boxes.begin(); it != boxes.end(); ++it)
 			{
-				Box::sController box = *it;
-				
-				if (!isSelected(box))
+				if(select(*it, false))
 				{
-					select(box, false);
 					notify = true;
 				}
 			}
 			
-			if (notify)
+			if(notify)
+            {
 				selectionChanged();
+            }
 		}
 	}
 	
@@ -740,19 +739,18 @@ namespace Kiwi
 		bool notify = false;
 		if(!links.empty())
 		{
-			for (auto it = links.begin() ; it != links.end(); ++it)
+			for(auto it = links.begin(); it != links.end(); ++it)
 			{
-				Link::sController link = *it;
-				
-				if (!isSelected(link))
+				if(select(*it, false))
 				{
-					select(link, false);
 					notify = true;
 				}
 			}
 			
-			if (notify)
+			if(notify)
+            {
 				selectionChanged();
+            }
 		}
 	}
 	
@@ -761,8 +759,10 @@ namespace Kiwi
 		if(box && m_boxes_selected.insert(box).second)
 		{
 			box->setSelectedStatus(true);
-			if (notify)
+			if(notify)
+            {
 				selectionChanged();
+            }
 			return true;
 		}
 		return false;
@@ -773,8 +773,10 @@ namespace Kiwi
 		if(link && m_links_selected.insert(link).second)
 		{
 			link->setSelectedStatus(true);
-			if (notify)
+			if(notify)
+            {
 				selectionChanged();
+            }
 			return true;
 		}
 		return false;
@@ -812,7 +814,7 @@ namespace Kiwi
 	bool Page::Controller::selectOnly(Link::sController link)
 	{
 		unselectAllBoxes();
-		if (link)
+		if(link)
 		{
 			if(!m_links_selected.empty())
 			{
@@ -844,19 +846,18 @@ namespace Kiwi
 		bool notify = false;
 		if(isSomethingSelected() && !boxes.empty())
 		{
-			for (auto it = boxes.begin() ; it != boxes.end(); ++it)
+			for(auto it = boxes.begin(); it != boxes.end(); ++it)
 			{
-				Box::sController box = *it;
-				
-				if (isSelected(box))
+				if(unselect(*it, false))
 				{
-					unselect(box, false);
 					notify = true;
 				}
 			}
 			
-			if (notify)
+			if(notify)
+            {
 				selectionChanged();
+            }
 		}
 	}
 	
@@ -865,19 +866,18 @@ namespace Kiwi
 		bool notify = false;
 		if(isSomethingSelected() && !links.empty())
 		{
-			for (auto it = links.begin() ; it != links.end(); ++it)
+			for(auto it = links.begin(); it != links.end(); ++it)
 			{
-				Link::sController link = *it;
-				
-				if (isSelected(link))
+				if(unselect(*it, false))
 				{
-					unselect(link, false);
 					notify = true;
 				}
 			}
 			
-			if (notify)
+			if(notify)
+            {
 				selectionChanged();
+            }
 		}
 	}
 	
@@ -886,10 +886,10 @@ namespace Kiwi
 		if(box && m_boxes_selected.erase(box))
 		{
 			box->setSelectedStatus(false);
-			
 			if(notify)
+            {
 				selectionChanged();
-			
+            }
 			return true;
 		}
 		return false;
@@ -900,7 +900,10 @@ namespace Kiwi
 		if(link && m_links_selected.erase(link))
 		{
 			link->setSelectedStatus(false);
-			selectionChanged();
+			if(notify)
+            {
+				selectionChanged();
+            }
 			return true;
 		}
 		return false;
@@ -912,10 +915,14 @@ namespace Kiwi
 		
 		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 		{
-			Box::sController jbox = (*it).lock();
-			if(jbox)
+			Box::sController boxcrtl = (*it).lock();
+			if(boxcrtl)
 			{
-				m_boxes_bounds.push_back(jbox->getBox()->getBounds());
+                sBox box = boxcrtl->getBox();
+                if(box)
+                {
+                    m_boxes_bounds.push_back(box->getBounds());
+                }
 			}
 		}
 	}
@@ -929,7 +936,7 @@ namespace Kiwi
 	void Page::Controller::getBoxesInRect(vector<Box::sController>& boxes, Rectangle const& rect) const noexcept
 	{
 		boxes.clear();
-		
+		int zaza; //To clear
 		for(int i=0; i < m_boxes.size(); i++)
 		{
 			sBox box = m_boxes[i]->getBox();
@@ -947,7 +954,7 @@ namespace Kiwi
 	void Page::Controller::getLinksInRect(vector<Link::sController>& links, Rectangle const& rect) const noexcept
 	{
 		links.clear();
-		
+		int zaza; //To clear
 		for(int i=0; i < m_links.size(); i++)
 		{
 			sLink link = m_links[i]->getLink();
@@ -966,17 +973,17 @@ namespace Kiwi
 	{
 		if (isAnyBoxSelected())
 		{
-			unsigned int i = 0;
 			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 			{
-				Box::sController box = (*it).lock();
-				if(box)
+				Box::sController boxctrl = (*it).lock();
+				if(boxctrl)
 				{
-					Point boxpos = box->getBox()->getPosition();
-					boxpos += delta;
-					box->getBox()->setAttributeValue(AttrBox::Tag_position, {boxpos.x(), boxpos.y()});
+                    sBox box =  boxctrl->getBox();
+                    if(box)
+                    {
+                        box->setAttributeValue(AttrBox::Tag_position, box->getPosition() + delta);
+                    }
 				}
-				i++;
 			}
 		}
 	}
@@ -988,7 +995,6 @@ namespace Kiwi
 		{
 			ElemVector elements;
 			vector<sBox> boxes;
-			unsigned int i = 0;
 			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 			{
 				Box::sController boxctrl = (*it).lock();
@@ -1008,7 +1014,6 @@ namespace Kiwi
 						}
 					}
 				}
-				i++;
 			}
 			dico->set(Tag_boxes, elements);
 			
@@ -1113,6 +1118,66 @@ namespace Kiwi
 		
 		return pageModified;
 	}
+    
+    // ================================================================================ //
+    //                                      HIT TEST                                    //
+    // ================================================================================ //
+    
+    Page::Controller::HitTest::HitTest(sController owner) :
+    m_owner(owner),
+    m_type(Type::Nothing)
+    {
+        ;
+    }
+    
+    Page::Controller::HitTest::~HitTest()
+    {
+        ;
+    }
+    
+    void Page::Controller::HitTest::reset() noexcept
+    {
+        m_type = Type::Nothing;
+        m_link_hit.link.reset();
+        m_link_hit.type = Link::Controller::Outside;
+        m_box_hit.box.reset();
+        m_box_hit.type  = Box::Controller::Outside;
+    }
+    
+    void Page::Controller::HitTest::test(Point const& pt) noexcept
+    {
+        reset();
+        Page::sController ctrl = m_owner.lock();
+        if(ctrl)
+        {
+            vector<Box::sController> boxes;
+            ctrl->getBoxes(boxes);
+            for(vector<Box::sController>::size_type i = boxes.size(); i; i--)
+            {
+                Box::sController box = boxes[i-1];
+                if(box && box->isHit(pt, m_box_hit))
+                {
+                    m_type  = Type::Box;
+                    return;
+                }
+            }
+            
+            vector<Link::sController> links;
+            ctrl->getLinks(links);
+            for(vector<Link::sController>::size_type i = links.size(); i; i--)
+            {
+                Link::sController link = links[i-1];
+                if(link && link->isHit(pt, m_link_hit))
+                {
+                    m_type = Type::Link;
+                    return;
+                }
+            }
+            
+            m_type = Type::Page;
+            return;
+        }
+    }
 }
 
 

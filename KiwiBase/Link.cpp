@@ -252,11 +252,6 @@ namespace Kiwi
     // ================================================================================ //
     //                                  LINK CONTROLER                                  //
     // ================================================================================ //
-    
-    void Link::Controller::paint(sLink link, Doodle& d, bool selected)
-    {
-        
-    }
 	
 	void Link::Controller::setSelectedStatus(bool status)
 	{
@@ -266,6 +261,16 @@ namespace Kiwi
 			redraw();
 		}
 	}
+    
+    void Link::Controller::paint(sLink link, Doodle& d, bool selected)
+    {
+        
+    }
+    
+    bool Link::Controller::contains(Point const& point, Knock& knock) const noexcept
+    {
+        return false;
+    }
     
     bool Link::compareBoxToPositions(sLink link1, sLink link2)
     {
@@ -293,7 +298,6 @@ namespace Kiwi
         }
         return false;
     }
-    
 }
 
 

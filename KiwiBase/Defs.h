@@ -120,6 +120,8 @@ namespace Kiwi
     class Link;
     typedef shared_ptr<Link>        sLink;
     typedef shared_ptr<const Link>  scLink;
+    typedef weak_ptr<Link>          wLink;
+    typedef weak_ptr<const Link>    wcLink;
     
     class Box;
     typedef shared_ptr<Box>         sBox;

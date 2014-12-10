@@ -323,6 +323,9 @@ namespace Kiwi
          */
 		class Controller : public enable_shared_from_this<Controller>
         {
+        public:
+            class HitTest;
+            
         private:
             const sPage						m_page;
 			
@@ -344,172 +347,7 @@ namespace Kiwi
 			bool m_presentation;
 			bool m_display_grid;
 			bool m_snap_to_grid;
-			
         public:
-			class HitTest
-			{
-			public:
-				enum Type
-				{
-					Nothing = 0,
-					Page	= 1,
-					Box		= 2,
-					Link	= 3
-				};
-				
-				// create an invalid hittest
-				HitTest()
-				{
-					m_hittype = Type::Nothing;
-				}
-				
-				inline HitTest& operator=(HitTest& hit) noexcept
-				{
-					Console::post("======");
-					m_box.reset();
-					m_link.reset();
-					m_hittype = Type::Nothing;
-					m_owner = hit.getHitPage();
-					
-					if (hit.hasHitBox())
-					{
-						m_hittype = Type::Box;
-						m_box = hit.getHitBox();
-					}
-					else if (hit.hasHitLink())
-					{
-						m_hittype = Type::Link;
-						m_link = hit.getHitLink();
-					}
-					else if (hasHitPage())
-					{
-						m_hittype = Type::Page;
-					}
-					return *this;
-				}
-				
-				HitTest(sController owner, Point const& pt) : m_owner(owner)
-				{
-					m_hittype = Type::Nothing;
-					m_box.reset();
-					m_link.reset();
-					
-					bool hit = false;
-					hit = doBoxHitTest(pt);
-					
-					if (!hit)
-						hit = doLinkHitTest(pt);
-					
-					if (!hit)
-						m_hittype = Type::Page;
-				}
-				
-				bool doBoxHitTest(Point const& pt)
-				{
-					m_hittype = Type::Nothing;
-					m_box.reset();
-					
-					if (getHitPage())
-					{
-						for(size_t i = getHitPage()->m_boxes.size(); i; i--)
-						{
-							if(getHitPage()->m_boxes[i-1]->isHit(pt, m_box_hit))
-							{
-								m_box = getHitPage()->m_boxes[i-1];
-								m_box_hit.box = m_box.lock()->getBox();
-								m_hittype = Type::Box;
-								return true;
-							}
-						}
-					}
-					return false;
-				}
-				
-				bool doLinkHitTest(Point const& pt)
-				{
-					m_hittype = Type::Nothing;
-					m_link.reset();
-					
-					if (getHitPage())
-					{
-						Link::Controller::Hit hit;
-						for(size_t i = getHitPage()->m_links.size(); i; i--)
-						{
-							if(getHitPage()->m_links[i-1]->isHit(pt, m_link_hit))
-							{
-								m_link = getHitPage()->m_links[i-1];
-								m_hittype = Type::Link;
-								return true;
-							}
-						}
-					}
-					return false;
-				}
-				
-				Box::sController getHitBox()
-				{
-					if (m_hittype == Type::Box && !m_box.expired())
-					{
-						return m_box.lock();
-					}
-					return nullptr;
-				}
-				
-				Box::Controller::Hit getBoxHit() const noexcept
-				{
-					if (m_hittype == Type::Box && !m_box.expired())
-						return m_box_hit;
-
-					return Box::Controller::Hit();
-				}
-				
-				Link::Controller::Hit getLinkHit()  const
-				{
-					if (m_hittype == Type::Link && !m_link.expired())
-						return m_link_hit;
-
-					return Link::Controller::Hit();
-				}
-				
-				Link::sController getHitLink() const noexcept
-				{
-					if (m_hittype == Type::Link && !m_link.expired())
-						return m_link.lock();
-
-					return nullptr;
-				}
-				
-				inline sController getHitPage() const noexcept
-				{
-					if (!m_owner.expired())
-						return m_owner.lock();
-						
-					return nullptr;
-				}
-				
-				inline bool hasHitBox() const noexcept
-				{
-					return m_hittype == Type::Box;
-				}
-				
-				inline bool hasHitLink() const noexcept
-				{
-					return m_hittype == Type::Link;
-				}
-				
-				inline bool hasHitPage() const noexcept
-				{
-					return m_hittype == Type::Page;
-				}
-				
-			private:
-				Type					m_hittype;
-				Box::wController		m_box;
-				Box::Controller::Hit	m_box_hit;
-				Link::wController		m_link;
-				Link::Controller::Hit	m_link_hit;
-				wController				m_owner;
-			};
 			
 			//! Constructor.
 			/** You should never call this method except if you really know what you're doing.
@@ -904,6 +742,111 @@ namespace Kiwi
         static const sTag Tag_boxes;
         static const sTag Tag_link;
         static const sTag Tag_links;
+    };
+    
+    // ================================================================================ //
+    //                                      HIT TEST                                    //
+    // ================================================================================ //
+    
+    class Page::Controller::HitTest
+    {
+    public:
+        enum Type
+        {
+            Nothing = 0,
+            Page	= 1,
+            Box		= 2,
+            Link	= 3
+        };
+        
+    private:
+        const wController		m_owner;
+        Type					m_type;
+        Box::Controller::Hit	m_box_hit;
+        Link::Controller::Hit	m_link_hit;
+        
+    public:
+        
+        //! The contructor.
+        /** The contructor initialize a page controler.
+         @param owner The page controler.
+         */
+        HitTest(sController owner);
+        
+        //! The destructor.
+        /** The destructor does nothing.
+         */
+        ~HitTest();
+        
+        //! Reset the hit test.
+        /** The function resets the hit test as it has never touch any box or any link.
+         */
+        void reset() noexcept;
+        
+        //! Test a point.
+        /** The function try to find a box or then link under the point otherwise it will consider that the page has been touched.
+         @param pt The point.
+         */
+        void test(Point const& pt) noexcept;
+        
+        inline Box::sController getBoxController() const noexcept
+        {
+            if(m_type == Type::Box)
+            {
+                sBox box = m_box_hit.box.lock();
+                if(box)
+                {
+                    return box->getController();
+                }
+            }
+            return nullptr;
+        }
+        
+        inline Box::Controller::Hit getBoxHit() const noexcept
+        {
+            if(m_type == Type::Box)
+            {
+                return m_box_hit;
+            }
+            return Box::Controller::Hit();
+        }
+        
+        inline Link::sController getHitController() const noexcept
+        {
+            if(m_type == Type::Link)
+            {
+                sLink link = m_link_hit.link.lock();
+                if(link)
+                {
+                    return link->getController();
+                }
+            }
+            return nullptr;
+        }
+        
+        inline Link::Controller::Hit getLinkHit() const noexcept
+        {
+            if(m_type == Type::Link)
+            {
+                return m_link_hit;
+            }
+            return Link::Controller::Hit();
+        }
+        
+        inline bool hasHitBox() const noexcept
+        {
+            return m_type == Type::Box;
+        }
+        
+        inline bool hasHitLink() const noexcept
+        {
+            return m_type == Type::Link;
+        }
+        
+        inline bool hasHitPage() const noexcept
+        {
+            return m_type == Type::Page;
+        }
     };
     
 }

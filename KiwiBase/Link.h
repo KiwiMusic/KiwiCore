@@ -25,6 +25,7 @@
 #define __DEF_KIWI_LINK__
 
 #include "Attribute.h"
+#include "Knock.h"
 
 namespace Kiwi
 {
@@ -231,6 +232,7 @@ namespace Kiwi
 			
 			struct Hit
 			{
+                wLink     link;
 				HitType   type = HitType::Outside;
 			};
 			
@@ -296,6 +298,14 @@ namespace Kiwi
 			{
 				return false;
 			}
+            
+            //! Retrieve if the link is touch by a point.
+			/** The function retrieves if the link is touch by a point and fill the knock with the hit informations.
+             @param point The point.
+             @param knock The knock.
+			 @return true if the link is touch by the point, otherwise false.
+			 */
+			virtual bool contains(Point const& point, Knock& knock) const noexcept;
 			
             //! The bounds notification function that should be override.
             /** The function is called by the link when its bounds changed.

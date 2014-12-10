@@ -548,7 +548,7 @@ namespace Kiwi
             {
 				wBox			box;
 				Type            type = Type::Outside;
-                unsigned long   index;
+                unsigned long   index = 0;
             };
             
         private:

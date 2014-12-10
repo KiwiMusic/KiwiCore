@@ -496,6 +496,7 @@ namespace Kiwi
                 const unsigned long ninlets = m_box->getNumberOfInlets();
                 if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
                 {
+                    hit.box     = m_box;
                     hit.type    = Inlet;
                     hit.index   = 0;
                     return true;
@@ -508,6 +509,7 @@ namespace Kiwi
                         double val = ratio * i + bounds.x();
                         if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
                         {
+                            hit.box     = m_box;
                             hit.type    = Inlet;
                             hit.index   = i;
                             return true;
@@ -516,6 +518,7 @@ namespace Kiwi
                 }
                 else
                 {
+                    hit.box     = m_box;
                     hit.type    = Inside;
                     hit.index   = 0;
                     return true;
@@ -526,6 +529,7 @@ namespace Kiwi
                 const unsigned long noutlets = m_box->getNumberOfOutlets();
                 if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
                 {
+                    hit.box     = m_box;
                     hit.type    = Outlet;
                     hit.index   = 0;
                     return true;
@@ -538,6 +542,7 @@ namespace Kiwi
                         double val = ratio * i + bounds.x();
                         if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
                         {
+                            hit.box     = m_box;
                             hit.type    = Outlet;
                             hit.index   = i;
                             return true;
@@ -546,6 +551,7 @@ namespace Kiwi
                 }
                 else
                 {
+                    hit.box     = m_box;
                     hit.type    = Inside;
                     hit.index   = 0;
                     return true;
@@ -553,11 +559,15 @@ namespace Kiwi
             }
             else
             {
+                hit.box     = m_box;
                 hit.type    = Inside;
                 hit.index   = 0;
             }
             return true;
         }
+        hit.box.reset();
+        hit.type    = Outside;
+        hit.index   = 0;
         return false;
     }
     
