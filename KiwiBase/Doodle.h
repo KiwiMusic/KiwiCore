@@ -140,6 +140,19 @@ namespace Kiwi
          */
         virtual void drawText(string const& text, Rectangle const& rect, Font::Justification j, bool wrap = false);
         
+        //! Fill a path.
+        /** The function fills a page.
+         @param path The path.
+         */
+        virtual void fillPath(Path const& path) = 0;
+        
+        //! Draw a path.
+        /** The function draws a page.
+         @param path The path.
+         @param thickness The thickness of the parth.
+         */
+        virtual void drawPath(const Path& path, double const thickness) = 0;
+        
         virtual inline void drawLine(double x1, double y1, double x2, double y2, double thickness) = 0;
         
         virtual inline void drawRectangle(double x, double y, double w, double h, double thickness, double rounded = 0.) = 0;
@@ -159,6 +172,7 @@ namespace Kiwi
         virtual inline void drawEllipse(double x, double y, double width, double height, double thickness = 0.) = 0;
         
         virtual inline void fillEllipse(double x, double y, double width, double height) = 0;
+        
     };
 }
 

@@ -38,8 +38,23 @@ namespace Kiwi
      */
     class Path
     {
+    public:
+        enum Mode
+        {
+            Move        = 0,
+            Linear      = 1,
+            Quadratic   = 2,
+            Cubic       = 3
+        };
+        
+        struct Node
+        {
+            Point point;
+            Mode  mode;
+        };
+        
     private:
-        vector<Point> m_points;
+        vector<Node> m_points;
         
     public:
         //! Constructor.
@@ -67,27 +82,9 @@ namespace Kiwi
          */
         ~Path();
         
-        //! Add a point to the path.
-        /** The function adds a point to the path.
-         @param The point to add.
-         */
-        void add(Point const& pt) noexcept;
-		
-		//! Sets a point of the path.
-		/** The function sets a point of the path.
-		 @param index The index of the point to replace.
-		 @param The new point.
-		 */
-		void setPoint(unsigned long index, Point const& pt) noexcept;
-		
-        //! Clear the path.
-        /** The function clears a point to the path.
-         */
-        void clear() noexcept;
-        
-        //! Retrieve the number of points of the path.
-        /** The function retrieves the number of points of the path.
-         @return The number of points of the path.
+        //! Retrieve the number of nodes of the path.
+        /** The function retrieves the number of nodes of the path.
+         @return The number of nodes of the path.
          */
         unsigned long size() const noexcept
         {
@@ -103,22 +100,95 @@ namespace Kiwi
             return m_points.empty();
         }
         
-        //! Retrieve a point of the path.
-        /** The function retrieves a point of the path.
-         @param  index The index of the point.
-         @return The point.
+        //! Retrieve the node of the path at a defined index.
+        /** The function retrieves the node of the path at a defined index.
+         @param  index The index of the node.
+         @return The node.
          */
-        Point get(unsigned long index) const noexcept
+        Node getNode(unsigned long index) const noexcept
         {
             if(index < (unsigned long)m_points.size())
             {
-                return m_points[index];
+                return m_points[(vector<Node>::size_type)index];
+            }
+            else
+            {
+                return {Point(0., 0.), Move};
+            }
+        }
+        
+        //! Retrieve the mode of the path at a defined index.
+        /** The function retrieves the mode of the path at a defined index.
+         @param  index The index of the mode.
+         @return The mode.
+         */
+        Mode getMode(unsigned long index) const noexcept
+        {
+            if(index < (unsigned long)m_points.size())
+            {
+                return m_points[(vector<Node>::size_type)index].mode;
+            }
+            else
+            {
+                return Move;
+            }
+        }
+        
+        //! Retrieve a point of the path at a defined index.
+        /** The function retrieves a point of the path at a defined index.
+         @param  index The index of the point.
+         @return The point.
+         */
+        Point getPoint(unsigned long index) const noexcept
+        {
+            if(index < (unsigned long)m_points.size())
+            {
+                return m_points[(vector<Node>::size_type)index].point;
             }
             else
             {
                 return Point(0., 0.);
             }
         }
+        
+        //! Clear the path.
+        /** The function clears a point to the path.
+         */
+        void clear() noexcept;
+        
+        //! Add a node to the path that will won't be linked to the previous point.
+        /** The function adds a node to the path that will won't be linked to the previous node.
+         @param point The point to add.
+         */
+        void moveTo(Point const& point) noexcept;
+        
+        //! Add a node to the path that will be linked to the previous point linearly.
+        /** The function adds a node to the path that will be linked to the previous node linearly.
+         @param point The point to add.
+         */
+        void lineTo(Point const& point) noexcept;
+        
+        //! Add a node to the path that will be linked to the previous node with a quadratic bezier curve.
+        /** The function adds a node to the path that will be linked to the previous node with a quadratic bezier curve.
+         @param control The control point.
+         @param end     The end point.
+         */
+        void quadraticTo(Point const& control, Point const& end);
+        
+        //! Add a node to the path that will be linked to the previous node with a cubic bezier curve.
+        /** The function adds a node to the path that will be linked to the previous node with a cubic bezier curve.
+         @param control1 The first control point.
+         @param control2 The seconf control point.
+         @param end     The end point.
+         */
+        void cubicTo(Point const& control1, Point const& control2, Point const& end);
+		
+		//! Sets a point of the path.
+		/** The function sets a point of the path.
+		 @param index The index of the point to replace.
+		 @param The new point.
+		 */
+		void setPoint(unsigned long index, Point const& pt) noexcept;
         
         //! Retrieve the position of the path.
         /** The function retrieves the position of the path. The position point will be the top left point of the smallest rectangle that contains all the points.
@@ -141,21 +211,6 @@ namespace Kiwi
         bool contains(Point const& pt) const noexcept;
         
         bool intersect(Point const& pt) const noexcept;
-		
-		//! Copy path.
-		/** The function returns a path which is the copy of another path.
-		 @param path Another path.
-		 @return The path.
-		 */
-		inline Path copy() noexcept
-		{
-			Path p;
-			Console::post("=====");
-			for(int i = 0; i < m_points.size(); i++)
-				p.add(get(i));
-				
-			return p;
-		}
     };
 }
 

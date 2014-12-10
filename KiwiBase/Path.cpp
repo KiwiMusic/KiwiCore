@@ -37,16 +37,20 @@ namespace Kiwi
 
     Path::Path(Point const& pt) noexcept
     {
-        m_points.push_back(pt);
+        m_points.push_back({pt, Move});
     }
     
     Path::Path(ElemVector const& elements) noexcept
     {
-        for(ElemVector::size_type i = 0; i < elements.size(); i += 2)
+        if(elements.size() > 1)
+        {
+            m_points.push_back({Point((double)elements[0], (double)elements[1]), Move});
+        }
+        for(ElemVector::size_type i = 2; i < elements.size(); i += 2)
         {
             if(i+1 < elements.size())
             {
-                m_points.push_back(Point((double)elements[i], (double)elements[i+1]));
+                m_points.push_back({Point((double)elements[i], (double)elements[i+1]), Linear});
             }
         }
     }
@@ -56,16 +60,34 @@ namespace Kiwi
         m_points.clear();
     }
     
-    void Path::add(const Kiwi::Point &pt) noexcept
+    void Path::moveTo(const Kiwi::Point &pt) noexcept
     {
-        m_points.push_back(pt);
+        m_points.push_back({pt, Move});
+    }
+    
+    void Path::lineTo(const Kiwi::Point &pt) noexcept
+    {
+        m_points.push_back({pt, Linear});
+    }
+    
+    void Path::quadraticTo(Point const& control, Point const& end)
+    {
+        m_points.push_back({control, Quadratic});
+        m_points.push_back({end, Linear});
+    }
+
+    void Path::cubicTo(Point const& control1, Point const& control2, Point const& end)
+    {
+        m_points.push_back({control1, Cubic});
+        m_points.push_back({control2, Cubic});
+        m_points.push_back({end, Linear});
     }
 	
 	void Path::setPoint(unsigned long index, Point const& pt) noexcept
 	{
-		if(index < size())
+		if(index < m_points.size())
 		{
-			m_points[index] = pt;
+			m_points[(vector<Node>::size_type)index].point = pt;
 		}
 	}
     
@@ -79,17 +101,17 @@ namespace Kiwi
         Point position(0., 0.);
         if(!m_points.empty())
         {
-            position = m_points[0];
+            position = m_points[0].point;
             
             for(vector<Point>::size_type i = 1; i < m_points.size(); i++)
             {
-                if(m_points[i].x() < position.x())
+                if(m_points[i].point.x() < position.x())
                 {
-                    position.x(m_points[i].x());
+                    position.x(m_points[i].point.x());
                 }
-                if(m_points[i].y() < position.y())
+                if(m_points[i].point.y() < position.y())
                 {
-                    position.y(m_points[i].y());
+                    position.y(m_points[i].point.y());
                 }
             }
         }
@@ -107,27 +129,27 @@ namespace Kiwi
         Point size(0., 0.);
         if(!m_points.empty())
         {
-            position = m_points[0];
-            size = m_points[0];
+            position = m_points[0].point;
+            size = m_points[0].point;
             
             for(vector<Point>::size_type i = 1; i < m_points.size(); i++)
             {
-                if(m_points[i].x() < position.x())
+                if(m_points[i].point.x() < position.x())
                 {
-                    position.x(m_points[i].x());
+                    position.x(m_points[i].point.x());
                 }
-                else if(m_points[i].x() > size.x())
+                else if(m_points[i].point.x() > size.x())
                 {
-                    size.x(m_points[i].x());
+                    size.x(m_points[i].point.x());
                 }
                 
-                if(m_points[i].y() < position.y())
+                if(m_points[i].point.y() < position.y())
                 {
-                    position.y(m_points[i].y());
+                    position.y(m_points[i].point.y());
                 }
-                else if(m_points[i].y() > size.y())
+                else if(m_points[i].point.y() > size.y())
                 {
-                    size.y(m_points[i].y());
+                    size.y(m_points[i].point.y());
                 }
             }
         }

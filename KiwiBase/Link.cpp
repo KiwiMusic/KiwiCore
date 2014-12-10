@@ -44,8 +44,8 @@ namespace Kiwi
             Box::sController to_ctrl     = getBoxTo()->getController();
             if(from_ctrl && to_ctrl)
             {
-                m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.add(to_ctrl->getInletPosition(getInletIndex()));
+                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
             }
         }
     }
@@ -209,8 +209,8 @@ namespace Kiwi
             if(from_ctrl && to_ctrl)
             {
                 m_path.clear();
-                m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.add(to_ctrl->getInletPosition(getInletIndex()));
+                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
                 
                 sController ctrl = getController();
                 if(ctrl)
@@ -232,8 +232,8 @@ namespace Kiwi
             if(from_ctrl && to_ctrl)
             {
                 m_path.clear();
-                m_path.add(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.add(to_ctrl->getInletPosition(getInletIndex()));
+                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
                 
                 sController ctrl = getController();
                 if(ctrl)
@@ -264,9 +264,51 @@ namespace Kiwi
     
     void Link::Controller::paint(sLink link, Doodle& d, bool selected)
     {
-        
+        /*
+        Path path;
+        link->getPath(path);
+        if(path.size() > 1)
+        {
+            Point pos = link->getPosition();
+            pos -= 10.;
+            Point pt = path.getPoint(0), next;
+            pt -=  pos;
+            Path p(pt);
+            for(unsigned long i = 0; i < path.size() - 1; i++)
+            {
+                next = path.getPoint(i+1);
+                next -= pos;
+                if(pt.y() <= next.y())
+                {
+                    double h = max((next.y() - pt.y()) * 0.5, 15.);
+                    p.cubicTo(pt.x(), pt.y() + h, next.x(), next.y() - h, next.x(), next.y());
+                }
+                else
+                {
+                    double h = max(15. / (pt.y() - next.y()), 15.);
+                    p.cubicTo(pt.x(), pt.y() + h, next.x(), next.y() - h, next.x(), next.y());
+                }
+                pt = next;
+            }
+            
+            Color color;
+            if(selected)
+            {
+                color = Color(0., 0.5, 0.75, 0.4);
+            }
+            else
+            {
+                color = Color(0.42, 0.42, 0.42, 1.);
+            }
+            
+            d.setColor(color.darker(0.6));
+            d.strokePath(p, PathStrokeType(2, PathStrokeType::curved, PathStrokeType::rounded));
+            
+            d.setColor(color.brighter(0.5));
+            d.strokePath(p, PathStrokeType(1, PathStrokeType::curved, PathStrokeType::rounded));
+        }*/
     }
-    
+
     bool Link::Controller::contains(Point const& point, Knock& knock) const noexcept
     {
         return false;
