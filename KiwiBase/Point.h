@@ -346,43 +346,6 @@ namespace Kiwi
             return m_x != value && m_y != value;
         }
         
-        //! Get if the abscissa and the ordinate are near a vector of elements.
-        /** The function gets if the abscissa and the ordinate are near a vector of elements.
-         @param elements A vector of elements with two numbers for the abscissa and the ordinate.
-         @param distance The distance of neighborhood.
-         @return true if the vector of elements is equal to the point, otherwise false.
-         */
-        inline bool near(ElemVector const& elements, double const distance) const noexcept
-        {
-            if(elements.size() > 1 && elements[1].isNumber() && elements[0].isNumber())
-            {
-                return m_x >= (double)elements[0] + distance && m_x <= (double)elements[0] - distance && m_y >= (double)elements[1] + distance && m_y <= (double)elements[1] - distance;
-            }
-            return false;
-        }
-        
-        //! Get if the abscissa and the ordinate are near to another point.
-        /** The function gets if the abscissa and the ordinate are near to another point.
-         @param value The value.
-         @param distance The distance of neighborhood.
-         @return true if the two poitn are equal, otherwise false.
-         */
-        inline bool near(Point const& pt, double const distance) const noexcept
-        {
-            return m_x >= pt.x() + distance && m_x <= pt.x() - distance && m_y >= pt.y() + distance && m_y <= pt.y() - distance;
-        }
-        
-        //! Get if the abscissa and the ordinate are near to a value.
-        /** The function gets if the abscissa and the ordinate are near to a value.
-         @param value A value.
-         @param distance The distance of neighborhood.
-         @return true if the vector of elements is equal to the point, otherwise false.
-         */
-        inline bool near(double const value, double const distance) const noexcept
-        {
-            return m_x >= value + distance && m_x <= value - distance && m_y >= value + distance && m_y <= value - distance;
-        }
-        
         inline Point& operator+(ElemVector const& elements) const noexcept
         {
             return Point(*this) += elements;
@@ -452,7 +415,7 @@ namespace Kiwi
         /** The function retrieves the distance from the origin.
          @return The distance.
          */
-        double distance() const noexcept
+        inline double distance() const noexcept
         {
             return sqrt(m_x * m_x + m_y * m_y);
         }
@@ -462,16 +425,33 @@ namespace Kiwi
          @param pt The other point.
          @return The distance.
          */
-        double distance(Point const& pt) const noexcept
+        inline double distance(Point const& pt) const noexcept
         {
             return sqrt((m_x - pt.x()) * (m_x - pt.x()) + (m_y - pt.y()) * (m_y - pt.y()));
         }
+        
+        //! Retrieve the distance from a line.
+        /** The function retrieves the distance a line.
+         @param begin The first point of the line.
+         @param end   The end point of the line.
+         @return The distance.
+         */
+        double distance(Point const& begin, Point const& end) const noexcept;
+        
+        //! Retrieve the distance from a quadratic bezier line.
+        /** The function retrieves the distance a quadratic bezier line.
+         @param begin The first point of the line.
+         @param ctrl  The control point of the line.
+         @param end   The end point of the line.
+         @return The distance.
+         */
+        double distance(Point const& begin, Point const& ctrl, Point const& end) const noexcept;
         
         //! Retrieve the angle from the origin.
         /** The function retrieves the angle from origin.
          @return The angle.
          */
-        double angle() const noexcept
+        inline double angle() const noexcept
         {
             return atan2(m_y, m_x);
         }
@@ -481,7 +461,7 @@ namespace Kiwi
          @param pt The other point.
          @return The angle.
          */
-        double angle(Point const& pt) const noexcept
+        inline double angle(Point const& pt) const noexcept
         {
             return atan2(m_y - pt.y(), m_x - pt.x());
         }
@@ -502,7 +482,7 @@ namespace Kiwi
          @param The angle
          @return The copy with the rotation.
          */
-        Point rotate(Point const& pt, double const angle) const noexcept
+        inline Point rotate(Point const& pt, double const angle) const noexcept
         {
             Point newpt = Point(*this) - pt;
             return Point(newpt.x() * cos (angle) - newpt.y() * sin (angle) + pt.x(), newpt.x() * sin (angle) + newpt.y() * cos (angle) + pt.y());
@@ -513,10 +493,37 @@ namespace Kiwi
          @param pt The other point.
          @return The dot product.
          */
-        double dot(Point const& pt) const noexcept
+        inline double dot(Point const& pt) const noexcept
         {
             return m_x * pt.x() + m_y * pt.y();
         }
+        
+        //! Get if the point is near to another point.
+        /** The function gets if the point is near to another point.
+         @param pt The other point.
+         @param distance The distance of neighborhood.
+         @return true if the two points are near, otherwise false.
+         */
+        bool near(Point const& pt, double const distance) const noexcept;
+    
+        //! Get if the point is near or over a line.
+        /** The function gets if the point is near or over a line.
+         @param begin The first point of the line.
+         @param end   The end point of the line.
+         @param distance The distance of neighborhood (0 means over the line).
+         @return true if the point is near to the line, otherwise false.
+         */
+        bool near(Point const& begin, Point const& end, double const distance) const noexcept;
+        
+        //! Get if the point is near or over a quadratic bezier line.
+        /** The function gets if the point is near or over a quadratic bezier line.
+         @param begin The first point of the line.
+         @param ctrl  The control point of the line.
+         @param end   The end point of the line.
+         @param distance The distance of neighborhood (0 means over the line).
+         @return true if the point is near to the line, otherwise false.
+         */
+        bool near(Point const& begin, Point const& ctrl, Point const& end, double const distance) const noexcept;
         
         //! Create a vector of elements with the point.
         /** The function creates a vector of elements with the point.
