@@ -210,7 +210,7 @@ namespace Kiwi
         
         bool contains(Point const& point, double const tolerance) const noexcept;
         
-        bool intersect(Point const& pt, double const tolerance) const noexcept;
+        bool near(Point const& pt, double const distance) const noexcept;
     };
 }
 

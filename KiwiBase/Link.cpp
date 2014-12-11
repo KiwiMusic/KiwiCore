@@ -338,12 +338,15 @@ namespace Kiwi
                 realpath.cubicTo(ctrl1, ctrl2, next);
                 pt = next;
             }
-			
-			if(realpath.intersect(point - pos, 5.))
+            
+            if(realpath.getBounds().contains(point)) // Avoid 
             {
-                knock.m_link = m_link;
-                knock.m_part = Knock::Inside;
-				return true;
+                if(realpath.near(point - pos, 5.))
+                {
+                    knock.m_link = m_link;
+                    knock.m_part = Knock::Inside;
+                    return true;
+                }
             }
 		}
 		

@@ -173,11 +173,11 @@ namespace Kiwi
         return false;
     }
     
-    bool Path::intersect(Point const& pt, double const tolerance) const noexcept
+    bool Path::near(Point const& pt, double const distance) const noexcept
     {
         if(m_points.size() == 1)
         {
-            return pt.near(m_points[0].point, tolerance);
+            return pt.near(m_points[0].point, distance);
         }
         else if(m_points.empty())
         {
@@ -188,87 +188,25 @@ namespace Kiwi
                 switch(m_points[i].mode)
                 {
                     case Move:
-                        if(pt.near(current, tolerance))
+                        if(pt.near(current, distance))
                         {
                             return true;
                         }
                         break;
                     case Linear:
-                        if(previous.x() < current.x() && previous.x() - tolerance <= pt.x() && current.x() + tolerance >= pt.x())
+                        if(pt.near(previous, current, distance))
                         {
-                            const double position = (current.x() - previous.x()) / (pt.x() - previous.x());
-                            if(previous.y() < current.y())
-                            {
-                                const double y = (current.y() - previous.y()) * position + previous.y();
-                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
-                                {
-                                    return true;
-                                }
-                            }
-                            else
-                            {
-                                const double y = (previous.y() - current.y()) * position + current.y();
-                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
-                                {
-                                    return true;
-                                }
-                            }
+                            return true;
                         }
-                        else if(previous.x() + tolerance >= pt.x() && current.x() - tolerance <= pt.x())
+                        break;
+                    case Quadratic:
+                        if(pt.near(previous, current, distance))
                         {
-                            const double position = (previous.x() - current.x()) / (pt.x() - current.x());
-                            if(previous.y() < current.y())
-                            {
-                                const double y = (current.y() - previous.y()) * position + previous.y();
-                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
-                                {
-                                    return true;
-                                }
-                            }
-                            else
-                            {
-                                const double y = (previous.y() - current.y()) * position + current.y();
-                                if(y - tolerance <= pt.y() && y + tolerance >= pt.y())
-                                {
-                                    return true;
-                                }
-                            }
+                            return true;
                         }
                         break;
                     case Cubic:
-                        int zaza;
-                        i += 2;
-                        if(i < m_points.size())
-                        {
-                            if(previous.x() < current.x() && previous.x() - tolerance <= pt.x() && current.x() + tolerance >= pt.x())
-                            {
-                                const double position = (current.x() - previous.x()) / (pt.x() - previous.x());
-                                Point begin(0., previous.y());
-                                Point ctrl1(m_points[i-2].point.x() - previous.x(), m_points[i-2].point.y());
-                                Point ctrl2(m_points[i-1].point.x() - previous.x(), m_points[i-1].point.y());
-                                Point end(current.x() - previous.x(), current.y());
-                                
-                                Point result = begin * pow(1. - position, 3.) + ctrl1 * 3. * position * pow(1. - position, 2.) + ctrl2 * 2 * pow(position, 2.) * (1. - position) + end * pow(position, 3.);
-                                if(result.near(pt, tolerance))
-                                {
-                                    return true;
-                                }
-                            }
-                            else if(previous.x() + tolerance >= pt.x() && current.x() - tolerance <= pt.x())
-                            {
-                                const double position = (previous.x() - current.x()) / (pt.x() - current.x());
-                                Point end(0., previous.y());
-                                Point ctrl2(m_points[i-2].point.x() - previous.x(), m_points[i-2].point.y());
-                                Point ctrl1(m_points[i-1].point.x() - previous.x(), m_points[i-1].point.y());
-                                Point begin(current.x() - previous.x(), current.y());
-                                
-                                Point result = begin * pow(1. - position, 3.) + ctrl1 * 3. * position * pow(1. - position, 2.) + ctrl2 * 2 * pow(position, 2.) * (1. - position) + end * pow(position, 3.);
-                                if(result.near(pt, tolerance))
-                                {
-                                    return true;
-                                }
-                            }
-                        }
+                        
                         break;
                         
                     default:
