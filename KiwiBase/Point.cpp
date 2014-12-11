@@ -58,17 +58,34 @@ namespace Kiwi
         ;
     }
     
+    Point Point::fromLine(Point const& begin, Point const& end, double delta) noexcept
+    {
+        return Point(fabs(end.x() - begin.x()) * delta, fabs(end.y() - begin.y()) * delta);
+    }
+    
+    Point Point::fromLine(Point const& begin, Point const& ctrl, Point const& end, const double delta) noexcept
+    {
+        const double mdelta = (1. - delta);
+        return begin * mdelta * mdelta + ctrl * 2. * delta * mdelta + end * delta * delta;
+    }
+    
+    Point Point::fromLine(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, const double delta) noexcept
+    {
+        const double mdelta = (1. - delta);
+        return begin * mdelta * mdelta * mdelta + ctrl1 * 3. * delta * mdelta * mdelta + ctrl2 * 3. * delta * delta * mdelta + end * delta * delta * mdelta;
+    }
+    
     double Point::distance(Point const& begin, Point const& end) const noexcept
     {
         const double line_distance = begin.distance(end);
         if(!line_distance)
         {
-            return this->distance(begin);
+            return this->distance(end);
         }
         else
         {
-            const Point shidt_this = *this - begin;
-            const double dotprod = shidt_this.dot(end - begin) / line_distance;
+            const Point shift_this = *this - begin;
+            const double dotprod = shift_this.dot(end - begin) / line_distance;
             if(dotprod < 0.)
             {
                 return this->distance(begin);
@@ -94,14 +111,22 @@ namespace Kiwi
         const unsigned long nresult = solve(B.distance(), 3 * A.dot(B), 2 * A.distance() + B.dot(relPoint), A.dot(relPoint), sol1, sol2, sol3);
         if(nresult)
         {
-            double dist = sol1;
-            if(nresult > 1 && sol2 < dist)
+            double dist = this->distance(fromLine(begin, ctrl, end, sol1));
+            if(nresult > 1)
             {
-                dist  = sol2;
+                const double dist2 = this->distance(fromLine(begin, ctrl, end, sol2));
+                if(dist2 < dist)
+                {
+                    dist  = dist2;
+                }
             }
-            if(nresult > 2 && sol3 < dist)
+            if(nresult > 2)
             {
-                dist  = sol3;
+                const double dist2 = this->distance(fromLine(begin, ctrl, end, sol3));
+                if(dist2 < dist)
+                {
+                    dist  = dist2;
+                }
             }
             return dist;
         }
@@ -120,6 +145,11 @@ namespace Kiwi
         }
     }
     
+    double Point::distance(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end) const noexcept
+    {
+        return 1000.;
+    }
+    
     bool Point::near(Point const& pt, double const distance) const noexcept
     {
         return this->distance(pt) <= distance;
@@ -133,6 +163,11 @@ namespace Kiwi
     bool Point::near(Point const& begin, Point const& ctrl, Point const& end, double const distance) const noexcept
     {
         return this->distance(begin, ctrl, end) <= distance;
+    }
+    
+    bool Point::near(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, double const distance) const noexcept
+    {
+        return this->distance(begin, ctrl1, ctrl2, end) <= distance;
     }
     
 }

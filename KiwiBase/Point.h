@@ -430,6 +430,36 @@ namespace Kiwi
             return sqrt((m_x - pt.x()) * (m_x - pt.x()) + (m_y - pt.y()) * (m_y - pt.y()));
         }
         
+        //! Retrieve the point over a line.
+        /** The function retrieves the point over a line.
+         @param begin The first point of the line.
+         @param end   The end point of the line.
+         @param delta The position of the point over the line (first point is 0 and and end point is 1).
+         @return The point.
+         */
+        static Point fromLine(Point const& begin, Point const& end, const double delta) noexcept;
+        
+        //! Retrieve the point over a quadratic bezier line.
+        /** The function retrieves the point over a quadratic bezier line.
+         @param begin The first point of the line.
+         @param ctrl  The control point of the line.
+         @param end   The end point of the line.
+         @param delta The position of the point over the line (first point is 0 and and end point is 1).
+         @return The point.
+         */
+        static Point fromLine(Point const& begin, Point const& ctrl, Point const& end, const double delta) noexcept;
+        
+        //! Retrieve the point over a cubic bezier line.
+        /** The function retrieves the point over a cubic bezier line.
+         @param begin The first point of the line.
+         @param ctrl1 The first control point of the line.
+         @param ctrl2 The second control point of the line.
+         @param end The end point of the line.
+         @param delta The position of the point over the line (first point is 0 and and end point is 1).
+         @return The point.
+         */
+        static Point fromLine(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, const double delta) noexcept;
+        
         //! Retrieve the distance from a line.
         /** The function retrieves the distance a line.
          @param begin The first point of the line.
@@ -446,6 +476,16 @@ namespace Kiwi
          @return The distance.
          */
         double distance(Point const& begin, Point const& ctrl, Point const& end) const noexcept;
+        
+        //! Retrieve the distance from a cubic bezier line.
+        /** The function retrieves the distance a cubic bezier line.
+         @param begin The first point of the line.
+         @param ctrl1 The first control point of the line.
+         @param ctrl2 The second control point of the line.
+         @param end   The end point of the line.
+         @return The distance.
+         */
+        double distance(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end) const noexcept;
         
         //! Retrieve the angle from the origin.
         /** The function retrieves the angle from origin.
@@ -524,6 +564,17 @@ namespace Kiwi
          @return true if the point is near to the line, otherwise false.
          */
         bool near(Point const& begin, Point const& ctrl, Point const& end, double const distance) const noexcept;
+        
+        //! Get if the point is near or over a cubic bezier line.
+        /** The function gets if the point is near or over a cubic bezier line.
+         @param begin The first point of the line.
+         @param ctrl1 The first control point of the line.
+         @param ctrl2 The second control point of the line.
+         @param end   The end point of the line.
+         @param distance The distance of neighborhood (0 means over the line).
+         @return true if the point is near to the line, otherwise false.
+         */
+        bool near(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, double const distance) const noexcept;
         
         //! Create a vector of elements with the point.
         /** The function creates a vector of elements with the point.

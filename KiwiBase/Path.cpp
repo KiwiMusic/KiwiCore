@@ -200,19 +200,37 @@ namespace Kiwi
                         }
                         break;
                     case Quadratic:
-                        if(pt.near(previous, current, distance))
+                        i++;
+                        if(i < m_points.size())
                         {
-                            return true;
+                            const Point ctrl = current;
+                            current = m_points[i].point;
+                            if(pt.near(previous, ctrl, current, distance))
+                            {
+                                return true;
+                            }
+
                         }
                         break;
                     case Cubic:
-                        
+                        i += 2;
+                        if(i < m_points.size())
+                        {
+                            const Point ctrl1 = current;
+                            const Point ctrl2 = m_points[i-1].point;
+                            current = m_points[i].point;
+                            if(pt.near(previous, ctrl1, ctrl2, current, distance))
+                            {
+                                return true;
+                            }
+                            
+                        }
                         break;
                         
                     default:
                         break;
                 }
-                previous = m_points[0].point;
+                previous = current;
             }
         }
         return false;
