@@ -34,7 +34,7 @@ namespace Kiwi
     }
     
     // Solve a 3rd degree equation, return the number of solution and the solution are in solution1, solution2 and solution3. 
-    template <typename Type> unsigned long solve(Type const a, Type const b, Type const c, Type const d, Type &solution1, Type &solution2,  Type &solution3)
+    template <typename Type> unsigned long solve(Type a, Type b, Type c, Type const d, Type &solution1, Type &solution2,  Type &solution3)
 	{
 		if(abs(a) > 0.)
 		{

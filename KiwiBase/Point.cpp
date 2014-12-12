@@ -60,7 +60,7 @@ namespace Kiwi
     
     Point Point::fromLine(Point const& begin, Point const& end, double delta) noexcept
     {
-        return Point(fabs(end.x() - begin.x()) * delta, fabs(end.y() - begin.y()) * delta);
+        return Point(begin.x() + (end.x() - begin.x()) * delta, begin.y() + (end.y() - begin.y()) * delta);
     }
     
     Point Point::fromLine(Point const& begin, Point const& ctrl, Point const& end, const double delta) noexcept
@@ -77,26 +77,36 @@ namespace Kiwi
     
     double Point::distance(Point const& begin, Point const& end) const noexcept
     {
-        const double line_distance = begin.distance(end);
-        if(!line_distance)
+        const Point delta(end - begin);
+        const double length = delta.x() * delta.x() + delta.y() * delta.y();
+        
+        if(length > 0.)
         {
-            return this->distance(end);
-        }
-        else
-        {
-            const Point shift_this = *this - begin;
-            const double dotprod = shift_this.dot(end - begin) / line_distance;
-            if(dotprod < 0.)
+            const double ratio = ((m_x - begin.x()) * delta.x() + (m_x - begin.x()) * delta.x()) / length;
+            if(ratio < 0.)
             {
                 return this->distance(begin);
             }
-            else if(dotprod > 1.)
+            else if(ratio > 1.)
             {
                 return this->distance(end);
             }
             else
             {
-                return this->distance(begin + (end - begin) * dotprod);
+                return this->distance(begin + delta * ratio);
+            }
+        }
+        else
+        {
+            const double distBegin  = this->distance(begin);
+            const double distEnd    = this->distance(end);
+            if(distBegin < distEnd)
+            {
+                return distBegin;
+            }
+            else
+            {
+                return distEnd;
             }
         }
     }
