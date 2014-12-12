@@ -418,7 +418,7 @@ namespace Kiwi
     //                                  PAGE CONTROLER                                  //
     // ================================================================================ //
     
-    Page::Controller::Controller(sPage page) noexcept :
+    Page::Controller::Controller(sPage page) noexcept : Knock(page),
     m_page(page),
 	m_zoom(100),
 	m_locked(false),
@@ -500,19 +500,6 @@ namespace Kiwi
 			}
 		}
 		
-		return nullptr;
-	}
-	
-	Box::sController Page::Controller::getBoxController(Point const& pt) const noexcept
-	{
-		Box::Controller::Hit hit;
-		for(size_t i = m_boxes.size(); i; i--)
-		{
-			if(m_boxes[i-1]->isHit(pt, hit))
-			{
-				return m_boxes[i-1];
-			}
-		}
 		return nullptr;
 	}
 	
@@ -1118,66 +1105,6 @@ namespace Kiwi
 		
 		return pageModified;
 	}
-    
-    // ================================================================================ //
-    //                                      HIT TEST                                    //
-    // ================================================================================ //
-    
-    Page::Controller::HitTest::HitTest(sController owner) :
-    m_owner(owner),
-    m_type(Type::Nothing)
-    {
-        ;
-    }
-    
-    Page::Controller::HitTest::~HitTest()
-    {
-        ;
-    }
-    
-    void Page::Controller::HitTest::reset() noexcept
-    {
-        m_type = Type::Nothing;
-        m_link_hit.link.reset();
-        m_link_hit.type = Link::Controller::Outside;
-        m_box_hit.box.reset();
-        m_box_hit.type  = Box::Controller::Outside;
-    }
-    
-    void Page::Controller::HitTest::test(Point const& pt) noexcept
-    {
-        reset();
-        Page::sController ctrl = m_owner.lock();
-        if(ctrl)
-        {
-            vector<Box::sController> boxes;
-            ctrl->getBoxes(boxes);
-            for(vector<Box::sController>::size_type i = boxes.size(); i; i--)
-            {
-                Box::sController box = boxes[i-1];
-                if(box && box->isHit(pt, m_box_hit))
-                {
-                    m_type  = Type::Box;
-                    return;
-                }
-            }
-            
-            vector<Link::sController> links;
-            ctrl->getLinks(links);
-            for(vector<Link::sController>::size_type i = links.size(); i; i--)
-            {
-                Link::sController link = links[i-1];
-                if(link && link->isHit(pt, m_link_hit))
-                {
-                    m_type = Type::Link;
-                    return;
-                }
-            }
-            
-            m_type = Type::Page;
-            return;
-        }
-    }
 }
 
 

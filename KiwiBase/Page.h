@@ -321,7 +321,7 @@ namespace Kiwi
          @see Page::Listener
          @see Box::Controller
          */
-		class Controller : public enable_shared_from_this<Controller>
+		class Controller : public Knock, public enable_shared_from_this<Controller>
         {
         public:
             class HitTest;
@@ -715,7 +715,6 @@ namespace Kiwi
 			void removeBoxController(Box::sController box);
 			
 			Box::sController getBoxController(sBox box) const noexcept;
-			Box::sController getBoxController(Point const& pt) const noexcept;
 			
 			void addLinkController(Link::sController link);
 			void removeLinkController(Link::sController link);
@@ -742,111 +741,6 @@ namespace Kiwi
         static const sTag Tag_boxes;
         static const sTag Tag_link;
         static const sTag Tag_links;
-    };
-    
-    // ================================================================================ //
-    //                                      HIT TEST                                    //
-    // ================================================================================ //
-    
-    class Page::Controller::HitTest
-    {
-    public:
-        enum Type
-        {
-            Nothing = 0,
-            Page	= 1,
-            Box		= 2,
-            Link	= 3
-        };
-        
-    private:
-        const wController		m_owner;
-        Type					m_type;
-        Box::Controller::Hit	m_box_hit;
-        Link::Controller::Hit	m_link_hit;
-        
-    public:
-        
-        //! The contructor.
-        /** The contructor initialize a page controler.
-         @param owner The page controler.
-         */
-        HitTest(sController owner);
-        
-        //! The destructor.
-        /** The destructor does nothing.
-         */
-        ~HitTest();
-        
-        //! Reset the hit test.
-        /** The function resets the hit test as it has never touch any box or any link.
-         */
-        void reset() noexcept;
-        
-        //! Test a point.
-        /** The function try to find a box or then link under the point otherwise it will consider that the page has been touched.
-         @param pt The point.
-         */
-        void test(Point const& pt) noexcept;
-        
-        inline Box::sController getBoxController() const noexcept
-        {
-            if(m_type == Type::Box)
-            {
-                sBox box = m_box_hit.box.lock();
-                if(box)
-                {
-                    return box->getController();
-                }
-            }
-            return nullptr;
-        }
-        
-        inline Box::Controller::Hit getBoxHit() const noexcept
-        {
-            if(m_type == Type::Box)
-            {
-                return m_box_hit;
-            }
-            return Box::Controller::Hit();
-        }
-        
-        inline Link::sController getHitController() const noexcept
-        {
-            if(m_type == Type::Link)
-            {
-                sLink link = m_link_hit.link.lock();
-                if(link)
-                {
-                    return link->getController();
-                }
-            }
-            return nullptr;
-        }
-        
-        inline Link::Controller::Hit getLinkHit() const noexcept
-        {
-            if(m_type == Type::Link)
-            {
-                return m_link_hit;
-            }
-            return Link::Controller::Hit();
-        }
-        
-        inline bool hasHitBox() const noexcept
-        {
-            return m_type == Type::Box;
-        }
-        
-        inline bool hasHitLink() const noexcept
-        {
-            return m_type == Type::Link;
-        }
-        
-        inline bool hasHitPage() const noexcept
-        {
-            return m_type == Type::Page;
-        }
     };
     
 }

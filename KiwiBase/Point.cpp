@@ -66,7 +66,10 @@ namespace Kiwi
     Point Point::fromLine(Point const& begin, Point const& ctrl, Point const& end, const double delta) noexcept
     {
         const double mdelta = (1. - delta);
-        return begin * mdelta * mdelta + ctrl * 2. * delta * mdelta + end * delta * delta;
+        const double fac1 = mdelta * mdelta;
+        const double fac2 = 2. * delta * mdelta;
+        const double fac3 = delta * delta;
+        return Point(begin.x() * fac1 + ctrl.x() * fac2 + end.x() * fac3, begin.y() * fac1 + ctrl.y() * fac2 + end.y() * fac3);
     }
     
     Point Point::fromLine(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, const double delta) noexcept
@@ -113,12 +116,12 @@ namespace Kiwi
     
     double Point::distance(Point const& begin, Point const& ctrl, Point const& end) const noexcept
     {
-		const Point A = ctrl - begin;
-        const Point B = end - ctrl - A;
-        const Point relPoint = begin - *this;
+		const Point A(ctrl.x() - begin.x(), ctrl.y() - begin.y());
+        const Point B(begin.x() - ctrl.x() * 2. + end.x(), begin.y() - ctrl.y() * 2. + end.y());
+        const Point C(begin.x() - m_x, begin.y() - m_y);
         
         double sol1, sol2, sol3;
-        const unsigned long nresult = solve(B.distance(), 3 * A.dot(B), 2 * A.distance() + B.dot(relPoint), A.dot(relPoint), sol1, sol2, sol3);
+        const unsigned long nresult = solve(B.x() * B.x() + B.y() * B.y(), 3 * (A.x() * B.x() + A.y() * B.y()), 2 * (A.x() * A.x() + A.y() * A.y()) + C.x() * B.x() + C.y() * B.y(), C.x() * A.x() + C.y() * A.y(), sol1, sol2, sol3);
         if(nresult)
         {
             double dist = this->distance(fromLine(begin, ctrl, end, sol1));
@@ -170,9 +173,9 @@ namespace Kiwi
         return this->distance(begin, end) <= distance;
     }
     
-    bool Point::near(Point const& begin, Point const& ctrl, Point const& end, double const distance) const noexcept
+    bool Point::near(Point const& begin, Point const& ctrl, Point const& end, double const dist) const noexcept
     {
-        return this->distance(begin, ctrl, end) <= distance;
+        return this->distance(begin, ctrl, end) <= dist;
     }
     
     bool Point::near(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, double const distance) const noexcept

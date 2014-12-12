@@ -317,43 +317,54 @@ namespace Kiwi
 
     bool Link::Controller::contains(Point const& point, Knock& knock) const noexcept
     {
+        if(!m_link)
+        {
+            return false;
+        }
         Path path;
         m_link->getPath(path);
         if(path.size() > 1)
         {
-            Point pos = m_link->getPosition() - 10.;
-            Point pt = path.getPoint(0) - pos, next;
-            Path realpath(pt);
-            for(unsigned long i = 0; i < path.size() - 1; i++)
+            Point current = path.getPoint(0);
+            Path drawnpath(current);
+            for(unsigned long i = 1; i < path.size(); i++)
             {
-                next = path.getPoint(i+1) - pos;
-                double h;
-                if(pt.y() <= next.y())
+                const Point next = path.getPoint(i);
+                const Point middle = Point::fromLine(current, next, 0.5);
+                if(current.y() < next.y())
                 {
-                    h = max((next.y() - pt.y()) * 0.5, 15.);
-                    
+                    const double height = (middle.y() - current.y()) * 0.5 + 5.;
+                    drawnpath.quadraticTo(Point(current.x(), current.y() + height), middle);
+                    drawnpath.quadraticTo(Point(next.x(), next.y() - height), next);
+                }
+                else if(current.y() - 20. < next.y())
+                {
+                    const double height = (current.y() - next.y()) * 0.5;
+                    const double absi = (middle.x() - current.x()) * height * 0.05;
+                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + height + 5.), middle);
+                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - height - 5.), next);
                 }
                 else
                 {
-                    h = max(15. / (pt.y() - next.y()), 15.);
+                    const double absi = (middle.x() - current.x()) * 0.5;
+                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + 15.), middle);
+                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - 15.), next);
                 }
-                Point ctrl1 = pt;
-                ctrl1.y(ctrl1.y() + h);
-                Point ctrl2 = next;
-                ctrl2.y(ctrl2.y() - h);
-                realpath.cubicTo(ctrl1, ctrl2, next);
-                pt = next;
+                
+                current = next;
             }
             
-            if(realpath.getBounds().expanded(5.).contains(point)) // Avoid
+            if(drawnpath.near(point, 2.5))
             {
-                if(realpath.near(point - pos, 2.5))
-                {
-                    knock.m_link = m_link;
-                    knock.m_part = Knock::Inside;
-                    return true;
-                }
+                knock.m_link = m_link;
+                knock.m_part = Knock::Inside;
+                return true;
             }
+            /*
+            if(drawnpath.getBounds().expanded(5.).contains(point)) // Avoid
+            {
+                
+            }*/
 		}
 		
         knock.m_link.reset();

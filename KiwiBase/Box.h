@@ -516,41 +516,7 @@ namespace Kiwi
          The box controller...
          */
         class Controller
-        {
-        public:
-            enum Type
-            {
-				Outside = 0,
-                Inside  = 1,
-                Inlet   = 2,
-                Outlet  = 3,
-                Corner  = 4,
-                Border  = 5
-            };
-            
-            enum Border
-            {
-                Left  = 0,
-                Right = 1,
-                Top   = 2,
-                Bottom= 3,
-            };
-            
-            enum Corner
-            {
-                TopLeft     = 0,
-                TopRight    = 1,
-                BottomLeft  = 2,
-                BottomRight = 3
-            };
-            
-            struct Hit
-            {
-				wBox			box;
-				Type            type = Type::Outside;
-                unsigned long   index = 0;
-            };
-            
+        {            
         private:
             
             const sBox  m_box;
@@ -685,11 +651,13 @@ namespace Kiwi
              */
             Point getOutletPosition(unsigned long index) const noexcept;
             
-            //! Retrieve if the box is hit by a point.
-            /** The function retrieves if the box is hit by a point.
-             @return true if the box is hit by a point otherwise false.
-             */
-            virtual bool isHit(Point const& pt, Hit& hit) const noexcept;
+            //! Retrieve if the box is touch by a point.
+			/** The function retrieves if the box is touch by a point and fill the knock with the knock informations.
+             @param point The point.
+             @param knock The knock.
+			 @return true if the box is touch by the point, otherwise false.
+			 */
+			virtual bool contains(Point const& point, Knock& knock) const noexcept;
             
             //! Notify that the page is in edition.
             /** The function notifies that page is in edition to redraw the box.

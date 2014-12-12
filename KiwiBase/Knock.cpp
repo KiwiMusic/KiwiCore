@@ -31,7 +31,8 @@ namespace Kiwi
     //                                      INLET                                       //
     // ================================================================================ //
     
-    Knock::Knock() noexcept
+    Knock::Knock(sPage page) noexcept :
+    m_page(page)
     {
         ;
     }
@@ -41,7 +42,7 @@ namespace Kiwi
         ;
     }
     
-    void Knock::reset() noexcept
+    void Knock::knockReset() noexcept
     {
         m_box.reset();
         m_link.reset();
@@ -50,10 +51,10 @@ namespace Kiwi
         m_index = 0;
     }
     
-    void Knock::process(sPage page, Point const& point) noexcept
+    void Knock::knockAll(Point const& point) noexcept
     {
-        reset();
-        
+        knockReset();
+        sPage page = m_page.lock();
         if(page)
         {
             Page::sController ctrl = page->getController();
@@ -63,10 +64,10 @@ namespace Kiwi
                 ctrl->getBoxes(boxes);
                 for(vector<Box::sController>::size_type i = boxes.size(); i; i--)
                 {
-                    int zaza;
                     Box::sController box = boxes[i-1];
-                    if(box)// && box->isHit(point, this))
+                    if(box && box->contains(point, *this))
                     {
+                        m_target = Box;
                         return;
                     }
                 }
@@ -78,13 +79,61 @@ namespace Kiwi
                     Link::sController link = links[i-1];
                     if(link && link->contains(point, *this))
                     {
+                        m_target = Link;
                         return;
                     }
                 }
                 
                 m_target = Page;
+                m_part   = Inside;
                 return;
 
+            }
+        }
+    }
+    
+    void Knock::knockBoxes(Point const& point) noexcept
+    {
+        knockReset();
+        sPage page = m_page.lock();
+        if(page)
+        {
+            Page::sController ctrl = page->getController();
+            if(ctrl)
+            {
+                vector<Box::sController> boxes;
+                ctrl->getBoxes(boxes);
+                for(vector<Box::sController>::size_type i = boxes.size(); i; i--)
+                {
+                    Box::sController box = boxes[i-1];
+                    if(box && box->contains(point, *this))
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    
+    void Knock::knockLinks(Point const& point) noexcept
+    {
+        knockReset();
+        sPage page = m_page.lock();
+        if(page)
+        {
+            Page::sController ctrl = page->getController();
+            if(ctrl)
+            {
+                vector<Link::sController> links;
+                ctrl->getLinks(links);
+                for(vector<Link::sController>::size_type i = links.size(); i; i--)
+                {
+                    Link::sController link = links[i-1];
+                    if(link && link->contains(point, *this))
+                    {
+                        return;
+                    }
+                }
             }
         }
     }

@@ -222,20 +222,6 @@ namespace Kiwi
 
         public:
 			
-			enum HitType
-			{
-				Outside		= 0,
-				Inside		= 1,
-				InletPin	= 2,
-				OutletPin	= 3
-			};
-			
-			struct Hit
-			{
-                wLink     link;
-				HitType   type = HitType::Outside;
-			};
-			
             //! Constructor.
             /** You should never call this method except if you really know what you're doing.
              */
@@ -289,18 +275,9 @@ namespace Kiwi
 			{
 				return m_selected;
 			}
-			
-			//! Retrieve if the link is hit by a point.
-			/** The function retrieves if the link is hit by a point.
-			 @return true if the link is hit by a point, otherwise false.
-			 */
-			virtual bool isHit(Point const& pt, Hit& hit) const noexcept
-			{
-				return false;
-			}
             
             //! Retrieve if the link is touch by a point.
-			/** The function retrieves if the link is touch by a point and fill the knock with the hit informations.
+			/** The function retrieves if the link is touch by a point and fill the knock with the knock informations.
              @param point The point.
              @param knock The knock.
 			 @return true if the link is touch by the point, otherwise false.

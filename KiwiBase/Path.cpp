@@ -179,7 +179,7 @@ namespace Kiwi
         {
             return pt.near(m_points[0].point, distance);
         }
-        else if(m_points.empty())
+        else if(m_points.size() > 1)
         {
             Point previous;
             for(vector<Node>::size_type i = 0; i < m_points.size(); i++)

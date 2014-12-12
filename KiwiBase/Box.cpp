@@ -486,7 +486,7 @@ namespace Kiwi
         return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
     }
     
-    bool Box::Controller::isHit(Point const& pt, Hit& hit) const noexcept
+    bool Box::Controller::contains(Point const& pt, Knock& knock) const noexcept
     {
         const Rectangle bounds = m_box->getBounds();
         if(bounds.contains(pt))
@@ -496,9 +496,9 @@ namespace Kiwi
                 const unsigned long ninlets = m_box->getNumberOfInlets();
                 if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
                 {
-                    hit.box     = m_box;
-                    hit.type    = Inlet;
-                    hit.index   = 0;
+                    knock.m_box     = m_box;
+                    knock.m_part    = Knock::Inlet;
+                    knock.m_index   = 0;
                     return true;
                 }
                 else if(ninlets > 1)
@@ -509,18 +509,18 @@ namespace Kiwi
                         double val = ratio * i + bounds.x();
                         if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
                         {
-                            hit.box     = m_box;
-                            hit.type    = Inlet;
-                            hit.index   = i;
+                            knock.m_box     = m_box;
+                            knock.m_part    = Knock::Inlet;
+                            knock.m_index   = i;
                             return true;
                         }
                     }
                 }
                 else
                 {
-                    hit.box     = m_box;
-                    hit.type    = Inside;
-                    hit.index   = 0;
+                    knock.m_box     = m_box;
+                    knock.m_part    = Knock::Inside;
+                    knock.m_index   = 0;
                     return true;
                 }
             }
@@ -529,9 +529,9 @@ namespace Kiwi
                 const unsigned long noutlets = m_box->getNumberOfOutlets();
                 if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
                 {
-                    hit.box     = m_box;
-                    hit.type    = Outlet;
-                    hit.index   = 0;
+                    knock.m_box     = m_box;
+                    knock.m_part    = Knock::Outlet;
+                    knock.m_index   = 0;
                     return true;
                 }
                 else if(noutlets > 1)
@@ -542,32 +542,32 @@ namespace Kiwi
                         double val = ratio * i + bounds.x();
                         if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
                         {
-                            hit.box     = m_box;
-                            hit.type    = Outlet;
-                            hit.index   = i;
+                            knock.m_box     = m_box;
+                            knock.m_part    = Knock::Outlet;
+                            knock.m_index   = i;
                             return true;
                         }
                     }
                 }
                 else
                 {
-                    hit.box     = m_box;
-                    hit.type    = Inside;
-                    hit.index   = 0;
+                    knock.m_box     = m_box;
+                    knock.m_part    = Knock::Inside;
+                    knock.m_index   = 0;
                     return true;
                 }
             }
             else
             {
-                hit.box     = m_box;
-                hit.type    = Inside;
-                hit.index   = 0;
+                knock.m_box     = m_box;
+                knock.m_part    = Knock::Inside;
+                knock.m_index   = 0;
             }
             return true;
         }
-        hit.box.reset();
-        hit.type    = Outside;
-        hit.index   = 0;
+        knock.m_box.reset();
+        knock.m_part    = Knock::Outside;
+        knock.m_index   = 0;
         return false;
     }
     

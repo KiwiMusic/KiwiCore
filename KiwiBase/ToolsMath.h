@@ -43,43 +43,43 @@ namespace Kiwi
 			b = c / z;
 			c = d / z;
 			
-			Type p = b - a * a / 3;
-			Type q = a * (2 * a * a - 9 * b) / 27 + c;
+			Type p = b - a * a / 3.;
+			Type q = a * (2. * a * a - 9. * b) / 27. + c;
 			Type p3 = p * p * p;
-			Type D = q * q + 4 * p3 / 27;
-			Type offset = -a / 3;
+			Type D = q * q + 4. * p3 / 27.;
+			Type offset = -a / 3.;
             if(D == 0.)
             {
                 Type u;
-				if(q < 0)
+				if(q < 0.)
                 {
-                    u = pow( -q / 2, 1 / 3);
+                    u = pow( -q / 2., 1. / 3.);
                 }
                 else
                 {
-                    u = -pow( q / 2, 1 / 3);
+                    u = -pow( q / 2., 1. / 3.);
                 }
-                solution1 = 2 * u + offset;
+                solution1 = 2. * u + offset;
                 solution2 = -u + offset;
                 return 2;
             }
 			else if(D > 0.)
 			{
 				z = sqrt(D);
-				Type u = ( -q + z) / 2;
-				Type v = ( -q - z) / 2;
-				u = (u >= 0) ? pow(u, 1 / 3) : - pow( -u, 1 / 3);
-				v = (v >= 0) ? pow(v, 1 / 3) : - pow( -v, 1 / 3);
+				Type u = ( -q + z) / 2.;
+				Type v = ( -q - z) / 2.;
+				u = (u >= 0.) ? pow(u, 1. / 3.) : - pow( -u, 1. / 3.);
+				v = (v >= 0.) ? pow(v, 1. / 3.) : - pow( -v, 1. / 3.);
 				solution1 = u + v + offset;
 				return 1;
 			}
             else
 			{
-				Type u = 2 * sqrt( -p / 3);
-				Type v = acos(-sqrt( -27 / p3) * q / 2) / 3;
+				Type u = 2. * sqrt( -p / 3.);
+				Type v = acos(-sqrt( -27. / p3) * q / 2.) / 3.;
 				solution1 = u * cos(v) + offset;
-				solution2 = u * cos(v + 2 * M_PI / 3) + offset;
-				solution3 = u * cos(v + 4 * M_PI / 3) + offset;
+				solution2 = u * cos(v + 2. * M_PI / 3.) + offset;
+				solution3 = u * cos(v + 4. * M_PI / 3.) + offset;
 				return 3;
 			}
 		}
@@ -101,17 +101,17 @@ namespace Kiwi
 				}
 			}
             
-			Type D = b*b - 4*a*c;
+			Type D = b*b - 4.*a*c;
 			if(D == 0)
             {
-				solution1 = -b / (2 * a);
+				solution1 = -b / (2. * a);
 				return 1;
             }
 			if(D > 0.)
 			{
 				D = sqrt(D);
-				solution1 = ( -b - D) / (2 * a);
-				solution2 = ( -b + D) / (2 * a);
+				solution1 = ( -b - D) / (2. * a);
+				solution2 = ( -b + D) / (2. * a);
 				return 2;
 			}
             else

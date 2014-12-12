@@ -39,6 +39,7 @@ namespace Kiwi
     class Knock
     {
         friend class Link;
+        friend class Box;
     public:
         enum Border
         {
@@ -86,8 +87,9 @@ namespace Kiwi
         
         //! The contructor.
         /** The contructor initialize an empty hit.
+         @param page The page that owns the knock.
          */
-        Knock() noexcept;
+        Knock(sPage page) noexcept;
         
         //! The destructor.
         /** The destructor does nothing.
@@ -97,20 +99,34 @@ namespace Kiwi
         //! Reset the touch test.
         /** The function resets the knock as it has never touch any box, any link or any page.
          */
-        void reset() noexcept;
+        void knockReset() noexcept;
         
         //! Test a point.
         /** The function try to find a box or then link under the point otherwise it will consider that the page has been touched.
          @param page The page to test.
          @param point The point.
          */
-        void process(sPage page, Point const& point) noexcept;
+        void knockAll(Point const& point) noexcept;
+        
+        //! Test a point.
+        /** The function try to find a ink under the point.
+         @param page The page to test.
+         @param point The point.
+         */
+        void knockBoxes(Point const& point) noexcept;
+        
+        //! Test a point.
+        /** The function try to find a box .
+         @param page The page to test.
+         @param point The point.
+         */
+        void knockLinks(Point const& point) noexcept;
         
         //! Retrieve the last target touched.
         /** The function retrieves the last target touched by a point.
          @return The target.
          */
-        inline Target getTarget() const noexcept
+        inline Target knockGetTarget() const noexcept
         {
             return m_target;
         }
@@ -119,7 +135,7 @@ namespace Kiwi
         /** The function retrieves if the last target was nothing.
          @return true if the last target was nothing, otherwise false.
          */
-        inline bool hasHitNothing() const noexcept
+        inline bool knockHasHitNothing() const noexcept
         {
             return m_target == Nothing;
         }
@@ -128,7 +144,7 @@ namespace Kiwi
         /** The function retrieves if the last target was a box.
          @return true if the last target was a box, otherwise false.
          */
-        inline bool hasHitBox() const noexcept
+        inline bool knockHasHitBox() const noexcept
         {
             return m_target == Box;
         }
@@ -137,7 +153,7 @@ namespace Kiwi
         /** The function retrieves if the last target was a link.
          @return true if the last target was a link, otherwise false.
          */
-        inline bool hasHitLink() const noexcept
+        inline bool knockHasHitLink() const noexcept
         {
             return m_target == Link;
         }
@@ -146,7 +162,7 @@ namespace Kiwi
         /** The function retrieves if the last target was a page.
          @return true if the last target was a page, otherwise false.
          */
-        inline bool hasHitPage() const noexcept
+        inline bool knockHasHitPage() const noexcept
         {
             return m_target == Page;
         }
@@ -155,7 +171,7 @@ namespace Kiwi
         /** The function retrieves the box that has been touched.
          @return The box that has been touched if the last target was a box.
          */
-        inline sBox getBox() const noexcept
+        inline sBox knockGetBox() const noexcept
         {
             if(m_target == Box)
             {
@@ -168,7 +184,7 @@ namespace Kiwi
         /** The function retrieves the link that has been touched.
          @return The link that has been touched if the last target was a link.
          */
-        inline sLink getLink() const noexcept
+        inline sLink knockGetLink() const noexcept
         {
             if(m_target == Link)
             {
@@ -181,7 +197,7 @@ namespace Kiwi
         /** The function retrieves the page that has been touched.
          @return The page that has been touched if the last target was a page.
          */
-        inline sPage getPage() const noexcept
+        inline sPage knockGetPage() const noexcept
         {
             if(m_target == Page)
             {
@@ -194,7 +210,7 @@ namespace Kiwi
         /** The function retrieves the part of the target that has been touched. If a box has been touched, it can be one of all the parts. If a link has been touched, it can only be the four first parts. If a page has been touched, it can be inside or outside. It nothing has been touched yet, it will be outside.
          @return The part of the target that has been touched.
          */
-        inline Part getPart() const noexcept
+        inline Part knockGetPart() const noexcept
         {
             if(m_target == Box)
             {
@@ -215,7 +231,7 @@ namespace Kiwi
         /** The function retrieves the index of the part of the box. If the part is an inlet or an outlet, it will be their index. If the part is a border or a corner it will be their position.
          @return The index of the part of the box.
          */
-        inline unsigned long getIndex() const noexcept
+        inline unsigned long knockGetIndex() const noexcept
         {
             if(m_target == Box)
             {
