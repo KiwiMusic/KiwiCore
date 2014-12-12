@@ -558,6 +558,18 @@ namespace Kiwi
 			}
 		}
 	}
+    
+    void Page::Controller::getSelection(set<Box::wController,
+                                        owner_less<Box::wController>>& boxes) const noexcept
+	{
+		boxes = m_boxes_selected;
+	}
+	
+	void Page::Controller::getSelection(set<Link::wController,
+                                        owner_less<Link::wController>>& links) const noexcept
+	{
+		links = m_links_selected;
+	}
 	
 	void Page::Controller::unselectAll(const bool notify)
 	{
@@ -1104,6 +1116,149 @@ namespace Kiwi
 		}
 		
 		return pageModified;
+	}
+    
+    // ================================================================================ //
+    //										LASSO                                       //
+    // ================================================================================ //
+    
+    Page::Controller::Lasso::Lasso(Page::sController page) : m_page_ctrl(page)
+	{
+        ;
+	}
+    
+    Page::Controller::Lasso::~Lasso()
+    {
+        m_boxes.clear();
+		m_links.clear();
+    }
+    
+	void Page::Controller::Lasso::begin(Point const& point, bool preserve)
+	{
+        if(m_dragging)
+        {
+            m_boxes.clear();
+            m_links.clear();
+        }
+        
+        Page::sController page_ctrl = m_page_ctrl.lock();
+		if(page_ctrl)
+        {
+            m_preserve = preserve;
+            if(!m_preserve)
+            {
+                page_ctrl->unselectAll();
+            }
+            else
+            {
+                page_ctrl->getSelection(m_boxes);
+                page_ctrl->getSelection(m_links);
+            }
+        }
+        
+        m_start = point;
+		m_bounds = Rectangle(point, Point(0., 0));
+		m_dragging = true;
+	}
+    
+	void Page::Controller::Lasso::perform(Point const& point, bool boxes, bool links)
+	{
+        
+        if(m_start.x() < point.x())
+        {
+            if(m_start.y() < point.y())
+            {
+                m_bounds = Rectangle(m_start, point);
+            }
+            else
+            {
+                m_bounds = Rectangle(point.x(), m_start.y(), m_start.x(), point.y());
+            }
+        }
+        else
+        {
+            if(m_start.y() < point.y())
+            {
+                m_bounds = Rectangle(m_start.x(), point.y(), point.x(), m_start.y());
+            }
+            else
+            {
+                m_bounds = Rectangle(point, m_start);
+            }
+        }
+		
+        Page::sController page_ctrl = m_page_ctrl.lock();
+        if(page_ctrl)
+        {
+            if(m_preserve)
+            {
+                if(boxes)
+                {
+                    vector<Box::sController> nboxes;
+                    page_ctrl->getBoxesInRect(nboxes, m_bounds);
+                    for(vector<Box::sController>::size_type i = 0; i < nboxes.size(); i++)
+                    {
+                        if(m_boxes.find(nboxes[i]) != m_boxes.end())
+                        {
+                            page_ctrl->unselect(nboxes[i], false);
+                        }
+                        else
+                        {
+                            page_ctrl->select(nboxes[i], false);
+                        }
+                    }
+                }
+                if(links)
+                {
+                    vector<Link::sController> nlinks;
+                    page_ctrl->getLinksInRect(nlinks, m_bounds);
+                    for(vector<Link::sController>::size_type i = 0; i < nlinks.size(); i++)
+                    {
+                        if(m_links.find(nlinks[i]) != m_links.end())
+                        {
+                            page_ctrl->unselect(nlinks[i], false);
+                        }
+                        else
+                        {
+                            page_ctrl->select(nlinks[i], false);
+                        }
+                    }
+                }
+                page_ctrl->selectionChanged();
+            }
+            else
+            {
+                page_ctrl->unselectAll(false);
+                if(boxes)
+                {
+                    vector<Box::sController> nBoxes;
+                    page_ctrl->getBoxesInRect(nBoxes, m_bounds);
+                    page_ctrl->select(nBoxes);
+                }
+                if(links)
+                {
+                    vector<Link::sController> nLinks;
+                    page_ctrl->getLinksInRect(nLinks, m_bounds);
+                    page_ctrl->select(nLinks);
+                }
+            }
+        }
+		boundsHasChanged();
+	}
+    
+	void Page::Controller::Lasso::end()
+	{
+		m_dragging = false;
+        m_boxes.clear();
+		m_links.clear();
+	}
+	
+	void Page::Controller::Lasso::draw(Doodle &d)
+	{
+        d.setColor(Color(0.96, 0.96, 0.96, 0.5));
+        d.fillAll();
+        d.setColor(Color(0.96, 0.96, 0.96, 1.));
+        d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1.);
 	}
 }
 

@@ -303,6 +303,10 @@ namespace Kiwi
             static void paint(sLink link, Doodle& d, bool selected = false);
         };
         
+        // ================================================================================ //
+        //                                  LINK CREATOR                                    //
+        // ================================================================================ //
+        
         static const sTag Tag_from;
         static const sTag Tag_to;
         
