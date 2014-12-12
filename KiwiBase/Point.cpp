@@ -75,7 +75,11 @@ namespace Kiwi
     Point Point::fromLine(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, const double delta) noexcept
     {
         const double mdelta = (1. - delta);
-        return begin * mdelta * mdelta * mdelta + ctrl1 * 3. * delta * mdelta * mdelta + ctrl2 * 3. * delta * delta * mdelta + end * delta * delta * mdelta;
+        const double fac1 = mdelta * mdelta * mdelta;
+        const double fac2 = 3. * delta * mdelta * mdelta;
+        const double fac3 = 3. * delta * delta * mdelta;
+        const double fac4 = delta * delta * mdelta;
+        return Point(begin.x() * fac1 + ctrl1.x() * fac2 + ctrl2.x() * fac3 + end.x() * fac4, begin.y() * fac1 + ctrl1.y() * fac2 + ctrl2.y() * fac3 + end.y() * fac4);
     }
     
     double Point::distance(Point const& begin, Point const& end) const noexcept
@@ -158,11 +162,6 @@ namespace Kiwi
         }
     }
     
-    double Point::distance(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end) const noexcept
-    {
-        return 1000.;
-    }
-    
     bool Point::near(Point const& pt, double const distance) const noexcept
     {
         return this->distance(pt) <= distance;
@@ -180,7 +179,15 @@ namespace Kiwi
     
     bool Point::near(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end, double const distance) const noexcept
     {
-        return this->distance(begin, ctrl1, ctrl2, end) <= distance;
+        int zaza; // For the moment
+        for(double i = 0; i < 1.001; i += 0.01)
+        {
+            if(this->distance(fromLine(begin, ctrl1, ctrl2, end, i)) <= distance)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
 }

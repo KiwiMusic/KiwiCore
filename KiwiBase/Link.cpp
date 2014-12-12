@@ -354,17 +354,12 @@ namespace Kiwi
                 current = next;
             }
             
-            if(drawnpath.near(point, 2.5))
+            if(m_link->getBounds().expanded(10.).contains(point) && drawnpath.near(point, 2.5))
             {
                 knock.m_link = m_link;
                 knock.m_part = Knock::Inside;
                 return true;
             }
-            /*
-            if(drawnpath.getBounds().expanded(5.).contains(point)) // Avoid
-            {
-                
-            }*/
 		}
 		
         knock.m_link.reset();
