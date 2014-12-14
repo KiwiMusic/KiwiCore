@@ -30,39 +30,57 @@ namespace Kiwi
     {
         ;
     }
-    
-    //! Constructor.
-    /** The function initializes a rectangle with four double values.
-     */
+
     Rectangle::Rectangle(const double x, const double y, const double width, const double height) noexcept :
     m_position(x, y), m_size(max(width, 0.), max(height, 0.))
     {
         ;
     }
-    
-    //! Constructor.
-    /** The function initializes a rectangle with two points.
-     */
+
     Rectangle::Rectangle(Point const& position, Point const& size) noexcept :
     m_position(position), m_size(max(size.x(), 0.), max(size.y(), 0.))
     {
         ;
     }
-    
-    //! Constructor.
-    /** The function initializes a rectangle with a vector of elements.
-     */
+
     Rectangle::Rectangle(ElemVector const& elements) noexcept :
     m_position(elements), m_size(elements.size() > 2 ? max((double)elements[2], 0.) : 0., elements.size() > 3 ? max((double)elements[3], 0.) : 0.)
     {
         ;
     }
-    
-    //! Destructor.
-    /** The function deletes the rectangle.
-     */
+
     Rectangle::~Rectangle()
     {
         ;
+    }
+    
+    bool Rectangle::overlaps(Point const& begin, Point const& end) const noexcept
+    {
+        int zaza;
+        if(contains(begin) || contains(end))
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    bool Rectangle::overlaps(Point const& begin, Point const& ctrl, Point const& end) const noexcept
+    {
+        int zaza;
+        if(contains(begin) || contains(end))
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    bool Rectangle::overlaps(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end) const noexcept
+    {
+        int zaza;
+        if(contains(begin) || contains(end))
+        {
+            return true;
+        }
+        return false;
     }
 }

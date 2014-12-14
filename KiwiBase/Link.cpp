@@ -317,10 +317,6 @@ namespace Kiwi
 
     bool Link::Controller::contains(Point const& point, Knock& knock) const noexcept
     {
-        if(!m_link)
-        {
-            return false;
-        }
         Path path;
         m_link->getPath(path);
         if(path.size() > 1)
@@ -364,6 +360,49 @@ namespace Kiwi
 		
         knock.m_link.reset();
         knock.m_part = Knock::Outside;
+        return false;
+    }
+    
+    bool Link::Controller::overlaps(Rectangle const& rect) const noexcept
+    {
+        Path path;
+        m_link->getPath(path);
+        if(path.size() > 1)
+        {
+            Point current = path.getPoint(0);
+            Path drawnpath(current);
+            for(unsigned long i = 1; i < path.size(); i++)
+            {
+                const Point next = path.getPoint(i);
+                const Point middle = Point::fromLine(current, next, 0.5);
+                if(current.y() < next.y())
+                {
+                    const double height = (middle.y() - current.y()) * 0.5 + 5.;
+                    drawnpath.quadraticTo(Point(current.x(), current.y() + height), middle);
+                    drawnpath.quadraticTo(Point(next.x(), next.y() - height), next);
+                }
+                else if(current.y() - 20. < next.y())
+                {
+                    const double height = (current.y() - next.y()) * 0.5;
+                    const double absi = (middle.x() - current.x()) * height * 0.05;
+                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + height + 5.), middle);
+                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - height - 5.), next);
+                }
+                else
+                {
+                    const double absi = (middle.x() - current.x()) * 0.5;
+                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + 15.), middle);
+                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - 15.), next);
+                }
+                
+                current = next;
+            }
+            
+            if(m_link->getBounds().expanded(10.).overlaps(rect) && drawnpath.overlaps(rect))
+            {
+                return true;
+            }
+		}
         return false;
     }
     

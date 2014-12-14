@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_KNOCK__
 #define __DEF_KIWI_KNOCK__
 
-#include "Tools.h"
+#include "Box.h"
 
 namespace Kiwi
 {
@@ -103,13 +103,12 @@ namespace Kiwi
         
         //! Test a point.
         /** The function try to find a box or then link under the point otherwise it will consider that the page has been touched.
-         @param page The page to test.
          @param point The point.
          */
         void knockAll(Point const& point) noexcept;
         
         //! Test a point.
-        /** The function try to find a ink under the point.
+        /** The function try to find a box under the point.
          @param page The page to test.
          @param point The point.
          */
@@ -117,10 +116,31 @@ namespace Kiwi
         
         //! Test a point.
         /** The function try to find a box .
-         @param page The page to test.
          @param point The point.
          */
         void knockLinks(Point const& point) noexcept;
+        
+        //! Test a rectangle.
+        /** TThe function try to find the boxes and the links that overlaps the rectangle.
+         @param rect The rectangle.
+         @param boxes The vector of boxes that will be filled.
+         @param links The vector of links that will be filled.
+         */
+        void knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links) noexcept;
+        
+        //! Test a rectangle.
+        /** The function try to find the boxes that overlaps the rectangle.
+         @param rect The rectangle.
+         @param boxes The vector of boxes that will be filled.
+         */
+        void knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes) noexcept;
+        
+        //! Test a rectangle.
+        /** The function try to find the links that overlaps the rectangle.
+         @param rect The rectangle.
+         @param links The vector of links that will be filled.
+         */
+        void knockLinks(Rectangle const& rect, vector<Link::sController>& links) noexcept;
         
         //! Retrieve the last target touched.
         /** The function retrieves the last target touched by a point.

@@ -235,4 +235,69 @@ namespace Kiwi
         }
         return false;
     }
+    
+    
+    bool Path::overlaps(Rectangle const& rect) const noexcept
+    {
+        if(m_points.size() == 1)
+        {
+            return rect.contains(m_points[0].point);
+        }
+        else if(m_points.size() > 1)
+        {
+            Point previous;
+            for(vector<Node>::size_type i = 0; i < m_points.size(); i++)
+            {
+                Point current = m_points[i].point;
+                switch(m_points[i].mode)
+                {
+                    case Move:
+                        if(rect.contains(current))
+                        {
+                            return true;
+                        }
+                        break;
+                    case Linear:
+                        if(rect.overlaps(previous, current))
+                        {
+                            return true;
+                        }
+                        break;
+                    case Quadratic:
+                        i++;
+                        if(i < m_points.size())
+                        {
+                            const Point ctrl = current;
+                            current = m_points[i].point;
+                            if(rect.overlaps(previous, ctrl, current))
+                            {
+                                return true;
+                            }
+                            
+                        }
+                        break;
+                    case Cubic:
+                        i += 2;
+                        if(i < m_points.size())
+                        {
+                            const Point ctrl1 = current;
+                            const Point ctrl2 = m_points[i-1].point;
+                            current = m_points[i].point;
+                            if(rect.overlaps(previous, ctrl1, ctrl2, current))
+                            {
+                                return true;
+                            }
+                            
+                        }
+                        break;
+                        
+                    default:
+                        break;
+                }
+                previous = current;
+            }
+        }
+        return false;
+    }
+    
 }

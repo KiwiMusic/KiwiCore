@@ -448,12 +448,11 @@ namespace Kiwi
 		if(m_locked != locked)
 		{
 			m_locked = locked;
-			
-			for(size_t i = 0; i < m_boxes.size(); i++)
+			for(vector<Box::sController>::size_type i = 0; i < m_boxes.size(); i++)
+            {
 				m_boxes[i]->setEditionStatus(!m_locked);
-			
+            }
 			unselectAll();
-			
 			lockStatusChanged();
 		}
 	}
@@ -559,21 +558,19 @@ namespace Kiwi
 		}
 	}
     
-    void Page::Controller::getSelection(set<Box::wController,
-                                        owner_less<Box::wController>>& boxes) const noexcept
+    void Page::Controller::getSelection(set<Box::wController, owner_less<Box::wController>>& boxes) const noexcept
 	{
 		boxes = m_boxes_selected;
 	}
 	
-	void Page::Controller::getSelection(set<Link::wController,
-                                        owner_less<Link::wController>>& links) const noexcept
+	void Page::Controller::getSelection(set<Link::wController, owner_less<Link::wController>>& links) const noexcept
 	{
 		links = m_links_selected;
 	}
 	
 	void Page::Controller::unselectAll(const bool notify)
 	{
-		if(isSomethingSelected())
+		if(isAnythingSelected())
 		{
 			unselectAllBoxes(false);
 			unselectAllLinks(false);
@@ -843,7 +840,7 @@ namespace Kiwi
 	void Page::Controller::unselect(vector<Box::sController>& boxes)
 	{
 		bool notify = false;
-		if(isSomethingSelected() && !boxes.empty())
+		if(isAnythingSelected() && !boxes.empty())
 		{
 			for(auto it = boxes.begin(); it != boxes.end(); ++it)
 			{
@@ -863,7 +860,7 @@ namespace Kiwi
 	void Page::Controller::unselect(vector<Link::sController>& links)
 	{
 		bool notify = false;
-		if(isSomethingSelected() && !links.empty())
+		if(isAnythingSelected() && !links.empty())
 		{
 			for(auto it = links.begin(); it != links.end(); ++it)
 			{
@@ -930,42 +927,6 @@ namespace Kiwi
 	{
 		// to do !
 		return Rectangle();
-	}
-	
-	void Page::Controller::getBoxesInRect(vector<Box::sController>& boxes, Rectangle const& rect) const noexcept
-	{
-		boxes.clear();
-		int zaza; //To clear
-		for(int i=0; i < m_boxes.size(); i++)
-		{
-			sBox box = m_boxes[i]->getBox();
-			if(box)
-			{
-				const Rectangle boxBounds = box->getBounds();
-				if(rect.overlaps(boxBounds))
-				{
-					boxes.push_back(m_boxes[i]);
-				}
-			}
-		}
-	}
-	
-	void Page::Controller::getLinksInRect(vector<Link::sController>& links, Rectangle const& rect) const noexcept
-	{
-		links.clear();
-		int zaza; //To clear
-		for(int i=0; i < m_links.size(); i++)
-		{
-			sLink link = m_links[i]->getLink();
-			if(link)
-			{
-				const Rectangle linkBounds = link->getBounds();
-				if(rect.overlaps(linkBounds))
-				{
-					links.push_back(m_links[i]);
-				}
-			}
-		}
 	}
 	
 	void Page::Controller::moveSelectedBoxes(Point const& delta)
@@ -1157,7 +1118,7 @@ namespace Kiwi
         }
         
         m_start = point;
-		m_bounds = Rectangle(point, Point(0., 0));
+		m_bounds = Rectangle(m_start, Point(0., 0));
 		m_dragging = true;
 	}
     
@@ -1168,22 +1129,22 @@ namespace Kiwi
         {
             if(m_start.y() < point.y())
             {
-                m_bounds = Rectangle(m_start, point);
+                m_bounds = Rectangle(m_start, point - m_start);
             }
             else
             {
-                m_bounds = Rectangle(point.x(), m_start.y(), m_start.x(), point.y());
+                m_bounds = Rectangle(m_start.x(), point.y(), point.x() - m_start.x(), m_start.y() - point.y());
             }
         }
         else
         {
             if(m_start.y() < point.y())
             {
-                m_bounds = Rectangle(m_start.x(), point.y(), point.x(), m_start.y());
+                m_bounds = Rectangle(point.x(), m_start.y(), m_start.x() - point.x(), point.y() - m_start.y());
             }
             else
             {
-                m_bounds = Rectangle(point, m_start);
+                m_bounds = Rectangle(point, m_start - point);
             }
         }
 		
@@ -1195,7 +1156,7 @@ namespace Kiwi
                 if(boxes)
                 {
                     vector<Box::sController> nboxes;
-                    page_ctrl->getBoxesInRect(nboxes, m_bounds);
+                    page_ctrl->knockBoxes(m_bounds, nboxes);
                     for(vector<Box::sController>::size_type i = 0; i < nboxes.size(); i++)
                     {
                         if(m_boxes.find(nboxes[i]) != m_boxes.end())
@@ -1211,7 +1172,7 @@ namespace Kiwi
                 if(links)
                 {
                     vector<Link::sController> nlinks;
-                    page_ctrl->getLinksInRect(nlinks, m_bounds);
+                    page_ctrl->knockLinks(m_bounds, nlinks);
                     for(vector<Link::sController>::size_type i = 0; i < nlinks.size(); i++)
                     {
                         if(m_links.find(nlinks[i]) != m_links.end())
@@ -1232,13 +1193,13 @@ namespace Kiwi
                 if(boxes)
                 {
                     vector<Box::sController> nBoxes;
-                    page_ctrl->getBoxesInRect(nBoxes, m_bounds);
+                    page_ctrl->knockBoxes(m_bounds, nBoxes);
                     page_ctrl->select(nBoxes);
                 }
                 if(links)
                 {
                     vector<Link::sController> nLinks;
-                    page_ctrl->getLinksInRect(nLinks, m_bounds);
+                    page_ctrl->knockLinks(m_bounds, nLinks);
                     page_ctrl->select(nLinks);
                 }
             }

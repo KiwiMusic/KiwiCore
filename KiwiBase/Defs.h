@@ -129,6 +129,8 @@ namespace Kiwi
     typedef shared_ptr<const AttrColor> scAttrColor;
     typedef weak_ptr<const AttrColor>   wcAttrColor;
     
+    class Knock;
+    
     class Inlet;
     typedef unique_ptr<Inlet>       uInlet;
     

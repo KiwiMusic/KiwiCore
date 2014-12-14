@@ -25,7 +25,6 @@
 #define __DEF_KIWI_LINK__
 
 #include "Attribute.h"
-#include "Knock.h"
 
 namespace Kiwi
 {
@@ -283,6 +282,13 @@ namespace Kiwi
 			 @return true if the link is touch by the point, otherwise false.
 			 */
 			virtual bool contains(Point const& point, Knock& knock) const noexcept;
+            
+            //! Retrieve if the link is overlaps the rectangle.
+			/** The function retrieves if the link is overlaps the rectangle.
+             @param rect The Rectangle.
+			 @return true if the link overlaps the rectangle, otherwise false.
+			 */
+			virtual bool overlaps(Rectangle const& rect) const noexcept;
 			
             //! The bounds notification function that should be override.
             /** The function is called by the link when its bounds changed.

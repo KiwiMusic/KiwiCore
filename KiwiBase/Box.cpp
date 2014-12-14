@@ -571,6 +571,11 @@ namespace Kiwi
         return false;
     }
     
+    bool Box::Controller::overlaps(Rectangle const& rect) const noexcept
+    {
+        return m_box->getBounds().overlaps(rect);
+    }
+    
     void Box::Controller::inletsChanged()
     {
         if(m_edition)

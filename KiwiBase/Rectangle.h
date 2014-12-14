@@ -441,10 +441,7 @@ namespace Kiwi
 		
 		inline bool overlaps(Rectangle const& other) const noexcept
 		{
-			return x() + width() > other.x()
-			&& y() + height() > other.y()
-			&& x() < other.x() + other.width()
-			&& y() < other.y() + other.height();
+			return x() + width() > other.x() && y() + height() > other.y() && x() < other.x() + other.width() && y() < other.y() + other.height();
 		}
 		
         inline void expand(double const value) noexcept
@@ -503,6 +500,33 @@ namespace Kiwi
         {
             return {m_position.x(), m_position.y(), m_size.x(), m_size.y()};
         }
+        
+        //! Get if the rectangle overlaps a line.
+        /** The function gets if the rectangle overlaps a line.
+         @param begin The first point of the line.
+         @param end   The end point of the line.
+         @return true if the rectangle overlaps a line, otherwise false.
+         */
+        bool overlaps(Point const& begin, Point const& end) const noexcept;
+        
+        //! Get if the rectangle overlaps a quadratic bezier line.
+        /** The function gets if the rectangle overlaps a quadratic bezier line.
+         @param begin The first point of the line.
+         @param ctrl  The control point of the line.
+         @param end   The end point of the line.
+         @return true if the rectangle overlaps a line, otherwise false.
+         */
+        bool overlaps(Point const& begin, Point const& ctrl, Point const& end) const noexcept;
+        
+        //! Get if the rectangle overlaps a cubic bezier line.
+        /** The function gets if the rectangle overlaps a cubic bezier line.
+         @param begin The first point of the line.
+         @param ctrl1 The first control point of the line.
+         @param ctrl2 The second control point of the line.
+         @param end   The end point of the line.
+         @return true if the rectangle overlaps a line, otherwise false.
+         */
+        bool overlaps(Point const& begin, Point const& ctrl1, Point const& ctrl2, Point const& end) const noexcept;
     };
 }
 

@@ -137,6 +137,57 @@ namespace Kiwi
             }
         }
     }
+    
+
+    void Knock::knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links) noexcept
+    {
+        knockBoxes(rect, boxes);
+        knockLinks(rect, links);
+    }
+    
+    void Knock::knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes) noexcept
+    {
+        boxes.clear();
+        sPage page = m_page.lock();
+        if(page)
+        {
+            Page::sController ctrl = page->getController();
+            if(ctrl)
+            {
+                vector<Box::sController> vboxes;
+                ctrl->getBoxes(vboxes);
+                for(vector<Box::sController>::size_type i = 0; i < vboxes.size(); i++)
+                {
+                    if(vboxes[i] && vboxes[i]->overlaps(rect))
+                    {
+                        boxes.push_back(vboxes[i]);
+                    }
+                }
+            }
+        }
+    }
+    
+    void Knock::knockLinks(Rectangle const& rect, vector<Link::sController>& links) noexcept
+    {
+        links.clear();
+        sPage page = m_page.lock();
+        if(page)
+        {
+            Page::sController ctrl = page->getController();
+            if(ctrl)
+            {
+                vector<Link::sController> vlinks;
+                ctrl->getLinks(vlinks);
+                for(vector<Link::sController>::size_type i = 0; i < vlinks.size(); i++)
+                {
+                    if(vlinks[i] && vlinks[i]->overlaps(rect))
+                    {
+                        links.push_back(vlinks[i]);
+                    }
+                }
+            }
+        }
+    }
 }
 
 

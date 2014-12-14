@@ -659,6 +659,13 @@ namespace Kiwi
 			 */
 			virtual bool contains(Point const& point, Knock& knock) const noexcept;
             
+            //! Retrieve if the box is overlaps the rectangle.
+			/** The function retrieves if the box is overlaps the rectangle.
+             @param rect The Rectangle.
+			 @return true if the box overlaps the rectangle, otherwise false.
+			 */
+			virtual bool overlaps(Rectangle const& rect) const noexcept;
+            
             //! Notify that the page is in edition.
             /** The function notifies that page is in edition to redraw the box.
              @param status true if page is in edition, otherwise false.

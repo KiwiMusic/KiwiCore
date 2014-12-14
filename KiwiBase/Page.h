@@ -26,6 +26,7 @@
 
 #include "Box.h"
 #include "AttributePage.h"
+#include "Knock.h"
 
 // TODO
 // - Add the attributes
@@ -489,7 +490,7 @@ namespace Kiwi
 			/** The function retrieves if some boxes or links are currently selected.
 			 @return True if some boxes or links are currently selected, false if nothing is selected.
 			 */
-			inline bool isSomethingSelected()
+			inline bool isAnythingSelected()
 			{
 				return isAnyBoxSelected() || isAnyLinksSelected();
 			}
@@ -527,14 +528,12 @@ namespace Kiwi
             //! Retrieves the selected boxes.
 			/** The function retrieves the selected boxes.
 			 */
-			void getSelection(set<Box::wController,
-                              owner_less<Box::wController>>& boxes) const noexcept;
+			void getSelection(set<Box::wController, owner_less<Box::wController>>& boxes) const noexcept;
 			
 			//! Retrieves the selected links.
 			/** The function retrieves the selected links.
 			 */
-			void getSelection(set<Link::wController,
-                              owner_less<Link::wController>>& links) const noexcept;
+			void getSelection(set<Link::wController, owner_less<Link::wController>>& links) const noexcept;
 			
 			//! Deletes all selected links and boxes.
 			/** The function deletes all selected links and boxes.
@@ -633,20 +632,6 @@ namespace Kiwi
 			 @return The selected boxes bounds as a rectangle.
 			 */
 			Rectangle getSelectionBounds();
-			
-			//! Gets the boxes contained in a given rectangle.
-			/** The function retrieves the boxes contained in a given rectangle.
-			 @param boxes A vector of boxes to fill.
-			 @param rect  The rectangle.
-			 */
-			void getBoxesInRect(vector<Box::sController>& boxes, Rectangle const& rect) const noexcept;
-			
-			//! Gets the links overlapped by a given rectangle.
-			/** The function retrieves the links overlapped by a given rectangle.
-			 @param links A vector of links to fill.
-			 @param rect  The rectangle.
-			 */
-			void getLinksInRect(vector<Link::sController>& links, Rectangle const& rect) const noexcept;
 			
 			//! Moves the boxes that are currently selected by given value.
 			/** The function moves the boxes that are currently selected by given value.
@@ -786,7 +771,7 @@ namespace Kiwi
         
         //! The lasso creation method.
         /** The function allocates a lasso.
-         @param page The page controler that used the lasso/
+         @param page The page controler that used the lasso.
          */
         template<class LassoClass, class ...Args> static shared_ptr<LassoClass> create(Page::sController page, Args&& ...arguments)
         {
@@ -839,6 +824,9 @@ namespace Kiwi
             return m_bounds;
         }
 
+        //! Retrieve the notification that the bounds has changed.
+        /** The function retrieves the notification that the bounds has changed.
+         */
         virtual void boundsHasChanged() = 0;
     };
     
