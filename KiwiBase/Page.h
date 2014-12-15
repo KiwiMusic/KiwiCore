@@ -323,12 +323,10 @@ namespace Kiwi
          @see Box::Controller
          */
 		class Controller : public Knock, public enable_shared_from_this<Controller>
-        {
-        public:
-            class Lasso;
+        {            
         private:
             const sPage						m_page;
-			
+            
 			vector<Box::sController>		m_boxes;
 			mutable mutex					m_boxes_mutex;
 			set<Box::wController,
@@ -624,6 +622,11 @@ namespace Kiwi
 			/** The function unselects link.
 			 */
 			bool unselect(Link::sController link, const bool notify = true);
+            
+            //! Called when the selection has changed.
+			/** The function is called when the selection has changed.
+			 */
+			virtual void selectionChanged() {};
 			
 			void updateSelectedBoxesBounds();
 			
@@ -722,11 +725,6 @@ namespace Kiwi
 			 */
 			virtual void redraw() {};
 			
-			//! Called when the selection has changed.
-			/** The function is called when the selection has changed.
-			 */
-			virtual void selectionChanged() {};
-			
 			//! Called when the page has been locked/unlocked.
 			/** The function is called when the page has been locked/unlocked.
 			 */
@@ -737,99 +735,7 @@ namespace Kiwi
         static const sTag Tag_boxes;
         static const sTag Tag_link;
         static const sTag Tag_links;
-    };
-    
-    // ================================================================================ //
-    //										LASSO                                       //
-    // ================================================================================ //
-    
-    class Page::Controller::Lasso
-    {
-    private:
-        Page::wController			m_page_ctrl;
-        Rectangle                   m_bounds;
-        Point                       m_start;
-        bool						m_dragging;
-        bool                        m_preserve;
-        
-        set<Box::wController,
-        owner_less<Box::wController>>   m_boxes;
-        set<Link::wController,
-        owner_less<Link::wController>>	m_links;
-        
-    public:
-        
-        //! Contructor.
-        /** You should never have to use this method.
-         */
-        Lasso(Page::sController page);
-        
-        //! Destructor.
-        /** You should never have to use this method.
-         */
-        virtual ~Lasso();
-        
-        //! The lasso creation method.
-        /** The function allocates a lasso.
-         @param page The page controler that used the lasso.
-         */
-        template<class LassoClass, class ...Args> static shared_ptr<LassoClass> create(Page::sController page, Args&& ...arguments)
-        {
-            return make_shared<LassoClass>(page, forward<Args>(arguments)...);
-        }
-        
-        //! Initialize the selection of the links and the boxes.
-        /** The function initialize the selection of the links and the boxes.
-         @param point The starting point.
-         @param preserve The lasso should preserve the last selection.
-         */
-        void begin(Point const& point, bool preserve);
-        
-        //! Perform the selection of the links and the boxes.
-        /** The function performs the selection of the links and the boxes.
-         @param point The draging point.
-         @param preserve The lasso should preserve the last selection.
-         @param boxes The lasso should add boxes to the selection.
-         @param links The lasso should add links to the selection.
-         */
-        void perform(Point const& point, bool boxes, bool links);
-        
-        //! Finish the selection of the links and the boxes.
-        /** The function finishes the selection of the links and the boxes.
-         @param preserve The lasso should preserve the last selection.
-         */
-        void end();
-        
-        //! The draw method that could be override.
-        /** The function draws the lasso in a doodle.
-         @param d The doodle.
-         */
-        virtual void draw(Doodle& d);
-        
-        //! Retrieve if the lasso is performing the selection.
-        /** The function retrieves if the lasso is performing the selection.
-         @return True if the lasso is performing the selection.
-         */
-        inline bool isPerforming() const noexcept
-        {
-            return m_dragging;
-        }
-        
-        //! Retrieve the bounds of the lasso.
-        /** The function retrieves the bounds of the lasso.
-         @return The bounds of the lasso.
-         */
-        inline Rectangle getBounds() const noexcept
-        {
-            return m_bounds;
-        }
-
-        //! Retrieve the notification that the bounds has changed.
-        /** The function retrieves the notification that the bounds has changed.
-         */
-        virtual void boundsHasChanged() = 0;
-    };
-    
+    };    
 }
 
 
