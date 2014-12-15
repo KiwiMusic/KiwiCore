@@ -145,24 +145,6 @@ namespace Kiwi
             boxes = m_boxes;
         }
 		
-		//! Retrieves box with id.
-		/** The function attempts to retrieves a box from the page with an id.
-		 @param boxID   The box id to find
-		 @return		The  box with this id, or nullptr if no any box has this id.
-		 */
-		sBox getBoxWithId(const unsigned long boxID) const
-		{
-			lock_guard<mutex> guard(m_boxes_mutex);
-			for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
-			{
-				if(boxID == m_boxes[i]->getId())
-				{
-					return m_boxes[i];
-				}
-			}
-			return nullptr;
-		}
-		
         //! Get the number of links.
         /** The function retrieves the number of links in the page.
          @return The number of links in the page.
@@ -322,7 +304,7 @@ namespace Kiwi
          @see Page::Listener
          @see Box::Controller
          */
-		class Controller : public Knock, public enable_shared_from_this<Controller>
+		class Controller : public Knock, public IoletMagnet, public enable_shared_from_this<Controller>
         {            
         private:
             const sPage						m_page;

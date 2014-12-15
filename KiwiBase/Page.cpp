@@ -418,7 +418,7 @@ namespace Kiwi
     //                                  PAGE CONTROLER                                  //
     // ================================================================================ //
     
-    Page::Controller::Controller(sPage page) noexcept : Knock(page),
+    Page::Controller::Controller(sPage page) noexcept : Knock(page), IoletMagnet(page),
     m_page(page),
 	m_zoom(100),
 	m_locked(false),

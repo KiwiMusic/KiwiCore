@@ -86,7 +86,7 @@ namespace Kiwi
     public:
         
         //! The contructor.
-        /** The contructor initialize an empty hit.
+        /** The contructor initialize an empty knock.
          @param page The page that owns the knock.
          */
         Knock(sPage page) noexcept;
@@ -262,6 +262,42 @@ namespace Kiwi
     };
     
     // ================================================================================ //
+    //										IOLET MAGNET                                //
+    // ================================================================================ //
+    
+    class IoletMagnet
+    {
+    private:
+        const wPage     m_page;
+        wBox            m_box;
+        unsigned long   m_index;
+        
+    public:
+        
+        //! The contructor.
+        /** The contructor initialize an empty iolet magnet.
+         @param page The page that owns the iolet magnet.
+         */
+        IoletMagnet(sPage page) noexcept;
+        
+        //! The destructor.
+        /** The destructor does nothing.
+         */
+        ~IoletMagnet();
+        
+        //! Find the closest iolet to a point.
+        /** The function finds in a page the closest iolet to a page.
+         @param point The point to compute.
+         @param box  The box that won't be check (the box that owns the link).
+         @param inlet If true function will look for an inlet, otherwise it will look for an outlet.
+         @param distance The maximum distance to for.
+         @return True if an iolet has been find.
+         */
+        bool findIolet(Point const& point, sBox box, bool inlet, double const distance);
+        
+    };
+    
+    // ================================================================================ //
     //										LASSO                                       //
     // ================================================================================ //
     
@@ -284,7 +320,7 @@ namespace Kiwi
         //! Contructor.
         /** You should never have to use this method.
          */
-        Lasso(sPage page);
+        Lasso(sPage page) noexcept;
         
         //! Destructor.
         /** You should never have to use this method.
@@ -365,12 +401,21 @@ namespace Kiwi
         //! Contructor.
         /** You should never have to use this method.
          */
-        IoletHighlighter();
+        IoletHighlighter() noexcept;
         
         //! Destrcutor.
         /** You should never have to use this method.
          */
         virtual ~IoletHighlighter();
+        
+        //! The lasso creation method.
+        /** The function allocates a lasso.
+         @param page The page that used the lasso.
+         */
+        template<class IoletHighlighterClass, class ...Args> static shared_ptr<IoletHighlighterClass> create(Args&& ...arguments)
+        {
+            return make_shared<IoletHighlighterClass>(forward<Args>(arguments)...);
+        }
         
         //! Defines an inlet to be highlighted.
         /** The function defines an inlet to be highlighted.

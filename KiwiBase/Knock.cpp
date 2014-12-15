@@ -190,10 +190,70 @@ namespace Kiwi
     }
     
     // ================================================================================ //
+    //										IOLET MAGNET                                //
+    // ================================================================================ //
+    
+    IoletMagnet::IoletMagnet(sPage page) noexcept : m_page(page)
+    {
+        
+    }
+    
+    IoletMagnet::~IoletMagnet()
+    {
+        
+    }
+    
+    bool IoletMagnet::findIolet(Point const& point, sBox box, bool inlet, double const distance)
+	{
+        m_box.reset();
+        sPage page = m_page.lock();
+		if(page && box)
+		{
+            double ndistance = distance;
+            vector<sBox> boxes;
+            page->getBoxes(boxes);
+            for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
+            {
+                if(boxes[i] && boxes[i] != box)
+                {
+                    Box::sController boxctrl = boxes[i]->getController();
+                    if(boxctrl && inlet)
+                    {
+                        for(unsigned long j = 0; j <  boxes[i]->getNumberOfInlets(); j++)
+                        {
+                            const double cdistance = point.distance(boxctrl->getInletPosition(j));
+                            if(cdistance < ndistance)
+                            {
+                                m_box   = boxes[i];
+                                m_index = j;
+                                ndistance = cdistance;
+                            }
+                        }
+                    }
+                    else if(boxctrl)
+                    {
+                        for(unsigned long j = 0; j <  boxes[i]->getNumberOfOutlets(); j++)
+                        {
+                            const double cdistance = point.distance(boxctrl->getOutletPosition(j));
+                            if(cdistance < ndistance)
+                            {
+                                m_box   = boxes[i];
+                                m_index = j;
+                                ndistance = cdistance;
+                            }
+                        }
+                    }
+                }
+            }
+		}
+		return !m_box.expired();
+	}
+    
+    // ================================================================================ //
     //										LASSO                                       //
     // ================================================================================ //
     
-    Lasso::Lasso(sPage page) : m_page(page)
+    Lasso::Lasso(sPage page) noexcept : m_page(page)
 	{
         ;
 	}
@@ -342,7 +402,7 @@ namespace Kiwi
     //                                 IOLET HIGHLIGHTER                                //
     // ================================================================================ //
     
-    IoletHighlighter::IoletHighlighter()
+    IoletHighlighter::IoletHighlighter() noexcept
 	{
 		;
 	}
