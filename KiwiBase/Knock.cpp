@@ -203,7 +203,7 @@ namespace Kiwi
         
     }
     
-    bool IoletMagnet::findIolet(Point const& point, sBox box, bool inlet, double const distance)
+    bool IoletMagnet::magnetFindIolet(Point const& point, sBox box, bool inlet, double const distance)
 	{
         m_box.reset();
         sPage page = m_page.lock();

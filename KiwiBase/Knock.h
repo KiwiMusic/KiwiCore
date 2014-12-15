@@ -293,7 +293,25 @@ namespace Kiwi
          @param distance The maximum distance to for.
          @return True if an iolet has been find.
          */
-        bool findIolet(Point const& point, sBox box, bool inlet, double const distance);
+        bool magnetFindIolet(Point const& point, sBox box, bool inlet, double const distance);
+        
+        //! Retrieve the box that has been found.
+        /** The function retrieves the box that has been found.
+         @return The box that has been found.
+         */
+        inline sBox magnetGetBox() const noexcept
+        {
+            return m_box.lock();
+        }
+        
+        //! Retrieve the index of the iolet.
+        /** The function retrieves the index of the iolet.
+         @return The index of the iolet.
+         */
+        inline unsigned long magnetGetIndex() const noexcept
+        {
+            return m_index;
+        }
         
     };
     
