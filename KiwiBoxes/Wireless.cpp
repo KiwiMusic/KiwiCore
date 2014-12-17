@@ -75,7 +75,7 @@ namespace Kiwi
         if(value.empty())
         {
             addInlet(IoType::Data, IoPolarity::Hot, "Value or Bang to output (int, float or bang)");
-            addInlet(IoType::Data, IoPolarity::Hot, "Value to set (int or float)");
+            addInlet(IoType::Data, IoPolarity::Cold, "Value to set (int or float)");
         }
         else if(value[0].isNumber())
         {

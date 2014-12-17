@@ -194,7 +194,7 @@ namespace Kiwi
 			m_attrs[attr->getName()] = attr;
 			m_attrs_mutex.unlock();
 			
-			sendNotification(attr, Notification::AttrAdded);
+			sendNotification(attr, Notification::Added);
 		}
 	}
 	
@@ -208,7 +208,7 @@ namespace Kiwi
             {
                 m_attrs.erase(it);
 				m_attrs_mutex.unlock();
-				sendNotification(attr, Notification::AttrRemoved);
+				sendNotification(attr, Notification::Removed);
             }
 		}
 	}
@@ -223,7 +223,7 @@ namespace Kiwi
             {
                 m_attrs.erase(it);
 				m_attrs_mutex.unlock();
-				sendNotification(it->second, Notification::AttrRemoved);
+				sendNotification(it->second, Notification::Removed);
             }
         }
 	}
@@ -524,39 +524,88 @@ namespace Kiwi
         }
 	}
 	
-	void Attr::Manager::bind(shared_ptr<Attr::Manager::Listener> listener)
+	void Attr::Manager::bind(sListener listener, sTag name, Notification type)
 	{
 		if(listener)
 		{
 			lock_guard<mutex> guard(m_listeners_mutex);
-			m_listeners.insert(listener);
-		}
+            auto it = m_listeners.find(listener);
+            if(it != m_listeners.end())
+            {
+                auto it2 = it->second.attrs.find(name);
+                if(it2 != it->second.attrs.end())
+                {
+                    it2->second |= type;
+                }
+                else
+                {
+                    it->second.attrs[name] = 0 | type;
+                }
+                if(name == nullptr)
+                {
+                    for(auto it2 = it->second.attrs.begin(); it2 != it->second.attrs.end(); ++it)
+                    {
+                        it2->second &= ~type;
+                        if(!it2->second)
+                        {
+                            it->second.attrs.erase(it2);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                m_listeners.insert(pair<wListener, ListenerAttrList>(listener, ListenerAttrList(name, type)));
+            }
+        }
 	}
 	
-	void Attr::Manager::unbind(shared_ptr<Attr::Manager::Listener> listener)
+	void Attr::Manager::unbind(sListener listener, sTag name, Notification type)
 	{
 		if(listener)
 		{
+            int zaza;  // TODO
 			lock_guard<mutex> guard(m_listeners_mutex);
-			m_listeners.erase(listener);
+			auto it = m_listeners.find(listener);
+            if(it != m_listeners.end())
+            {
+                m_listeners.erase(listener);
+            }
 		}
 	}
 	
-	//! @internal Trigger notification to subclasses and listeners.
 	void Attr::Manager::sendNotification(sAttr attr, Notification type)
 	{
 		lock_guard<mutex> guard(m_listeners_mutex);
+     
 		auto it = m_listeners.begin();
 		while(it != m_listeners.end())
 		{
-			if((*it).expired())
+			if(it->first.expired())
 			{
 				it = m_listeners.erase(it);
 			}
 			else
 			{
-				Manager::sListener listener = (*it).lock();
-				listener->attributeNotify(shared_from_this(), attr, type);
+                sListener listener = it->first.lock();
+                if(listener)
+                {
+                    auto it2 = it->second.attrs.find(attr->getName());
+                    if(it2 != it->second.attrs.end())
+                    {
+                        if(it2->second & type)
+                        {
+                            listener->attributeNotify(shared_from_this(), attr, type);
+                        }
+                    }
+                    else if((it2 = it->second.attrs.find(nullptr)) != it->second.attrs.end())
+                    {
+                        if(it2->second & type)
+                        {
+                            listener->attributeNotify(shared_from_this(), attr, type);
+                        }
+                    }
+                }
 				++it;
 			}
 		}
