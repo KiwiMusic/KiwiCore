@@ -178,7 +178,7 @@ namespace Kiwi
 		/** The function retrieves if the box should be hidden when the page is locked.
 		 @return True if the box should be hidden when the page is locked, false otherwise.
 		 */
-		inline bool getHiddenOnLock() const noexcept
+		inline bool isHiddenOnLock() const noexcept
 		{
 			return appearance_hidden->get();
 		}
@@ -208,15 +208,6 @@ namespace Kiwi
         inline Rectangle getPresentationBounds() const noexcept
         {
             return Rectangle(appearance_presentation_position->get(), appearance_presentation_size->get());
-        }
-        
-        //! Retrieve if the box should be hidden.
-        /** The function retrieves if the box should be hidden.
-         @return True if the box should be hidden, otherwise false.
-         */
-        inline bool isHidden() const noexcept
-        {
-            return appearance_hidden->get();
         }
         
         //! Retrieve if the box should be displayed in presentation.

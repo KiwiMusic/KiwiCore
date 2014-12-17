@@ -36,7 +36,7 @@ namespace Kiwi
     /**
      The link is a combination of two sockets used to create the connection between boxes in a page.
      */
-    class Link : public enable_shared_from_this<Link>
+    class Link : public enable_shared_from_this<Link>//, public Attr::Listener
     {
     public:
         class Controller;
@@ -312,6 +312,117 @@ namespace Kiwi
         // ================================================================================ //
         //                                  LINK CREATOR                                    //
         // ================================================================================ //
+        
+        class Creator
+        {
+        private:
+            wBox			m_box_from;
+            wBox			m_box_to;
+            unsigned long   m_index_outlet;
+            unsigned long   m_index_intlet;
+            Path            m_path;
+            
+        public:
+            
+            //! The constructor.
+            /** You should never use this method.
+             */
+            Creator(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept;
+            
+            //! The destructor.
+            /** You should never use this method.
+             */
+            ~Creator();
+            
+            //! The creator creation method with sockets.
+            /** The function allocates a creator.
+             @param from    The box that send.
+             @param outlet  The index of the outlet.
+             @param to      The box that receive.
+             @param inlet   The index of the inlet.
+             @return The creator.
+             */
+            static shared_ptr<Creator> create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet);
+            
+            //! Retrieve if the creator owns the boxes.
+            /** The function retrieves if the creator owns the two boxes.
+             @return true if the creator owns the two boxes, otherwise false.
+             */
+            inline bool hasBoxes() const noexcept
+            {
+                return !Creator::m_box_from.expired() && Creator::m_box_to.expired();
+            }
+            
+            //! Retrieve if the creator owns the output box.
+            /** The function retrieves if the creator owns the output box.
+             @return true if the creator owns the output box, otherwise false.
+             */
+            inline bool hasBoxFrom() const noexcept
+            {
+                return !Creator::m_box_from.expired();
+            }
+            
+            //! Retrieve if the creator owns the input box.
+            /** The function retrieves if the creator owns the input box.
+             @return true if the creator owns the input box, otherwise false.
+             */
+            inline bool hasBoxTo() const noexcept
+            {
+                return !Creator::m_box_to.expired();
+            }
+            
+            //! Retrieve the index of the outlet of the creator.
+            /** The function retrieves the index of the outlet of the creator.
+             @return The index of the outlet of the creator.
+             */
+            inline unsigned long getOutletIndex() const noexcept
+            {
+                return Creator::m_index_outlet;
+            }
+            
+            //! Retrieve the index of the inlet of the creator.
+            /** The function retrieves the index of the inlet of the creator.
+             @return The index of the inlet of the creator.
+             */
+            inline unsigned long getInletIndex() const noexcept
+            {
+                return Creator::m_index_intlet;
+            }
+            
+            //! Retrieve the output box.
+            /** The function retrieves the output box of the creator.
+             @return The output box.
+             */
+            inline sBox getBoxFrom() const noexcept
+            {
+                return m_box_from.lock();
+            }
+            
+            //! Retrieve the input box.
+            /** The function retrieves the input box of the creator.
+             @return The input box.
+             */
+            inline sBox getBoxTo() const noexcept
+            {
+                return m_box_to.lock();
+            }
+            
+            /** Call this in your mouseDrag event, to update the link's position.
+             This must be repeatedly calling when the mouse is dragged, after you've
+             first initialised the link with beginLink().
+             */
+            void drag(Point const& point)
+            {
+                if(m_path.size() == 1)
+                {
+                    m_path.lineTo(point);
+                }
+                else
+                {
+                    m_path.setPoint(m_path.size() - 1, point);
+                }
+            }
+        };
         
         static const sTag Tag_from;
         static const sTag Tag_to;

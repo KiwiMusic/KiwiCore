@@ -38,14 +38,30 @@ namespace Kiwi
     Link::Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept :
     m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
     {
-        if(from && to)
+        if(from && outlet < from->getNumberOfOutlets() && to && inlet < to->getNumberOfInlets())
         {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
+            Box::sController from_ctrl   = from->getController();
+            Box::sController to_ctrl     = to->getController();
             if(from_ctrl && to_ctrl)
             {
-                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
+                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                m_path.lineTo(to_ctrl->getInletPosition(inlet));
+            }
+        }
+        else if(from && outlet < from->getNumberOfOutlets())
+        {
+            Box::sController from_ctrl   = from->getController();
+            if(from_ctrl)
+            {
+                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+            }
+        }
+        else if(to && inlet < to->getNumberOfInlets())
+        {
+            Box::sController to_ctrl   = to->getController();
+            if(to_ctrl)
+            {
+                m_path.moveTo(to_ctrl->getInletPosition(inlet));
             }
         }
     }
@@ -57,7 +73,14 @@ namespace Kiwi
     
     sLink Link::create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
     {
-        return make_shared<Link>(from, outlet, to, inlet);
+        if((from && outlet < from->getNumberOfOutlets()) || (to && inlet < to->getNumberOfInlets()))
+        {
+            return make_shared<Link>(from, outlet, to, inlet);
+        }
+        else
+        {
+            return nullptr;
+        }
     }
     
     sLink Link::create(scPage page, scDico dico)
@@ -431,6 +454,54 @@ namespace Kiwi
             }
         }
         return false;
+    }
+    
+    Link::Creator::Creator(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept :
+    m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
+    {
+        if(from && outlet < from->getNumberOfOutlets() && to && inlet < to->getNumberOfInlets())
+        {
+            Box::sController from_ctrl   = from->getController();
+            Box::sController to_ctrl     = to->getController();
+            if(from_ctrl && to_ctrl)
+            {
+                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                m_path.lineTo(to_ctrl->getInletPosition(inlet));
+            }
+        }
+        else if(from && outlet < from->getNumberOfOutlets())
+        {
+            Box::sController from_ctrl   = from->getController();
+            if(from_ctrl)
+            {
+                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+            }
+        }
+        else if(to && inlet < to->getNumberOfInlets())
+        {
+            Box::sController to_ctrl   = to->getController();
+            if(to_ctrl)
+            {
+                m_path.moveTo(to_ctrl->getInletPosition(inlet));
+            }
+        }
+    }
+    
+    shared_ptr<Link::Creator> Link::Creator::create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
+    {
+        if((from && outlet < from->getNumberOfOutlets()) || (to && inlet < to->getNumberOfInlets()))
+        {
+            return make_shared<Link::Creator>(from, outlet, to, inlet);
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    
+    Link::Creator::~Creator()
+    {
+        
     }
 }
 

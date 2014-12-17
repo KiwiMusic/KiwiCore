@@ -43,15 +43,35 @@ namespace Kiwi
     class Attr
     {
     public:
+        class Manager;
+        typedef shared_ptr<Attr::Manager> sManager;
+		typedef shared_ptr<const Attr::Manager> scManager;
+        
+        class Listener;
+        typedef shared_ptr<Listener>    sListener;
+        typedef weak_ptr<Listener>      wListener;
+        
+        /** Flags describing the type of the notification
+         @see Listener
+         */
+        enum Notification
+        {
+            Added           = 1<<1,     ///< Indicates that an attribute has been added.
+            Removed         = 1<<2,     ///< Indicates that an attribute has been removed.
+            ValueChanged	= 1<<3,     ///< Indicates that an attribute value has changed.
+            BehaviorChanged	= 1<<4,		///< Indicates that the behavior of an attribute has changed.
+            Anything        = 1<<1 | 1<<2 | 1<<3 | 1<<4,
+        };
+        
 		/** Flags describing the behavior of the attribute.
 		 @see setInvisible, setDisabled, setSaveable, setNotifyChanges
 		 */
         enum Behavior
         {
-            Invisible			= (1<<0),///< Indicates that the attribute is invisible.
-			Disabled			= (1<<1),///< Indicates that the attribute can't be changed.
-            Unsaved             = (1<<2),///< Indicates that the attribute is not saved.
-            Notifier            = (1<<3) ///< Indicates that the attribute should not notify its changes.
+            Invisible			= 1<<0,///< Indicates that the attribute is invisible.
+			Disabled			= 1<<1,///< Indicates that the attribute can't be changed.
+            Unsaved             = 1<<2,///< Indicates that the attribute is not saved.
+            Notifier            = 1<<3 ///< Indicates that the attribute should not notify its changes.
         };
         
 		/** Flags describing the display style of the attribute.
@@ -335,248 +355,6 @@ namespace Kiwi
 		void setNotifier(bool notifier) noexcept;
         
     public:
-        // ================================================================================ //
-        //                                  ATTRIBUTE MANAGER                               //
-        // ================================================================================ //
-        
-        //! The attribute manager manages a set of attributes.
-        /** The attribute manager manages a set of attributes, it allows the setting and the getting of their values and to retrieve them by name or by category.
-         @see Attr
-         */
-		class Manager : public enable_shared_from_this<Manager>
-		{
-		public:
-			class Listener;
-		private:
-			unordered_map<sTag, sAttr>          m_attrs;
-			mutable mutex                       m_attrs_mutex;
-			
-			unordered_set<weak_ptr<Listener>,
-			weak_ptr_hash<Listener>,
-			weak_ptr_equal<Listener>>           m_listeners;
-			mutex                               m_listeners_mutex;
-			
-        public:
-            
-            //! Constructor.
-            /** Creates a new attribute manager.
-             */
-            Manager() noexcept;
-            
-            //! Descrutor.
-            /** Free the attributes.
-             */
-            virtual ~Manager();
-            
-            //! Add an attribute.
-            /** The function adds an attribute .
-             @param attr the attribute to add.
-             */
-            void addAttribute(sAttr attr);
-            
-        protected:
-            
-            //! Remove an attribute.
-            /** The function removes an attribute.
-             @param attr The attribute to remove.
-             */
-            void removeAttribute(sAttr attr);
-            
-            //! The an attribute.
-            /** The function removes an attribute.
-             @param name The name of the attribute to remove.
-             */
-            void removeAttribute(sTag name);
-            
-            //! Set the attribute's default values.
-            /** The function sets the attribute's  default values.
-             @param name The name of the attribute.
-             @param elements The new default values of the attribute.
-             */
-            void setAttributeDefaultValues(sTag name, ElemVector const& elements);
-            
-            //! Set the attribute behavior.
-            /** The function sets the attribute behaviors.
-             @param name The name of the attribute.
-             @param behavior The behavior of the attribute.
-             */
-            void setAttributeBehavior(sTag name, Attr::Behavior behavior);
-            
-            //! Set if the attribute should be visible.
-            /** The function sets if the attribute should be visible.
-             @param invisible If true, the attribute will be invisible, if false it will be visible.
-             */
-            void setAttributeInvisible(sTag name, bool invisible) noexcept;
-            
-            //! Set if the attribute should be disabled.
-            /** The function sets if the attribute should be disabled.
-             @param disabled If true, the attribute will be disable, if false it will be enable.
-             */
-            void setAttributeDisabled(sTag name, bool disabled) noexcept;
-            
-            //! Set if the attribute should be saved.
-            /** The function sets if the attribute should be saved.
-             @param saved If true, the attribute will be saved, if false it won't be saved.
-             */
-            void setAttributeSaved(sTag name, bool saved) noexcept;
-            
-            //! Set if the attribute should notify changes.
-            /** The function sets if the attribute should notify changes.
-             @param shouldNotify If true, the attribute will notify changes, if false it won't notify changes.
-             */
-            void setAttributeNotifier(sTag name, bool notifier) noexcept;
-            
-            //! Set the attributes values with a dico.
-            /** The function sets the attributes values with a dico.
-             @param dico A dico.
-             */
-            void read(scDico dico) noexcept;
-            
-        public:
-            
-            //! Retrieve the number of attributes.
-            /** The function retrieves the numbers of attributes. The attributes invisibles won't be counted.
-             @return The number of attributes.
-             */
-            unsigned long getNumberOfAttributes() const noexcept;
-            
-            //! Retrieve the names of the attributes.
-            /** The function retrieves the names of the attributes. The name attributes invisibles won't be retrieved.
-             @param names A vector of tags that will contain the names of the attributes;
-             */
-            void getAttributeNames(vector<sTag>& names) const noexcept;
-            
-            //! Check if a given attribute exist.
-            /** The function checks if a given attribute exist. If the attribute is invisible the function returns false.
-             @param name The name of the attribute.
-             @return true if an attribute exist, otherwise false.
-             */
-            bool hasAttribute(sTag name) const noexcept;
-            
-            //! Retrieve an attribute.
-            /** The function retrieves an attribute. If the attribute is invisible the function returns a pointer null.
-             @param name The name of the attribute.
-             @return The attribute or null if the attribute doesn't exist.
-             */
-            sAttr getAttribute(sTag name) const noexcept;
-            
-            //! Set the values of an attribute.
-            /** The function sets the value of an attribute.
-             @param name		The name of the attribute.
-             @param elements    A vector of elements to pass.
-             @return true if the attribute value has setted its values, otherwise false.
-             @see getAttributeValue
-             */
-            bool setAttributeValue(sTag name, ElemVector const& elements);
-            
-            //! Get the values of an attribute.
-            /** The function gets the values of an attribute.
-             @param name        The name of the attribute.
-             @param elements    A vector of elements to pass.
-             @return true if the attribute value retrieved its values, otherwise false.
-             @see setAttrValue
-             */
-            bool getAttributeValue(sTag name, ElemVector& elements);
-            
-            //! Retrieve the number of attribute categories.
-            /** The function retrieves the number of attribute categories. If a category have only invisibles attributes, the category won't be counted.
-             @return The number of attribute categories.
-             */
-            unsigned long getNumberOfCategories() const noexcept;
-            
-            //! Retrieve the names of the categories.
-            /** The function retrieves the names of the categories. If a category have only invisibles attributes, the name of the category won't be retrieved.
-             @param names				A vector of tag containing the names of the categories.
-			 @param sortAlphabetically	If true, categories name will be sorted alphabetically.
-             */
-            void getCategoriesNames(vector<sTag>& names, bool sortAlphabetically = false) const noexcept;
-            
-            //! Check if a category exist.
-            /** The function checks if a category exist.  If a category have only invisibles attributes, the function returns false.
-             @param name The name of the category.
-             @return true if the category exist, otherwise false.
-             */
-            bool hasCategory(sTag name) const noexcept;
-            
-            //! Retrieve the attributes of a category.
-            /** The function retrieves the attributes of a category. If an attribute is invisible, the attribute won't be retrieved.
-             @param name	The name of the category.
-             @param attrs	A vector of attributes to pass.
-			 @param sorted	If true, attributes will be sorted alphabetically and according to their order.
-             */
-            void getAttributesInCategory(sTag name, vector<sAttr>& attrs, bool sorted = false) const;
-            
-            //! Write the attributes in a dico.
-            /** The function writes the attributes in a dico.
-             @param dico A dico.
-             */
-            void write(sDico dico) const noexcept;
-			
-            //! Notify the manager that the values of an attribute has changed.
-            /** The function notifies the manager that the values of an attribute has changed.
-             @param dico A dico.
-			 @return pass true to notify changes to listeners, false if you don't want them to be notified
-             */
-			virtual bool attributeValueChanged(sAttr attr)
-			{
-				return true;
-			}
-			
-            // ================================================================================ //
-            //								ATTRIBUTE MANAGER LISTENER                          //
-            // ================================================================================ //
-			
-			/** Flags describing the type of the notification
-			 @see Manager::Listener
-			 */
-			enum Notification
-			{
-				AttrAdded		= 0,	///< Indicates that an attribute has been added.
-				AttrRemoved		= 1,	///< Indicates that an attribute has been removed.
-				ValueChanged	= 2,	///< Indicates that an attribute value has changed.
-				BehaviorChanged	= 3		///< Indicates that the behavior of an attribute has changed.
-			};
-			
-            //! The attribute manager listener is a virtual class that can be binded to an attribute manager to be notified of various changes.
-            /** The attribute manager listener is a very light class that allows to be notified of the attributes modification.
-             */
-            class Listener
-            {
-            public:
-                virtual ~Listener() {}
-                
-                //! Receive the notification that an attribute has changed.
-                /** Sublass of Attr::Manager::Listener must implement this virtual function to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
-                 @param manager		The Attr::Manager that manages the attribute.
-                 @param attr		The attribute that has been modified.
-                 @param type		The type of notification as specified in the Attr::Manager::NotificationType enum,
-                 */
-                virtual void attributeNotify(shared_ptr<Manager> manager, sAttr attr, Notification type) = 0;
-            };
-			
-			//! Adds an attribute manager listener in the binding list of the attribute manager.
-			/** The function adds an attribute manager listener in the binding list of the attribute manager. If the attribute manager listener is already in the binding list, the function has no effect.
-			 @param listener  The pointer of the attribute manager listener.
-			 @see              unbind()
-			 */
-			void bind(shared_ptr<Listener> listener);
-			
-			//! Removes an attribute manager listener from the binding list of the attribute manager.
-			/** The function removes an attribute manager listener from the binding list of the attribute manager. If the attribute manager listener was not in the binding list, the function has no effect.
-			 @param listener  The pointer of the attribute manager listener.
-			 @see              unbind()
-			 */
-			void unbind(shared_ptr<Listener> listener);
-			
-			typedef shared_ptr<Listener>    sListener;
-			
-		private:
-			//! @internal Trigger notification to subclasses and listeners.
-			void sendNotification(sAttr attr, Notification type);
-        };
-		
-		typedef shared_ptr<Attr::Manager> sManager;
-		typedef shared_ptr<const Attr::Manager> scManager;
         
         //! Attribute comparaison.
         /** This function compare the attributes by their order or by the name of their label.
@@ -595,6 +373,247 @@ namespace Kiwi
             }
             return attr1->getLabel()->getName() < attr2->getLabel()->getName();
         }
+    };
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTE MANAGER                               //
+    // ================================================================================ //
+    
+    //! The attribute manager manages a set of attributes.
+    /** The attribute manager manages a set of attributes, it allows the setting and the getting of their values and to retrieve them by name or by category.
+     @see Attr
+     */
+    class Attr::Manager : public enable_shared_from_this<Attr::Manager>
+    {
+    private:
+        struct ListenerAttrList
+        {
+            map<sTag, unsigned long> attrs;
+            
+            ListenerAttrList(sTag name, unsigned long notification)
+            {
+                attrs[name] = 0 | notification;
+            }
+            
+            ~ListenerAttrList()
+            {
+                attrs.clear();
+            }
+        };
+        
+        unordered_map<sTag, sAttr>  m_attrs;
+        mutable mutex               m_attrs_mutex;
+        map<wListener,
+        ListenerAttrList,
+        owner_less<wListener>>      m_listeners;
+        mutex                       m_listeners_mutex;
+        
+    public:
+        
+        //! Constructor.
+        /** Creates a new attribute manager.
+         */
+        Manager() noexcept;
+        
+        //! Descrutor.
+        /** Free the attributes.
+         */
+        virtual ~Manager();
+        
+        //! Add an attribute.
+        /** The function adds an attribute .
+         @param attr the attribute to add.
+         */
+        void addAttribute(sAttr attr);
+        
+    protected:
+        
+        //! Remove an attribute.
+        /** The function removes an attribute.
+         @param attr The attribute to remove.
+         */
+        void removeAttribute(sAttr attr);
+        
+        //! The an attribute.
+        /** The function removes an attribute.
+         @param name The name of the attribute to remove.
+         */
+        void removeAttribute(sTag name);
+        
+        //! Set the attribute's default values.
+        /** The function sets the attribute's  default values.
+         @param name The name of the attribute.
+         @param elements The new default values of the attribute.
+         */
+        void setAttributeDefaultValues(sTag name, ElemVector const& elements);
+        
+        //! Set the attribute behavior.
+        /** The function sets the attribute behaviors.
+         @param name The name of the attribute.
+         @param behavior The behavior of the attribute.
+         */
+        void setAttributeBehavior(sTag name, Attr::Behavior behavior);
+        
+        //! Set if the attribute should be visible.
+        /** The function sets if the attribute should be visible.
+         @param invisible If true, the attribute will be invisible, if false it will be visible.
+         */
+        void setAttributeInvisible(sTag name, bool invisible) noexcept;
+        
+        //! Set if the attribute should be disabled.
+        /** The function sets if the attribute should be disabled.
+         @param disabled If true, the attribute will be disable, if false it will be enable.
+         */
+        void setAttributeDisabled(sTag name, bool disabled) noexcept;
+        
+        //! Set if the attribute should be saved.
+        /** The function sets if the attribute should be saved.
+         @param saved If true, the attribute will be saved, if false it won't be saved.
+         */
+        void setAttributeSaved(sTag name, bool saved) noexcept;
+        
+        //! Set if the attribute should notify changes.
+        /** The function sets if the attribute should notify changes.
+         @param shouldNotify If true, the attribute will notify changes, if false it won't notify changes.
+         */
+        void setAttributeNotifier(sTag name, bool notifier) noexcept;
+        
+        //! Set the attributes values with a dico.
+        /** The function sets the attributes values with a dico.
+         @param dico A dico.
+         */
+        void read(scDico dico) noexcept;
+        
+    public:
+        
+        //! Retrieve the number of attributes.
+        /** The function retrieves the numbers of attributes. The attributes invisibles won't be counted.
+         @return The number of attributes.
+         */
+        unsigned long getNumberOfAttributes() const noexcept;
+        
+        //! Retrieve the names of the attributes.
+        /** The function retrieves the names of the attributes. The name attributes invisibles won't be retrieved.
+         @param names A vector of tags that will contain the names of the attributes;
+         */
+        void getAttributeNames(vector<sTag>& names) const noexcept;
+        
+        //! Check if a given attribute exist.
+        /** The function checks if a given attribute exist. If the attribute is invisible the function returns false.
+         @param name The name of the attribute.
+         @return true if an attribute exist, otherwise false.
+         */
+        bool hasAttribute(sTag name) const noexcept;
+        
+        //! Retrieve an attribute.
+        /** The function retrieves an attribute. If the attribute is invisible the function returns a pointer null.
+         @param name The name of the attribute.
+         @return The attribute or null if the attribute doesn't exist.
+         */
+        sAttr getAttribute(sTag name) const noexcept;
+        
+        //! Set the values of an attribute.
+        /** The function sets the value of an attribute.
+         @param name		The name of the attribute.
+         @param elements    A vector of elements to pass.
+         @return true if the attribute value has setted its values, otherwise false.
+         @see getAttributeValue
+         */
+        bool setAttributeValue(sTag name, ElemVector const& elements);
+        
+        //! Get the values of an attribute.
+        /** The function gets the values of an attribute.
+         @param name        The name of the attribute.
+         @param elements    A vector of elements to pass.
+         @return true if the attribute value retrieved its values, otherwise false.
+         @see setAttrValue
+         */
+        bool getAttributeValue(sTag name, ElemVector& elements);
+        
+        //! Retrieve the number of attribute categories.
+        /** The function retrieves the number of attribute categories. If a category have only invisibles attributes, the category won't be counted.
+         @return The number of attribute categories.
+         */
+        unsigned long getNumberOfCategories() const noexcept;
+        
+        //! Retrieve the names of the categories.
+        /** The function retrieves the names of the categories. If a category have only invisibles attributes, the name of the category won't be retrieved.
+         @param names				A vector of tag containing the names of the categories.
+         @param sortAlphabetically	If true, categories name will be sorted alphabetically.
+         */
+        void getCategoriesNames(vector<sTag>& names, bool sortAlphabetically = false) const noexcept;
+        
+        //! Check if a category exist.
+        /** The function checks if a category exist.  If a category have only invisibles attributes, the function returns false.
+         @param name The name of the category.
+         @return true if the category exist, otherwise false.
+         */
+        bool hasCategory(sTag name) const noexcept;
+        
+        //! Retrieve the attributes of a category.
+        /** The function retrieves the attributes of a category. If an attribute is invisible, the attribute won't be retrieved.
+         @param name	The name of the category.
+         @param attrs	A vector of attributes to pass.
+         @param sorted	If true, attributes will be sorted alphabetically and according to their order.
+         */
+        void getAttributesInCategory(sTag name, vector<sAttr>& attrs, bool sorted = false) const;
+        
+        //! Write the attributes in a dico.
+        /** The function writes the attributes in a dico.
+         @param dico A dico.
+         */
+        void write(sDico dico) const noexcept;
+        
+        //! Notify the manager that the values of an attribute has changed.
+        /** The function notifies the manager that the values of an attribute has changed.
+         @param dico A dico.
+         @return pass true to notify changes to listeners, false if you don't want them to be notified
+         */
+        virtual bool attributeValueChanged(sAttr attr)
+        {
+            return true;
+        }
+        
+        //! Adds an attribute manager listener in the binding list of the attribute manager.
+        /** The function adds an attribute manager listener in the binding list of the attribute manager. If the attribute manager listener is already in the binding list, the function has no effect.
+         @param listener  The pointer of the attribute manager listener.
+         @see              unbind()
+         */
+        void bind(sListener listener, sTag name = nullptr, Notification type = Anything);
+        
+        //! Removes an attribute manager listener from the binding list of the attribute manager.
+        /** The function removes an attribute manager listener from the binding list of the attribute manager. If the attribute manager listener was not in the binding list, the function has no effect.
+         @param listener  The pointer of the attribute manager listener.
+         @see              unbind()
+         */
+        void unbind(sListener listener, sTag name = nullptr, Notification type = Anything);
+        
+    private:
+        
+        //! @internal Trigger notification to subclasses and listeners.
+        void sendNotification(sAttr attr, Notification type);
+    };
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTE LISTENER                              //
+    // ================================================================================ //
+    
+    //! The attribute manager listener is a virtual class that can be binded to an attribute manager to be notified of various changes.
+    /** The attribute manager listener is a very light class that allows to be notified of the attributes modification.
+     */
+    class Attr::Listener
+    {        
+    public:
+        virtual ~Listener() {}
+        
+        //! Receive the notification that an attribute has changed.
+        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+         @param manager		The manager that manages the attribute.
+         @param attr		The attribute that has been modified.
+         @param type		The type of notification.
+         */
+        virtual void attributeNotify(sManager manager, sAttr attr, Notification type) = 0;
+        
     };
 	
 	
