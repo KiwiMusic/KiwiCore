@@ -314,7 +314,6 @@ namespace Kiwi
 			set<Box::wController,
 			owner_less<Box::wController>>	m_boxes_selected;
 			mutable mutex					m_boxes_selected_mutex;
-			vector<Rectangle>				m_boxes_bounds;
 			
 			vector<Link::sController>		m_links;
 			mutable mutex					m_links_mutex;
@@ -609,9 +608,7 @@ namespace Kiwi
 			/** The function is called when the selection has changed.
 			 */
 			virtual void selectionChanged() {};
-			
-			void updateSelectedBoxesBounds();
-			
+						
 			//! Retrieves the selected boxes bounds.
 			/** The function retrieves the selected boxes bounds.
 			 @return The selected boxes bounds as a rectangle.

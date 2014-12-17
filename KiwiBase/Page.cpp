@@ -905,24 +905,6 @@ namespace Kiwi
 		return false;
 	}
 	
-	void Page::Controller::updateSelectedBoxesBounds()
-	{
-		m_boxes_bounds.clear();
-		
-		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
-		{
-			Box::sController boxcrtl = (*it).lock();
-			if(boxcrtl)
-			{
-                sBox box = boxcrtl->getBox();
-                if(box)
-                {
-                    m_boxes_bounds.push_back(box->getBounds());
-                }
-			}
-		}
-	}
-	
 	Rectangle Page::Controller::getSelectionBounds()
 	{
 		// to do !
