@@ -392,7 +392,7 @@ namespace Kiwi
             
             ListenerAttrList(sTag name, unsigned long notification)
             {
-                attrs[name] = 0 | notification;
+                attrs[name] = notification;
             }
             
             ~ListenerAttrList()
@@ -591,7 +591,7 @@ namespace Kiwi
     private:
         
         //! @internal Trigger notification to subclasses and listeners.
-        void sendNotification(sAttr attr, Notification type);
+        void send(sAttr attr, Notification type);
     };
     
     // ================================================================================ //
@@ -612,7 +612,7 @@ namespace Kiwi
          @param attr		The attribute that has been modified.
          @param type		The type of notification.
          */
-        virtual void attributeNotify(sManager manager, sAttr attr, Notification type) = 0;
+        virtual void notify(sManager manager, sAttr attr, Notification type) = 0;
         
     };
 	

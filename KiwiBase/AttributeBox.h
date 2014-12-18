@@ -39,6 +39,10 @@ namespace Kiwi
     class AttrBox : public Attr::Manager
     {
     public:
+        // Internal //
+        static const sTag Tag_ninlets;
+        static const sTag Tag_noutlets;
+        
         // Appearance //
         static const sTag Tag_Appearance;
         static const sTag Tag_position;
@@ -83,6 +87,10 @@ namespace Kiwi
         static const sTag Tag_textcolor;
         static const sTag Tag_Text_Color;
         
+        // Internal //
+        const shared_ptr<AttrLong>      attr_ninlets;
+        const shared_ptr<AttrLong>      attr_noutlets;
+        
         // Appearance //
         const shared_ptr<AttrPoint>     appearance_position;
         const shared_ptr<AttrPoint>     appearance_size;
@@ -103,6 +111,10 @@ namespace Kiwi
         const shared_ptr<AttrColor>     color_text;
         
         AttrBox() :
+        // Internal //
+        attr_ninlets(Attr::create<AttrLong>(Tag_ninlets, nullptr, nullptr, 0, Attr::Invisible)),
+        attr_noutlets(Attr::create<AttrLong>(Tag_noutlets, nullptr, nullptr, 0, Attr::Invisible)),
+        
         // Appearance //
         appearance_position(Attr::create<AttrPoint>(Tag_position, Tag_Position, Tag_Appearance)),
         appearance_size(Attr::create<AttrPoint>(Tag_size, Tag_Size, Tag_Appearance, (ElemVector){100., 20.})),

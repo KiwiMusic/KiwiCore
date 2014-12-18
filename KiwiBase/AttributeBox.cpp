@@ -29,6 +29,9 @@ namespace Kiwi
     //                                  ATTRIBUTE BOX                                   //
     // ================================================================================ //
     
+    const sTag AttrBox::Tag_ninlets     = Tag::create("ninlets");
+    const sTag AttrBox::Tag_noutlets    = Tag::create("noutlets");
+    
     const sTag AttrBox::Tag_Font               = Tag::create("Font");
     const sTag AttrBox::Tag_fontname                           = Tag::create("fontname");
     const sTag AttrBox::Tag_Font_Name                          = Tag::create("Font Name");

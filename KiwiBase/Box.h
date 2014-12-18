@@ -747,8 +747,6 @@ namespace Kiwi
         static const sTag Tag_id;
         static const sTag Tag_focus;
         static const sTag Tag_name;
-        static const sTag Tag_ninlets;
-        static const sTag Tag_noutlets;
         static const sTag Tag_set;
         static const sTag Tag_text;
         

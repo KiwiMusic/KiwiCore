@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_LINK__
 #define __DEF_KIWI_LINK__
 
-#include "Attribute.h"
+#include "AttributeLink.h"
 
 namespace Kiwi
 {
@@ -36,7 +36,7 @@ namespace Kiwi
     /**
      The link is a combination of two sockets used to create the connection between boxes in a page.
      */
-    class Link : public enable_shared_from_this<Link>//, public Attr::Listener
+    class Link : public AttrLink, public Attr::Listener
     {
     public:
         class Controller;
@@ -89,6 +89,25 @@ namespace Kiwi
          @return The link.
          */
         static sLink create(scLink link, const sBox oldbox, const sBox newbox);
+        
+        //! Retrieve the sLink.
+        /** The function sLink.
+         @return The sLink.
+         */
+		inline sLink getShared() noexcept
+		{
+			return static_pointer_cast<Link>(shared_from_this());
+		}
+        
+        //! Retrieve the scLink.
+        /** The function scLink.
+         @return The scLink.
+         */
+		inline scLink getShared() const noexcept
+		{
+			return static_pointer_cast<const Link>(shared_from_this());
+		}
+        
         
         //! Retrieve the output box.
         /** The function retrieves the output box of the link.
@@ -153,16 +172,6 @@ namespace Kiwi
          */
         void write(sDico dico) const noexcept;
         
-        //! Notify that the inlet has changed.
-        /** The function is called by the inlet when it changed.
-         */
-        void inletChanged() noexcept;
-        
-        //! Notify that the outlet has changed.
-        /** The function is called by the outlet when it changed.
-         */
-        void outletChanged() noexcept;
-        
         //! Retrieve the position of the link.
         /** The function retrieves the position of the link as a point.
          @return The position of the link as a point.
@@ -204,6 +213,14 @@ namespace Kiwi
          @param ctrl    The controller.
          */
         void setController(sController ctrl);
+        
+        //! Receive the notification that an attribute has changed.
+        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+         @param manager		The manager that manages the attribute.
+         @param attr		The attribute that has been modified.
+         @param type		The type of notification.
+         */
+        void notify(Attr::sManager manager, sAttr attr, Attr::Notification type);
         
         // ================================================================================ //
         //                                  LINK CONTROLER                                  //

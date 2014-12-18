@@ -75,7 +75,23 @@ namespace Kiwi
     {
         if((from && outlet < from->getNumberOfOutlets()) || (to && inlet < to->getNumberOfInlets()))
         {
-            return make_shared<Link>(from, outlet, to, inlet);
+            sLink link = make_shared<Link>(from, outlet, to, inlet);
+            if(link && from)
+            {
+                from->bind(link, Box::Tag_ninlets, Attr::ValueChanged);
+                from->bind(link, Box::Tag_noutlets, Attr::ValueChanged);
+                from->bind(link, Box::Tag_position, Attr::ValueChanged);
+                from->bind(link, Box::Tag_size, Attr::ValueChanged);
+                
+            }
+            if(link && to)
+            {
+                to->bind(link, Box::Tag_ninlets, Attr::ValueChanged);
+                to->bind(link, Box::Tag_noutlets, Attr::ValueChanged);
+                to->bind(link, Box::Tag_position, Attr::ValueChanged);
+                to->bind(link, Box::Tag_size, Attr::ValueChanged);
+            }
+            return link;
         }
         else
         {
@@ -173,14 +189,14 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->connectOutlet(shared_from_this()) && to->connectInlet(shared_from_this()))
+            if(from->connectOutlet(getShared()) && to->connectInlet(getShared()))
             {
                 return true;
             }
             else
             {
-                from->disconnectOutlet(shared_from_this());
-                to->disconnectInlet(shared_from_this());
+                from->disconnectOutlet(getShared());
+                to->disconnectInlet(getShared());
                 return false;
             }
         }
@@ -194,9 +210,9 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->disconnectOutlet(shared_from_this()))
+            if(from->disconnectOutlet(getShared()))
             {
-                if(to->disconnectInlet(shared_from_this()))
+                if(to->disconnectInlet(getShared()))
                 {
                    return true;
                 }
@@ -221,55 +237,32 @@ namespace Kiwi
         }
     }
     
-    void Link::inletChanged() noexcept
-    {
-        sBox from   = getBoxFrom();
-        sBox to     = getBoxTo();
-        if(from && to)
-        {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
-            if(from_ctrl && to_ctrl)
-            {
-                m_path.clear();
-                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
-                
-                sController ctrl = getController();
-                if(ctrl)
-                {
-                    ctrl->boundsChanged();
-                }
-            }
-        }
-    }
-    
-    void Link::outletChanged() noexcept
-    {
-        sBox from   = getBoxFrom();
-        sBox to     = getBoxTo();
-        if(from && to)
-        {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
-            if(from_ctrl && to_ctrl)
-            {
-                m_path.clear();
-                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
-                
-                sController ctrl = getController();
-                if(ctrl)
-                {
-                    ctrl->boundsChanged();
-                }
-            }
-        }
-    }
-    
     void Link::setController(sController ctrl)
     {
         m_controller = ctrl;
+    }
+    
+    void Link::notify(Attr::sManager manager, sAttr attr, Attr::Notification type)
+    {
+        sBox from   = getBoxFrom();
+        sBox to     = getBoxTo();
+        if(from && to)
+        {
+            Box::sController from_ctrl   = getBoxFrom()->getController();
+            Box::sController to_ctrl     = getBoxTo()->getController();
+            if(from_ctrl && to_ctrl)
+            {
+                m_path.clear();
+                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
+                
+                sController ctrl = getController();
+                if(ctrl)
+                {
+                    ctrl->boundsChanged();
+                }
+            }
+        }
     }
     
     // ================================================================================ //
@@ -328,7 +321,7 @@ namespace Kiwi
             }
             else
             {
-                color = Color(0.42, 0.42, 0.42, 1.);
+                color = link->getMessageColor();
             }
             
             d.setColor(color.darker(0.2));

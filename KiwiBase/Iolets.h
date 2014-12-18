@@ -187,11 +187,6 @@ namespace Kiwi
          @return true if the link has been removed, otherwise false.
          */
         bool erase(sLink link) noexcept;
-        
-        //! Notify that the owner box has changed.
-        /** The function is called by the box when its position, its size or the inlets changed and notifies the links that the inlet has changed.
-         */
-        void boxChanged() const noexcept;
     };
     
     // ================================================================================ //
@@ -329,11 +324,6 @@ namespace Kiwi
          @return true if the link has been removed, otherwise false.
          */
         bool erase(sLink link) noexcept;
-        
-        //! Notify that the owner box has changed.
-        /** The function is called by the box when its position, its size or the outlets changed and notifies the links that the inlet has changed.
-         */
-        void boxChanged() const noexcept;
     };
 }
 

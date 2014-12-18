@@ -34,8 +34,6 @@ namespace Kiwi
     const sTag Box::Tag_id          = Tag::create("id");
     const sTag Box::Tag_focus       = Tag::create("focus");
     const sTag Box::Tag_name        = Tag::create("name");
-    const sTag Box::Tag_ninlets     = Tag::create("ninlets");
-    const sTag Box::Tag_noutlets    = Tag::create("noutlets");
     const sTag Box::Tag_set         = Tag::create("set");
     const sTag Box::Tag_text        = Tag::create("text");
     
@@ -206,15 +204,6 @@ namespace Kiwi
             if(controller)
             {
                 controller->positionChanged();
-                //lock_guard<mutex> guard(m_io_mutex);
-                for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
-                {
-                    m_inlets[i]->boxChanged();
-                }
-                for(vector<uOutlet>::size_type i = 0; i < m_outlets.size(); i++)
-                {
-                    m_outlets[i]->boxChanged();
-                }
             }
         }
         else if(attr == AttrBox::appearance_size)
@@ -223,15 +212,6 @@ namespace Kiwi
             if(controller)
             {
                 controller->sizeChanged();
-                //lock_guard<mutex> guard(m_io_mutex);
-                for(vector<uInlet>::size_type i = 0; i < m_inlets.size(); i++)
-                {
-                    m_inlets[i]->boxChanged();
-                }
-                for(vector<uOutlet>::size_type i = 0; i < m_outlets.size(); i++)
-                {
-                    m_outlets[i]->boxChanged();
-                }
             }
         }
         else if(attr == AttrBox::color_background || AttrBox::color_border || AttrBox::color_text)
@@ -258,6 +238,7 @@ namespace Kiwi
         {
             controller->inletsChanged();
         }
+        setAttributeValue(Tag_ninlets, {m_inlets.size()});
     }
     
     void Box::insertInlet(unsigned long index, IoType type, IoPolarity polarity, string const& description)
@@ -271,7 +252,6 @@ namespace Kiwi
         else
         {
             m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, polarity, description)));
-            int zaza; // Notify Links that they must change their indices
         }
         
         sController controller = getController();
@@ -279,6 +259,7 @@ namespace Kiwi
         {
             controller->inletsChanged();
         }
+        setAttributeValue(Tag_ninlets, {m_inlets.size()});
     }
     
     void Box::removeInlet(unsigned long index)
@@ -301,6 +282,7 @@ namespace Kiwi
             {
                 controller->inletsChanged();
             }
+            setAttributeValue(Tag_ninlets, {m_inlets.size()});
         }
     }
     
@@ -317,6 +299,7 @@ namespace Kiwi
         {
             controller->outletsChanged();
         }
+        setAttributeValue(Tag_noutlets, {m_outlets.size()});
     }
     
     void Box::insertOutlet(unsigned long index, IoType type, string const& description)
@@ -329,13 +312,13 @@ namespace Kiwi
         else
         {
             m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
-            int zaza; // Notify Links that they must change their indices
         }
         sController controller = getController();
         if(controller)
         {
             controller->outletsChanged();
         }
+        setAttributeValue(Tag_noutlets, {m_outlets.size()});
     }
     
     void Box::removeOutlet(unsigned long index)
@@ -358,8 +341,8 @@ namespace Kiwi
             {
                 controller->outletsChanged();
             }
+            setAttributeValue(Tag_noutlets, {m_outlets.size()});
         }
-        
     }
     
     bool Box::connectInlet(sLink link)
