@@ -35,6 +35,7 @@
 // TODO
 // - See how to format the expression
 // - Box should deletes it owns links at deletion
+// - Links and Iolets behavior (resize ect..)
 namespace Kiwi
 {    
     // ================================================================================ //
@@ -61,6 +62,7 @@ namespace Kiwi
         };
         
     private:
+        friend void Outlet::send(ElemVector const& elements) const noexcept;
         friend bool Link::connect() noexcept;
         friend bool Link::disconnect() noexcept;
         
@@ -71,8 +73,8 @@ namespace Kiwi
         const unsigned long m_type;
         sTag                m_text;
         
-        vector<uOutlet>     m_outlets;
-        vector<uInlet>      m_inlets;
+        vector<sOutlet>     m_outlets;
+        vector<sInlet>      m_inlets;
         atomic_ullong       m_stack_count;
         mutable mutex       m_io_mutex;
         
@@ -217,7 +219,7 @@ namespace Kiwi
          @param index The inlet index.
          @return The type.
          */
-        inline IoType getInletType(unsigned long index) const noexcept
+        inline Iolet::Type getInletType(unsigned long index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
@@ -226,7 +228,7 @@ namespace Kiwi
             }
             else
             {
-                return IoType::Both;
+                return Iolet::Type::Both;
             }
         }
 		
@@ -235,7 +237,7 @@ namespace Kiwi
 		 @param index The inlet index.
 		 @return The type.
 		 */
-		inline IoPolarity getInletPolarity(unsigned long index) const noexcept
+		inline Iolet::Polarity getInletPolarity(unsigned long index) const noexcept
 		{
 			lock_guard<mutex> guard(m_io_mutex);
 			if(index < m_inlets.size())
@@ -244,7 +246,7 @@ namespace Kiwi
 			}
 			else
 			{
-				return IoPolarity::Hot;
+				return Iolet::Hot;
 			}
 		}
 		
@@ -281,7 +283,7 @@ namespace Kiwi
          @param index The inlet index.
          @return The type.
          */
-        inline IoType getOutletType(unsigned long index) const noexcept
+        inline Iolet::Type getOutletType(unsigned long index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
@@ -290,23 +292,9 @@ namespace Kiwi
             }
             else
             {
-                return IoType::Both;
+                return Iolet::Type::Both;
             }
         }
-		
-		//! Retrieves the links connected to a box's inlet.
-		/** The function retrieves the links connected to a box's inlet.
-		 @param links	The vector of link to fill.
-		 @param index	The index of the inlet to query.
-		 */
-		void getInletLinks(vector<sLink> links, unsigned long index);
-		
-		//! Retrieves the links connected to a box's outlet.
-		/** The function retrieves the links connected to a box's outlet.
-		 @param links	The vector of link to fill.
-		 @param index	The index of the outlet to query.
-		 */
-		void getOutletLinks(vector<sLink> links, unsigned long index);
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff. Return false if the vector of element doesn't match with your method then the box will check if the vector match with attributes methods, othersize return true.
@@ -391,7 +379,7 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    addInlet(IoType type, IoPolarity polarity, string const& description = "");
+        void    addInlet(Iolet::Type type, Iolet::Polarity polarity, string const& description = "");
         
         //! Insert a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -399,7 +387,7 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    insertInlet(unsigned long index, IoType type, IoPolarity polarity, string const& description = "");
+        void    insertInlet(unsigned long index, Iolet::Type type, Iolet::Polarity polarity, string const& description = "");
         
         //! Remove an inlet from the box.
         /** The function removes an inlet from the box.
@@ -412,7 +400,7 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    addOutlet(IoType type, string const& description = "");
+        void    addOutlet(Iolet::Type type, string const& description = "");
         
         //! Insert a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -420,7 +408,7 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    insertOutlet(unsigned long index, IoType type, string const& description = "");
+        void    insertOutlet(unsigned long index, Iolet::Type type, string const& description = "");
         
         //! Remove an outlet.
         /** The function removes an outlet.
@@ -470,34 +458,6 @@ namespace Kiwi
 		 @return pass true to notify changes to listeners, false if you don't want them to be notified
 		 */
 		bool attributeValueChanged(sAttr attr);
-        
-        //! Connect an inlet to a box's outlet.
-        /** The function connects an inlet to a box's outlet. Note that the link of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
-         @param link  The link.
-         @return true if the link has been done, otherwise false.
-         */
-        bool connectInlet(sLink link);
-        
-        //! Connect an outlet to a box's inlet.
-        /** The function connects an outlet to a box's inlet. This part of the link is the only one really important, because this is the one used by the send method.
-         @param link  The link.
-         @return true if the link has been done, otherwise false.
-         */
-        bool connectOutlet(sLink link);
-        
-        //! Disconnect an inlet to a box's outlet.
-        /** The function disconnects an inlet to a box's outlet. Note that the link of the inlet isn't very necessary, it only to  facilitate the retrieving of the input boxes.
-         @param link  The link.
-         @return true if the link has been removed, otherwise false.
-         */
-        bool disconnectInlet(sLink link);
-        
-        //! Disconnect an outlet to a box's inlet.
-        /** The function disconnects an outlet to a box's inlet. This part of the dislink is the only one really important, because this is the one used by the send method.
-         @param link  The link.
-         @return true if the link has been removed, otherwise false.
-         */
-        bool disconnectOutlet(sLink link);
 
         //! Set the controller of the box.
         /** The function sets the controller of the box.

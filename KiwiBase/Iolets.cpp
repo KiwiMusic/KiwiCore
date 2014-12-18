@@ -31,13 +31,15 @@ namespace Kiwi
     //                                      INLET                                       //
     // ================================================================================ //
     
-    bool Inlet::has(sLink link) noexcept
+    bool Iolet::has(sBox box, unsigned long index) const noexcept
     {
-        if(link)
+        if(box)
         {
-            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
+            lock_guard<mutex> guard(m_mutex);
+            for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                if(link->getBoxFrom() == getBox(i) && link->getOutletIndex() == getOutletIndex(i))
+                sBox cbox = m_connections[i].box.lock();
+                if(cbox && box == cbox && m_connections[i].index == index)
                 {
                     return true;
                 }
@@ -46,88 +48,113 @@ namespace Kiwi
         return false;
     }
     
-    bool Inlet::append(sLink link) noexcept
+    bool Iolet::append(sBox box, unsigned long index) noexcept
     {
-        if(link)
+        if(box)
         {
-            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
+            lock_guard<mutex> guard(m_mutex);
+            for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                if(link->getBoxFrom() == getBox(i) && link->getOutletIndex() == getOutletIndex(i))
+                sBox cbox = m_connections[i].box.lock();
+                if(cbox && box == cbox && m_connections[i].index == index)
                 {
                     return false;
                 }
             }
-            m_links.push_back(link);
+            m_connections.push_back({box, index});
+            sort(m_connections.begin(), m_connections.end());
+            box->bind(shared_from_this(), Box::Tag_position, Attr::ValueChanged);
             return true;
         }
         return false;
     }
     
-    bool Inlet::erase(const sLink link) noexcept
+    bool Iolet::erase(sBox box, unsigned long index) noexcept
     {
-        if(link)
+        if(box)
         {
-            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
+            lock_guard<mutex> guard(m_mutex);
+            for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                if(link->getBoxFrom() == getBox(i) && link->getOutletIndex() == getOutletIndex(i))
+                sBox cbox = m_connections[i].box.lock();
+                if(cbox && box == cbox && m_connections[i].index == index)
                 {
-                    m_links.erase(m_links.begin()+(long)i);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    // ================================================================================ //
-    //                                      OUTLET                                      //
-    // ================================================================================ //
-    
-    bool Outlet::has(sLink link) noexcept
-    {
-        if(link)
-        {
-            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
-            {
-                if(link->getBoxTo() == getBox(i) && link->getInletIndex() == getInletIndex(i))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    bool Outlet::append(sLink link) noexcept
-    {
-        if(link)
-        {
-            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
-            {
-                if(link->getBoxTo() == getBox(i) && link->getInletIndex() == getInletIndex(i))
-                {
+                    m_connections.erase(m_connections.begin() + i);
                     return false;
                 }
             }
-            m_links.push_back(link);
-            sort(m_links.begin(), m_links.end(), Link::compareBoxToPositions);
-            return true;
         }
         return false;
     }
     
-    bool Outlet::erase(sLink link) noexcept
+    void Iolet::notify(Attr::sManager manager, sAttr attr, Attr::Notification type)
     {
-        if(link)
+        lock_guard<mutex> guard(m_mutex);
+        sort(m_connections.begin(), m_connections.end());
+    }
+    
+    void Outlet::send(ElemVector const& elements) const noexcept
+    {
+        lock_guard<mutex> guard(m_mutex);
+        for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
         {
-            for(unsigned long i = 0; i < getNumberOfLinks(); i++)
+            sBox receiver       = m_connections[i].box.lock();
+            unsigned long inlet  = m_connections[i].index;
+            if(receiver)
             {
-                if(link->getBoxTo() == getBox(i) && link->getInletIndex() == getInletIndex(i))
+                if(++receiver->m_stack_count < 256)
                 {
-                    m_links.erase(m_links.begin()+(long)i);
-                    return true;
+                    if(!elements.empty() && elements[0].isTag() && toString(elements[0])[0] == '@')
+                    {
+                        ElemVector attrvec;
+                        attrvec.assign(elements.begin()+1, elements.end());
+                        if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
+                        {
+                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                        }
+                    }
+                    else if(!receiver->receive(inlet, elements))
+                    {
+                        Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                    }
                 }
+                else if(receiver->m_stack_count  == 256)
+                {
+                    Console::error(receiver, "Stack overflow");
+                    if(!elements.empty() && elements[0].isTag() && toString(elements[0])[0] == '@')
+                    {
+                        ElemVector attrvec;
+                        attrvec.assign(elements.begin()+1, elements.end());
+                        if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
+                        {
+                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                        }
+                    }
+                    else if(!receiver->receive(inlet, elements))
+                    {
+                        Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
+                    }
+                }
+                else
+                {
+                    Console::error(receiver, "Stack overflow");
+                }
+                receiver->m_stack_count--;
             }
+        }
+    }
+    
+    bool Iolet::Connection::operator<(Connection const& other) const noexcept
+    {
+        sBox box1 = this->box.lock();
+        sBox box2 = other.box.lock();
+        if(box1 && box2)
+        {
+            if(box1->getPosition().x() == box2->getPosition().x())
+            {
+                return box1->getPosition().y() < box2->getPosition().y();
+            }
+            return box1->getPosition().x() < box2->getPosition().x();
         }
         return false;
     }

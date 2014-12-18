@@ -34,17 +34,17 @@ namespace Kiwi
     m_active(false),
     m_clock(Clock::create())
     {
-        addInlet(IoType::Data, IoPolarity::Hot, "Start/Stop Metronome");
+        addInlet(Iolet::Message, Iolet::Hot, "Start/Stop Metronome");
         if(elements.empty())
         {
-            addInlet(IoType::Data, IoPolarity::Cold, "Set Metronome Time Interval");
+            addInlet(Iolet::Message, Iolet::Cold, "Set Metronome Time Interval");
             m_interval = 200.;
         }
         else
         {
             m_interval = max((double)elements[0], 1.);
         }
-        addOutlet(IoType::Data, "Output (bang) on Metronome Ticks");
+        addOutlet(Iolet::Message, "Output (bang) on Metronome Ticks");
     }
     
     Metro::~Metro()

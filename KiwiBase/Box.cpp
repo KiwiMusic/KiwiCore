@@ -140,54 +140,7 @@ namespace Kiwi
         m_io_mutex.lock();
         if(index < m_outlets.size())
         {
-            for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
-            {
-                sBox receiver       = m_outlets[index]->getBox(i);
-                unsigned long inlet = m_outlets[index]->getInletIndex(i);
-                m_io_mutex.unlock();
-                if(receiver)
-                {
-                    if(++receiver->m_stack_count < 256)
-                    {
-                        if(!elements.empty() && elements[0].isTag() && toString(elements[0])[0] == '@')
-                        {
-                            ElemVector attrvec;
-                            attrvec.assign(elements.begin()+1, elements.end());
-                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
-                            {
-                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                            }
-                        }
-                        else if(!receiver->receive(inlet, elements))
-                        {
-                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                        }
-                    }
-                    else if(receiver->m_stack_count  == 256)
-                    {
-                        Console::error(receiver, "Stack overflow");
-                        if(!elements.empty() && elements[0].isTag() && toString(elements[0])[0] == '@')
-                        {
-                            ElemVector attrvec;
-                            attrvec.assign(elements.begin()+1, elements.end());
-                            if(!receiver->Attr::Manager::setAttributeValue(elements[0], attrvec))
-                            {
-                                Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                            }
-                        }
-                        else if(!receiver->receive(inlet, elements))
-                        {
-                            Console::error(receiver, "wrong elements \"" + toString(elements) + "\"");
-                        }
-                    }
-                    else
-                    {
-                        Console::error(receiver, "Stack overflow");
-                    }
-                    receiver->m_stack_count--;
-                }
-                m_io_mutex.unlock();
-            }
+            m_outlets[(vector<uOutlet>::size_type)index]->send(elements);
         }
         m_io_mutex.unlock();
     }
@@ -229,37 +182,45 @@ namespace Kiwi
     //                                      INLETS                                      //
     // ================================================================================ //
     
-    void Box::addInlet(IoType type, IoPolarity polarity, string const& description)
+    void Box::addInlet(Iolet::Type type, Iolet::Polarity polarity, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
-        m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, polarity, description)));
-        sController controller = getController();
-        if(controller)
+        sInlet inlet = Inlet::create(type, polarity, description);
+        if(inlet)
         {
-            controller->inletsChanged();
-        }
-        setAttributeValue(Tag_ninlets, {m_inlets.size()});
-    }
-    
-    void Box::insertInlet(unsigned long index, IoType type, IoPolarity polarity, string const& description)
-    {
-        lock_guard<mutex> guard(m_io_mutex);
-        if(index >= m_inlets.size())
-        {
-            index = m_inlets.size();
-            m_inlets.push_back(unique_ptr<Inlet>(new Inlet(type, polarity, description)));
-        }
-        else
-        {
-            m_inlets.insert(m_inlets.begin()+(long)index, unique_ptr<Inlet>(new Inlet(type, polarity, description)));
+            m_inlets.push_back(inlet);
+            sController controller = getController();
+            if(controller)
+            {
+                controller->inletsChanged();
+            }
+            setAttributeValue(Tag_ninlets, {m_inlets.size()});
         }
         
-        sController controller = getController();
-        if(controller)
+    }
+    
+    void Box::insertInlet(unsigned long index, Iolet::Type type, Iolet::Polarity polarity, string const& description)
+    {
+        lock_guard<mutex> guard(m_io_mutex);
+        sInlet inlet = Inlet::create(type, polarity, description);
+        if(inlet)
         {
-            controller->inletsChanged();
+            if(index >= m_inlets.size())
+            {
+                m_inlets.push_back(inlet);
+            }
+            else
+            {
+                m_inlets.insert(m_inlets.begin()+(long)index, inlet);
+            }
+            
+            sController controller = getController();
+            if(controller)
+            {
+                controller->inletsChanged();
+            }
+            setAttributeValue(Tag_ninlets, {m_inlets.size()});
         }
-        setAttributeValue(Tag_ninlets, {m_inlets.size()});
     }
     
     void Box::removeInlet(unsigned long index)
@@ -270,10 +231,13 @@ namespace Kiwi
             sPage page = getPage();
             if(page)
             {
+                int zaza;
+                /*
                 for(unsigned long i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
                 {
                     page->removeLink(m_inlets[index]->getLink(i));
                 }
+                 */
             }
             m_inlets.erase(m_inlets.begin()+(long)index);
             
@@ -290,35 +254,44 @@ namespace Kiwi
     //                                      OUTLETS                                     //
     // ================================================================================ //
     
-    void Box::addOutlet(IoType type, string const& description)
+    void Box::addOutlet(Iolet::Type type, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
-        m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
-        sController controller = getController();
-        if(controller)
+        sOutlet outlet = Outlet::create(type, description);
+        if(outlet)
         {
-            controller->outletsChanged();
+            m_outlets.push_back(outlet);
+            sController controller = getController();
+            if(controller)
+            {
+                controller->outletsChanged();
+            }
+            setAttributeValue(Tag_noutlets, {m_outlets.size()});
         }
-        setAttributeValue(Tag_noutlets, {m_outlets.size()});
     }
     
-    void Box::insertOutlet(unsigned long index, IoType type, string const& description)
+    void Box::insertOutlet(unsigned long index, Iolet::Type type, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
-        if(index >= m_outlets.size())
+        sOutlet outlet = Outlet::create(type, description);
+        if(outlet)
         {
-            m_outlets.push_back(unique_ptr<Outlet>(new Outlet(type, description)));
+            if(index >= m_outlets.size())
+            {
+                m_outlets.push_back(outlet);
+            }
+            else
+            {
+                m_outlets.insert(m_outlets.begin()+(long)index, outlet);
+            }
+            sController controller = getController();
+            if(controller)
+            {
+                controller->outletsChanged();
+            }
+            setAttributeValue(Tag_noutlets, {m_outlets.size()});
         }
-        else
-        {
-            m_outlets.insert(m_outlets.begin()+(long)index, unique_ptr<Outlet>(new Outlet(type, description)));
-        }
-        sController controller = getController();
-        if(controller)
-        {
-            controller->outletsChanged();
-        }
-        setAttributeValue(Tag_noutlets, {m_outlets.size()});
+        
     }
     
     void Box::removeOutlet(unsigned long index)
@@ -329,10 +302,12 @@ namespace Kiwi
             sPage page = getPage();
             if(page)
             {
+                int zaza;
+                /*
                 for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
                 {
                     page->removeLink(m_outlets[index]->getLink(i));
-                }
+                }*/
             }
             m_outlets.erase(m_outlets.begin()+(long)index);
             
@@ -344,79 +319,7 @@ namespace Kiwi
             setAttributeValue(Tag_noutlets, {m_outlets.size()});
         }
     }
-    
-    bool Box::connectInlet(sLink link)
-    {
-        if(link && link->getInletIndex() < getNumberOfInlets())
-        {
-            lock_guard<mutex> guard(m_io_mutex);
-            return m_inlets[link->getInletIndex()]->append(link);
-        }
-        return false;
-    }
 
-    bool Box::connectOutlet(sLink link)
-    {
-        if(link && link->getOutletIndex() < getNumberOfOutlets())
-        {
-            lock_guard<mutex> guard(m_io_mutex);
-            return m_outlets[link->getOutletIndex()]->append(link);
-        }
-        return false;
-    }
-    
-    bool Box::disconnectInlet(sLink link)
-    {
-        if(link && link->getInletIndex() < getNumberOfInlets())
-        {
-            lock_guard<mutex> guard(m_io_mutex);
-            return m_inlets[link->getInletIndex()]->erase(link);
-        }
-        return false;
-    }
-    
-    bool Box::disconnectOutlet(sLink link)
-    {
-        if(link && link->getOutletIndex() < getNumberOfOutlets())
-        {
-            lock_guard<mutex> guard(m_io_mutex);
-            return m_outlets[link->getOutletIndex()]->erase(link);
-        }
-        return false;
-    }
-	
-	void Box::getInletLinks(vector<sLink> links, unsigned long index)
-	{
-		links.clear();
-		
-		if (index < getNumberOfInlets())
-		{
-			lock_guard<mutex> guard(m_io_mutex);
-			const unsigned long nLinks = m_inlets[index]->getNumberOfLinks();
-			for (int i = 0; i < nLinks; i++)
-			{
-				sLink link = m_inlets[index]->getLink(i);
-				links.push_back(link);
-			}
-		}
-	}
-	
-	void Box::getOutletLinks(vector<sLink> links, unsigned long index)
-	{
-		links.clear();
-		
-		if (index < getNumberOfOutlets())
-		{
-			lock_guard<mutex> guard(m_io_mutex);
-			const unsigned long nLinks = m_outlets[index]->getNumberOfLinks();
-			for (int i = 0; i < nLinks; i++)
-			{
-				sLink link = m_outlets[index]->getLink(i);
-				links.push_back(link);
-			}
-		}
-	}
-	
     void Box::setController(sController ctrl)
     {
         m_controller = ctrl;

@@ -413,7 +413,7 @@ namespace Kiwi
     class IoletHighlighter
     {
     private:
-        IoPolarity m_polarity;
+        Iolet::Polarity m_polarity;
         Rectangle  m_bounds;
     public:
         //! Contructor.
@@ -459,7 +459,7 @@ namespace Kiwi
         /** The function retrieves the polarity of the hightlighter.
          @return The the polarity of the hightlighter.
          */
-        inline IoPolarity getPolarity() const noexcept
+        inline Iolet::Polarity getPolarity() const noexcept
         {
             return m_polarity;
         }

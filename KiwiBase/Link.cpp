@@ -35,33 +35,36 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    Link::Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept :
-    m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
+    Link::Link(sPage page, sBox from, unsigned outlet, sBox to, unsigned inlet) noexcept :
+    m_page(page), m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
     {
-        if(from && outlet < from->getNumberOfOutlets() && to && inlet < to->getNumberOfInlets())
+        if(page)
         {
-            Box::sController from_ctrl   = from->getController();
-            Box::sController to_ctrl     = to->getController();
-            if(from_ctrl && to_ctrl)
+            if(from && outlet < from->getNumberOfOutlets() && to && inlet < to->getNumberOfInlets())
             {
-                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
-                m_path.lineTo(to_ctrl->getInletPosition(inlet));
+                Box::sController from_ctrl   = from->getController();
+                Box::sController to_ctrl     = to->getController();
+                if(from_ctrl && to_ctrl)
+                {
+                    m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                    m_path.lineTo(to_ctrl->getInletPosition(inlet));
+                }
             }
-        }
-        else if(from && outlet < from->getNumberOfOutlets())
-        {
-            Box::sController from_ctrl   = from->getController();
-            if(from_ctrl)
+            else if(from && outlet < from->getNumberOfOutlets())
             {
-                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                Box::sController from_ctrl   = from->getController();
+                if(from_ctrl)
+                {
+                    m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                }
             }
-        }
-        else if(to && inlet < to->getNumberOfInlets())
-        {
-            Box::sController to_ctrl   = to->getController();
-            if(to_ctrl)
+            else if(to && inlet < to->getNumberOfInlets())
             {
-                m_path.moveTo(to_ctrl->getInletPosition(inlet));
+                Box::sController to_ctrl   = to->getController();
+                if(to_ctrl)
+                {
+                    m_path.moveTo(to_ctrl->getInletPosition(inlet));
+                }
             }
         }
     }
@@ -71,11 +74,11 @@ namespace Kiwi
         
     }
     
-    sLink Link::create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
+    sLink Link::create(sPage page, const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
     {
         if((from && outlet < from->getNumberOfOutlets()) || (to && inlet < to->getNumberOfInlets()))
         {
-            sLink link = make_shared<Link>(from, outlet, to, inlet);
+            sLink link = make_shared<Link>(page, from, outlet, to, inlet);
             if(link && from)
             {
                 from->bind(link, Box::Tag_ninlets, Attr::ValueChanged);
@@ -99,7 +102,7 @@ namespace Kiwi
         }
     }
     
-    sLink Link::create(scPage page, scDico dico)
+    sLink Link::create(sPage page, scDico dico)
     {
         if(page && dico)
         {
@@ -156,7 +159,7 @@ namespace Kiwi
                 
                 if(from && to)
                 {
-                    return Link::create(from, outlet, to, inlet);
+                    return Link::create(page, from, outlet, to, inlet);
                 }
             }
             
@@ -166,18 +169,22 @@ namespace Kiwi
     
     sLink Link::create(scLink link, const sBox oldbox, const sBox newbox)
     {
-        if(link && link->getBoxFrom() == oldbox)
+        if(link)
         {
-            if(link->getOutletIndex() < newbox->getNumberOfOutlets())
+            sPage page = link->getPage();
+            if(page && link->getBoxFrom() == oldbox)
             {
-                return create(newbox, link->getOutletIndex(), link->getBoxTo(), link->getInletIndex());
+                if(link->getOutletIndex() < newbox->getNumberOfOutlets())
+                {
+                    return create(page, newbox, link->getOutletIndex(), link->getBoxTo(), link->getInletIndex());
+                }
             }
-        }
-        else if(link && link->getBoxTo() == oldbox)
-        {
-            if(link->getInletIndex() < newbox->getNumberOfInlets())
+            else if(page && link->getBoxTo() == oldbox)
             {
-                return create(link->getBoxFrom(), link->getOutletIndex(), newbox, link->getInletIndex());
+                if(link->getInletIndex() < newbox->getNumberOfInlets())
+                {
+                    return create(page, link->getBoxFrom(), link->getOutletIndex(), newbox, link->getInletIndex());
+                }
             }
         }
         return nullptr;

@@ -440,7 +440,7 @@ namespace Kiwi
 				if(index < box->getNumberOfOutlets())
 				{
 					const Point pos = ctrl->getOutletPosition(index);
-					m_polarity = IoPolarity::Hot;
+					m_polarity = Iolet::Hot;
                     m_bounds = Rectangle(pos.x() - 8.,  pos.y() - 8., 16., 16.);
                     boundsHasChanged();
 				}
@@ -452,7 +452,7 @@ namespace Kiwi
 	{
 		const Point size = d.getSize();
         Color color;
-        if(m_polarity == IoPolarity::Cold)
+        if(m_polarity == Iolet::Cold)
         {
             color = Color(0.28, 0.28, 0.88, 1);
         }
