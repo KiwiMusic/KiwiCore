@@ -80,6 +80,7 @@ namespace Kiwi
                 if(cbox && box == cbox && m_connections[i].index == index)
                 {
                     m_connections.erase(m_connections.begin() + i);
+                    box->unbind(shared_from_this(), Box::Tag_position, Attr::ValueChanged);
                     return false;
                 }
             }

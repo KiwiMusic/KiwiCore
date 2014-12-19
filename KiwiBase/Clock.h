@@ -98,6 +98,7 @@ namespace Kiwi
         {
             thread(tick_elements, shared_from_this(), ms, box, elements).detach();
         }
+        
     };
 };
 

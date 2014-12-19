@@ -63,8 +63,6 @@ namespace Kiwi
         
     private:
         friend void Outlet::send(ElemVector const& elements) const noexcept;
-        friend bool Link::connect() noexcept;
-        friend bool Link::disconnect() noexcept;
         
         const wInstance     m_instance;
         const wPage         m_page;
@@ -196,60 +194,24 @@ namespace Kiwi
             return (unsigned long)m_inlets.size();
         }
         
-        //! Retrieve the description of an inlet.
-        /** The functions retrieves the description of an inlet.
-         @param index The inlet index.
-         @return The description.
+        //! Retrieve an inlet.
+        /** The functions retrieves an inlet.
+         @param index The inlet's index.
+         @return The inlet.
          */
-        inline string getInletDescription(unsigned long index) const noexcept
+        inline sInlet getInlet(unsigned long index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
             {
-                return m_inlets[(vector<uInlet>::size_type)index]->getDescription();
+                return m_inlets[(vector<sInlet>::size_type)index];
             }
             else
             {
-                return "";
+                return nullptr;
             }
         }
         
-        //! Retrieve the type of an inlet.
-        /** The functions retrieves the type of an inlet.
-         @param index The inlet index.
-         @return The type.
-         */
-        inline Iolet::Type getInletType(unsigned long index) const noexcept
-        {
-            lock_guard<mutex> guard(m_io_mutex);
-            if(index < m_inlets.size())
-            {
-                return m_inlets[(vector<uInlet>::size_type)index]->getType();
-            }
-            else
-            {
-                return Iolet::Type::Both;
-            }
-        }
-		
-		//! Retrieve the type of an inlet.
-		/** The functions retrieves the type of an inlet.
-		 @param index The inlet index.
-		 @return The type.
-		 */
-		inline Iolet::Polarity getInletPolarity(unsigned long index) const noexcept
-		{
-			lock_guard<mutex> guard(m_io_mutex);
-			if(index < m_inlets.size())
-			{
-				return m_inlets[(vector<uInlet>::size_type)index]->getPolarity();
-			}
-			else
-			{
-				return Iolet::Hot;
-			}
-		}
-		
         //! Retrieve the number of outlets of the box.
         /** The functions retrieves the number of outlets of the box.
          @return The number of outlets.
@@ -260,39 +222,21 @@ namespace Kiwi
             return (unsigned long)m_outlets.size();
         }
         
-        //! Retrieve the description of an outlet.
-        /** The functions retrieves the description of an outlet.
-         @param index The index of the outlet.
-         @return The descrition.
+        //! Retrieve an outlet.
+        /** The functions retrieves an outlet.
+         @param index The outlet's index.
+         @return The outlet.
          */
-        inline string getOutletDescription(unsigned long index) const noexcept
+        inline sOutlet getOutlet(unsigned long index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
             {
-                return m_outlets[(vector<uOutlet>::size_type)index]->getDescription();
+                return m_outlets[(vector<sOutlet>::size_type)index];
             }
             else
             {
-                return "";
-            }
-        }
-        
-        //! Retrieve the type of an inlet.
-        /** The functions retrieves the type of an inlet.
-         @param index The inlet index.
-         @return The type.
-         */
-        inline Iolet::Type getOutletType(unsigned long index) const noexcept
-        {
-            lock_guard<mutex> guard(m_io_mutex);
-            if(index < m_outlets.size())
-            {
-                return m_outlets[(vector<uOutlet>::size_type)index]->getType();
-            }
-            else
-            {
-                return Iolet::Type::Both;
+                return nullptr;
             }
         }
         

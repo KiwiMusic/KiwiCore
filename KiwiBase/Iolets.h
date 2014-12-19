@@ -56,7 +56,8 @@ namespace Kiwi
         };
         
     protected:
-
+        friend Link;
+        
         vector<Connection>    m_connections;
         const Iolet::Type     m_type;
         const Iolet::Polarity m_polarity;

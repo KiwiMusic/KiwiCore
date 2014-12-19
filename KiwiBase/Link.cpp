@@ -196,15 +196,20 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->connectOutlet(getShared()) && to->connectInlet(getShared()))
+            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            sInlet inlet    = to->getInlet(m_index_intlet);
+            if(outlet && inlet)
             {
-                return true;
-            }
-            else
-            {
-                from->disconnectOutlet(getShared());
-                to->disconnectInlet(getShared());
-                return false;
+                if(outlet->append(to, m_index_outlet) && inlet->append(from, m_index_intlet))
+                {
+                    return true;
+                }
+                else
+                {
+                    outlet->erase(to, m_index_outlet);
+                    inlet->erase(from, m_index_intlet);
+                    return false;
+                }
             }
         }
         return false;
@@ -217,11 +222,13 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->disconnectOutlet(getShared()))
+            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            sInlet inlet    = to->getInlet(m_index_intlet);
+            if(outlet && inlet)
             {
-                if(to->disconnectInlet(getShared()))
+                if(outlet->erase(to, m_index_outlet) && inlet->erase(from, m_index_intlet))
                 {
-                   return true;
+                    return true;
                 }
             }
         }
