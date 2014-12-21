@@ -419,10 +419,11 @@ namespace Kiwi
             Box::sController ctrl = box->getController();
 			if(ctrl)
 			{
-				if(index < box->getNumberOfInlets())
+                sInlet inlet = box->getInlet(index);
+				if(inlet)
 				{
 					const Point pos = ctrl->getInletPosition(index);
-					m_polarity = box->getInletPolarity(index);
+					m_polarity = inlet->getPolarity();
                     m_bounds = Rectangle(pos.x() - 8.,  pos.y() - 8., 16., 16.);
                     boundsHasChanged();
 				}

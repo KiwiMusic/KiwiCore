@@ -25,6 +25,7 @@
 #define __DEF_KIWI_KNOCK__
 
 #include "Box.h"
+#include "Link.h"
 
 namespace Kiwi
 {
