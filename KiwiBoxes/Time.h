@@ -36,7 +36,7 @@ namespace Kiwi
     //                                     METRO                                        //
     // ================================================================================ //
     
-    class Metro : public Box
+    class Metro : public Box, public Clock::Maker
     {
     private:
 		atomic_bool	m_active;

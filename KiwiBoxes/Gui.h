@@ -36,7 +36,7 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    class Bang : public Box
+    class Bang : public Box, public Clock::Maker
     {
     private:
         const sAttrColor    m_color_circle;
@@ -80,7 +80,7 @@ namespace Kiwi
     //                                      MESSAGE                                     //
     // ================================================================================ //
     
-    class Message : public Box, public Text::Editor
+    class Message : public Box, public Text::Editor, public Clock::Maker
     {
     private:
         ElemVector      m_elements;
@@ -103,7 +103,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    class Number : public Box, public Text::Editor
+    class Number : public Box, public Text::Editor, public Clock::Maker
     {
     private:
         double m_value;

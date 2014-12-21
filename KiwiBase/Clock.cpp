@@ -27,7 +27,7 @@
 
 namespace Kiwi
 {
-    void Clock::tick_elements(wClock clock, unsigned long ms, wBox box, ElemVector const& elements)
+    void Clock::tick_elements(wClock clock, unsigned long ms, wMaker maker, ElemVector const& elements)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -41,16 +41,16 @@ namespace Kiwi
             if(nclock)
             {
                 nclock->m_used--;
-                sBox nbox = box.lock();
-                if(!nclock->m_used && nbox)
+                sMaker nmaker = maker.lock();
+                if(!nclock->m_used && nmaker)
                 {
-                    nbox->tick();
+                    nmaker->tick(elements);
                 }
             }
         }
     }
     
-    void Clock::tick(wClock clock, unsigned long ms, wBox box)
+    void Clock::tick(wClock clock, unsigned long ms, wMaker maker)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -64,12 +64,42 @@ namespace Kiwi
             if(nclock)
             {
                 nclock->m_used--;
-                sBox nbox = box.lock();
-                if(!nclock->m_used && nbox)
+                sMaker nmaker = maker.lock();
+                if(!nclock->m_used && nmaker)
                 {
-                    nbox->tick();
+                    nmaker->tick();
                 }
             }
+        }
+    }
+    
+    void Clock::delay(sMaker maker, const unsigned long ms)
+    {
+        thread(tick, shared_from_this(), ms, maker).detach();
+    }
+    
+
+    void Clock::delay(sMaker maker, ElemVector const& elements, const unsigned long ms)
+    {
+        thread(tick_elements, shared_from_this(), ms, maker, elements).detach();
+    }
+    
+    
+    void Clock::delay(sBox box, const unsigned long ms)
+    {
+        sMaker maker = dynamic_pointer_cast<Clock::Maker>(box);
+        if(maker)
+        {
+            thread(tick, shared_from_this(), ms, maker).detach();
+        }
+    }
+    
+    void Clock::delay(sBox box, ElemVector const& elements, const unsigned long ms)
+    {
+        sMaker maker = dynamic_pointer_cast<Clock::Maker>(box);
+        if(maker)
+        {
+            thread(tick_elements, shared_from_this(), ms, maker, elements).detach();
         }
     }
 }

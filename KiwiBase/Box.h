@@ -93,7 +93,7 @@ namespace Kiwi
         /** The function allocates a box and initialize the defaults members.
          */
         static sBox create(sPage page, sDico dico);
-		
+    
         //! Retrieve the sBox.
         /** The function sBox.
          @return The sBox.
@@ -283,14 +283,6 @@ namespace Kiwi
         virtual bool draw(Doodle& doodle) const
         {
             return false;
-        }
-        
-        //! ...
-        /** ....
-         */
-        virtual void tick()
-        {
-            ;
         }
         
         //! Write the box in a dico.
