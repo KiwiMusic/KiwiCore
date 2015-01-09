@@ -539,7 +539,7 @@ namespace Kiwi
 			return resizer;
 		}
 		
-		void attributeNotify(Attr::sManager manager, sAttr attr, Attr::Notification type) override;
+		void notify(Attr::sManager manager, sAttr attr, Attr::Notification type) override;
 		
 		//! The draw method that could be overrided.
 		/** The function draws the box resizer in a doodle.

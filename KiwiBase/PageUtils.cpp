@@ -530,7 +530,7 @@ namespace Kiwi
 		;
 	}
 	
-	void BoxResizer::attributeNotify(Attr::sManager manager, sAttr attr, Attr::Notification type)
+	void BoxResizer::notify(Attr::sManager manager, sAttr attr, Attr::Notification type)
 	{
 		sBox box = m_box.lock();
 		
