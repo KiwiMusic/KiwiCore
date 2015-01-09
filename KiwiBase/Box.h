@@ -57,7 +57,10 @@ namespace Kiwi
             Signal      = 1<<1,
             Mouse       = 1<<2,
             Keyboard    = 1<<3,
-            Graphic     = 1<<4
+            Graphic     = 1<<4,
+			
+			GrowY		= 1<<5,
+			GrowBoth	= 1<<6,
         };
         
     private:
@@ -68,7 +71,7 @@ namespace Kiwi
         const wPage         m_page;
         const sTag          m_name;
         const unsigned long m_id;
-        const unsigned long m_type;
+        const unsigned long m_flags;
         sTag                m_text;
         
         vector<uOutlet>     m_outlets;
@@ -76,7 +79,7 @@ namespace Kiwi
         atomic_ullong       m_stack_count;
         mutable mutex       m_io_mutex;
         
-        wController          m_controller;
+        wController         m_controller;
     public:
         
         //! Constructor.
@@ -157,15 +160,51 @@ namespace Kiwi
             return m_id;
         }
         
-        //! Retrieve the type of the box.
-        /** The function retrieves the type of the box.
-         @return The type of the box as a tag.
+        //! Retrieve the flags of the box.
+        /** The function retrieves the flags of the box.
+         @return The flags of the box.
          */
-        inline unsigned long getType() const noexcept
+        inline unsigned long getFlags() const noexcept
         {
-            return m_type;
+            return m_flags;
         }
-        
+		
+		//! Retrieve if the box is a graphical object.
+		/** The function retrieves if the box is a graphical object.
+		 @return true if the box is a graphical object otherwise false.
+		 */
+		inline bool isGUI() const noexcept
+		{
+			return m_flags & Graphic;
+		}
+		
+		//! Retrieve if the box is a DSP object.
+		/** The function retrieves if the box is a DSP object.
+		 @return true if the box is a DSP object otherwise false.
+		 */
+		inline bool isDSP() const noexcept
+		{
+			return m_flags & Signal;
+		}
+		
+		//! Retrieve if the box wants the mouse focus.
+		/** The function retrieves if the box wants the mouse focus.
+		 @return true if the box wants the mouse focus otherwise false.
+		 */
+		inline bool isMouseListener() const noexcept
+		{
+			return m_flags & Mouse;
+		}
+		
+		//! Retrieve if the box wants the keyboard focus.
+		/** The function retrieves if the box wants the keyboard focus.
+		 @return true if the box wants the keyboard focus otherwise false.
+		 */
+		inline bool isKeyboardListener() const noexcept
+		{
+			return m_flags & Keyboard;
+		}
+		
         //! Retrieve the text of the box.
         /** The function retrieves the text of the box as a tag.
          @return The text of the box as a tag.
@@ -515,15 +554,16 @@ namespace Kiwi
         /**
          The box controller...
          */
-        class Controller
-        {            
+		class Controller
+        {
         private:
             
-            const sBox  m_box;
-			const bool  m_boxgui;
-			const bool  m_boxdsp;
-            const bool  m_want_mouse_focus;
-            const bool  m_want_keyboard_focus;
+            const sBox		m_box;
+			const bool		m_boxgui;
+			const bool		m_boxdsp;
+            const bool  	m_want_mouse_focus;
+            const bool		m_want_keyboard_focus;
+			const double	m_framesize;
 			
             bool    m_edition;
             bool    m_selected;
@@ -534,10 +574,11 @@ namespace Kiwi
              */
             Controller(sBox box) :
             m_box(box),
-            m_boxgui(box->getType() & Box::Graphic),
-            m_boxdsp(box->getType() & Box::Signal),
-			m_want_mouse_focus(box->getType() & Box::Mouse),
-			m_want_keyboard_focus(box->getType() & Box::Keyboard),
+            m_boxgui(box->getFlags() & Box::Graphic),
+            m_boxdsp(box->getFlags() & Box::Signal),
+			m_want_mouse_focus(box->getFlags() & Box::Mouse),
+			m_want_keyboard_focus(box->getFlags() & Box::Keyboard),
+			m_framesize(4.),
             m_edition(true),
             m_selected(false)
             {
@@ -553,7 +594,7 @@ namespace Kiwi
             }
             
             //! The controller maker.
-            /** The function creates an controller with arguments.
+            /** The function creates a controller with arguments.
              */
             template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
             {
@@ -637,6 +678,33 @@ namespace Kiwi
                 return m_want_keyboard_focus;
             }
 			
+			//! Retrieve the frame size.
+			/** The function retrieves the frame size.
+			 @return The frame size value.
+			 */
+			inline double getFrameSize() const noexcept
+			{
+				return m_framesize;
+			}
+			
+			//! Retrieve the bounds of the box controller.
+			/** The function retrieves the bounds of the box controller.
+			 The box controller's bounds is equal to the box's bounds expanded by a framesize.
+			 */
+			Rectangle getBounds() const noexcept;
+			
+			//! Retrieve the position of the box controller.
+			/** The function retrieves the position of the box controller.
+			 The box controller's position is equal to the box's position expanded by a framesize.
+			 */
+			Point getPosition() const noexcept;
+			
+			//! Retrieve the size of the box controller.
+			/** The function retrieves the size of the box controller.
+			 The box controller's size is equal to the box's size expanded by a framesize.
+			 */
+			Point getSize() const noexcept;
+			
             //! Retrieve the position of an inlet.
             /** The function retrieves the position of an inlet.
              @param index The index of the inlet.
@@ -659,10 +727,10 @@ namespace Kiwi
 			 */
 			virtual bool contains(Point const& point, Knock& knock) const noexcept;
             
-            //! Retrieve if the box is overlaps the rectangle.
-			/** The function retrieves if the box is overlaps the rectangle.
+            //! Tests if the box overlaps the rectangle.
+			/** The function tests if the box overlaps the rectangle.
              @param rect The Rectangle.
-			 @return true if the box overlaps the rectangle, otherwise false.
+			 @return True if the box overlaps the rectangle, otherwise false.
 			 */
 			virtual bool overlaps(Rectangle const& rect) const noexcept;
             
@@ -720,8 +788,16 @@ namespace Kiwi
              @param selected    If the box is selected
              */
             static void paint(sBox box, Doodle& d, bool edit = false, bool selected = false);
+			
+			//! The default paint method.
+			/** The default function paint a default box with the background, border, inlets, outlets and text.
+			 @param paper       A doodle to draw.
+			 @param edit        If the page is in edition mode.
+			 @param selected    If the box is selected
+			 */
+			static void paintBox(sBox box, Doodle& d);
         };
-        
+		
         // ================================================================================ //
         //                                      BOX FACTORY                                 //
         // ================================================================================ //

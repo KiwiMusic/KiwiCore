@@ -26,7 +26,7 @@
 
 #include "Box.h"
 #include "AttributePage.h"
-#include "Knock.h"
+#include "PageUtils.h"
 
 // TODO
 // - Add the attributes
@@ -47,7 +47,7 @@ namespace Kiwi
 	{
     public:
         class Listener;
-        friend Box::Box(sPage page, string const& name, unsigned long type);
+        friend Box::Box(sPage page, string const& name, unsigned long flags);
 		
 		class Controller;
 		typedef shared_ptr<Controller>			sController;
@@ -620,6 +620,12 @@ namespace Kiwi
 			 @param delta A shift amount delta.
 			 */
 			void moveSelectedBoxes(Point const& delta);
+			
+			//! Resizes the boxes that are currently selected by given value.
+			/** The function moves the boxes that are currently selected by given value.
+			 @param delta A shift amount delta.
+			 */
+			void resizeSelectedBoxes(Point const& delta, enum Knock::Corner corner);
 			
 			//! Retrieve the selected boxes (including links) as a dico
 			/** The function retrieve the selected boxes (including links) as a dico.

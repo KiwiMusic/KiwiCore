@@ -408,7 +408,8 @@ namespace Kiwi
 	{
 		m_controller = ctrl;
 		
-		// todo : make it smarter !
+		int TODO_makeItSmarter;
+
 		sDico dico = Dico::create();
 		write(dico);
 		read(dico);
@@ -909,6 +910,50 @@ namespace Kiwi
 	{
 		// to do !
 		return Rectangle();
+	}
+	
+	void Page::Controller::resizeSelectedBoxes(Point const& delta, enum Knock::Corner corner)
+	{
+		if (isAnyBoxSelected())
+		{
+			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+			{
+				Box::sController boxctrl = (*it).lock();
+				if(boxctrl)
+				{
+					sBox box =  boxctrl->getBox();
+					if(box)
+					{
+						Rectangle newBounds = box->getBounds();
+						
+						if (corner == Knock::TopLeft)
+						{
+							newBounds.position(newBounds.position() + delta);
+							newBounds.size(newBounds.size() - delta);
+						}
+						else if (corner == Knock::TopRight)
+						{
+							newBounds.width(newBounds.width() + delta.x());
+							newBounds.y(newBounds.y() + delta.y());
+							newBounds.height(newBounds.height() - delta.y());
+						}
+						else if (corner == Knock::BottomRight)
+						{
+							newBounds.size(newBounds.size() + delta);
+						}
+						else if (corner == Knock::BottomLeft)
+						{
+							newBounds.x(newBounds.x() + delta.x());
+							newBounds.width(newBounds.width() - delta.x());
+							newBounds.height(newBounds.height() + delta.y());
+						}
+						
+						box->setAttributeValue(AttrBox::Tag_position, newBounds.position());
+						box->setAttributeValue(AttrBox::Tag_size, newBounds.size());
+					}
+				}
+			}
+		}
 	}
 	
 	void Page::Controller::moveSelectedBoxes(Point const& delta)

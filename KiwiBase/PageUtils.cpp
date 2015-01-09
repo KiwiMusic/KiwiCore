@@ -21,7 +21,7 @@
  ==============================================================================
 */
 
-#include "Knock.h"
+#include "PageUtils.h"
 #include "Page.h"
 
 namespace Kiwi
@@ -296,7 +296,6 @@ namespace Kiwi
     
 	void Lasso::perform(Point const& point, bool boxes, bool links)
 	{
-        
         if(m_start.x() < point.x())
         {
             if(m_start.y() < point.y())
@@ -464,6 +463,195 @@ namespace Kiwi
         d.fillEllipse(4.5, 4.5, size.x() - 9., size.y() - 9.);
         d.setColor(color);
         d.drawEllipse(4.5, 4.5, size.x() - 9., size.y() - 9., 1.5);
+	}
+	
+	// ================================================================================ //
+	//										BOX RESIZER									//
+	// ================================================================================ //
+	
+	BoxResizer::Zone::Zone() noexcept
+	: zone (0)
+	{}
+	
+	BoxResizer::Zone::Zone (const int zoneFlags) noexcept
+	: zone (zoneFlags)
+	{}
+	
+	BoxResizer::Zone::Zone (const BoxResizer::Zone& other) noexcept
+	: zone (other.zone)
+	{}
+	
+	BoxResizer::Zone& BoxResizer::Zone::operator= (const BoxResizer::Zone& other) noexcept
+	{
+		zone = other.zone;
+		return *this;
+	}
+	
+	bool BoxResizer::Zone::operator== (const BoxResizer::Zone& other) const noexcept
+	{
+		return zone == other.zone;
+	}
+	
+	bool BoxResizer::Zone::operator!= (const BoxResizer::Zone& other) const noexcept
+	{
+		return zone != other.zone;
+	}
+	
+	/*
+	MouseCursor BoxResizerComponent::Zone::getMouseCursor() const noexcept
+	{
+		MouseCursor::StandardCursorType mc = MouseCursor::NormalCursor;
+		
+		switch (zone)
+		{
+			case (left | top):      mc = MouseCursor::TopLeftCornerResizeCursor; break;
+			case top:               mc = MouseCursor::TopEdgeResizeCursor; break;
+			case (right | top):     mc = MouseCursor::TopRightCornerResizeCursor; break;
+			case left:              mc = MouseCursor::LeftEdgeResizeCursor; break;
+			case right:             mc = MouseCursor::RightEdgeResizeCursor; break;
+			case (left | bottom):   mc = MouseCursor::BottomLeftCornerResizeCursor; break;
+			case bottom:            mc = MouseCursor::BottomEdgeResizeCursor; break;
+			case (right | bottom):  mc = MouseCursor::BottomRightCornerResizeCursor; break;
+			default:                break;
+		}
+		
+		return mc;
+	}
+	*/
+	
+	BoxResizer::BoxResizer(sBox box) noexcept : m_box(box)
+	{
+		;
+	}
+	
+	BoxResizer::~BoxResizer()
+	{
+		;
+	}
+	
+	void BoxResizer::attributeNotify(Attr::sManager manager, sAttr attr, Attr::Notification type)
+	{
+		sBox box = m_box.lock();
+		
+		if(box && box == manager)
+		{
+			Console::post("attr changed");
+			if (attr->getName() == AttrBox::Tag_position)
+			{
+				m_bounds = box->getBounds().expanded(6);
+				boundsHasChanged();
+			}
+		}
+	}
+	
+	bool BoxResizer::contains(Point const& pt, Knock& knock) const noexcept
+	{
+		const Rectangle bounds = getBounds();
+		if(bounds.contains(pt))
+		{
+			bool inside = false;
+			
+			// test corners
+			if(m_topLeftCornerRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::TopLeft;
+			}
+			else if(m_topRightCornerRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::TopRight;
+			}
+			else if(m_bottomRightCornerRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::BottomRight;
+			}
+			else if(m_bottomLeftCornerRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::TopLeft;
+			}
+			
+			// test borders
+			else if(m_topRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Border;
+				knock.m_border = Knock::Top;
+			}
+			else if(m_rightRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Border;
+				knock.m_border = Knock::Right;
+			}
+			else if(m_bottomRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Border;
+				knock.m_border = Knock::Bottom;
+			}
+			else if(m_leftRect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Border;
+				knock.m_border = Knock::Left;
+			}
+			
+			if(inside)
+			{
+				knock.m_box = m_box.lock();
+				return true;
+			}
+		}
+		knock.m_box.reset();
+		knock.m_part = Knock::Outside;
+		return false;
+	}
+	
+	void BoxResizer::draw(Doodle &d)
+	{
+		Rectangle bounds = d.getBounds();
+		double borderSize = 1.5;
+		Rectangle boxFrame = bounds.reduced(borderSize*2);
+		
+		// resizer
+		d.setColor({0.2, 0.2, 0.2, 0.9});
+		double cornerSize = 5;
+		Path p;
+		
+		// top-left
+		p.moveTo(Point(boxFrame.x() + cornerSize, boxFrame.y()));
+		p.lineTo(Point(boxFrame.x(), boxFrame.y()));
+		p.lineTo(Point(boxFrame.x(), boxFrame.y() + cornerSize));
+		d.fillPath(p);
+		p.clear();
+		
+		// top-right
+		p.moveTo(Point(boxFrame.x() + boxFrame.width() - cornerSize, boxFrame.y()));
+		p.lineTo(Point(boxFrame.x() + boxFrame.width(), boxFrame.y()));
+		p.lineTo(Point(boxFrame.x() + boxFrame.width(), boxFrame.y() + cornerSize));
+		d.fillPath(p);
+		p.clear();
+		
+		// bottom-right
+		p.moveTo(Point(boxFrame.x() + boxFrame.width(), boxFrame.y() + boxFrame.height() - cornerSize));
+		p.lineTo(Point(boxFrame.x() + boxFrame.width(), boxFrame.y() + boxFrame.height()));
+		p.lineTo(Point(boxFrame.x() + boxFrame.width() - cornerSize, boxFrame.y() + boxFrame.height()));
+		d.fillPath(p);
+		p.clear();
+		
+		// bottom-left
+		p.moveTo(Point(boxFrame.x(), boxFrame.y() + boxFrame.height() - cornerSize));
+		p.lineTo(Point(boxFrame.x(), boxFrame.y() + boxFrame.height()));
+		p.lineTo(Point(boxFrame.x() + cornerSize, boxFrame.y() + boxFrame.height()));
+		d.fillPath(p);
+		p.clear();
 	}
 }
 

@@ -176,8 +176,13 @@ namespace Kiwi
         inline void size(Point const& size) noexcept
         {
             m_size.x(max(size.x(), 0.));
-            m_size.y(max(size.x(), 0.));
+            m_size.y(max(size.y(), 0.));
         }
+		
+		inline static Rectangle withCentre(Point const& centre, Point const& size)
+		{
+			return Rectangle(centre, Point()).expanded(size * 0.5);
+		}
         
         //! Set the position and the size with another rectangle.
         /** The function sets the position and the size with another rectangle.

@@ -28,10 +28,11 @@
 
 namespace Kiwi
 {
+	class BoxResizer;
     // ================================================================================ //
     //                                      KNOCK                                       //
     // ================================================================================ //
-    
+	
     //! The knock is a small class to test if a box, a link or a page has been touch by a point or if a rectangle overlaps them.
     /**
      The knock...
@@ -40,7 +41,9 @@ namespace Kiwi
     {
         friend class Link;
         friend class Box;
+		friend class BoxResizer;
     public:
+		
         enum Border
         {
             Left  = 0,
@@ -51,10 +54,11 @@ namespace Kiwi
         
         enum Corner
         {
-            TopLeft     = 0,
-            TopRight    = 1,
-            BottomLeft  = 2,
-            BottomRight = 3
+			none		= 0,
+            TopLeft     = 1,
+            TopRight    = 2,
+            BottomLeft  = 3,
+            BottomRight = 4
         };
         
         enum Part
@@ -79,10 +83,12 @@ namespace Kiwi
         const wPage     m_page;
         wBox            m_box;
         wLink           m_link;
-        Target          m_target= Nothing;
-        Part            m_part  = Outside;
+        enum Target     m_target	= Nothing;
+        enum Part       m_part		= Outside;
+		enum Corner		m_corner	= TopRight;
+		enum Border		m_border	= Right;
         unsigned long   m_index = 0;
-        
+		
     public:
         
         //! The contructor.
@@ -246,7 +252,20 @@ namespace Kiwi
             }
             return Outside;
         }
-        
+		
+		//! Retrieve the type of corner if a corner of a box has been touched.
+		/** The function retrieves the type of corner if a corner of a box has been touched.
+		 @return The type of corner if a corner of a box has been touched.
+		 */
+		inline enum Corner knockGetCorner() const noexcept
+		{
+			if(m_target == Box)
+			{
+				return m_corner;
+			}
+			return none;
+		}
+		
         //! Retrieve the index of the part of the box.
         /** The function retrieves the index of the part of the box. If the part is an inlet or an outlet, it will be their index. If the part is a border or a corner it will be their position.
          @return The index of the part of the box.
@@ -428,7 +447,7 @@ namespace Kiwi
         
         //! The lasso creation method.
         /** The function allocates a lasso.
-         @param page The page that used the lasso.
+         @param page The page that use the lasso.
          */
         template<class IoletHighlighterClass, class ...Args> static shared_ptr<IoletHighlighterClass> create(Args&& ...arguments)
         {
@@ -478,6 +497,191 @@ namespace Kiwi
          */
         virtual void boundsHasChanged() = 0;
     };
+	
+	// ================================================================================ //
+	//										BOX RESIZER									//
+	// ================================================================================ //
+	
+	class BoxResizer : public Attr::Listener
+	{
+	private:
+		wBox		m_box;
+		Rectangle	m_bounds;
+	public:
+		
+		//! Contructor.
+		/** You should never have to use this method.
+		 */
+		BoxResizer(sBox box) noexcept;
+		
+		//! Destrcutor.
+		/** You should never have to use this method.
+		 */
+		virtual ~BoxResizer();
+		
+		//! The box resizer creation method.
+		/** The function allocates a box resizer.
+		 @param box The box on which that resizer must be attached.
+		 */
+		template<class BoxResizerClass, class ...Args> static shared_ptr<BoxResizerClass> create(sBox box, Args&& ...arguments)
+		{
+			shared_ptr<BoxResizerClass> resizer;
+			
+			if (box)
+			{
+				resizer = make_shared<BoxResizerClass>(box, forward<Args>(arguments)...);
+				box->bind(resizer);
+				resizer->m_bounds = box->getBounds().expanded(6);
+				resizer->boundsHasChanged();
+			}
+			
+			return resizer;
+		}
+		
+		void attributeNotify(Attr::sManager manager, sAttr attr, Attr::Notification type) override;
+		
+		//! The draw method that could be overrided.
+		/** The function draws the box resizer in a doodle.
+		 @param d The doodle.
+		 */
+		virtual void draw(Doodle& d);
+		
+		//! Retrieve if the box resizer is touch by a point.
+		/** The function retrieves if the box resizer is touch by a point and fill the knock with the knock informations.
+		 @param point The point.
+		 @param knock The knock.
+		 @return true if the box resizer is touch by the point, otherwise false.
+		 */
+		virtual bool contains(Point const& point, Knock& knock) const noexcept;
+		
+		//! Retrieve the bounds of the box resizer.
+		/** The function retrieves the bounds of the box resizer.
+		 @return The bounds of the box resizer.
+		 */
+		inline Rectangle getBounds() const noexcept
+		{
+			return m_bounds;
+		}
+		
+		//! Retrieve the notification that the bounds has changed.
+		/** The function retrieves the notification that the bounds has changed.
+		 */
+		virtual void boundsHasChanged() = 0;
+		
+		/** Represents the different zones of a resizable box, which allow it to resize in different ways.
+		 */
+		class Zone
+		{
+		private:
+			int zone;
+			
+		public:
+			enum Zones
+			{
+				centre  = 0,
+				left    = 1,
+				top     = 2,
+				right   = 4,
+				bottom  = 8
+			};
+			
+			/** Creates a Zone from a combination of the flags in \enum Zones. */
+			explicit Zone (int zoneFlags) noexcept;
+			
+			Zone() noexcept;
+			Zone(const Zone&) noexcept;
+			Zone& operator=(const Zone&) noexcept;
+			
+			bool operator==(const Zone&) const noexcept;
+			bool operator!=(const Zone&) const noexcept;
+			
+			/** Returns an appropriate mouse-cursor for this resize zone. */
+			//MouseCursor getMouseCursor() const noexcept;
+			
+			/** Returns true if dragging this zone will move the entire object without resizing it. */
+			bool isDraggingWholeBox() const noexcept
+			{
+				return zone == centre;
+			}
+			
+			/** Returns true if dragging this zone will move the object's left edge. */
+			bool isDraggingLeftEdge() const noexcept
+			{
+				return (zone & left) != 0;
+			}
+			
+			/** Returns true if dragging this zone will move the object's right edge. */
+			bool isDraggingRightEdge() const noexcept
+			{
+				return (zone & right) != 0;
+			}
+			
+			/** Returns true if dragging this zone will move the object's top edge. */
+			bool isDraggingTopEdge() const noexcept
+			{
+				return (zone & top) != 0;
+			}
+			
+			/** Returns true if dragging this zone will move the object's bottom edge. */
+			bool isDraggingBottomEdge() const noexcept
+			{
+				return (zone & bottom) != 0;
+			}
+			
+			/** Resizes this rectangle by the given amount, moving just the edges that this zone
+			 applies to.
+			 */
+			Rectangle resizeRectangleBy (Rectangle original, const Point& distance) const noexcept
+			{
+				if (isDraggingWholeBox())
+					return original + distance;
+				/*
+				if (isDraggingLeftEdge())
+					original.setLeft (jmin (original.getRight(), original.getX() + distance.x));
+					
+				if (isDraggingRightEdge())
+					original.setWidth (jmax (ValueType(), original.getWidth() + distance.x));
+					
+				if (isDraggingTopEdge())
+					original.setTop (jmin (original.getBottom(), original.getY() + distance.y));
+				
+				if (isDraggingBottomEdge())
+					original.setHeight (jmax (ValueType(), original.getHeight() + distance.y));
+				*/
+				
+				return original;
+			}
+			/** Returns the raw flags for this zone. */
+			int getZoneFlags() const noexcept               { return zone; }
+		};
+		
+		void resizeComponentFromResizerStart();
+		//void resizeComponentFromResizer (int zoneFlags, const MouseEvent& e);
+		void resizeComponentFromResizerEnd();
+		
+		/** Returns the zone in which the mouse was last seen. */
+		Zone getCurrentZone() const noexcept                { return m_mouseZone; }
+		
+		int getSquareSize() const noexcept					{ return m_square_size; }
+		
+		/** Returns the square resizer size. */
+		void setSquareSize(int size);
+		
+	private:
+		Rectangle									m_originalBounds;
+		Zone										m_mouseZone;
+		
+		int											m_square_size;
+		bool										m_show_resizer;
+		
+		Rectangle		m_bottomRightRect;
+		Rectangle		m_topLeftCornerRect, m_topRightCornerRect, m_bottomRightCornerRect, m_bottomLeftCornerRect;
+		Rectangle		m_topRect, m_rightRect, m_bottomRect, m_leftRect;
+		
+		//void updateMouseZone(const MouseEvent&);
+		Zone getZoneFromPos(Point pos);
+		//void drawSquareResizer(Graphics& g, Rectangle<int>& rect, Colour& color);
+	};
 }
 
 

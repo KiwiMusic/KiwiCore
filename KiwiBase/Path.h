@@ -156,8 +156,8 @@ namespace Kiwi
          */
         void clear() noexcept;
         
-        //! Add a node to the path that will won't be linked to the previous point.
-        /** The function adds a node to the path that will won't be linked to the previous node.
+        //! Add a node to the path that won't be linked to the previous point.
+        /** The function adds a node to the path that won't be linked to the previous node.
          @param point The point to add.
          */
         void moveTo(Point const& point) noexcept;

@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse),
+    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse | GrowY),
     m_color_circle(Attr::create<AttrColor>(Tag::create("circlecolor"),
                                             Tag::create("Circle Color"),
                                             Tag::create("Color"),
@@ -91,17 +91,24 @@ namespace Kiwi
         return false;
     }
     
-    bool Bang::draw(Doodle& doodle) const
+    bool Bang::draw(Doodle& d) const
     {
-        const double size1 = getSize().x() * 0.25;
-        const double size2 = getSize().x() * 0.5;
-        
-        doodle.setColor(m_color_circle->get());
-        doodle.drawEllipse(size1, size1, size2, size2, 1.5);
+		const double size1 = d.getWidth() * 0.25;
+		const double size2 = size1 * 2;
+		
+		double borderSize = 2;
+		d.setColor(getBorderColor());
+		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, 0);
+		
+		d.setColor(getBackgroundColor());
+		d.fillRectangle(d.getBounds().reduced(borderSize));
+		
+        d.setColor(m_color_circle->get());
+        d.drawEllipse(size1, size1, size2, size2, 1.5);
         if(m_led)
         {
-            doodle.setColor(m_color_led->get());
-            doodle.fillEllipse(size1 + 1.5, size1 + 1.5, size2 - 3., size2 - 3.);
+            d.setColor(m_color_led->get());
+            d.fillEllipse(size1 + 1.5, size1 + 1.5, size2 - 3., size2 - 3.);
         }
         
         return true;
@@ -109,7 +116,20 @@ namespace Kiwi
     
     bool Bang::attributeChanged(sAttr attr)
     {
-        if(attr == m_color_circle)
+		if(attr == AttrBox::appearance_size)
+		{
+			Point size = getSize();
+			if(size.x() < 10. || size.y() < 10.)
+			{
+				setAttributeValue(AttrBox::Tag_size, ElemVector(10., 10.));
+			}
+			else if(size.x() != size.y())
+			{
+				setAttributeValue(AttrBox::Tag_size, ElemVector(size.x(), size.x()));
+			}
+			
+		}
+        else if(attr == m_color_circle)
         {
             redraw();
         }
@@ -120,7 +140,7 @@ namespace Kiwi
     //                                      TOGGLE                                      //
     // ================================================================================ //
     
-    Toggle::Toggle(sPage page) : Box(page, "toggle", Graphic | Mouse),
+    Toggle::Toggle(sPage page) : Box(page, "toggle", Graphic | Mouse | GrowY),
     m_color_cross_on(Attr::create<AttrColor>(Tag::create("crosscoloron"),
                                             Tag::create("Cross Color On"),
                                             Tag::create("Color"),
@@ -190,20 +210,27 @@ namespace Kiwi
         return false;
     }
     
-    bool Toggle::draw(Doodle& doodle) const
+    bool Toggle::draw(Doodle& d) const
     {
+		double borderSize = 2;
+		d.setColor(getBorderColor());
+		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, 0);
+		d.setColor(getBackgroundColor());
+		d.fillRectangle(d.getBounds().reduced(borderSize));
+		
         if(m_value)
         {
-            doodle.setColor(m_color_cross_on->get());
+            d.setColor(m_color_cross_on->get());
         }
         else
         {
-            doodle.setColor(m_color_cross_off->get());
+            d.setColor(m_color_cross_off->get());
         }
-        const double size1 = getSize().x() * 0.25;
-        const double size2 = getSize().x() * 0.75;
-        doodle.drawLine(size1, size1, size2, size2, 1.5);
-        doodle.drawLine(size2, size1, size1, size2, 1.5);
+		
+		const double size1 = d.getWidth() * 0.25;
+		const double size2 = size1 * 3;
+        d.drawLine(size1, size1, size2, size2, 1.5);
+        d.drawLine(size2, size1, size1, size2, 1.5);
         return true;
     }
     
@@ -301,7 +328,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard),
+    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard | GrowY),
     m_value(0.),
     m_increment(0.),
     m_last_y(0.),
@@ -491,31 +518,37 @@ namespace Kiwi
         }
     }
     
-    bool Number::draw(Doodle& doodle) const
+    bool Number::draw(Doodle& d) const
     {
+		double borderSize = 2;
+		d.setColor(getBorderColor());
+		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, 0);
+		d.setColor(getBackgroundColor());
+		d.fillRectangle(d.getBounds().reduced(borderSize));
+		
         const Point size = getSize();
-        doodle.setColor(color_border->get());
-        doodle.drawLine(12., 0., 12., size.y(), 1.);
-        doodle.setFont(getFont());
+        d.setColor(color_border->get());
+        d.drawLine(12., 0., 12., size.y(), 1.);
+        d.setFont(getFont());
         if(m_edition)
         {
-            doodle.setColor(getTextColor());
-            doodle.drawText(m_text, 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+            d.setColor(getTextColor());
+            d.drawText(m_text, 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
             if(m_selection.y() != 0.)
             {
-                doodle.setColor(Color(0.1, 0.2, 0.3, 0.25));
-                doodle.fillRectangle(m_selection.x() + 14., 3., m_selection.y() + 14., size.y() - 3.);
+                d.setColor(Color(0.1, 0.2, 0.3, 0.25));
+                d.fillRectangle(m_selection.x() + 14., 3., m_selection.y() + 14., size.y() - 3.);
             }
             else if(m_maker)
             {
                 Point pt = Text::getStringSize(getFont(), m_text);
-                doodle.drawLine(pt.x()+15., 3., pt.x()+15., size.y() - 3., 1.);
+                d.drawLine(pt.x()+15., 3., pt.x()+15., size.y() - 3., 1.);
             }
         }
         else
         {
-            doodle.setColor(getTextColor());
-            doodle.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+            d.setColor(getTextColor());
+            d.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
         }
         
         return true;
@@ -642,17 +675,17 @@ namespace Kiwi
         return false;
     }
     
-    bool Slider::draw(Doodle& doodle) const
+    bool Slider::draw(Doodle& d) const
     {
         const Point size = getSize();
         if(size.x() > size.y())
         {
-            doodle.setColor(m_color_on->get());
-            doodle.fillAll();
-            doodle.setColor(m_color_off->get());
-            doodle.fillRectangle(0., 0., size.x() * 0.5 - 3., size.y(), 3.);
-            doodle.setColor(m_color_knob->get());
-            doodle.drawLine(size.x() * 0.5, 0., size.x() * 0.5, size.y(), 3.);
+            d.setColor(m_color_on->get());
+            d.fillAll();
+            d.setColor(m_color_off->get());
+            d.fillRectangle(0., 0., size.x() * 0.5 - 3., size.y(), 3.);
+            d.setColor(m_color_knob->get());
+            d.drawLine(size.x() * 0.5, 0., size.x() * 0.5, size.y(), 3.);
         }
         return true;
     }

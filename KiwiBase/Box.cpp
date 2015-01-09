@@ -43,12 +43,12 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(sPage page, string const& name,  unsigned long type) :
+    Box::Box(sPage page, string const& name, unsigned long flags) :
     m_instance(page ? page->m_instance : weak_ptr<Instance>()),
     m_page(page),
     m_name(Tag::create(name)),
     m_id(page ? page->m_boxe_id : 0),
-    m_type(0 | type),
+    m_flags(0 | flags),
     m_stack_count(0)
     {
         ;
@@ -90,7 +90,7 @@ namespace Kiwi
                     box->m_text = dico->get(Tag_text);
                     box->load(dico);
 					box->Attr::Manager::read(dico);
-                    if(!dico->has(Tag_size) && !(box->getType() & Graphic))
+                    if(!dico->has(Tag_size) && !(box->isGUI()))
                     {
                         Point size = Text::getStringSize(box->getFont(), toString(box->getText()));
                         box->setAttributeValue(Tag_size, {max(ceil(size.x()) + 6., 25.), box->getSize().y()});
@@ -461,6 +461,21 @@ namespace Kiwi
         }
     }
 
+	Rectangle Box::Controller::getBounds() const noexcept
+	{
+		return m_box->getBounds().expanded(m_framesize);
+	}
+	
+	Point Box::Controller::getPosition() const noexcept
+	{
+		return getBounds().position();
+	}
+
+	Point Box::Controller::getSize() const noexcept
+	{
+		return getBounds().size();
+	}
+
 #define KIO_HEIGHT 3.
 #define KIO_WIDTH 5.
     
@@ -488,7 +503,52 @@ namespace Kiwi
     
     bool Box::Controller::contains(Point const& pt, Knock& knock) const noexcept
     {
-        const Rectangle bounds = m_box->getBounds();
+		// test resizer
+		const Rectangle bounds = m_box->getBounds();
+		if(getBounds().contains(pt))
+		{
+			bool inside = false;
+			
+			const Point rectSize = Point(8, 8);
+			const Rectangle top_left_rect = Rectangle::withCentre(bounds.position(), rectSize);
+			const Rectangle top_right_rect = Rectangle::withCentre(Point(bounds.x() + bounds.width(), bounds.y()), rectSize);
+			const Rectangle bottom_right_rect = Rectangle::withCentre(Point(bounds.x() + bounds.width(), bounds.y() + bounds.height()), rectSize);
+			const Rectangle bottom_left_rect = Rectangle::withCentre(Point(bounds.x(), bounds.y() + bounds.height()), rectSize);
+			
+			// test corners
+			if(top_left_rect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::TopLeft;
+			}
+			else if(top_right_rect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::TopRight;
+			}
+			else if(bottom_right_rect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::BottomRight;
+			}
+			else if(bottom_left_rect.contains(pt))
+			{
+				inside = true;
+				knock.m_part = Knock::Corner;
+				knock.m_corner = Knock::BottomLeft;
+			}
+			
+			if(inside)
+			{
+				knock.m_box = m_box;
+				return true;
+			}
+		}
+		
+		
         if(bounds.contains(pt))
         {
             if(pt.y() < bounds.y() + KIO_HEIGHT)
@@ -594,64 +654,87 @@ namespace Kiwi
     
     void Box::Controller::paint(sBox box, Doodle& d, bool edit, bool selected)
     {
-        d.setFont(box->getFont());
-        d.setColor(box->getBackgroundColor());
-        d.fillRectangle(1., 1., d.getWidth() - 2., d.getHeight() - 2., 2.5);
-        if(!(box->getType() & Behavior::Graphic))
-        {
-            d.setColor(box->getTextColor());
-            d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), box->getFontJustification());
-        }
-        else
-        {
-            box->draw(d);
-        }
-        d.setColor(box->getBorderColor());
-        d.drawRectangle(0.5, 0.5, d.getWidth()-1., d.getHeight()-1., 1., 2.5);
-        
-        if(edit)
-        {
-            const unsigned long ninlets = box->getNumberOfInlets();
-            const unsigned long noutlets= box->getNumberOfOutlets();
-            
-            if(ninlets)
-            {
-                d.setColor({0.3, 0.3, 0.3, 1.});
-                d.fillRectangle(0., 0., KIO_WIDTH, KIO_HEIGHT, 1.5);
-            }
-            if(ninlets > 1)
-            {
-                const double ratio = (d.getWidth() - KIO_WIDTH) / (double)(ninlets - 1);
-                for(unsigned long i = 1; i < ninlets; i++)
-                {
-                    d.fillRectangle(ratio * i, 0., KIO_WIDTH, KIO_HEIGHT, 1.5);
-                }
-            }
-            
-            if(noutlets)
-            {
-                d.setColor({0.3, 0.3, 0.3, 1.});
-                d.fillRectangle(0., d.getHeight() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT, 1.5);
-            }
-            if(noutlets > 1)
-            {
-                const double ratio = (d.getWidth() - KIO_WIDTH) / (double)(noutlets - 1);
-                for(unsigned long i = 1; i < noutlets; i--)
-                {
-                    d.fillRectangle(ratio * i, d.getHeight() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT, 1.5);
-                }
-            }
-        }
-        
-        if(selected)
-        {
-            d.setColor({0., 0.5, 0.75, 0.15});
-            d.fillRectangle(0., 0., d.getWidth(), d.getHeight(), 2.5);
-        }
+		if (box)
+		{
+			if (Box::sController boxctrl = box->getController())
+			{
+				Rectangle boxFrame = boxctrl->getBounds();
+				Rectangle boxBounds = box->getBounds() - boxFrame.position();
+				boxFrame.position(Point());
+				
+				double frameSize = boxctrl->getFrameSize();
+				
+				if(edit)
+				{
+					if(!selected)
+					{
+						const unsigned long ninlets = box->getNumberOfInlets();
+						const unsigned long noutlets= box->getNumberOfOutlets();
+						
+						if(ninlets)
+						{
+							d.setColor({0.3, 0.3, 0.3, 1.});
+							d.fillRectangle(boxBounds.x(), boxBounds.y(), KIO_WIDTH, KIO_HEIGHT);
+						}
+						if(ninlets > 1)
+						{
+							const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
+							for(unsigned long i = 1; i < ninlets; i++)
+							{
+								d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y(), KIO_WIDTH, KIO_HEIGHT);
+							}
+						}
+						
+						if(noutlets)
+						{
+							d.setColor({0.3, 0.3, 0.3, 1.});
+							d.fillRectangle(boxBounds.x(), boxBounds.y() + boxBounds.height() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT);
+						}
+						if(noutlets > 1)
+						{
+							const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
+							for(unsigned long i = 1; i < noutlets; i--)
+							{
+								d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y() + boxBounds.height() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT);
+							}
+						}
+					}
+
+					if(selected)
+					{
+						Color selectedColor = Color(0., 0.6, 0.9);
+						d.setColor(selectedColor);
+						d.drawRectangle(boxFrame.reduced(frameSize*0.5), frameSize*0.5);
+						
+						d.setColor(selectedColor.darker(0.3));
+						d.drawRectangle(boxFrame, 1);
+					}
+				}
+			}
+		}
     }
+	
+	void Box::Controller::paintBox(sBox box, Doodle& d)
+	{
+		if (box)
+		{
+			if(!(box->draw(d)))
+			{
+				double borderSize = 1.5;
+				d.setColor(box->getBorderColor());
+				d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, 0);
+				
+				d.setColor(box->getBackgroundColor());
+				d.fillRectangle(d.getBounds().reduced(borderSize));
+				
+				d.setColor(box->getTextColor());
+				d.drawText(toString(box->getText()), 3, 0, d.getWidth(), d.getHeight(), box->getFontJustification());
+			}
+		}
+	}
 #undef KIO_HEIGHT
 #undef KIO_WIDTH
-    
+	
     // ================================================================================ //
     //                                      BOX FACTORY                                 //
     // ================================================================================ //
@@ -671,8 +754,7 @@ namespace Kiwi
         }
         
         lock_guard<mutex> guard(m_prototypes_mutex);
-        auto it = m_prototypes.find(tname);
-        if(it != m_prototypes.end())
+        if(m_prototypes.find(tname) != m_prototypes.end())
         {
             Console::error("The box " + toString(box->getName()) + " already exist !");
         }
