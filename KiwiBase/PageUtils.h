@@ -25,6 +25,7 @@
 #define __DEF_KIWI_KNOCK__
 
 #include "Box.h"
+#include "Link.h"
 
 namespace Kiwi
 {
@@ -432,7 +433,7 @@ namespace Kiwi
     class IoletHighlighter
     {
     private:
-        IoPolarity m_polarity;
+        Iolet::Polarity m_polarity;
         Rectangle  m_bounds;
     public:
         //! Contructor.
@@ -478,7 +479,7 @@ namespace Kiwi
         /** The function retrieves the polarity of the hightlighter.
          @return The the polarity of the hightlighter.
          */
-        inline IoPolarity getPolarity() const noexcept
+        inline Iolet::Polarity getPolarity() const noexcept
         {
             return m_polarity;
         }

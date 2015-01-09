@@ -132,9 +132,11 @@ namespace Kiwi
     class Knock;
     
     class Inlet;
+    typedef shared_ptr<Inlet>       sInlet;
     typedef unique_ptr<Inlet>       uInlet;
     
     class Outlet;
+    typedef shared_ptr<Outlet>      sOutlet;
     typedef unique_ptr<Outlet>      uOutlet;
     
     class Link;

@@ -21,42 +21,33 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_TIME__
-#define __DEF_KIWI_TIME__
-
-#include "../KiwiBase/Core.h"
+#include "AttributeLink.h"
 
 namespace Kiwi
 {
     // ================================================================================ //
-    //                                     TIME                                         //
+    //                                  ATTRIBUTE LINK                                  //
     // ================================================================================ //
     
-    // ================================================================================ //
-    //                                     METRO                                        //
-    // ================================================================================ //
-    
-    class Metro : public Box, public Clock::Maker
-    {
-    private:
-		atomic_bool	m_active;
-		double      m_interval;
-        sClock      m_clock;
-    public:
-        
-        Metro(sPage page, ElemVector const& elements = {});
-        ~Metro();
-        bool receive(unsigned long index, ElemVector const& elements) override;
-        void tick() override;
-        AllocateElemVector(Metro);
-    };
-    
-    inline void timing()
-    {
-		Box::addPrototype(unique_ptr<Box>(new Metro(sPage())));
-    }
+    const sTag AttrLink::Tag_Color       = Tag::create("Color");
+    const sTag AttrLink::Tag_mescolor                           = Tag::create("mescolor");
+    const sTag AttrLink::Tag_sigcolor                           = Tag::create("sigcolor");
+    const sTag AttrLink::Tag_Message_Color                      = Tag::create("Message Color");
+    const sTag AttrLink::Tag_Signal_Color                       = Tag::create("Signal Color");
 }
 
-#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

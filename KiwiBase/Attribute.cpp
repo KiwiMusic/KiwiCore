@@ -193,8 +193,7 @@ namespace Kiwi
 			m_attrs_mutex.lock();
 			m_attrs[attr->getName()] = attr;
 			m_attrs_mutex.unlock();
-			
-			sendNotification(attr, Notification::Added);
+			send(attr, Notification::Added);
 		}
 	}
 	
@@ -208,7 +207,7 @@ namespace Kiwi
             {
                 m_attrs.erase(it);
 				m_attrs_mutex.unlock();
-				sendNotification(attr, Notification::Removed);
+				send(attr, Notification::Removed);
             }
 		}
 	}
@@ -223,7 +222,7 @@ namespace Kiwi
             {
                 m_attrs.erase(it);
 				m_attrs_mutex.unlock();
-				sendNotification(it->second, Notification::Removed);
+				send(it->second, Notification::Removed);
             }
         }
 	}
@@ -242,7 +241,7 @@ namespace Kiwi
 				
 				if(attributeValueChanged(attr))
 				{
-					sendNotification(attr, Notification::ValueChanged);
+					send(attr, Notification::ValueChanged);
 				}
             }
         }
@@ -263,7 +262,7 @@ namespace Kiwi
 				
 				if(attributeValueChanged(attr))
 				{
-					sendNotification(attr, Notification::ValueChanged);
+					send(attr, Notification::ValueChanged);
 				}
 				return true;
             }
@@ -376,7 +375,7 @@ namespace Kiwi
                 attr->read(dico);
                 if(attributeValueChanged(attr))
                 {
-                    sendNotification(attr, Notification::ValueChanged);
+                    send(attr, Notification::ValueChanged);
                 }
             }
         }
@@ -393,7 +392,7 @@ namespace Kiwi
             {
                 attr->setBehavior(behavior);
 				m_attrs_mutex.unlock();
-				sendNotification(attr, Notification::BehaviorChanged);
+				send(attr, Notification::BehaviorChanged);
             }
 		}
 	}
@@ -409,7 +408,7 @@ namespace Kiwi
             {
                 attr->setInvisible(invisible);
 				m_attrs_mutex.unlock();
-				sendNotification(attr, Notification::BehaviorChanged);
+				send(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -425,7 +424,7 @@ namespace Kiwi
             {
                 attr->setDisabled(disable);
 				m_attrs_mutex.unlock();
-				sendNotification(attr, Notification::BehaviorChanged);
+				send(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -441,7 +440,7 @@ namespace Kiwi
             {
                 attr->setSaved(saved);
 				m_attrs_mutex.unlock();
-				sendNotification(attr, Notification::BehaviorChanged);
+				send(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -457,7 +456,7 @@ namespace Kiwi
             {
                 attr->setNotifier(notifier);
 				m_attrs_mutex.unlock();
-				sendNotification(attr, Notification::BehaviorChanged);
+				send(attr, Notification::BehaviorChanged);
             }
 		}
     }
@@ -555,7 +554,7 @@ namespace Kiwi
             }
             else
             {
-                m_listeners.insert(pair<wListener, ListenerAttrList>(listener, ListenerAttrList(name, type)));
+                m_listeners.insert(pair<wListener, ListenerAttrList>(listener, ListenerAttrList(name, 0 | type)));
             }
         }
 	}
@@ -564,17 +563,50 @@ namespace Kiwi
 	{
 		if(listener)
 		{
-            int zaza;  // TODO
 			lock_guard<mutex> guard(m_listeners_mutex);
 			auto it = m_listeners.find(listener);
             if(it != m_listeners.end())
             {
-                m_listeners.erase(listener);
+                if(name == nullptr && type == Anything)
+                {
+                     m_listeners.erase(listener);
+                }
+                else if(name == nullptr && type != Anything)
+                {
+                    for(auto it2 = it->second.attrs.begin(); it2 != it->second.attrs.end(); ++it)
+                    {
+                        it2->second &= ~type;
+                        if(!it2->second)
+                        {
+                            it->second.attrs.erase(it2);
+                        }
+                    }
+                    if(it->second.attrs.empty())
+                    {
+                        m_listeners.erase(listener);
+                    }
+                }
+                else
+                {
+                    auto it2 = it->second.attrs.find(name);
+                    if(it2 != it->second.attrs.end())
+                    {
+                        it2->second &= ~type;
+                        if(!it2->second)
+                        {
+                            it->second.attrs.erase(it2);
+                        }
+                    }
+                    if(it->second.attrs.empty())
+                    {
+                        m_listeners.erase(listener);
+                    }
+                }
             }
 		}
 	}
 	
-	void Attr::Manager::sendNotification(sAttr attr, Notification type)
+	void Attr::Manager::send(sAttr attr, Notification type)
 	{
 		lock_guard<mutex> guard(m_listeners_mutex);
      
@@ -595,14 +627,14 @@ namespace Kiwi
                     {
                         if(it2->second & type)
                         {
-                            listener->attributeNotify(shared_from_this(), attr, type);
+                            listener->notify(shared_from_this(), attr, type);
                         }
                     }
                     else if((it2 = it->second.attrs.find(nullptr)) != it->second.attrs.end())
                     {
                         if(it2->second & type)
                         {
-                            listener->attributeNotify(shared_from_this(), attr, type);
+                            listener->notify(shared_from_this(), attr, type);
                         }
                     }
                 }

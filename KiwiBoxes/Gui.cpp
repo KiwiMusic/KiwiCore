@@ -42,8 +42,8 @@ namespace Kiwi
     m_led(false),
     m_clock(Clock::create())
     {
-        addInlet(IoType::Data, IoPolarity::Hot, "Flash (anything)");
-        addOutlet(IoType::Data, "Output (bang)");
+        addInlet(Iolet::Message, Iolet::Hot, "Flash (anything)");
+        addOutlet(Iolet::Message, "Output (bang)");
         addAttribute(m_color_circle);
         addAttribute(m_color_led);
         setAttributeDefaultValues(Tag_size, {20., 20.});
@@ -151,8 +151,8 @@ namespace Kiwi
                                             (ElemVector){0.6, 0.6, 0.6, 1.})),
     m_value(false)
     {
-        addInlet(IoType::Data, IoPolarity::Hot, "Active/Desactive (bang, int or float)");
-        addOutlet(IoType::Data, "Boolean 0 or 1 (float)");
+        addInlet(Iolet::Message, Iolet::Hot, "Active/Desactive (bang, int or float)");
+        addOutlet(Iolet::Message, "Boolean 0 or 1 (float)");
         addAttribute(m_color_cross_on);
         addAttribute(m_color_cross_off);
         setAttributeDefaultValues(Tag_size, {20., 20.});
@@ -253,9 +253,9 @@ namespace Kiwi
     
     Message::Message(sPage page) : Box(page, "message", Graphic | Mouse | Keyboard)
     {
-        addInlet(IoType::Data, IoPolarity::Hot, "Messages and Ouput (anything)");
-        addInlet(IoType::Data, IoPolarity::Hot, "Messages without Ouput (anything)");
-        addOutlet(IoType::Data, "Messages (anything)");
+        addInlet(Iolet::Message, Iolet::Hot, "Messages and Ouput (anything)");
+        addInlet(Iolet::Message, Iolet::Hot, "Messages without Ouput (anything)");
+        addOutlet(Iolet::Message, "Messages (anything)");
         setAttributeDefaultValues(Tag_size, {80., 20.});
         
         Text::Editor::setFont(getFont());
@@ -335,9 +335,9 @@ namespace Kiwi
     m_edition(false),
     m_clock(Clock::create())
     {
-        addInlet(IoType::Data, IoPolarity::Hot, "New value and Ouput (int, float or bang)");
-        addOutlet(IoType::Data, "Value (float)");
-        addOutlet(IoType::Data, "Tab key pressed (bang)");
+        addInlet(Iolet::Message, Iolet::Hot, "New value and Ouput (int, float or bang)");
+        addOutlet(Iolet::Message, "Value (float)");
+        addOutlet(Iolet::Message, "Tab key pressed (bang)");
         setAttributeDefaultValues(Tag_size, {50., 20.});
 
         Text::Editor::setFont(getFont());
@@ -596,8 +596,8 @@ namespace Kiwi
                                         Tag::create("Behavior"))),
     m_value(false)
     {
-        addInlet(IoType::Data, IoPolarity::Hot, "New value (int or float)");
-        addOutlet(IoType::Data, "Mapped value (float)");
+        addInlet(Iolet::Message, Iolet::Hot, "New value (int or float)");
+        addOutlet(Iolet::Message, "Mapped value (float)");
         addAttribute(m_color_on);
         addAttribute(m_color_off);
         addAttribute(m_color_knob);

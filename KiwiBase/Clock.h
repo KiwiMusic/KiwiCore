@@ -34,23 +34,26 @@ namespace Kiwi
     
     //! The clock is used to defer the execution of a function.
     /**
-     The clock can be used by a box to call of one of the tick funtions after a specific delay. The clock creates a new thread and detach a new thread that will sleep for a specific time before calling the tick funtion of the box.
-     @see Box.
+     The clock can be used by a clack maker to call one of the tick funtions after a specific delay. The clock creates a new thread that will sleep for a specific time before calling the tick funtion of the clock maker.
      */
     class Clock : public enable_shared_from_this<Clock>
     {
+    public:
+        class Maker;
+        typedef shared_ptr<Maker> sMaker;
+        typedef weak_ptr<Maker>   wMaker;
     private:
         atomic_ulong m_used;
         
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void tick(wClock clock, unsigned long ms, wBox box);
+        static void tick(wClock clock, unsigned long ms, wMaker maker);
         
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void tick_elements(wClock clock, unsigned long ms, wBox box, ElemVector const& elements);
+        static void tick_elements(wClock clock, unsigned long ms, wMaker maker, ElemVector const& elements);
         
     public:
         //! The constructor.
@@ -78,26 +81,77 @@ namespace Kiwi
             return make_shared<Clock>();
         }
         
-        //! Clock creator.
-        /** This function create a new clock.
+        //! Delay the call of the tick function of a clock maker.
+        /** This function delay the call of the tick function of a clock maker.
+         @param  maker      The maker that will be used.
+         @param  ms         The delay time in milliseconds.
+         */
+        void delay(sMaker maker, const unsigned long ms);
+        
+        //! Delay the call of the tick function of a clock maker.
+        /** This function delay the call of the tick function of a clock maker.
+         @param  maker      The maker that will be used.
+         @param  elements   The elements that will be send to the function.
+         @param  ms         The delay time in milliseconds.
+         */
+        void delay(sMaker maker, ElemVector const& elements, const unsigned long ms);
+        
+        //! Delay the call of the tick function of a clock maker.
+        /** This function delay the call of the tick function of a clock maker.
          @param  box        The box that will be used.
          @param  ms         The delay time in milliseconds.
          */
-        inline void delay(wBox box, const unsigned long ms)
-        {
-            thread(tick, shared_from_this(), ms, box).detach();
-        }
+        void delay(sBox box, const unsigned long ms);
         
-        //! Clock creator.
-        /** This function create a new clock.
+        //! Delay the call of the tick function of a clock maker.
+        /** This function delay the call of the tick function of a clock maker.
          @param  box        The box that will be used.
          @param  elements   The elements that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        inline void delay(wBox box, ElemVector const& elements, const unsigned long ms)
+        void delay(sBox box, ElemVector const& elements, const unsigned long ms);
+        
+        // ================================================================================ //
+        //                                      MAKER                                       //
+        // ================================================================================ //
+        
+        class Maker
         {
-            thread(tick_elements, shared_from_this(), ms, box, elements).detach();
-        }
+        public:
+            //! The constructor.
+            /** The constructor does nothing.
+             */
+            Maker() noexcept
+            {
+                ;
+            }
+            
+            //! The destructor.
+            /** The destructor does nothing.
+             */
+            virtual ~Maker()
+            {
+                ;
+            }
+            
+            //! The tick function that must be override.
+            /** The tick function is called by a clock after a delay.
+             */
+            virtual void tick()
+            {
+                ;
+            }
+            
+            //! The tick function that must be override.
+            /** The tick function is called by a clock after a delay.
+             @param  elements   The elements that sent by the clock.
+             */
+            virtual void tick(ElemVector const& elements)
+            {
+                ;
+            }
+        };
+        
     };
 };
 

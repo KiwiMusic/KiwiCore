@@ -35,33 +35,36 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    Link::Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept :
-    m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
+    Link::Link(sPage page, sBox from, unsigned outlet, sBox to, unsigned inlet) noexcept :
+    m_page(page), m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
     {
-        if(from && outlet < from->getNumberOfOutlets() && to && inlet < to->getNumberOfInlets())
+        if(page)
         {
-            Box::sController from_ctrl   = from->getController();
-            Box::sController to_ctrl     = to->getController();
-            if(from_ctrl && to_ctrl)
+            if(from && outlet < from->getNumberOfOutlets() && to && inlet < to->getNumberOfInlets())
             {
-                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
-                m_path.lineTo(to_ctrl->getInletPosition(inlet));
+                Box::sController from_ctrl   = from->getController();
+                Box::sController to_ctrl     = to->getController();
+                if(from_ctrl && to_ctrl)
+                {
+                    m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                    m_path.lineTo(to_ctrl->getInletPosition(inlet));
+                }
             }
-        }
-        else if(from && outlet < from->getNumberOfOutlets())
-        {
-            Box::sController from_ctrl   = from->getController();
-            if(from_ctrl)
+            else if(from && outlet < from->getNumberOfOutlets())
             {
-                m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                Box::sController from_ctrl   = from->getController();
+                if(from_ctrl)
+                {
+                    m_path.moveTo(from_ctrl->getOutletPosition(outlet));
+                }
             }
-        }
-        else if(to && inlet < to->getNumberOfInlets())
-        {
-            Box::sController to_ctrl   = to->getController();
-            if(to_ctrl)
+            else if(to && inlet < to->getNumberOfInlets())
             {
-                m_path.moveTo(to_ctrl->getInletPosition(inlet));
+                Box::sController to_ctrl   = to->getController();
+                if(to_ctrl)
+                {
+                    m_path.moveTo(to_ctrl->getInletPosition(inlet));
+                }
             }
         }
     }
@@ -71,11 +74,27 @@ namespace Kiwi
         
     }
     
-    sLink Link::create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
+    sLink Link::create(sPage page, const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
     {
         if((from && outlet < from->getNumberOfOutlets()) || (to && inlet < to->getNumberOfInlets()))
         {
-            return make_shared<Link>(from, outlet, to, inlet);
+            sLink link = make_shared<Link>(page, from, outlet, to, inlet);
+            if(link && from)
+            {
+                from->bind(link, Box::Tag_ninlets, Attr::ValueChanged);
+                from->bind(link, Box::Tag_noutlets, Attr::ValueChanged);
+                from->bind(link, Box::Tag_position, Attr::ValueChanged);
+                from->bind(link, Box::Tag_size, Attr::ValueChanged);
+                
+            }
+            if(link && to)
+            {
+                to->bind(link, Box::Tag_ninlets, Attr::ValueChanged);
+                to->bind(link, Box::Tag_noutlets, Attr::ValueChanged);
+                to->bind(link, Box::Tag_position, Attr::ValueChanged);
+                to->bind(link, Box::Tag_size, Attr::ValueChanged);
+            }
+            return link;
         }
         else
         {
@@ -83,7 +102,7 @@ namespace Kiwi
         }
     }
     
-    sLink Link::create(scPage page, scDico dico)
+    sLink Link::create(sPage page, scDico dico)
     {
         if(page && dico)
         {
@@ -140,7 +159,7 @@ namespace Kiwi
                 
                 if(from && to)
                 {
-                    return Link::create(from, outlet, to, inlet);
+                    return Link::create(page, from, outlet, to, inlet);
                 }
             }
             
@@ -150,18 +169,22 @@ namespace Kiwi
     
     sLink Link::create(scLink link, const sBox oldbox, const sBox newbox)
     {
-        if(link && link->getBoxFrom() == oldbox)
+        if(link)
         {
-            if(link->getOutletIndex() < newbox->getNumberOfOutlets())
+            sPage page = link->getPage();
+            if(page && link->getBoxFrom() == oldbox)
             {
-                return create(newbox, link->getOutletIndex(), link->getBoxTo(), link->getInletIndex());
+                if(link->getOutletIndex() < newbox->getNumberOfOutlets())
+                {
+                    return create(page, newbox, link->getOutletIndex(), link->getBoxTo(), link->getInletIndex());
+                }
             }
-        }
-        else if(link && link->getBoxTo() == oldbox)
-        {
-            if(link->getInletIndex() < newbox->getNumberOfInlets())
+            else if(page && link->getBoxTo() == oldbox)
             {
-                return create(link->getBoxFrom(), link->getOutletIndex(), newbox, link->getInletIndex());
+                if(link->getInletIndex() < newbox->getNumberOfInlets())
+                {
+                    return create(page, link->getBoxFrom(), link->getOutletIndex(), newbox, link->getInletIndex());
+                }
             }
         }
         return nullptr;
@@ -173,15 +196,20 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->connectOutlet(shared_from_this()) && to->connectInlet(shared_from_this()))
+            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            sInlet inlet    = to->getInlet(m_index_intlet);
+            if(outlet && inlet)
             {
-                return true;
-            }
-            else
-            {
-                from->disconnectOutlet(shared_from_this());
-                to->disconnectInlet(shared_from_this());
-                return false;
+                if(outlet->append(to, m_index_outlet) && inlet->append(from, m_index_intlet))
+                {
+                    return true;
+                }
+                else
+                {
+                    outlet->erase(to, m_index_outlet);
+                    inlet->erase(from, m_index_intlet);
+                    return false;
+                }
             }
         }
         return false;
@@ -194,11 +222,13 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            if(from->disconnectOutlet(shared_from_this()))
+            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            sInlet inlet    = to->getInlet(m_index_intlet);
+            if(outlet && inlet)
             {
-                if(to->disconnectInlet(shared_from_this()))
+                if(outlet->erase(to, m_index_outlet) && inlet->erase(from, m_index_intlet))
                 {
-                   return true;
+                    return true;
                 }
             }
         }
@@ -221,55 +251,32 @@ namespace Kiwi
         }
     }
     
-    void Link::inletChanged() noexcept
-    {
-        sBox from   = getBoxFrom();
-        sBox to     = getBoxTo();
-        if(from && to)
-        {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
-            if(from_ctrl && to_ctrl)
-            {
-                m_path.clear();
-                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
-                
-                sController ctrl = getController();
-                if(ctrl)
-                {
-                    ctrl->boundsChanged();
-                }
-            }
-        }
-    }
-    
-    void Link::outletChanged() noexcept
-    {
-        sBox from   = getBoxFrom();
-        sBox to     = getBoxTo();
-        if(from && to)
-        {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
-            if(from_ctrl && to_ctrl)
-            {
-                m_path.clear();
-                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
-                
-                sController ctrl = getController();
-                if(ctrl)
-                {
-                    ctrl->boundsChanged();
-                }
-            }
-        }
-    }
-    
     void Link::setController(sController ctrl)
     {
         m_controller = ctrl;
+    }
+    
+    void Link::notify(Attr::sManager manager, sAttr attr, Attr::Notification type)
+    {
+        sBox from   = getBoxFrom();
+        sBox to     = getBoxTo();
+        if(from && to)
+        {
+            Box::sController from_ctrl   = getBoxFrom()->getController();
+            Box::sController to_ctrl     = getBoxTo()->getController();
+            if(from_ctrl && to_ctrl)
+            {
+                m_path.clear();
+                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
+                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
+                
+                sController ctrl = getController();
+                if(ctrl)
+                {
+                    ctrl->boundsChanged();
+                }
+            }
+        }
     }
     
     // ================================================================================ //
@@ -328,7 +335,7 @@ namespace Kiwi
             }
             else
             {
-                color = Color(0.42, 0.42, 0.42, 1.);
+                color = link->getMessageColor();
             }
             
             d.setColor(color.darker(0.2));

@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_LINK__
 #define __DEF_KIWI_LINK__
 
-#include "Attribute.h"
+#include "AttributeLink.h"
 
 namespace Kiwi
 {
@@ -36,7 +36,7 @@ namespace Kiwi
     /**
      The link is a combination of two sockets used to create the connection between boxes in a page.
      */
-    class Link : public enable_shared_from_this<Link>//, public Attr::Listener
+    class Link : public AttrLink, public Attr::Listener
     {
     public:
         class Controller;
@@ -44,19 +44,19 @@ namespace Kiwi
         typedef weak_ptr<Controller>     wController;
         
     private:
-        const wBox			m_box_from;
-        const wBox			m_box_to;
-        const unsigned long m_index_outlet;
-        const unsigned long m_index_intlet;
-        Path				m_path;
-        
-        wController			m_controller;
+        wPage           m_page;
+        wBox			m_box_from;
+        wBox			m_box_to;
+        unsigned long   m_index_outlet;
+        unsigned long   m_index_intlet;
+        Path            m_path;
+        wController		m_controller;
     public:
         
         //! The constructor.
         /** You should never use this method.
          */
-        Link(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet) noexcept;
+        Link(sPage page, sBox from, unsigned outlet, sBox to, unsigned inlet) noexcept;
         
         //! The destructor.
         /** You should never use this method.
@@ -71,7 +71,7 @@ namespace Kiwi
          @param inlet   The index of the inlet.
          @return The link.
          */
-        static sLink create(const sBox from, const unsigned outlet, const sBox to, const unsigned inlet);
+        static sLink create(sPage page, const sBox from, const unsigned outlet, const sBox to, const unsigned inlet);
         
         //! The link creation method with a dico.
         /** The function allocates a link with a page and a dico.
@@ -79,7 +79,7 @@ namespace Kiwi
          @param dico    The dico that defines the link.
          @return The link.
          */
-        static sLink create(scPage page, scDico dico);
+        static sLink create(sPage page, scDico dico);
         
         //! The link creation method with another link but change one of the boxes with another one.
         /** The function allocates a link with another link.
@@ -89,6 +89,60 @@ namespace Kiwi
          @return The link.
          */
         static sLink create(scLink link, const sBox oldbox, const sBox newbox);
+        
+        //! Retrieve the sLink.
+        /** The function sLink.
+         @return The sLink.
+         */
+		inline sLink getShared() noexcept
+		{
+			return static_pointer_cast<Link>(shared_from_this());
+		}
+        
+        //! Retrieve the scLink.
+        /** The function scLink.
+         @return The scLink.
+         */
+		inline scLink getShared() const noexcept
+		{
+			return static_pointer_cast<const Link>(shared_from_this());
+		}
+        
+        //! Retrieve the page of the link.
+        /** The function retrieves the page of the link.
+         @return The page of the link.
+         */
+        inline sPage getPage() const noexcept
+        {
+            return m_page.lock();
+        }
+        
+        //! Retrieve if the link owns the boxes.
+        /** The function retrieves if the link owns the two boxes.
+         @return true if the link owns the two boxes, otherwise false.
+         */
+        inline bool hasBoxes() const noexcept
+        {
+            return m_box_from.expired() && m_box_to.expired();
+        }
+        
+        //! Retrieve if the link owns the output box.
+        /** The function retrieves if the link owns the output box.
+         @return true if the link owns the output box, otherwise false.
+         */
+        inline bool hasBoxFrom() const noexcept
+        {
+            return m_box_from.expired();
+        }
+        
+        //! Retrieve if the link owns the input box.
+        /** The function retrieves if the link owns the input box.
+         @return true if the link owns the input box, otherwise false.
+         */
+        inline bool hasBoxTo() const noexcept
+        {
+            return m_box_to.expired();
+        }
         
         //! Retrieve the output box.
         /** The function retrieves the output box of the link.
@@ -126,6 +180,24 @@ namespace Kiwi
             return m_index_intlet;
         }
         
+        //! Retrieve the outlet of the link.
+        /** The function retrieves the outlet of the link.
+         @return The outlet of the link.
+         */
+        inline sOutlet getOutlet() const noexcept
+        {
+            return nullptr;
+        }
+        
+        //! Retrieve the inlet of the link.
+        /** The function retrieves the inlet of the link.
+         @return The inlet of the link.
+         */
+        inline sInlet getInlet() const noexcept
+        {
+            return nullptr;
+        }
+        
         //! Retrieve the controller that manages the box.
         /** The function retrieves the controller that manages the box.
          @return The controller that manages the box.
@@ -152,16 +224,6 @@ namespace Kiwi
          @param dico The dico.
          */
         void write(sDico dico) const noexcept;
-        
-        //! Notify that the inlet has changed.
-        /** The function is called by the inlet when it changed.
-         */
-        void inletChanged() noexcept;
-        
-        //! Notify that the outlet has changed.
-        /** The function is called by the outlet when it changed.
-         */
-        void outletChanged() noexcept;
         
         //! Retrieve the position of the link.
         /** The function retrieves the position of the link as a point.
@@ -204,6 +266,14 @@ namespace Kiwi
          @param ctrl    The controller.
          */
         void setController(sController ctrl);
+        
+        //! Receive the notification that an attribute has changed.
+        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+         @param manager		The manager that manages the attribute.
+         @param attr		The attribute that has been modified.
+         @param type		The type of notification.
+         */
+        void notify(Attr::sManager manager, sAttr attr, Attr::Notification type);
         
         // ================================================================================ //
         //                                  LINK CONTROLER                                  //

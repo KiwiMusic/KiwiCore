@@ -215,8 +215,10 @@ namespace Kiwi
             m_links_mutex.unlock();
 			
 			sController ctrl = getController();
-			if (ctrl)
+			if(ctrl)
+            {
 				ctrl->linkHasBeenCreated(link);
+            }
             
             return link;
         }
