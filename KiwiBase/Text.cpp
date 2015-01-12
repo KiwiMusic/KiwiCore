@@ -30,22 +30,20 @@ namespace Kiwi
     // ================================================================================ //
     
     Text::Text() noexcept :
-    m_start_line(0),
-    m_start_marker(0),
-    m_end_line(0),
-    m_end_marker(0)
+    m_marker_start(0),
+    m_marker_end(0)
     {
-        m_lines.push_back("");
+        ;
     }
     
     Text::~Text()
     {
-        m_lines.clear();
+        m_text.clear();
     }
 
     bool Text::isEmpty() const noexcept
     {
-        return m_lines.size() == 1 && m_lines[0].empty();
+        return m_text.empty();
     }
     
     unsigned long Text::getNumberOfLines() const noexcept
@@ -54,137 +52,103 @@ namespace Kiwi
         {
             return 0;
         }
-        return m_lines.size();
-    }
-    
-    void Text::getLine(unsigned long index, string& text) const noexcept
-    {
-        text.clear();
-        if(index < (unsigned long)m_lines.size() - 1)
+        else
         {
-            text.assign(m_lines[index], 0, m_lines[index].size() - 1);
-        }
-        else if(index == (unsigned long)m_lines.size() - 1)
-        {
-            text = m_lines[(vector<string>::size_type)index];
-        }
-    }
-    
-    void Text::getAllLines(string& text) const noexcept
-    {
-        text.clear();
-        for(vector<string>::size_type i = 0; i < m_lines.size(); i++)
-        {
-            text += m_lines[i];
-        }
-    }
-    
-    void Text::getSelectedLines(string& text) const noexcept
-    {
-        text.clear();
-        if(!isSelectionEmpty())
-        {
-            int zaza;
+            unsigned long nlines = 1;
+            string::size_type pos = string::npos;
+            while((pos = m_text.find('\n', pos)) != string::npos)
+            {
+                nlines++;
+            }
+            return nlines;
         }
     }
     
     bool Text::isSelectionEmpty() const noexcept
     {
-        return m_start_line == m_end_line && m_start_marker == m_end_marker;
+        return m_marker_end == m_marker_start;
     }
     
     void Text::selectAll() noexcept
     {
-        m_start_line   = 0;
-        m_start_marker = 0;
-        if(!m_lines.empty())
-        {
-            m_end_line   = m_lines.size() - 1;
-            m_end_marker = m_lines[m_end_line].size() - 1;
-        }
-        else
-        {
-            m_end_line   = 0;
-            m_end_marker = 0;
-        }
+        m_marker_start  = 0;
+        m_marker_end    = m_text.size() - 1;
     }
 
     void Text::addPreviousCharacterToSelection() noexcept
     {
-        if(!isEmpty())
+        if(!isEmpty() && m_marker_start)
         {
-            if(m_start_line && m_start_marker == 0)
-            {
-                m_start_line--;
-                m_start_marker = m_lines[m_start_line].size() - 1;
-            }
-            else if(m_start_marker)
-            {
-                m_start_marker--;
-            }
+            m_marker_start--;
         }
     }
     
     void Text::addNextCharacterToSelection() noexcept
     {
-        if(!isEmpty())
+        if(!isEmpty() && m_marker_end != m_text.size() - 1)
         {
-            ;
+            m_marker_end++;
         }
     }
     
     void Text::addPreviousWordToSelection() noexcept
     {
-        
+        if(!isEmpty() && m_marker_start)
+        {
+            while(m_text[m_marker_start] == ' ' && m_marker_start)
+            {
+                m_marker_start--;
+            }
+            if(m_marker_start)
+            {
+                m_marker_start = m_text.rfind(' ', m_marker_start);
+                if(m_marker_start == string::npos)
+                {
+                    m_marker_start = 0;
+                }
+                else
+                {
+                    m_marker_start++;
+                }
+            }
+        }
     }
     
     void Text::addNextWordToSelection() noexcept
     {
-        
+        if(!isEmpty() && m_marker_end != m_text.size() - 1)
+        {
+            while(m_text[m_marker_end] == ' ' && m_marker_end != m_text.size() - 1)
+            {
+                m_marker_end++;
+            }
+            if(m_marker_end != m_text.size() - 1)
+            {
+                m_marker_end = m_text.find(' ', m_marker_end);
+                if(m_marker_end == string::npos)
+                {
+                    m_marker_end = m_text.size() - 1;
+                }
+                else
+                {
+                    m_marker_end--;
+                }
+            }
+        }
     }
     
     void Text::eraseSelection()
     {
         if(!isEmpty() && !isSelectionEmpty())
         {
-            if(m_start_line == m_end_line && m_start_marker != m_end_marker)
-            {
-                m_lines[m_start_line].erase(m_start_marker, m_end_marker - m_start_marker);
-                m_end_marker = m_start_marker;
-            }
-            else
-            {
-                if(m_start_line + 1 != m_end_line)
-                {
-                    m_lines.erase(m_lines.begin() + m_start_line + 1, m_lines.begin() + m_end_line - 1);
-                    m_end_line = m_start_line + 1;
-                }
-                m_lines[m_start_line].erase(m_start_marker);
-                m_lines[m_end_line].erase(0, m_end_marker);
-                m_lines[m_start_line] += m_lines[m_end_line];
-                m_lines.erase(m_lines.begin() + m_end_line);
-                m_end_line   = m_start_line;
-                m_end_marker = m_start_marker;
-            }
+            auto it = m_text.erase(m_text.begin() + m_marker_start, m_text.begin() + m_marker_end);
+            m_marker_end = m_marker_start = it - m_text.begin();
         }
     }
     
-    void Text::insertCharacter(const char c)
+    void Text::insertCharacter(const wchar_t c)
     {
-        eraseSelection();
-        if(c == '\n')
-        {
-            m_lines[m_start_line].insert(m_start_marker, 1, '\n');
-            m_start_line++;
-            m_lines.insert(m_lines.begin() + m_start_line, string(""));
-            m_end_line      = m_start_line;
-            m_end_marker    = m_start_marker = 0;
-        }
-        else
-        {
-            m_lines[m_start_line].insert(m_start_marker, 1, c);
-            m_end_marker = ++m_start_marker;
-        }
+        m_text.replace(m_marker_start, m_marker_end - m_marker_start, &c);
     }
     
     // ================================================================================ //
@@ -308,7 +272,7 @@ namespace Kiwi
         for(vector<string>::size_type i = 0; i < getNumberOfLines(); i++)
         {
             string line;
-            getLine(i, line);
+            //getLine(i, line);
             Point size = getStringSize(m_font, line);
             if(size.x() > m_displayed_width)
             {
@@ -326,10 +290,11 @@ namespace Kiwi
     
     void Text::Editor::wrap()
     {
-        for(vector<string>::size_type i = 0; i < getNumberOfLines(); i++)
+        m_text_size = getStringSize(m_font, m_text);
+        for(vector<string>::size_type i = 0; i < m_text.size(); i++)
         {
             string line;
-            getLine(i, line);
+            //getLine(i, line);
             Point size = getStringSize(m_font, line);
             if(size.x() > m_displayed_width)
             {
@@ -383,18 +348,6 @@ namespace Kiwi
     
     void Text::Editor::updateBoundaries()
     {
-        m_text_size = Point(0., 0.);
-        for(vector<string>::size_type i = 0; i < getNumberOfLines(); i++)
-        {
-            string line;
-            getLine(i, line);
-            const Point line_size = getStringSize(m_font, line);
-            m_text_size.x(max(line_size.x(), m_text_size.x()));
-            m_text_size.y(m_text_size.y() + line_size.y() + m_line_spacing);
-        }
-        m_text_size.x(m_text_size.x() + m_margin_right + m_margin_left);
-        m_text_size.y(m_text_size.y() + m_margin_top + m_margin_bottom);
-        
         if(m_behavior)
         {
             wrap();
@@ -457,19 +410,19 @@ namespace Kiwi
         }
         else if(event.isReturn())
         {
-            insertCharacter('\n');
+            insertCharacter(L'\n');
             updateBoundaries();
             return true;
         }
         else if(event.isTab())
         {
-            insertCharacter('\t');
+            insertCharacter(L'\t');
             updateBoundaries();
             return true;
         }
         else if(event.isCharacter())
         {
-            insertCharacter(event.getCharacter());
+            insertCharacter(event.getWideCharacter());
             updateBoundaries();
             return true;
         }
