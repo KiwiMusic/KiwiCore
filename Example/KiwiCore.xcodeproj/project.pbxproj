@@ -24,10 +24,6 @@
 		8FC8A33419C3243E0028F321 /* Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8A32119C3243E0028F321 /* Attribute.cpp */; };
 		8FC8A33619C3243E0028F321 /* Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8A32719C3243E0028F321 /* Element.cpp */; };
 		8FC8A33819C3243E0028F321 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8A32B19C3243E0028F321 /* Instance.cpp */; };
-		8FCE3DDF19C2EDD200DEAA7F /* DspContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DD719C2EDD200DEAA7F /* DspContext.cpp */; };
-		8FCE3DE019C2EDD200DEAA7F /* DspNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DD919C2EDD200DEAA7F /* DspNode.cpp */; };
-		8FCE3DE119C2EDD200DEAA7F /* DspProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DDB19C2EDD200DEAA7F /* DspProcess.cpp */; };
-		8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */; };
 		8FCFF72F1A21E111008C7C80 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCFF72D1A21E111008C7C80 /* Point.cpp */; };
 		8FCFF7321A21E64E008C7C80 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FCFF7301A21E64E008C7C80 /* Color.cpp */; };
 /* End PBXBuildFile section */
@@ -94,14 +90,6 @@
 		8FC8A32C19C3243E0028F321 /* Instance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Instance.h; sourceTree = "<group>"; };
 		8FC8A33219C3243E0028F321 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
 		8FC8A33319C3243E0028F321 /* Tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tools.h; sourceTree = "<group>"; };
-		8FCE3DD719C2EDD200DEAA7F /* DspContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspContext.cpp; sourceTree = "<group>"; };
-		8FCE3DD819C2EDD200DEAA7F /* DspContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspContext.h; sourceTree = "<group>"; };
-		8FCE3DD919C2EDD200DEAA7F /* DspNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspNode.cpp; sourceTree = "<group>"; };
-		8FCE3DDA19C2EDD200DEAA7F /* DspNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspNode.h; sourceTree = "<group>"; };
-		8FCE3DDB19C2EDD200DEAA7F /* DspProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspProcess.cpp; sourceTree = "<group>"; };
-		8FCE3DDC19C2EDD200DEAA7F /* DspProcess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspProcess.h; sourceTree = "<group>"; };
-		8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Signal.cpp; sourceTree = "<group>"; };
-		8FCE3DDE19C2EDD200DEAA7F /* Signal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Signal.h; sourceTree = "<group>"; };
 		8FCFF72D1A21E111008C7C80 /* Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Point.cpp; sourceTree = "<group>"; };
 		8FCFF72E1A21E111008C7C80 /* Point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Point.h; sourceTree = "<group>"; };
 		8FCFF7301A21E64E008C7C80 /* Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Color.cpp; sourceTree = "<group>"; };
@@ -264,14 +252,6 @@
 		8FCE3DD619C2EDD200DEAA7F /* KiwiDsp */ = {
 			isa = PBXGroup;
 			children = (
-				8FCE3DD719C2EDD200DEAA7F /* DspContext.cpp */,
-				8FCE3DD819C2EDD200DEAA7F /* DspContext.h */,
-				8FCE3DD919C2EDD200DEAA7F /* DspNode.cpp */,
-				8FCE3DDA19C2EDD200DEAA7F /* DspNode.h */,
-				8FCE3DDB19C2EDD200DEAA7F /* DspProcess.cpp */,
-				8FCE3DDC19C2EDD200DEAA7F /* DspProcess.h */,
-				8FCE3DDD19C2EDD200DEAA7F /* Signal.cpp */,
-				8FCE3DDE19C2EDD200DEAA7F /* Signal.h */,
 			);
 			name = KiwiDsp;
 			path = ../KiwiDsp;
@@ -357,12 +337,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8F73C78219B9C81E0041C577 /* main.cpp in Sources */,
-				8FCE3DDF19C2EDD200DEAA7F /* DspContext.cpp in Sources */,
 				8FC8A33619C3243E0028F321 /* Element.cpp in Sources */,
 				8FC8A33419C3243E0028F321 /* Attribute.cpp in Sources */,
 				8F1B7BE91A0138D500E58BBB /* Tag.cpp in Sources */,
-				8FCE3DE019C2EDD200DEAA7F /* DspNode.cpp in Sources */,
-				8FCE3DE119C2EDD200DEAA7F /* DspProcess.cpp in Sources */,
 				8FCFF7321A21E64E008C7C80 /* Color.cpp in Sources */,
 				8FC8A33819C3243E0028F321 /* Instance.cpp in Sources */,
 				8F479BA41A128E8300E81465 /* Event.cpp in Sources */,
@@ -370,7 +347,6 @@
 				8F1E2B9719DBB72500F904B9 /* Dico.cpp in Sources */,
 				8FAFBFF41A1E150800929003 /* Link.cpp in Sources */,
 				8FCFF72F1A21E111008C7C80 /* Point.cpp in Sources */,
-				8FCE3DE219C2EDD200DEAA7F /* Signal.cpp in Sources */,
 				8FA8FA711A1B684B007A37CA /* Doodle.cpp in Sources */,
 				8FA8FA6E1A181E86007A37CA /* Beacon.cpp in Sources */,
 				8F1E2B8B19DA9E3700F904B9 /* Box.cpp in Sources */,
