@@ -41,12 +41,9 @@ namespace Kiwi
     public:
         class Editor;
     private:
-        vector<string>              m_lines;
-        
-        vector<string>::size_type   m_start_line;
-        string::size_type           m_start_marker;
-        vector<string>::size_type   m_end_line;
-        string::size_type           m_end_marker;
+        wstring             m_text;
+        wstring::size_type  m_marker_start;
+        wstring::size_type  m_marker_end;
     public:
         
         //! Constructor.
@@ -71,26 +68,6 @@ namespace Kiwi
          */
         unsigned long getNumberOfLines() const noexcept;
         
-        //! Get the text of a line.
-        /** The function retrieves the text of a line.
-         @param index   The line index.
-         @param text    The string to fill.
-         */
-        void getLine(unsigned long index, string& text) const noexcept;
-        
-        //! Get the text of all the lines.
-        /** The function retrieves the text of all the lines.
-         @param text    The string to fill.
-         */
-        void getAllLines(string& text) const noexcept;
-
-        //! Get the text of the selected lines.
-        /** The function retrieves the text of the selected lines.
-         @param text    The string to fill.
-         */
-        void getSelectedLines(string& text) const noexcept;
-
-        
         bool isSelectionEmpty() const noexcept;
         
         void selectAll() noexcept;
@@ -100,9 +77,11 @@ namespace Kiwi
         void addNextWordToSelection() noexcept;
         
         void eraseSelection();
-        void insertCharacter(const char c);
+        void insertCharacter(const wchar_t c);
         
         static Point getStringSize(Font const& font, string const& text) noexcept;
+        
+        static Point getStringSize(Font const& font, wstring const& text) noexcept;
     };
     
     class Text::Editor : public Text
@@ -130,7 +109,9 @@ namespace Kiwi
         double              m_line_spacing;
         
         long                m_behavior;
+        
         Point               m_text_size;
+        Point               m_text_displayed_size;
         
         void updateBoundaries();        
         void truncate();

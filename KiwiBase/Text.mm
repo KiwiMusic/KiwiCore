@@ -39,6 +39,18 @@ namespace Kiwi
         
         return Point(textSize.width, textSize.height);
     }
+    
+    Point Text::getStringSize(Font const& font, wstring const& wtext) noexcept
+    {
+        string text(wtext.begin(), wtext.end());
+        NSString *message = [NSString stringWithCString:text.c_str() encoding:[NSString defaultCStringEncoding]];
+        NSString *fontname = [NSString stringWithCString:font.name.c_str() encoding:[NSString defaultCStringEncoding]];
+        NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont fontWithName:fontname size:font.size], NSFontAttributeName, nil];
+        NSAttributedString *text2 = [[NSAttributedString alloc] initWithString:message attributes: attributes];
+        NSSize textSize = [text2 size];
+        
+        return Point(textSize.width, textSize.height);
+    }
 }
 
 #elif TARGET_OS_IPHONE
