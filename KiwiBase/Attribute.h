@@ -768,7 +768,30 @@ namespace Kiwi
             return m_value;
         }
 	};
-    
+	
+	//! The point attribute is an attribute that is particulary suitable to represent a position.
+	/** The point attribute holds two double values suitable to represent a point, its default display style will obviously be a Attr::Style::List.
+	 @see Attr
+	 */
+	class AttrSize : public Attr
+	{
+	private:
+		bool preserve;
+		Point m_value = {0., 0.};
+	public:
+		AttrSize(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0.}, long behavior = 0) :
+		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
+		virtual ~AttrSize() {};
+		virtual void get(ElemVector& elements) const noexcept;
+		virtual void set(ElemVector const& elements) override;
+		
+		void setPreserve();
+		inline Point get() const noexcept
+		{
+			return m_value;
+		}
+	};
+	
 	//! The rectangle attribute is an attribute that is particulary suitable to represent a position and a size.
 	/** The rectangle attribute holds four double values suitable to represent a rectangle, its default display style will obviously be a Attr::Style::List.
 	 @see Attr

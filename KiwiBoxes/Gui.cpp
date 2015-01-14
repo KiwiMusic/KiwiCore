@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse | GrowY),
+    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse),
     m_color_circle(Attr::create<AttrColor>(Tag::create("circlecolor"),
                                             Tag::create("Circle Color"),
                                             Tag::create("Color"),
@@ -140,7 +140,7 @@ namespace Kiwi
     //                                      TOGGLE                                      //
     // ================================================================================ //
     
-    Toggle::Toggle(sPage page) : Box(page, "toggle", Graphic | Mouse | GrowY),
+    Toggle::Toggle(sPage page) : Box(page, "toggle", Graphic | Mouse),
     m_color_cross_on(Attr::create<AttrColor>(Tag::create("crosscoloron"),
                                             Tag::create("Cross Color On"),
                                             Tag::create("Color"),
@@ -328,7 +328,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard | GrowY),
+    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard),
     m_value(0.),
     m_increment(0.),
     m_last_y(0.),

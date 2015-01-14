@@ -914,7 +914,30 @@ namespace Kiwi
 		return Rectangle();
 	}
 	
-	void Page::Controller::resizeSelectedBoxes(Point const& delta, enum Knock::Corner corner)
+	void Page::Controller::startMoveOrResizeBoxes()
+	{
+		Console::post("startMoveOrResizeBoxes");
+		m_last_bounds.clear();
+		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+		{
+			if(Box::sController boxctrl = (*it).lock())
+			{
+				if(sBox box = boxctrl->getBox())
+				{
+					m_last_bounds[boxctrl] = box->getBounds();
+				}
+			}
+		}
+	}
+	
+	void Page::Controller::endMoveOrResizeBoxes()
+	{
+		Console::post("endMoveOrResizeBoxes");
+		// Todo : add undo / redo here
+		m_last_bounds.clear();
+	}
+	
+	void Page::Controller::resizeSelectedBoxes(Point const& d, const long borderFlags, const bool preserveRatio)
 	{
 		if (isAnyBoxSelected())
 		{
@@ -925,33 +948,85 @@ namespace Kiwi
 				{
 					sBox box =  boxctrl->getBox();
 					if(box)
-					{
-						Rectangle newBounds = box->getBounds();
-						
-						if (corner == Knock::TopLeft)
+					{	
+						auto it2 = m_last_bounds.find(boxctrl);
+						if (it2 != m_last_bounds.end())
 						{
-							newBounds.position(newBounds.position() + delta);
-							newBounds.size(newBounds.size() - delta);
+							long flags = borderFlags;
+							//bool preserve = (box->getPreserveRatio() || preserveRatio);
+							bool preserve = preserveRatio;
+							Rectangle original = it2->second;
+							Rectangle newrect = original;
+							
+							double ratio = 1.;
+							if (newrect.height() > 0)
+							{
+								ratio = newrect.width() / newrect.height();
+							}
+
+							if (flags & Left)
+								newrect.left(min(newrect.right(), newrect.x() + d.x()));
+							
+							if (flags & Right)
+								newrect.width(max(0., newrect.width() + d.x()));
+							
+							if (flags & Top)
+								newrect.top(min(newrect.bottom(), newrect.y() + d.y()));
+							
+							if (flags & Bottom)
+								newrect.height(max(0., newrect.height() + d.y()));
+							
+							// constrain the aspect ratio if one has been specified..
+							if (preserve)
+							{
+								bool adjustWidth;
+								
+								if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
+								{
+									adjustWidth = true;
+								}
+								else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
+								{
+									adjustWidth = false;
+								}
+								else
+								{
+									const double oldRatio = (original.height() > 0) ? abs(original.width() / (double) original.height()) : 0.0;
+									const double newRatio = abs(newrect.width() / (double) newrect.height());
+									
+									adjustWidth = (oldRatio > newRatio);
+								}
+								
+								if (adjustWidth)
+								{
+									newrect.width((int)(newrect.height() * ratio));
+								}
+								else
+								{
+									newrect.height((int)(newrect.width() / ratio));
+								}
+								
+								if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
+								{
+									newrect.x(original.x() + (original.width() - newrect.width()) / 2);
+								}
+								else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
+								{
+									newrect.y(original.y() + (original.height() - newrect.height()) / 2);
+								}
+								else
+								{
+									if (flags & Left)
+										newrect.x(original.right() - newrect.width());
+									
+									if (flags & Top)
+										newrect.y(original.bottom() - newrect.height());
+								}
+							}
+							
+							box->setAttributeValue(AttrBox::Tag_position, newrect.position());
+							box->setAttributeValue(AttrBox::Tag_size, newrect.size());
 						}
-						else if (corner == Knock::TopRight)
-						{
-							newBounds.width(newBounds.width() + delta.x());
-							newBounds.y(newBounds.y() + delta.y());
-							newBounds.height(newBounds.height() - delta.y());
-						}
-						else if (corner == Knock::BottomRight)
-						{
-							newBounds.size(newBounds.size() + delta);
-						}
-						else if (corner == Knock::BottomLeft)
-						{
-							newBounds.x(newBounds.x() + delta.x());
-							newBounds.width(newBounds.width() - delta.x());
-							newBounds.height(newBounds.height() + delta.y());
-						}
-						
-						box->setAttributeValue(AttrBox::Tag_position, newBounds.position());
-						box->setAttributeValue(AttrBox::Tag_size, newBounds.size());
 					}
 				}
 			}

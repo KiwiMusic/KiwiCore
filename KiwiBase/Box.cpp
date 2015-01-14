@@ -389,127 +389,112 @@ namespace Kiwi
     
     bool Box::Controller::contains(Point const& pt, Knock& knock) const noexcept
     {
-		// test resizer
 		const Rectangle bounds = m_box->getBounds();
-		if(getBounds().contains(pt))
+		
+		// test resizer
+		if(isSelected() && getBounds().contains(pt))
 		{
-			bool inside = false;
+			const Point localPoint = pt - getPosition();
+			const double size = getFrameSize();
 			
-			const Point rectSize = Point(8, 8);
-			const Rectangle top_left_rect = Rectangle::withCentre(bounds.position(), rectSize);
-			const Rectangle top_right_rect = Rectangle::withCentre(Point(bounds.x() + bounds.width(), bounds.y()), rectSize);
-			const Rectangle bottom_right_rect = Rectangle::withCentre(Point(bounds.x() + bounds.width(), bounds.y() + bounds.height()), rectSize);
-			const Rectangle bottom_left_rect = Rectangle::withCentre(Point(bounds.x(), bounds.y() + bounds.height()), rectSize);
-			
-			// test corners
-			if(top_left_rect.contains(pt))
+			if(localPoint.y() <= size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::TopLeft;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Top;
 			}
-			else if(top_right_rect.contains(pt))
+			if(localPoint.x() >= getSize().x() - size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::TopRight;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Right;
 			}
-			else if(bottom_right_rect.contains(pt))
+			if(localPoint.y() >= getSize().y() - size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::BottomRight;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Bottom;
 			}
-			else if(bottom_left_rect.contains(pt))
+			if(localPoint.x() <= size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::BottomLeft;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Left;
 			}
-			
-			if(inside)
+
+			if(knock.m_part == Knock::Border)
 			{
+				knock.m_border &= ~Knock::None;
 				knock.m_box = m_box;
 				return true;
 			}
 		}
 		
-		
         if(bounds.contains(pt))
         {
-            if(pt.y() < bounds.y() + KIO_HEIGHT)
-            {
-                const unsigned long ninlets = m_box->getNumberOfInlets();
-                if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Inlet;
-                    knock.m_index   = 0;
-                    return true;
-                }
-                else if(ninlets > 1)
-                {
-                    const double ratio = (bounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
-                    for(unsigned long i = 1; i < ninlets; i++)
-                    {
-                        double val = ratio * i + bounds.x();
-                        if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
-                        {
-                            knock.m_box     = m_box;
-                            knock.m_part    = Knock::Inlet;
-                            knock.m_index   = i;
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Inside;
-                    knock.m_index   = 0;
-                    return true;
-                }
-            }
-            else if(pt.y() > bounds.y() + bounds.height() - KIO_HEIGHT)
-            {
-                const unsigned long noutlets = m_box->getNumberOfOutlets();
-                if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Outlet;
-                    knock.m_index   = 0;
-                    return true;
-                }
-                else if(noutlets > 1)
-                {
-                    const double ratio = (bounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
-                    for(unsigned long i = 1; i < noutlets; i++)
-                    {
-                        double val = ratio * i + bounds.x();
-                        if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
-                        {
-                            knock.m_box     = m_box;
-                            knock.m_part    = Knock::Outlet;
-                            knock.m_index   = i;
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Inside;
-                    knock.m_index   = 0;
-                    return true;
-                }
-            }
-            else
-            {
-                knock.m_box     = m_box;
-                knock.m_part    = Knock::Inside;
-                knock.m_index   = 0;
-            }
-            return true;
+			knock.m_box     = m_box;
+			knock.m_part    = Knock::Inside;
+			knock.m_index   = 0;
+			
+			if(!isSelected())
+			{
+				if(pt.y() < bounds.y() + KIO_HEIGHT)
+				{
+					const unsigned long ninlets = m_box->getNumberOfInlets();
+					if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
+					{
+						knock.m_box     = m_box;
+						knock.m_part    = Knock::Inlet;
+						knock.m_index   = 0;
+						return true;
+					}
+					else if(ninlets > 1)
+					{
+						const double ratio = (bounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
+						for(unsigned long i = 1; i < ninlets; i++)
+						{
+							double val = ratio * i + bounds.x();
+							if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
+							{
+								knock.m_box     = m_box;
+								knock.m_part    = Knock::Inlet;
+								knock.m_index   = i;
+								return true;
+							}
+						}
+					}
+				}
+				else if(pt.y() > bounds.y() + bounds.height() - KIO_HEIGHT)
+				{
+					const unsigned long noutlets = m_box->getNumberOfOutlets();
+					if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
+					{
+						knock.m_box     = m_box;
+						knock.m_part    = Knock::Outlet;
+						knock.m_index   = 0;
+						return true;
+					}
+					else if(noutlets > 1)
+					{
+						const double ratio = (bounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
+						for(unsigned long i = 1; i < noutlets; i++)
+						{
+							double val = ratio * i + bounds.x();
+							if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
+							{
+								knock.m_box     = m_box;
+								knock.m_part    = Knock::Outlet;
+								knock.m_index   = i;
+								return true;
+							}
+						}
+					}
+					else
+					{
+						knock.m_box     = m_box;
+						knock.m_part    = Knock::Inside;
+						knock.m_index   = 0;
+						return true;
+					}
+				}
+			}
+			return true;
         }
         knock.m_box.reset();
         knock.m_part    = Knock::Outside;
