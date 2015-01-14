@@ -101,7 +101,7 @@ namespace Kiwi
 		ElemVector          m_default_values;	///< The default value of the attribute.
         atomic_long         m_behavior;			///< The behavior of the attribute.
 		ElemVector          m_frozen_values;    ///< The frozen value of the attribute.
-        
+
     public:
 		
         //! Constructor.
@@ -754,7 +754,7 @@ namespace Kiwi
 	 */
 	class AttrPoint : public Attr
 	{
-	private:
+	protected:
         Point m_value = {0., 0.};
 	public:
 		AttrPoint(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0.}, long behavior = 0) :
@@ -769,26 +769,83 @@ namespace Kiwi
         }
 	};
 	
-	//! The point attribute is an attribute that is particulary suitable to represent a position.
-	/** The point attribute holds two double values suitable to represent a point, its default display style will obviously be a Attr::Style::List.
+	//! The size attribute is a point attribute that is particulary suitable to represent a size.
+	/** The size attribute holds two double values suitable to represent a size
 	 @see Attr
 	 */
-	class AttrSize : public Attr
+	class AttrSize : public AttrPoint
 	{
 	private:
-		bool preserve;
-		Point m_value = {0., 0.};
+		Point	m_min_limits = {5., 5.};
+		Point	m_max_limits = {0., 0.};
+		double	m_ratio = 0.;
+		
+		void clipValue() noexcept
+		{
+			m_value.x(m_max_limits.x() > 0. ? clip(m_value.x(), m_min_limits.x(), m_max_limits.x()) : max(m_value.x(), m_min_limits.x()));
+			m_value.y(m_max_limits.y() > 0. ? clip(m_value.y(), m_min_limits.y(), m_max_limits.y()) : max(m_value.y(), m_min_limits.y()));
+		}
+		
 	public:
 		AttrSize(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0.}, long behavior = 0) :
-		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
+		AttrPoint(name, label, category, {default_value}, behavior) {;}
 		virtual ~AttrSize() {};
-		virtual void get(ElemVector& elements) const noexcept;
 		virtual void set(ElemVector const& elements) override;
-		
-		void setPreserve();
+		virtual void get(ElemVector& elements) const noexcept;
 		inline Point get() const noexcept
 		{
 			return m_value;
+		}
+		
+		//! Sets a minimum width and height limit.
+		void setMinLimits(Point const& minLimits) noexcept
+		{
+			if(minLimits != m_min_limits)
+			{
+				m_min_limits.x(m_max_limits.x() > 0. ? min(max(minLimits.x(), 0.), m_max_limits.x()) : max(minLimits.x(), 0.));
+				m_min_limits.y(m_max_limits.y() > 0. ? min(max(minLimits.y(), 0.), m_max_limits.y()) : max(minLimits.y(), 0.));
+				setMaxLimits(m_max_limits);
+			}
+		}
+		
+		//! Sets a maximum width and height limit.
+		/** Pass a 0 point if you don't want to limit width or height.
+		 @param maxLimits The maximum width and height limit.
+		 */
+		void setMaxLimits(Point const& maxLimits) noexcept
+		{
+			m_max_limits.x(maxLimits.x() > 0. ? max(maxLimits.x(), m_min_limits.x()) : 0.);
+			m_max_limits.y(maxLimits.y() > 0. ? max(maxLimits.y(), m_min_limits.y()) : 0.);
+		}
+		
+		//! Retrieves the minimum width and height limit.
+		Point getMinLimits() const noexcept
+		{
+			return m_min_limits;
+		}
+		
+		//! Retrieves the maximum width and height limit.
+		Point getMaxLimits() const noexcept
+		{
+			return m_max_limits;
+		}
+		
+		//! Specifies a width-to-height ratio that the box should always maintain when it is resized.
+		/** If the value is 0, no aspect ratio is enforced. If it's non-zero, the width
+		 will always be maintained as this multiple of the height.
+		 @see setSizeLimits
+		 */
+		void setSizeRatio(const double widthOverHeight) noexcept
+		{
+			m_ratio = max(widthOverHeight, 0.);
+		}
+		
+		//! Returns the aspect ratio that was set with setSizeRatio().
+		/** If no aspect ratio is being enforced, this will return 0.
+		 */
+		double getSizeRatio() const noexcept
+		{
+			return m_ratio;
 		}
 	};
 	

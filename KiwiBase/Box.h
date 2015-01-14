@@ -77,8 +77,6 @@ namespace Kiwi
         mutable mutex       m_io_mutex;
         
         wController         m_controller;
-		
-		bool				m_preserve_ratio;
     public:
         
         //! Constructor.
@@ -202,24 +200,6 @@ namespace Kiwi
 		inline bool isKeyboardListener() const noexcept
 		{
 			return m_flags & Keyboard;
-		}
-		
-		//! Preserve ratio when the box is resized.
-		/** The function indicate to preserve ratio when the box is resized.
-		 @param preserve True to preserve ratio when resizing, false if the box can be resized by all edges
-		 */
-		inline void setPreserveRatio(const bool preserve) noexcept
-		{
-			m_preserve_ratio = preserve;
-		}
-		
-		//! Retrieves if the box wants to keep its ratio unchanged when resized.
-		/** The function retrieves if the box wants to keep its ratio unchanged when resized.
-		 @param preserve True if the box wants to keep its ratio unchanged when resized, false otherwise.
-		 */
-		inline bool getPreserveRatio() const noexcept
-		{
-			return m_preserve_ratio;
 		}
 		
         //! Retrieve the text of the box.

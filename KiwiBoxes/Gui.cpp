@@ -47,6 +47,8 @@ namespace Kiwi
         addAttribute(m_color_circle);
         addAttribute(m_color_led);
         setAttributeDefaultValues(Tag_size, {20., 20.});
+		setSizeLimits(Point(10, 10));
+		setSizeRatio(1.);
     }
     
     Bang::~Bang()
@@ -116,20 +118,7 @@ namespace Kiwi
     
     bool Bang::attributeChanged(sAttr attr)
     {
-		if(attr == AttrBox::appearance_size)
-		{
-			Point size = getSize();
-			if(size.x() < 10. || size.y() < 10.)
-			{
-				setAttributeValue(AttrBox::Tag_size, ElemVector(10., 10.));
-			}
-			else if(size.x() != size.y())
-			{
-				setAttributeValue(AttrBox::Tag_size, ElemVector(size.x(), size.x()));
-			}
-			
-		}
-        else if(attr == m_color_circle)
+        if(attr == m_color_circle)
         {
             redraw();
         }
@@ -156,6 +145,8 @@ namespace Kiwi
         addAttribute(m_color_cross_on);
         addAttribute(m_color_cross_off);
         setAttributeDefaultValues(Tag_size, {20., 20.});
+		setSizeLimits(Point(10, 10));
+		setSizeRatio(1.);
     }
     
     Toggle::~Toggle()
@@ -304,9 +295,9 @@ namespace Kiwi
     
     bool Message::attributeChanged(sAttr attr)
     {
-        if(attr == appearance_size)
+        if(attr == attr_size)
         {
-            Text::Editor::setSize(appearance_size->get());
+            Text::Editor::setSize(attr_size->get());
         }
         else if(attr == color_text)
         {
@@ -556,9 +547,9 @@ namespace Kiwi
     
     bool Number::attributeChanged(sAttr attr)
     {
-        if(attr == appearance_size)
+        if(attr == attr_size)
         {
-            Text::Editor::setSize(appearance_size->get());
+            Text::Editor::setSize(attr_size->get());
         }
         else if(attr == color_text)
         {

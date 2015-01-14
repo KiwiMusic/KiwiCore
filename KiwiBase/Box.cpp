@@ -151,7 +151,7 @@ namespace Kiwi
         {
             return false;
         }
-        if(attr == AttrBox::appearance_position)
+        if(attr == AttrBox::attr_position)
         {
             sController controller = getController();
             if(controller)
@@ -159,7 +159,7 @@ namespace Kiwi
                 controller->positionChanged();
             }
         }
-        else if(attr == AttrBox::appearance_size)
+        else if(attr == AttrBox::attr_size)
         {
             sController controller = getController();
             if(controller)

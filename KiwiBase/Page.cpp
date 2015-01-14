@@ -916,7 +916,6 @@ namespace Kiwi
 	
 	void Page::Controller::startMoveOrResizeBoxes()
 	{
-		Console::post("startMoveOrResizeBoxes");
 		m_last_bounds.clear();
 		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 		{
@@ -932,102 +931,109 @@ namespace Kiwi
 	
 	void Page::Controller::endMoveOrResizeBoxes()
 	{
-		Console::post("endMoveOrResizeBoxes");
 		// Todo : add undo / redo here
 		m_last_bounds.clear();
 	}
 	
-	void Page::Controller::resizeSelectedBoxes(Point const& d, const long borderFlags, const bool preserveRatio)
+	void Page::Controller::resizeSelectedBoxes(Point const& d, const long flags, const bool preserveRatio)
 	{
-		if (isAnyBoxSelected())
+		for(auto it = m_last_bounds.begin(); it != m_last_bounds.end(); ++it)
 		{
-			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+			Box::sController boxctrl = (*it).first.lock();
+			if(boxctrl)
 			{
-				Box::sController boxctrl = (*it).lock();
-				if(boxctrl)
+				sBox box =  boxctrl->getBox();
+				if(box)
 				{
-					sBox box =  boxctrl->getBox();
-					if(box)
-					{	
-						auto it2 = m_last_bounds.find(boxctrl);
-						if (it2 != m_last_bounds.end())
+					double fixedRatio = box->getSizeRatio();
+					Rectangle original = it->second;
+					Rectangle newrect = original;
+					Point minLimit = box->getSizeMinLimits();
+					Point maxLimit = box->getSizeMaxLimits();
+						
+					if (flags & Left)
+						newrect.left(min(newrect.right() - minLimit.x(), newrect.x() + d.x()));
+					
+					if (flags & Right)
+						newrect.width(max(minLimit.x(), newrect.width() + d.x()));
+					
+					if (flags & Top)
+						newrect.top(min(newrect.bottom() - minLimit.y(), newrect.y() + d.y()));
+					
+					if (flags & Bottom)
+						newrect.height(max(minLimit.y(), newrect.height() + d.y()));
+					
+					// constrain the aspect ratio if one has been specified..
+					if (preserveRatio || (fixedRatio > 0.))
+					{
+						bool adjustWidth;
+						double ratio = 1.;
+						if(fixedRatio > 0.)
 						{
-							long flags = borderFlags;
-							//bool preserve = (box->getPreserveRatio() || preserveRatio);
-							bool preserve = preserveRatio;
-							Rectangle original = it2->second;
-							Rectangle newrect = original;
+							ratio = fixedRatio;
+						}
+						else if (original.height() > 0)
+						{
+							ratio = original.width() / original.height();
+						}
+						
+						if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
+						{
+							adjustWidth = true;
+						}
+						else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
+						{
+							adjustWidth = false;
+						}
+						else
+						{
+							const double oldRatio = (original.height() > 0) ? abs(original.width() / (double) original.height()) : 0.0;
+							const double newRatio = abs(newrect.width() / (double) newrect.height());
 							
-							double ratio = 1.;
-							if (newrect.height() > 0)
+							adjustWidth = (oldRatio > newRatio);
+						}
+						
+						if (adjustWidth)
+						{
+							newrect.width((int)(newrect.height() * ratio));
+							
+							if ((maxLimit.x() > 0. && newrect.width() > maxLimit.x()) || newrect.width() < minLimit.x())
 							{
-								ratio = newrect.width() / newrect.height();
+								newrect.width(clip(newrect.width(), minLimit.x(), maxLimit.x()));
+								newrect.height((int)(newrect.width() / ratio));
 							}
-
-							if (flags & Left)
-								newrect.left(min(newrect.right(), newrect.x() + d.x()));
+						}
+						else
+						{
+							newrect.height((int)(newrect.width() / ratio));
 							
-							if (flags & Right)
-								newrect.width(max(0., newrect.width() + d.x()));
+							if ((maxLimit.y() > 0. && newrect.height() > maxLimit.y()) || newrect.height() < minLimit.y())
+							{
+								newrect.height(clip(newrect.height(), minLimit.y(), maxLimit.y()));
+								newrect.width((int) (newrect.height() * ratio));
+							}
+						}
+						
+						if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
+						{
+							newrect.x(original.x() + (original.width() - newrect.width()) / 2);
+						}
+						else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
+						{
+							newrect.y(original.y() + (original.height() - newrect.height()) / 2);
+						}
+						else
+						{
+							if (flags & Left)
+								newrect.x(original.right() - newrect.width());
 							
 							if (flags & Top)
-								newrect.top(min(newrect.bottom(), newrect.y() + d.y()));
-							
-							if (flags & Bottom)
-								newrect.height(max(0., newrect.height() + d.y()));
-							
-							// constrain the aspect ratio if one has been specified..
-							if (preserve)
-							{
-								bool adjustWidth;
-								
-								if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
-								{
-									adjustWidth = true;
-								}
-								else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
-								{
-									adjustWidth = false;
-								}
-								else
-								{
-									const double oldRatio = (original.height() > 0) ? abs(original.width() / (double) original.height()) : 0.0;
-									const double newRatio = abs(newrect.width() / (double) newrect.height());
-									
-									adjustWidth = (oldRatio > newRatio);
-								}
-								
-								if (adjustWidth)
-								{
-									newrect.width((int)(newrect.height() * ratio));
-								}
-								else
-								{
-									newrect.height((int)(newrect.width() / ratio));
-								}
-								
-								if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
-								{
-									newrect.x(original.x() + (original.width() - newrect.width()) / 2);
-								}
-								else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
-								{
-									newrect.y(original.y() + (original.height() - newrect.height()) / 2);
-								}
-								else
-								{
-									if (flags & Left)
-										newrect.x(original.right() - newrect.width());
-									
-									if (flags & Top)
-										newrect.y(original.bottom() - newrect.height());
-								}
-							}
-							
-							box->setAttributeValue(AttrBox::Tag_position, newrect.position());
-							box->setAttributeValue(AttrBox::Tag_size, newrect.size());
+								newrect.y(original.bottom() - newrect.height());
 						}
 					}
+					
+					box->setAttributeValue(AttrBox::Tag_position, newrect.position());
+					box->setAttributeValue(AttrBox::Tag_size, newrect.size());
 				}
 			}
 		}
