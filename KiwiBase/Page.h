@@ -61,7 +61,7 @@ namespace Kiwi
         
         vector<sBox>                m_boxes;
         mutable mutex               m_boxes_mutex;
-        ulong               m_boxe_id;
+        ulong						m_boxe_id;
         
         vector<sLink>               m_links;
         mutable mutex               m_links_mutex;

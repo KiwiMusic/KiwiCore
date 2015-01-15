@@ -57,7 +57,12 @@ namespace Kiwi
         static const sTag Tag_Hide_on_Lock;
         static const sTag Tag_presentation;
         static const sTag Tag_Include_in_Presentation;
-        
+		
+		// Behavior //
+		static const sTag Tag_Behavior;
+		static const sTag Tag_ignoreclick;
+		static const sTag Tag_Ignore_Click;
+		
         // Font //
         static const sTag Tag_Font;
         static const sTag Tag_fontname;
@@ -98,7 +103,10 @@ namespace Kiwi
         const shared_ptr<AttrSize>		attr_presentation_size;
         const shared_ptr<AttrBool>      attr_hidden;
         const shared_ptr<AttrBool>      attr_presentation;
-        
+		
+		// Behavior //
+		const shared_ptr<AttrBool>		attr_ignoreclick;
+		
         // Font //
         const shared_ptr<AttrTag>       attr_font_name;
         const shared_ptr<AttrDouble>    attr_font_size;
@@ -122,7 +130,10 @@ namespace Kiwi
         attr_presentation_size(Attr::create<AttrSize>(Tag_presentation_size, Tag_Presentation_Size, Tag_Appearance)),
         attr_hidden(Attr::create<AttrBool>(Tag_hidden, Tag_Hide_on_Lock, Tag_Appearance, false)),
         attr_presentation(Attr::create<AttrBool>(Tag_presentation,  Tag_Include_in_Presentation, Tag_Appearance, false)),
-        
+		
+		// Appearance //
+		attr_ignoreclick(Attr::create<AttrBool>(Tag_ignoreclick, Tag_Ignore_Click, Tag_Behavior, false)),
+		
         // Font //
         attr_font_name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
         attr_font_size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
@@ -141,7 +152,10 @@ namespace Kiwi
             addAttribute(attr_presentation_size);
             addAttribute(attr_hidden);
             addAttribute(attr_presentation);
-            
+			
+			// Appearance //
+			addAttribute(attr_ignoreclick);
+			
             // Font //
             addAttribute(attr_font_name);
             addAttribute(attr_font_size);
@@ -263,6 +277,15 @@ namespace Kiwi
         {
             return attr_presentation->get();
         }
+		
+		//! Retrieve if the box should ignore mouse click.
+		/** The function retrieves if the box should ignore mouse click.
+		 @return True if the box should ignore mouse click, false otherwise.
+		 */
+		inline bool getIgnoreClick() const noexcept
+		{
+			return attr_ignoreclick->get();
+		}
         
         //! Retrieve if the font of the box.
         /** The function retrieves the font of the box.
