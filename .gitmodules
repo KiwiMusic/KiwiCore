@@ -1,6 +1,3 @@
 [submodule "KiwiDsp"]
 	path = KiwiDsp
 	url = https://pierreguillot@github.com/KiwiMusic/KiwiDsp.git
-[submodule "KiwiGui"]
-	path = KiwiGui
-	url = https://pierreguillot@github.com/KiwiMusic/KiwiGui.git
