@@ -252,7 +252,7 @@ namespace Kiwi
         
         Text::Editor::setFont(getFont());
         Text::Editor::setJustification(Font::Justification::VerticallyCentred);
-        Text::Editor::setColor(color_text->get());
+        Text::Editor::setColor(attr_color_text->get());
         Text::Editor::setSize(getSize());
         Text::Editor::setMargins(3., 3., 3., 3.);
         Text::Editor::setBehavior(Text::Editor::Wrapped);
@@ -300,9 +300,9 @@ namespace Kiwi
         {
             Text::Editor::setSize(attr_size->get());
         }
-        else if(attr == color_text)
+        else if(attr == attr_color_text)
         {
-            Text::Editor::setColor(color_text->get());
+            Text::Editor::setColor(attr_color_text->get());
         }
         else if(attr == attr_font_face || attr == attr_font_name || attr == attr_font_size)
         {
@@ -334,7 +334,7 @@ namespace Kiwi
 
         Text::Editor::setFont(getFont());
         Text::Editor::setJustification(Font::Justification::VerticallyCentred);
-        Text::Editor::setColor(color_text->get());
+        Text::Editor::setColor(attr_color_text->get());
         Text::Editor::setSize(getSize());
         Text::Editor::setMargins(3., 3., 3., 3.);
     }
@@ -519,7 +519,7 @@ namespace Kiwi
 		d.fillRectangle(d.getBounds().reduced(borderSize));
 		
         const Point size = getSize();
-        d.setColor(color_border->get());
+        d.setColor(getBorderColor());
         d.drawLine(12., 0., 12., size.y(), 1.);
         d.setFont(getFont());
         if(m_edition)
@@ -552,9 +552,9 @@ namespace Kiwi
         {
             Text::Editor::setSize(attr_size->get());
         }
-        else if(attr == color_text)
+        else if(attr == attr_color_text)
         {
-            Text::Editor::setColor(color_text->get());
+            Text::Editor::setColor(getTextColor());
         }
         else if(attr == attr_font_face || attr == attr_font_name || attr == attr_font_size)
         {
