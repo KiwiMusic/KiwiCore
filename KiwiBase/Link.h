@@ -47,8 +47,8 @@ namespace Kiwi
         wPage           m_page;
         wBox			m_box_from;
         wBox			m_box_to;
-        unsigned long   m_index_outlet;
-        unsigned long   m_index_intlet;
+        ulong           m_index_outlet;
+        ulong           m_index_intlet;
         Path            m_path;
         wController		m_controller;
     public:
@@ -166,7 +166,7 @@ namespace Kiwi
         /** The function retrieves the index of the outlet of the link.
          @return The index of the outlet of the link.
          */
-        inline unsigned long getOutletIndex() const noexcept
+        inline ulong getOutletIndex() const noexcept
         {
             return m_index_outlet;
         }
@@ -175,7 +175,7 @@ namespace Kiwi
         /** The function retrieves the index of the inlet of the link.
          @return The index of the inlet of the link.
          */
-        inline unsigned long getInletIndex() const noexcept
+        inline ulong getInletIndex() const noexcept
         {
             return m_index_intlet;
         }
@@ -388,8 +388,8 @@ namespace Kiwi
         private:
             wBox			m_box_from;
             wBox			m_box_to;
-            unsigned long   m_index_outlet;
-            unsigned long   m_index_intlet;
+            ulong   m_index_outlet;
+            ulong   m_index_intlet;
             Path            m_path;
             
         public:
@@ -445,7 +445,7 @@ namespace Kiwi
             /** The function retrieves the index of the outlet of the creator.
              @return The index of the outlet of the creator.
              */
-            inline unsigned long getOutletIndex() const noexcept
+            inline ulong getOutletIndex() const noexcept
             {
                 return Creator::m_index_outlet;
             }
@@ -454,7 +454,7 @@ namespace Kiwi
             /** The function retrieves the index of the inlet of the creator.
              @return The index of the inlet of the creator.
              */
-            inline unsigned long getInletIndex() const noexcept
+            inline ulong getInletIndex() const noexcept
             {
                 return Creator::m_index_intlet;
             }

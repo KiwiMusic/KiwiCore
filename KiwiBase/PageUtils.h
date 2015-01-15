@@ -88,7 +88,7 @@ namespace Kiwi
         enum Part       m_part		= Outside;
 		enum Corner		m_corner	= TopRight;
 		enum Border		m_border	= Right;
-        unsigned long   m_index = 0;
+        ulong   m_index = 0;
 		
     public:
         
@@ -271,7 +271,7 @@ namespace Kiwi
         /** The function retrieves the index of the part of the box. If the part is an inlet or an outlet, it will be their index. If the part is a border or a corner it will be their position.
          @return The index of the part of the box.
          */
-        inline unsigned long knockGetIndex() const noexcept
+        inline ulong knockGetIndex() const noexcept
         {
             if(m_target == Box)
             {
@@ -290,7 +290,7 @@ namespace Kiwi
     private:
         const wPage     m_page;
         wBox            m_box;
-        unsigned long   m_index;
+        ulong   m_index;
         
     public:
         
@@ -328,7 +328,7 @@ namespace Kiwi
         /** The function retrieves the index of the iolet.
          @return The index of the iolet.
          */
-        inline unsigned long magnetGetIndex() const noexcept
+        inline ulong magnetGetIndex() const noexcept
         {
             return m_index;
         }
@@ -460,14 +460,14 @@ namespace Kiwi
          @param box The box that owns the inlet.
          @param index The index of the inlet.
          */
-        void highlightInlet(sBox box, unsigned long index);
+        void highlightInlet(sBox box, ulong index);
         
         //! Defines an outlet to be highlighted.
         /** The function defines an outlet to be highlighted.
          @param box The box that owns the outlet.
          @param index The index of the outlet.
          */
-        void highlightOutlet(sBox box, unsigned long index);
+        void highlightOutlet(sBox box, ulong index);
         
         //! The draw method that could be override.
         /** The function draws the iolet hightlighter in a doodle.

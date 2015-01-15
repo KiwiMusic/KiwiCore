@@ -70,8 +70,8 @@ namespace Kiwi
         const wInstance     m_instance;
         const wPage         m_page;
         const sTag          m_name;
-        const unsigned long m_id;
-        const unsigned long m_flags;
+        const ulong         m_id;
+        const ulong         m_flags;
         sTag                m_text;
         
         vector<sOutlet>     m_outlets;
@@ -85,7 +85,7 @@ namespace Kiwi
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Box(sPage page, string const& name, unsigned long type = 1<<0);
+        Box(sPage page, string const& name, ulong type = 1<<0);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
@@ -155,7 +155,7 @@ namespace Kiwi
         /** The function retrieves the id of the box as a tag.
          @return The text of the id as a tag.
          */
-        inline unsigned long getId() const noexcept
+        inline ulong getId() const noexcept
         {
             return m_id;
         }
@@ -164,7 +164,7 @@ namespace Kiwi
         /** The function retrieves the flags of the box.
          @return The flags of the box.
          */
-        inline unsigned long getFlags() const noexcept
+        inline ulong getFlags() const noexcept
         {
             return m_flags;
         }
@@ -227,10 +227,10 @@ namespace Kiwi
         /** The functions retrieves the number of inlets of the box.
          @return The number of inlets.
          */
-        inline unsigned long getNumberOfInlets() const noexcept
+        inline ulong getNumberOfInlets() const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
-            return (unsigned long)m_inlets.size();
+            return (ulong)m_inlets.size();
         }
         
         //! Retrieve an inlet.
@@ -238,7 +238,7 @@ namespace Kiwi
          @param index The inlet's index.
          @return The inlet.
          */
-        inline sInlet getInlet(unsigned long index) const noexcept
+        inline sInlet getInlet(ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_inlets.size())
@@ -255,10 +255,10 @@ namespace Kiwi
         /** The functions retrieves the number of outlets of the box.
          @return The number of outlets.
          */
-        inline unsigned long getNumberOfOutlets() const noexcept
+        inline ulong getNumberOfOutlets() const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
-            return (unsigned long)m_outlets.size();
+            return (ulong)m_outlets.size();
         }
         
         //! Retrieve an outlet.
@@ -266,7 +266,7 @@ namespace Kiwi
          @param index The outlet's index.
          @return The outlet.
          */
-        inline sOutlet getOutlet(unsigned long index) const noexcept
+        inline sOutlet getOutlet(ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_io_mutex);
             if(index < m_outlets.size())
@@ -283,7 +283,7 @@ namespace Kiwi
         /** The function shoulds perform some stuff. Return false if the vector of element doesn't match with your method then the box will check if the vector match with attributes methods, othersize return true.
          @param elements    A list of elements to pass.
          */
-        virtual bool receive(unsigned long index, ElemVector const& elements)
+        virtual bool receive(ulong index, ElemVector const& elements)
         {
             return false;
         }
@@ -347,7 +347,7 @@ namespace Kiwi
          @param index The index of the outlet.
          @param elements A list of elements to pass.
          */
-        void    send(unsigned long index, ElemVector const& elements) const noexcept;
+        void    send(ulong index, ElemVector const& elements) const noexcept;
         
         //! Add a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -362,13 +362,13 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    insertInlet(unsigned long index, Iolet::Type type, Iolet::Polarity polarity, string const& description = "");
+        void    insertInlet(ulong index, Iolet::Type type, Iolet::Polarity polarity, string const& description = "");
         
         //! Remove an inlet from the box.
         /** The function removes an inlet from the box.
          @param index The index of the inlet
          */
-        void    removeInlet(unsigned long index);
+        void    removeInlet(ulong index);
         
         //! Add a new outlet the the box.
         /** The function adds a new outlet the the box.
@@ -383,13 +383,13 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    insertOutlet(unsigned long index, Iolet::Type type, string const& description = "");
+        void    insertOutlet(ulong index, Iolet::Type type, string const& description = "");
         
         //! Remove an outlet.
         /** The function removes an outlet.
          @param index The index of the outlet.
          */
-        void    removeOutlet(unsigned long index);
+        void    removeOutlet(ulong index);
 
     private:
         
@@ -606,14 +606,14 @@ namespace Kiwi
              @param index The index of the inlet.
              @return the position of the inlet as a point.
              */
-            Point getInletPosition(unsigned long index) const noexcept;
+            Point getInletPosition(ulong index) const noexcept;
             
             //! Retrieve the position of an outlet.
             /** The function retrieves the position of an outlet.
              @param index The index of the outlet.
              @return the position of the outlet as a point.
              */
-            Point getOutletPosition(unsigned long index) const noexcept;
+            Point getOutletPosition(ulong index) const noexcept;
             
             //! Retrieve if the box is touch by a point.
 			/** The function retrieves if the box is touch by a point and fill the knock with the knock informations.

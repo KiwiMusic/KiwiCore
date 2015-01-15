@@ -111,16 +111,16 @@ namespace Kiwi
             const Point     m_wheel_offset;
             const long      m_modifiers;
 			const bool		m_was_clicked;
-            const unsigned long m_nclicks;
+            const ulong m_nclicks;
 			
         public:
-            Mouse(Type type, int x, int y, long mod, double wheel_x, double wheel_y, bool was_clicked, int down_x, int down_y, unsigned long nclicks) noexcept
+            Mouse(Type type, int x, int y, long mod, double wheel_x, double wheel_y, bool was_clicked, int down_x, int down_y, ulong nclicks) noexcept
             : m_type(type), m_position(x, y), m_position_down(down_x, down_y), m_wheel_offset(wheel_x, wheel_y), m_modifiers(mod), m_was_clicked(was_clicked), m_nclicks(nclicks)
             {
                 ;
             }
             
-            Mouse(Type type, Point position, long mod, Point wheel, bool was_clicked, Point down_position, unsigned long nclicks) noexcept
+            Mouse(Type type, Point position, long mod, Point wheel, bool was_clicked, Point down_position, ulong nclicks) noexcept
             : m_type(type), m_position(position), m_position_down(down_position), m_wheel_offset(wheel), m_modifiers(mod), m_was_clicked(was_clicked), m_nclicks(nclicks)
             {
                 ;
@@ -281,7 +281,7 @@ namespace Kiwi
                 return m_was_clicked;
             }
             
-            inline unsigned long getNumberOfClicks() const noexcept
+            inline ulong getNumberOfClicks() const noexcept
             {
                 return m_nclicks;
             }

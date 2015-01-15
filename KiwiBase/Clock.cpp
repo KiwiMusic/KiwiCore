@@ -27,7 +27,7 @@
 
 namespace Kiwi
 {
-    void Clock::tick_elements(wClock clock, unsigned long ms, wMaker maker, ElemVector const& elements)
+    void Clock::tick_elements(wClock clock, ulong ms, wMaker maker, ElemVector const& elements)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -50,7 +50,7 @@ namespace Kiwi
         }
     }
     
-    void Clock::tick(wClock clock, unsigned long ms, wMaker maker)
+    void Clock::tick(wClock clock, ulong ms, wMaker maker)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -73,19 +73,19 @@ namespace Kiwi
         }
     }
     
-    void Clock::delay(sMaker maker, const unsigned long ms)
+    void Clock::delay(sMaker maker, const ulong ms)
     {
         thread(tick, shared_from_this(), ms, maker).detach();
     }
     
 
-    void Clock::delay(sMaker maker, ElemVector const& elements, const unsigned long ms)
+    void Clock::delay(sMaker maker, ElemVector const& elements, const ulong ms)
     {
         thread(tick_elements, shared_from_this(), ms, maker, elements).detach();
     }
     
     
-    void Clock::delay(sBox box, const unsigned long ms)
+    void Clock::delay(sBox box, const ulong ms)
     {
         sMaker maker = dynamic_pointer_cast<Clock::Maker>(box);
         if(maker)
@@ -94,7 +94,7 @@ namespace Kiwi
         }
     }
     
-    void Clock::delay(sBox box, ElemVector const& elements, const unsigned long ms)
+    void Clock::delay(sBox box, ElemVector const& elements, const ulong ms)
     {
         sMaker maker = dynamic_pointer_cast<Clock::Maker>(box);
         if(maker)

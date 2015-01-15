@@ -83,7 +83,7 @@ namespace Kiwi
         m_points.push_back({end, Linear});
     }
 	
-	void Path::setPoint(unsigned long index, Point const& pt) noexcept
+	void Path::setPoint(ulong index, Point const& pt) noexcept
 	{
 		if(index < m_points.size())
 		{

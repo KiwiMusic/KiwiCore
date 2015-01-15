@@ -107,8 +107,8 @@ namespace Kiwi
         if(page && dico)
         {
             sBox from, to;
-            unsigned long outlet, inlet;
-            unsigned long from_id, to_id;
+            ulong outlet, inlet;
+            ulong from_id, to_id;
             
             ElemVector elements;
             dico->get(Tag_from, elements);
@@ -301,7 +301,7 @@ namespace Kiwi
             const Point origin = link->getPosition() - 10.;
             Point current = path.getPoint(0) - origin;
             Path drawnpath(current);
-            for(unsigned long i = 1; i < path.size(); i++)
+            for(ulong i = 1; i < path.size(); i++)
             {
                 const Point next = path.getPoint(i) - origin;
                 const Point middle = Point::fromLine(current, next, 0.5);
@@ -353,7 +353,7 @@ namespace Kiwi
         {
             Point current = path.getPoint(0);
             Path drawnpath(current);
-            for(unsigned long i = 1; i < path.size(); i++)
+            for(ulong i = 1; i < path.size(); i++)
             {
                 const Point next = path.getPoint(i);
                 const Point middle = Point::fromLine(current, next, 0.5);
@@ -401,7 +401,7 @@ namespace Kiwi
         {
             Point current = path.getPoint(0);
             Path drawnpath(current);
-            for(unsigned long i = 1; i < path.size(); i++)
+            for(ulong i = 1; i < path.size(); i++)
             {
                 const Point next = path.getPoint(i);
                 const Point middle = Point::fromLine(current, next, 0.5);

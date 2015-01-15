@@ -48,12 +48,12 @@ namespace Kiwi
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void tick(wClock clock, unsigned long ms, wMaker maker);
+        static void tick(wClock clock, ulong ms, wMaker maker);
         
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void tick_elements(wClock clock, unsigned long ms, wMaker maker, ElemVector const& elements);
+        static void tick_elements(wClock clock, ulong ms, wMaker maker, ElemVector const& elements);
         
     public:
         //! The constructor.
@@ -86,7 +86,7 @@ namespace Kiwi
          @param  maker      The maker that will be used.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sMaker maker, const unsigned long ms);
+        void delay(sMaker maker, const ulong ms);
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
@@ -94,14 +94,14 @@ namespace Kiwi
          @param  elements   The elements that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sMaker maker, ElemVector const& elements, const unsigned long ms);
+        void delay(sMaker maker, ElemVector const& elements, const ulong ms);
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
          @param  box        The box that will be used.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sBox box, const unsigned long ms);
+        void delay(sBox box, const ulong ms);
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
@@ -109,7 +109,7 @@ namespace Kiwi
          @param  elements   The elements that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sBox box, ElemVector const& elements, const unsigned long ms);
+        void delay(sBox box, ElemVector const& elements, const ulong ms);
         
         // ================================================================================ //
         //                                      MAKER                                       //

@@ -125,7 +125,7 @@ namespace Kiwi
         const Point C(begin.x() - m_x, begin.y() - m_y);
         
         double sol1, sol2, sol3;
-        const unsigned long nresult = solve(B.x() * B.x() + B.y() * B.y(), 3 * (A.x() * B.x() + A.y() * B.y()), 2 * (A.x() * A.x() + A.y() * A.y()) + C.x() * B.x() + C.y() * B.y(), C.x() * A.x() + C.y() * A.y(), sol1, sol2, sol3);
+        const ulong nresult = solve(B.x() * B.x() + B.y() * B.y(), 3 * (A.x() * B.x() + A.y() * B.y()), 2 * (A.x() * A.x() + A.y() * A.y()) + C.x() * B.x() + C.y() * B.y(), C.x() * A.x() + C.y() * A.y(), sol1, sol2, sol3);
         if(nresult)
         {
             double dist = this->distance(fromLine(begin, ctrl, end, sol1));

@@ -388,9 +388,9 @@ namespace Kiwi
     private:
         struct ListenerAttrList
         {
-            map<sTag, unsigned long> attrs;
+            map<sTag, ulong> attrs;
             
-            ListenerAttrList(sTag name, unsigned long notification)
+            ListenerAttrList(sTag name, ulong notification)
             {
                 attrs[name] = notification;
             }
@@ -490,7 +490,7 @@ namespace Kiwi
         /** The function retrieves the numbers of attributes. The attributes invisibles won't be counted.
          @return The number of attributes.
          */
-        unsigned long getNumberOfAttributes() const noexcept;
+        ulong getNumberOfAttributes() const noexcept;
         
         //! Retrieve the names of the attributes.
         /** The function retrieves the names of the attributes. The name attributes invisibles won't be retrieved.
@@ -534,7 +534,7 @@ namespace Kiwi
         /** The function retrieves the number of attribute categories. If a category have only invisibles attributes, the category won't be counted.
          @return The number of attribute categories.
          */
-        unsigned long getNumberOfCategories() const noexcept;
+        ulong getNumberOfCategories() const noexcept;
         
         //! Retrieve the names of the categories.
         /** The function retrieves the names of the categories. If a category have only invisibles attributes, the name of the category won't be retrieved.
@@ -721,9 +721,9 @@ namespace Kiwi
         {
             elements = m_enum_values;
         }
-        inline unsigned long get() const noexcept
+        inline ulong get() const noexcept
         {
-            return (unsigned long)m_value;
+            return (ulong)m_value;
         }
 	};
 	

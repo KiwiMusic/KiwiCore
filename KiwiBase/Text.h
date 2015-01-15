@@ -66,7 +66,7 @@ namespace Kiwi
         /** The function retrieves the number of lines.
          @return The number of lines in the text.
          */
-        unsigned long getNumberOfLines() const noexcept;
+        ulong getNumberOfLines() const noexcept;
         
         bool isSelectionEmpty() const noexcept;
         
@@ -144,7 +144,7 @@ namespace Kiwi
         static string getStringSelection(Font const& font, string const& text, double const x1, double const x2) noexcept
         {
             string rtext, ctext;
-            unsigned long pos = 0;
+            ulong pos = 0;
             while(pos < text.size())
             {
                 ctext += text[pos];
@@ -165,7 +165,7 @@ namespace Kiwi
         {
             Point rpoint(0, 0.);
             string ctext;
-            unsigned long pos = 0;
+            ulong pos = 0;
             while(pos < text.size())
             {
                 ctext += text[pos];

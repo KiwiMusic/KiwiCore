@@ -288,9 +288,9 @@ namespace Kiwi
 		return false;
 	}
     
-    unsigned long Attr::Manager::getNumberOfAttributes() const noexcept
+    ulong Attr::Manager::getNumberOfAttributes() const noexcept
     {
-        unsigned long size = 0;
+        ulong size = 0;
         lock_guard<mutex> guard(m_attrs_mutex);
         for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
         {
@@ -461,11 +461,11 @@ namespace Kiwi
 		}
     }
     
-    unsigned long Attr::Manager::getNumberOfCategories() const noexcept
+    ulong Attr::Manager::getNumberOfCategories() const noexcept
     {
         vector<sTag> names;
         getCategoriesNames(names);
-        return (unsigned long)names.size();
+        return (ulong)names.size();
     }
 	
     void Attr::Manager::getCategoriesNames(vector<sTag>& names, bool sortAlphabetically) const noexcept

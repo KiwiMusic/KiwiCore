@@ -19,7 +19,7 @@
  To release a closed-source product which uses KIWI, contact : guillotpierre6@gmail.com
  
  ==============================================================================
-*/
+ */
 
 #ifndef __DEF_KIWI_DEFS__
 #define __DEF_KIWI_DEFS__
@@ -68,12 +68,8 @@ using namespace std;
 #endif
 
 namespace Kiwi
-{
-#ifdef KIWI_DOUBLE
-    typedef double sample;
-#else
-    typedef float sample;
-#endif
+{    
+    typedef unsigned long ulong;
     
     class Clock;
     typedef shared_ptr<Clock>       sClock;
@@ -89,7 +85,7 @@ namespace Kiwi
     
     class Dico;
     typedef shared_ptr<Dico>        sDico;
-	typedef shared_ptr<const Dico>  scDico;
+    typedef shared_ptr<const Dico>  scDico;
     typedef weak_ptr<Dico>          wDico;
     typedef weak_ptr<const Dico>    wcDico;
     
