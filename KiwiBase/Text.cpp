@@ -46,7 +46,7 @@ namespace Kiwi
         return m_text.empty();
     }
     
-    unsigned long Text::getNumberOfLines() const noexcept
+    ulong Text::getNumberOfLines() const noexcept
     {
         if(isEmpty())
         {
@@ -54,7 +54,7 @@ namespace Kiwi
         }
         else
         {
-            unsigned long nlines = 1;
+            ulong nlines = 1;
             string::size_type pos = string::npos;
             while((pos = m_text.find('\n', pos)) != string::npos)
             {

@@ -102,7 +102,7 @@ namespace Kiwi
         {
             if(dico)
             {
-                unsigned long current_box_id = m_boxe_id;
+                ulong current_box_id = m_boxe_id;
                 m_boxe_id = oldbox->getId();
                 sBox newbox = Box::create(getShared(), dico);
                 m_boxe_id = current_box_id;
@@ -257,7 +257,7 @@ namespace Kiwi
     {
         if(dico)
         {
-            map<unsigned long, unsigned long> m_ids_mapper;
+            map<ulong, ulong> m_ids_mapper;
             ElemVector boxes;
             dico->get(Tag_boxes, boxes);
             for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
@@ -272,7 +272,7 @@ namespace Kiwi
                     
                         if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
                         {
-                            unsigned long _id = subdico->get(Box::Tag_id);
+                            ulong _id = subdico->get(Box::Tag_id);
                             if(box->getId() != _id)
                             {
                                 m_ids_mapper[_id] = box->getId();
@@ -296,17 +296,17 @@ namespace Kiwi
                         subdico->get(Link::Tag_from, elem);
                         if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
                         {
-                            if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+                            if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
                             {
-                                subdico->set(Link::Tag_from, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+                                subdico->set(Link::Tag_from, {m_ids_mapper[(ulong)elem[0]], elem[1]});
                             }
                         }
                         subdico->get(Link::Tag_to, elem);
                         if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
                         {
-                            if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+                            if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
                             {
-                                subdico->set(Link::Tag_to, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+                                subdico->set(Link::Tag_to, {m_ids_mapper[(ulong)elem[0]], elem[1]});
                             }
                         }
                         createLink(subdico);
@@ -363,18 +363,22 @@ namespace Kiwi
         }
     }
     
-    bool Page::startDsp(unsigned long samplerate, unsigned long vectorsize)
+    bool Page::startDsp(ulong samplerate, ulong vectorsize)
     {
         /*
         m_dsp_context->clear();
         m_dsp_context->setSamplerate(samplerate);
         m_dsp_context->setVectorsize((long)vectorsize);
-        
+        */
         for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
-            m_dsp_context->addBox((*it));
+            Dsp::sProcess process = dynamic_pointer_cast<Dsp::Process>((*it));
+            if(process)
+            {
+                m_dsp_context->add(process);
+            }
         }
-        
+        /*
         for(auto it = m_links.begin(); it != m_links.end(); ++it)
         {
             m_dsp_context->addConnection((*it));
@@ -1121,7 +1125,7 @@ namespace Kiwi
 		bool pageModified = false;
 		if (page)
 		{
-			map<unsigned long, unsigned long> m_ids_mapper;
+			map<ulong, ulong> m_ids_mapper;
 			ElemVector boxes;
 			dico->get(Tag_boxes, boxes);
 			for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
@@ -1140,7 +1144,7 @@ namespace Kiwi
 							
 							if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
 							{
-								unsigned long _id = subdico->get(Box::Tag_id);
+								ulong _id = subdico->get(Box::Tag_id);
 								if(box->getId() != _id)
 								{
 									m_ids_mapper[_id] = box->getId();
@@ -1167,17 +1171,17 @@ namespace Kiwi
 						subdico->get(Link::Tag_from, elem);
 						if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
 						{
-							if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+							if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
 							{
-								subdico->set(Link::Tag_from, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+								subdico->set(Link::Tag_from, {m_ids_mapper[(ulong)elem[0]], elem[1]});
 							}
 						}
 						subdico->get(Link::Tag_to, elem);
 						if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
 						{
-							if(m_ids_mapper.find((unsigned long)elem[0]) != m_ids_mapper.end())
+							if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
 							{
-								subdico->set(Link::Tag_to, {m_ids_mapper[(unsigned long)elem[0]], elem[1]});
+								subdico->set(Link::Tag_to, {m_ids_mapper[(ulong)elem[0]], elem[1]});
 							}
 						}
 						page->createLink(subdico);

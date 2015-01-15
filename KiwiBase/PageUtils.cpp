@@ -220,7 +220,7 @@ namespace Kiwi
                     Box::sController boxctrl = boxes[i]->getController();
                     if(boxctrl && inlet)
                     {
-                        for(unsigned long j = 0; j <  boxes[i]->getNumberOfInlets(); j++)
+                        for(ulong j = 0; j <  boxes[i]->getNumberOfInlets(); j++)
                         {
                             const double cdistance = point.distance(boxctrl->getInletPosition(j));
                             if(cdistance < ndistance)
@@ -233,7 +233,7 @@ namespace Kiwi
                     }
                     else if(boxctrl)
                     {
-                        for(unsigned long j = 0; j <  boxes[i]->getNumberOfOutlets(); j++)
+                        for(ulong j = 0; j <  boxes[i]->getNumberOfOutlets(); j++)
                         {
                             const double cdistance = point.distance(boxctrl->getOutletPosition(j));
                             if(cdistance < ndistance)
@@ -412,7 +412,7 @@ namespace Kiwi
 		;
 	}
 	
-	void IoletHighlighter::highlightInlet(sBox box, unsigned long index)
+	void IoletHighlighter::highlightInlet(sBox box, ulong index)
 	{
 		if(box)
 		{
@@ -431,7 +431,7 @@ namespace Kiwi
 		}
 	}
 	
-	void IoletHighlighter::highlightOutlet(sBox box, unsigned long index)
+	void IoletHighlighter::highlightOutlet(sBox box, ulong index)
 	{
 		if(box)
 		{

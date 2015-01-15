@@ -31,7 +31,7 @@ namespace Kiwi
     //                                      INLET                                       //
     // ================================================================================ //
     
-    bool Iolet::has(sBox box, unsigned long index) const noexcept
+    bool Iolet::has(sBox box, ulong index) const noexcept
     {
         if(box)
         {
@@ -48,7 +48,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Iolet::append(sBox box, unsigned long index) noexcept
+    bool Iolet::append(sBox box, ulong index) noexcept
     {
         if(box)
         {
@@ -69,7 +69,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Iolet::erase(sBox box, unsigned long index) noexcept
+    bool Iolet::erase(sBox box, ulong index) noexcept
     {
         if(box)
         {
@@ -100,7 +100,7 @@ namespace Kiwi
         for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
         {
             sBox receiver       = m_connections[i].box.lock();
-            unsigned long inlet  = m_connections[i].index;
+            ulong inlet  = m_connections[i].index;
             if(receiver)
             {
                 if(++receiver->m_stack_count < 256)

@@ -69,10 +69,10 @@ namespace Kiwi
         /** The function retrieves the number of boxes in the binding list of the beacon.
          @return The number of boxes binded to the beacon.
          */
-        inline unsigned long size() const noexcept
+        inline ulong size() const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
-            return (unsigned long)m_boxes.size();
+            return (ulong)m_boxes.size();
         }
         
         //! Retrieve an box from the binding list of the beacon.
@@ -80,7 +80,7 @@ namespace Kiwi
          @param index   The position of the box in the binding list from 0 to the number of boxes in the binding list -1.
          @return        The pointer of the binded boxes or NULL is the index is less than 0 or greater or equal to the number of boxes in the binding list.
          */
-        inline sBox getBox(unsigned long index) const noexcept
+        inline sBox getBox(ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             if(index < m_boxes.size())

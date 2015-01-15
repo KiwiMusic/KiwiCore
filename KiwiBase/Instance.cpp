@@ -156,7 +156,7 @@ namespace Kiwi
         pages.assign(m_pages.begin(), m_pages.end());
     }
     
-    void Instance::startDsp(unsigned long samplerate, unsigned long vectorsize)
+    void Instance::startDsp(ulong samplerate, ulong vectorsize)
     {
         if(m_dsp_running)
         {

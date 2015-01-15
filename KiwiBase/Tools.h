@@ -26,7 +26,6 @@
 
 #include "Defs.h"
 #include "ToolsMath.h"
-#include "ToolsSignal.h"
 
 namespace Kiwi
 {
@@ -66,7 +65,7 @@ namespace Kiwi
         return to_string(__val);
     }
     
-    inline string toString(unsigned long __val)
+    inline string toString(ulong __val)
     {
         return to_string(__val);
     }

@@ -27,14 +27,13 @@
 #include "Box.h"
 #include "AttributePage.h"
 #include "PageUtils.h"
+#include "../KiwiDsp/Context.h"
 
 // TODO
 // - Add the attributes
 // - Dsp & Mutex for Dsp
 namespace Kiwi
 {
-    class DspContext;
-    
     // ================================================================================ //
     //                                      PAGE                                        //
     // ================================================================================ //
@@ -47,7 +46,7 @@ namespace Kiwi
 	{
     public:
         class Listener;
-        friend Box::Box(sPage page, string const& name, unsigned long flags);
+        friend Box::Box(sPage page, string const& name, ulong flags);
 		
 		class Controller;
 		typedef shared_ptr<Controller>			sController;
@@ -57,12 +56,12 @@ namespace Kiwi
     private:
         const wInstance             m_instance;
         
-        shared_ptr<DspContext>      m_dsp_context;
+        Dsp::sContext               m_dsp_context;
         atomic_bool                 m_dsp_running;
         
         vector<sBox>                m_boxes;
         mutable mutex               m_boxes_mutex;
-        unsigned long               m_boxe_id;
+        ulong               m_boxe_id;
         
         vector<sLink>               m_links;
         mutable mutex               m_links_mutex;
@@ -129,7 +128,7 @@ namespace Kiwi
         /** The function retrieves the number of boxes in the page.
          @return The number of boxes in the page.
          */
-        inline unsigned long getNumberOfBoxes() const noexcept
+        inline ulong getNumberOfBoxes() const noexcept
         {
             lock_guard<mutex> guard(m_boxes_mutex);
             return m_boxes.size();
@@ -149,7 +148,7 @@ namespace Kiwi
         /** The function retrieves the number of links in the page.
          @return The number of links in the page.
          */
-        inline unsigned long getNumberOfLinks() const noexcept
+        inline ulong getNumberOfLinks() const noexcept
         {
             lock_guard<mutex> guard(m_links_mutex);
             return m_links.size();
@@ -256,7 +255,7 @@ namespace Kiwi
          @param vectorsize The vector size of the signal.
          @return true if the page can process signal.
          */
-        bool startDsp(unsigned long samplerate, unsigned long vectorsize);
+        bool startDsp(ulong samplerate, ulong vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain.

@@ -136,7 +136,7 @@ namespace Kiwi
         //! Constructor with a long value.
         /** The function allocates the element with a long value.
          */
-        Element(const unsigned long value) noexcept
+        Element(const ulong value) noexcept
         {
             m_type = LONG;
             m_val.m_long = (long)value;
@@ -380,15 +380,15 @@ namespace Kiwi
         /** The function casts the element to a long.
          @return A long value if the element is a digit otherwise 0.
          */
-        inline operator unsigned long() const noexcept
+        inline operator ulong() const noexcept
         {
             if(m_type == LONG)
             {
-                return (unsigned long)m_val.m_long;
+                return (ulong)m_val.m_long;
             }
             else if(m_type == DOUBLE)
             {
-                return (unsigned long)m_val.m_double;
+                return (ulong)m_val.m_double;
             }
             else
             {
@@ -540,12 +540,12 @@ namespace Kiwi
             return *this;
         }
         
-        //! Set up the element with a unsigned long value.
-        /** The function sets up the element with a unsigned long value.
-         @param value   The unsigned long value.
+        //! Set up the element with a ulong value.
+        /** The function sets up the element with a ulong value.
+         @param value   The ulong value.
          @return An element.
          */
-        inline Element& operator=(const unsigned long value) noexcept
+        inline Element& operator=(const ulong value) noexcept
         {
             changeType(LONG);
             m_val.m_long = (long)value;
@@ -707,12 +707,12 @@ namespace Kiwi
             return m_type == LONG && m_val.m_long == value;
         }
         
-        //! Compare the element with an unsigned long value.
+        //! Compare the element with an ulong value.
         /** The function compares the element with an unsigned  long.
-         @param value   The unsigned long value.
-         @return true if the element hold the unsigned long value otherwise false.
+         @param value   The ulong value.
+         @return true if the element hold the ulong value otherwise false.
          */
-        inline bool operator==(const unsigned long value) const noexcept
+        inline bool operator==(const ulong value) const noexcept
         {
             return m_type == LONG && m_val.m_long == (long)value;
         }

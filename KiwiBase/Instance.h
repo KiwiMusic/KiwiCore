@@ -113,7 +113,7 @@ namespace Kiwi
          @see tickDsp()
          @see stopDsp()
          */
-        void startDsp(unsigned long samplerate, unsigned long vectorsize);
+        void startDsp(ulong samplerate, ulong vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain of all the pages.
@@ -156,7 +156,7 @@ namespace Kiwi
          @see getVectorSize()
          @see startDsp()
          */
-        inline unsigned long getSampleRate() const noexcept
+        inline ulong getSampleRate() const noexcept
         {
             return m_sample_rate;
         }
@@ -167,7 +167,7 @@ namespace Kiwi
          @see getSampleRate()
          @see startDsp()
          */
-        inline unsigned long getVectorSize() const noexcept
+        inline ulong getVectorSize() const noexcept
         {
             return m_vector_size;
         }

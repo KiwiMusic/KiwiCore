@@ -86,9 +86,9 @@ namespace Kiwi
         /** The function retrieves the number of nodes of the path.
          @return The number of nodes of the path.
          */
-        unsigned long size() const noexcept
+        ulong size() const noexcept
         {
-            return (unsigned long)m_points.size();
+            return (ulong)m_points.size();
         }
         
         //! Retrieve if the path is empty.
@@ -105,9 +105,9 @@ namespace Kiwi
          @param  index The index of the node.
          @return The node.
          */
-        Node getNode(unsigned long index) const noexcept
+        Node getNode(ulong index) const noexcept
         {
-            if(index < (unsigned long)m_points.size())
+            if(index < (ulong)m_points.size())
             {
                 return m_points[(vector<Node>::size_type)index];
             }
@@ -122,9 +122,9 @@ namespace Kiwi
          @param  index The index of the mode.
          @return The mode.
          */
-        Mode getMode(unsigned long index) const noexcept
+        Mode getMode(ulong index) const noexcept
         {
-            if(index < (unsigned long)m_points.size())
+            if(index < (ulong)m_points.size())
             {
                 return m_points[(vector<Node>::size_type)index].mode;
             }
@@ -139,9 +139,9 @@ namespace Kiwi
          @param  index The index of the point.
          @return The point.
          */
-        Point getPoint(unsigned long index) const noexcept
+        Point getPoint(ulong index) const noexcept
         {
-            if(index < (unsigned long)m_points.size())
+            if(index < (ulong)m_points.size())
             {
                 return m_points[(vector<Node>::size_type)index].point;
             }
@@ -188,7 +188,7 @@ namespace Kiwi
 		 @param index The index of the point to replace.
 		 @param The new point.
 		 */
-		void setPoint(unsigned long index, Point const& pt) noexcept;
+		void setPoint(ulong index, Point const& pt) noexcept;
         
         //! Retrieve the position of the path.
         /** The function retrieves the position of the path. The position point will be the top left point of the smallest rectangle that contains all the points.

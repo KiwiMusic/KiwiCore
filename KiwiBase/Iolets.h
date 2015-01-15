@@ -51,7 +51,7 @@ namespace Kiwi
         struct Connection
         {
             wBox box;
-            unsigned long index;
+            ulong index;
             bool operator<(Connection const& other) const noexcept;
         };
         
@@ -70,7 +70,7 @@ namespace Kiwi
          @param index the iolet's index.
          @return true if the connection is in the iolet, otherwise false.
          */
-        bool has(sBox box, unsigned long index) const noexcept;
+        bool has(sBox box, ulong index) const noexcept;
         
         //! Append a new connection to the iolet.
         /** The functions appends a new connection to the iolet.
@@ -78,7 +78,7 @@ namespace Kiwi
          @param index the iolet's index.
          @return true if the connection has been added, otherwise false.
          */
-        bool append(sBox box, unsigned long index) noexcept;
+        bool append(sBox box, ulong index) noexcept;
         
         //! Remove a connection from the iolet.
         /** The functions removes a connection from the iolet.
@@ -86,7 +86,7 @@ namespace Kiwi
          @param index the iolet's index.
          @return true if the connection has been removed, otherwise false.
          */
-        bool erase(sBox box, unsigned long index) noexcept;
+        bool erase(sBox box, ulong index) noexcept;
         
     public:
         //! Constructor.
@@ -139,10 +139,10 @@ namespace Kiwi
         /** The functions retrieves the number of connections of the iolet.
          @return The number of connections.
          */
-        inline unsigned long getNumberOfConnection() const noexcept
+        inline ulong getNumberOfConnection() const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
-            return (unsigned long)m_connections.size();
+            return (ulong)m_connections.size();
         }
         
         //! Retrieve the a connection.
@@ -150,10 +150,10 @@ namespace Kiwi
          @param index The index of the connection.
          @return The connection.
          */
-        inline Connection getConnection(unsigned long index) const noexcept
+        inline Connection getConnection(ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
-            if(index < (unsigned long)m_connections.size())
+            if(index < (ulong)m_connections.size())
             {
                 return m_connections[(vector<Connection>::size_type)index];
             }
@@ -168,10 +168,10 @@ namespace Kiwi
          @param index The index of the connection.
          @return The box of a connection.
          */
-        inline sBox getBox(unsigned long index) const noexcept
+        inline sBox getBox(ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
-            if(index < (unsigned long)m_connections.size())
+            if(index < (ulong)m_connections.size())
             {
                 return m_connections[(vector<Connection>::size_type)index].box.lock();
             }
@@ -186,10 +186,10 @@ namespace Kiwi
          @param index The index of the connection.
          @return The iolet's index of a connection.
          */
-        inline unsigned long getIndex(unsigned long index) const noexcept
+        inline ulong getIndex(ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
-            if(index < (unsigned long)m_connections.size())
+            if(index < (ulong)m_connections.size())
             {
                 return m_connections[(vector<Connection>::size_type)index].index;
             }
