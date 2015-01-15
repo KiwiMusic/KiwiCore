@@ -38,7 +38,7 @@ namespace Kiwi
     
     Page::Page(sInstance instance) :
     m_instance(instance),
-    m_dsp_context(nullptr),
+    //m_dsp_context(nullptr),
     m_boxe_id(1)
     {
         ;
@@ -370,6 +370,7 @@ namespace Kiwi
         m_dsp_context->setSamplerate(samplerate);
         m_dsp_context->setVectorsize((long)vectorsize);
         */
+		/*
         for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
             Dsp::sProcess process = dynamic_pointer_cast<Dsp::Process>((*it));
@@ -378,6 +379,7 @@ namespace Kiwi
                 m_dsp_context->add(process);
             }
         }
+		*/
         /*
         for(auto it = m_links.begin(); it != m_links.end(); ++it)
         {
