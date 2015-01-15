@@ -41,7 +41,7 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(sPage page, string const& name, ulong flags) :
+    Box::Box(sPage page, string const& name, unsigned long flags) :
     m_instance(page ? page->m_instance : weak_ptr<Instance>()),
     m_page(page),
     m_name(Tag::create(name)),
@@ -135,7 +135,7 @@ namespace Kiwi
         }
     }
     
-    void Box::send(ulong index, ElemVector const& elements) const noexcept
+    void Box::send(unsigned long index, ElemVector const& elements) const noexcept
     {
         m_io_mutex.lock();
         if(index < m_outlets.size())
@@ -151,7 +151,7 @@ namespace Kiwi
         {
             return false;
         }
-        if(attr == AttrBox::appearance_position)
+        if(attr == AttrBox::attr_position)
         {
             sController controller = getController();
             if(controller)
@@ -159,7 +159,7 @@ namespace Kiwi
                 controller->positionChanged();
             }
         }
-        else if(attr == AttrBox::appearance_size)
+        else if(attr == AttrBox::attr_size)
         {
             sController controller = getController();
             if(controller)
@@ -199,7 +199,7 @@ namespace Kiwi
         
     }
     
-    void Box::insertInlet(ulong index, Iolet::Type type, Iolet::Polarity polarity, string const& description)
+    void Box::insertInlet(unsigned long index, Iolet::Type type, Iolet::Polarity polarity, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
         sInlet inlet = Inlet::create(type, polarity, description);
@@ -223,7 +223,7 @@ namespace Kiwi
         }
     }
     
-    void Box::removeInlet(ulong index)
+    void Box::removeInlet(unsigned long index)
     {
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_inlets.size())
@@ -233,7 +233,7 @@ namespace Kiwi
             {
                 int zaza;
                 /*
-                for(ulong i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
+                for(unsigned long i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
                 {
                     page->removeLink(m_inlets[index]->getLink(i));
                 }
@@ -270,7 +270,7 @@ namespace Kiwi
         }
     }
     
-    void Box::insertOutlet(ulong index, Iolet::Type type, string const& description)
+    void Box::insertOutlet(unsigned long index, Iolet::Type type, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
         sOutlet outlet = Outlet::create(type, description);
@@ -294,7 +294,7 @@ namespace Kiwi
         
     }
     
-    void Box::removeOutlet(ulong index)
+    void Box::removeOutlet(unsigned long index)
     {
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_outlets.size())
@@ -304,7 +304,7 @@ namespace Kiwi
             {
                 int zaza;
                 /*
-                for(ulong i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
+                for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
                 {
                     page->removeLink(m_outlets[index]->getLink(i));
                 }*/
@@ -365,9 +365,9 @@ namespace Kiwi
 #define KIO_HEIGHT 3.
 #define KIO_WIDTH 5.
     
-    Point Box::Controller::getInletPosition(ulong index) const noexcept
+    Point Box::Controller::getInletPosition(unsigned long index) const noexcept
     {
-        const ulong ninlets = m_box->getNumberOfInlets();
+        const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
         {
             const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
@@ -376,9 +376,9 @@ namespace Kiwi
         return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
     }
     
-    Point Box::Controller::getOutletPosition(ulong index) const noexcept
+    Point Box::Controller::getOutletPosition(unsigned long index) const noexcept
     {
-        const ulong ninlets = m_box->getNumberOfInlets();
+        const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
         {
             const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
@@ -389,127 +389,112 @@ namespace Kiwi
     
     bool Box::Controller::contains(Point const& pt, Knock& knock) const noexcept
     {
-		// test resizer
 		const Rectangle bounds = m_box->getBounds();
-		if(getBounds().contains(pt))
+		
+		// test resizer
+		if(isSelected() && getBounds().contains(pt))
 		{
-			bool inside = false;
+			const Point localPoint = pt - getPosition();
+			const double size = getFrameSize();
 			
-			const Point rectSize = Point(8, 8);
-			const Rectangle top_left_rect = Rectangle::withCentre(bounds.position(), rectSize);
-			const Rectangle top_right_rect = Rectangle::withCentre(Point(bounds.x() + bounds.width(), bounds.y()), rectSize);
-			const Rectangle bottom_right_rect = Rectangle::withCentre(Point(bounds.x() + bounds.width(), bounds.y() + bounds.height()), rectSize);
-			const Rectangle bottom_left_rect = Rectangle::withCentre(Point(bounds.x(), bounds.y() + bounds.height()), rectSize);
-			
-			// test corners
-			if(top_left_rect.contains(pt))
+			if(localPoint.y() <= size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::TopLeft;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Top;
 			}
-			else if(top_right_rect.contains(pt))
+			if(localPoint.x() >= getSize().x() - size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::TopRight;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Right;
 			}
-			else if(bottom_right_rect.contains(pt))
+			if(localPoint.y() >= getSize().y() - size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::BottomRight;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Bottom;
 			}
-			else if(bottom_left_rect.contains(pt))
+			if(localPoint.x() <= size)
 			{
-				inside = true;
-				knock.m_part = Knock::Corner;
-				knock.m_corner = Knock::BottomLeft;
+				knock.m_part = Knock::Border;
+				knock.m_border |= Knock::Left;
 			}
-			
-			if(inside)
+
+			if(knock.m_part == Knock::Border)
 			{
+				knock.m_border &= ~Knock::None;
 				knock.m_box = m_box;
 				return true;
 			}
 		}
 		
-		
         if(bounds.contains(pt))
         {
-            if(pt.y() < bounds.y() + KIO_HEIGHT)
-            {
-                const ulong ninlets = m_box->getNumberOfInlets();
-                if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Inlet;
-                    knock.m_index   = 0;
-                    return true;
-                }
-                else if(ninlets > 1)
-                {
-                    const double ratio = (bounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
-                    for(ulong i = 1; i < ninlets; i++)
-                    {
-                        double val = ratio * i + bounds.x();
-                        if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
-                        {
-                            knock.m_box     = m_box;
-                            knock.m_part    = Knock::Inlet;
-                            knock.m_index   = i;
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Inside;
-                    knock.m_index   = 0;
-                    return true;
-                }
-            }
-            else if(pt.y() > bounds.y() + bounds.height() - KIO_HEIGHT)
-            {
-                const ulong noutlets = m_box->getNumberOfOutlets();
-                if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Outlet;
-                    knock.m_index   = 0;
-                    return true;
-                }
-                else if(noutlets > 1)
-                {
-                    const double ratio = (bounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
-                    for(ulong i = 1; i < noutlets; i++)
-                    {
-                        double val = ratio * i + bounds.x();
-                        if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
-                        {
-                            knock.m_box     = m_box;
-                            knock.m_part    = Knock::Outlet;
-                            knock.m_index   = i;
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    knock.m_box     = m_box;
-                    knock.m_part    = Knock::Inside;
-                    knock.m_index   = 0;
-                    return true;
-                }
-            }
-            else
-            {
-                knock.m_box     = m_box;
-                knock.m_part    = Knock::Inside;
-                knock.m_index   = 0;
-            }
-            return true;
+			knock.m_box     = m_box;
+			knock.m_part    = Knock::Inside;
+			knock.m_index   = 0;
+			
+			if(!isSelected())
+			{
+				if(pt.y() < bounds.y() + KIO_HEIGHT)
+				{
+					const unsigned long ninlets = m_box->getNumberOfInlets();
+					if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
+					{
+						knock.m_box     = m_box;
+						knock.m_part    = Knock::Inlet;
+						knock.m_index   = 0;
+						return true;
+					}
+					else if(ninlets > 1)
+					{
+						const double ratio = (bounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
+						for(unsigned long i = 1; i < ninlets; i++)
+						{
+							double val = ratio * i + bounds.x();
+							if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
+							{
+								knock.m_box     = m_box;
+								knock.m_part    = Knock::Inlet;
+								knock.m_index   = i;
+								return true;
+							}
+						}
+					}
+				}
+				else if(pt.y() > bounds.y() + bounds.height() - KIO_HEIGHT)
+				{
+					const unsigned long noutlets = m_box->getNumberOfOutlets();
+					if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
+					{
+						knock.m_box     = m_box;
+						knock.m_part    = Knock::Outlet;
+						knock.m_index   = 0;
+						return true;
+					}
+					else if(noutlets > 1)
+					{
+						const double ratio = (bounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
+						for(unsigned long i = 1; i < noutlets; i++)
+						{
+							double val = ratio * i + bounds.x();
+							if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
+							{
+								knock.m_box     = m_box;
+								knock.m_part    = Knock::Outlet;
+								knock.m_index   = i;
+								return true;
+							}
+						}
+					}
+					else
+					{
+						knock.m_box     = m_box;
+						knock.m_part    = Knock::Inside;
+						knock.m_index   = 0;
+						return true;
+					}
+				}
+			}
+			return true;
         }
         knock.m_box.reset();
         knock.m_part    = Knock::Outside;
@@ -554,8 +539,8 @@ namespace Kiwi
 				{
 					if(!selected)
 					{
-						const ulong ninlets = box->getNumberOfInlets();
-						const ulong noutlets= box->getNumberOfOutlets();
+						const unsigned long ninlets = box->getNumberOfInlets();
+						const unsigned long noutlets= box->getNumberOfOutlets();
 						
 						if(ninlets)
 						{
@@ -565,7 +550,7 @@ namespace Kiwi
 						if(ninlets > 1)
 						{
 							const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
-							for(ulong i = 1; i < ninlets; i++)
+							for(unsigned long i = 1; i < ninlets; i++)
 							{
 								d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y(), KIO_WIDTH, KIO_HEIGHT);
 							}
@@ -579,7 +564,7 @@ namespace Kiwi
 						if(noutlets > 1)
 						{
 							const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
-							for(ulong i = 1; i < noutlets; i--)
+							for(unsigned long i = 1; i < noutlets; i--)
 							{
 								d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y() + boxBounds.height() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT);
 							}

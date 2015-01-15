@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse | GrowY),
+    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse),
     m_color_circle(Attr::create<AttrColor>(Tag::create("circlecolor"),
                                             Tag::create("Circle Color"),
                                             Tag::create("Color"),
@@ -47,6 +47,8 @@ namespace Kiwi
         addAttribute(m_color_circle);
         addAttribute(m_color_led);
         setAttributeDefaultValues(Tag_size, {20., 20.});
+		setSizeLimits(Point(10, 10));
+		setSizeRatio(1.);
     }
     
     Bang::~Bang()
@@ -116,20 +118,7 @@ namespace Kiwi
     
     bool Bang::attributeChanged(sAttr attr)
     {
-		if(attr == AttrBox::appearance_size)
-		{
-			Point size = getSize();
-			if(size.x() < 10. || size.y() < 10.)
-			{
-				setAttributeValue(AttrBox::Tag_size, ElemVector(10., 10.));
-			}
-			else if(size.x() != size.y())
-			{
-				setAttributeValue(AttrBox::Tag_size, ElemVector(size.x(), size.x()));
-			}
-			
-		}
-        else if(attr == m_color_circle)
+        if(attr == m_color_circle)
         {
             redraw();
         }
@@ -140,7 +129,7 @@ namespace Kiwi
     //                                      TOGGLE                                      //
     // ================================================================================ //
     
-    Toggle::Toggle(sPage page) : Box(page, "toggle", Graphic | Mouse | GrowY),
+    Toggle::Toggle(sPage page) : Box(page, "toggle", Graphic | Mouse),
     m_color_cross_on(Attr::create<AttrColor>(Tag::create("crosscoloron"),
                                             Tag::create("Cross Color On"),
                                             Tag::create("Color"),
@@ -156,6 +145,8 @@ namespace Kiwi
         addAttribute(m_color_cross_on);
         addAttribute(m_color_cross_off);
         setAttributeDefaultValues(Tag_size, {20., 20.});
+		setSizeLimits(Point(10, 10));
+		setSizeRatio(1.);
     }
     
     Toggle::~Toggle()
@@ -304,9 +295,9 @@ namespace Kiwi
     
     bool Message::attributeChanged(sAttr attr)
     {
-        if(attr == appearance_size)
+        if(attr == attr_size)
         {
-            Text::Editor::setSize(appearance_size->get());
+            Text::Editor::setSize(attr_size->get());
         }
         else if(attr == color_text)
         {
@@ -328,7 +319,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard | GrowY),
+    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard),
     m_value(0.),
     m_increment(0.),
     m_last_y(0.),
@@ -556,9 +547,9 @@ namespace Kiwi
     
     bool Number::attributeChanged(sAttr attr)
     {
-        if(attr == appearance_size)
+        if(attr == attr_size)
         {
-            Text::Editor::setSize(appearance_size->get());
+            Text::Editor::setSize(attr_size->get());
         }
         else if(attr == color_text)
         {
@@ -726,5 +717,57 @@ namespace Kiwi
         }
         return true;
     }
+	
+	// ================================================================================ //
+	//                                      PANEL                                       //
+	// ================================================================================ //
+	
+	Panel::Panel(sPage page) : Box(page, "panel", Graphic),
+	m_border_size(Attr::create<AttrLong>(Tag::create("border"),
+										  Tag::create("Border Size"),
+										  AttrBox::Tag_Appearance,
+										  0)),
+	m_border_radius(Attr::create<AttrLong>(Tag::create("rounded"),
+											Tag::create("Border Radius"),
+											AttrBox::Tag_Appearance,
+											0))
+	{
+		addInlet(Iolet::Message, Iolet::Hot, "Messages");
+		addAttribute(m_border_radius);
+		addAttribute(m_border_size);
+		setAttributeDefaultValues(Tag_size, {120., 120.});
+		setAttributeDefaultValues(Tag_bgcolor, {0.44, 0.44, 0.44, 1.});
+		setAttributeDefaultValues(Tag_bdcolor, {0.3, 0.3, 0.3, 1.});
+	}
+	
+	bool Panel::receive(unsigned long index, ElemVector const& elements)
+	{
+		return false;
+	}
+
+	bool Panel::draw(Doodle& d) const
+	{
+		const long borderSize = m_border_size->get();
+		const long radius = m_border_radius->get();
+		const Rectangle rect = d.getBounds().reduced(borderSize);
+		
+		d.setColor(getBackgroundColor());
+		d.fillRectangle(rect, radius);
+		
+		d.setColor(getBorderColor());
+		d.drawRectangle(rect, borderSize, radius);
+		
+		return true;
+	}
+	
+	bool Panel::attributeChanged(sAttr attr)
+	{
+		if(attr == m_border_radius || attr == m_border_size)
+		{
+			redraw();
+		}
+		return true;
+	}
+
 }
 

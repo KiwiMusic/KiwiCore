@@ -320,6 +320,10 @@ namespace Kiwi
 			owner_less<Link::wController>>	m_links_selected;
 			mutable mutex					m_links_selected_mutex;
 			
+			map<Box::wController,
+			Rectangle,
+			owner_less<Box::wController>>	m_last_bounds;
+			
 			long m_zoom;
 			bool m_locked;
 			bool m_presentation;
@@ -620,11 +624,21 @@ namespace Kiwi
 			 */
 			void moveSelectedBoxes(Point const& delta);
 			
+			//! Start resizing boxes.
+			/** Call this function before to call resizeSelectedBoxes.
+			 */
+			void startMoveOrResizeBoxes();
+			
 			//! Resizes the boxes that are currently selected by given value.
 			/** The function moves the boxes that are currently selected by given value.
 			 @param delta A shift amount delta.
 			 */
-			void resizeSelectedBoxes(Point const& delta, enum Knock::Corner corner);
+			void resizeSelectedBoxes(Point const& delta, const long borderFlags, const bool preserveRatio = false);
+			
+			//! end resizing boxes.
+			/** Call this function after resizeSelectedBoxes.
+			 */
+			void endMoveOrResizeBoxes();
 			
 			//! Retrieve the selected boxes (including links) as a dico
 			/** The function retrieve the selected boxes (including links) as a dico.

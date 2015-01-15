@@ -58,10 +58,7 @@ namespace Kiwi
             Signal      = 1<<1,
             Mouse       = 1<<2,
             Keyboard    = 1<<3,
-            Graphic     = 1<<4,
-			
-			GrowY		= 1<<5,
-			GrowBoth	= 1<<6,
+            Graphic     = 1<<4
         };
         
     private:
@@ -533,7 +530,7 @@ namespace Kiwi
             /** The function retrieves if the box is selected.
              @param true if the box is selected, otherwise false.
              */
-            inline bool getSelectedStatus() const noexcept
+            inline bool isSelected() const noexcept
             {
                 return m_selected;
             }

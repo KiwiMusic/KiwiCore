@@ -92,12 +92,12 @@ namespace Kiwi
         const shared_ptr<AttrLong>      attr_noutlets;
         
         // Appearance //
-        const shared_ptr<AttrPoint>     appearance_position;
-        const shared_ptr<AttrPoint>     appearance_size;
-        const shared_ptr<AttrPoint>     appearance_presentation_position;
-        const shared_ptr<AttrPoint>     appearance_presentation_size;
-        const shared_ptr<AttrBool>      appearance_hidden;
-        const shared_ptr<AttrBool>      appearance_presentation;
+        const shared_ptr<AttrPoint>     attr_position;
+        const shared_ptr<AttrSize>		attr_size;
+        const shared_ptr<AttrPoint>     attr_presentation_position;
+        const shared_ptr<AttrSize>		attr_presentation_size;
+        const shared_ptr<AttrBool>      attr_hidden;
+        const shared_ptr<AttrBool>      attr_presentation;
         
         // Font //
         const shared_ptr<AttrTag>       font_name;
@@ -116,12 +116,12 @@ namespace Kiwi
         attr_noutlets(Attr::create<AttrLong>(Tag_noutlets, nullptr, nullptr, 0, Attr::Invisible)),
         
         // Appearance //
-        appearance_position(Attr::create<AttrPoint>(Tag_position, Tag_Position, Tag_Appearance)),
-        appearance_size(Attr::create<AttrPoint>(Tag_size, Tag_Size, Tag_Appearance, (ElemVector){100., 20.})),
-        appearance_presentation_position(Attr::create<AttrPoint>(Tag_presentation_position, Tag_Presentation_Position, Tag_Appearance)),
-        appearance_presentation_size(Attr::create<AttrPoint>(Tag_presentation_size, Tag_Presentation_Size, Tag_Appearance)),
-        appearance_hidden(Attr::create<AttrBool>(Tag_hidden, Tag_Hide_on_Lock, Tag_Appearance, false)),
-        appearance_presentation(Attr::create<AttrBool>(Tag_presentation,  Tag_Include_in_Presentation, Tag_Appearance, false)),
+        attr_position(Attr::create<AttrPoint>(Tag_position, Tag_Position, Tag_Appearance)),
+        attr_size(Attr::create<AttrSize>(Tag_size, Tag_Size, Tag_Appearance, (ElemVector){100., 20.})),
+        attr_presentation_position(Attr::create<AttrPoint>(Tag_presentation_position, Tag_Presentation_Position, Tag_Appearance)),
+        attr_presentation_size(Attr::create<AttrSize>(Tag_presentation_size, Tag_Presentation_Size, Tag_Appearance)),
+        attr_hidden(Attr::create<AttrBool>(Tag_hidden, Tag_Hide_on_Lock, Tag_Appearance, false)),
+        attr_presentation(Attr::create<AttrBool>(Tag_presentation,  Tag_Include_in_Presentation, Tag_Appearance, false)),
         
         // Font //
         font_name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
@@ -135,12 +135,12 @@ namespace Kiwi
         color_text(Attr::create<AttrColor>(Tag_textcolor, Tag_Text_Color, Tag_Color, (ElemVector){0.3, 0.3, 0.3, 1.}))
         {
             // Appearance //
-            addAttribute(appearance_position);
-            addAttribute(appearance_size);
-            addAttribute(appearance_presentation_position);
-            addAttribute(appearance_presentation_size);
-            addAttribute(appearance_hidden);
-            addAttribute(appearance_presentation);
+            addAttribute(attr_position);
+            addAttribute(attr_size);
+            addAttribute(attr_presentation_position);
+            addAttribute(attr_presentation_size);
+            addAttribute(attr_hidden);
+            addAttribute(attr_presentation);
             
             // Font //
             addAttribute(font_name);
@@ -163,28 +163,88 @@ namespace Kiwi
         /** The function retrieves the size of the box as a point.
          @return The size of the box as a point.
          */
-        inline Point getPosition() const noexcept
+        inline Point getPosition(const bool edition = true) const noexcept
         {
-            return appearance_position->get();
+			if(edition)
+				return attr_position->get();
+			else
+				return attr_presentation_position->get();
         }
         
         //! Retrieve the size of the box.
         /** The function retrieves the size of the box as a point.
+		 @param edition
          @return The size of the box as a point.
          */
-        inline Point getSize() const noexcept
+        inline Point getSize(const bool edition = true) const noexcept
         {
-            return appearance_size->get();
+			if(edition)
+				return attr_size->get();
+			else
+				return attr_presentation_size->get();
         }
     
         //! Retrieve the bounds of the box.
         /** The function retrieves the bounds of the box as a rectangle.
          @return The bounds of the box as a rectangle.
          */
-        inline Rectangle getBounds() const noexcept
+        inline Rectangle getBounds(const bool edition = true) const noexcept
         {
-            return Rectangle(appearance_position->get(), appearance_size->get());
+			if(edition)
+				return Rectangle(attr_position->get(), attr_size->get());
+			else
+				return Rectangle(attr_presentation_position->get(), attr_presentation_size->get());
         }
+		
+		//! Sets a minimum and a maximum width and height limit.
+		/** Pass a 0 point if you don't want to limit width or height.
+		 @param min The minimum width and height limit.
+		 @param max The maximum width and height limit.
+		 */
+		inline void setSizeLimits(Point const& min, Point const& max = Point()) noexcept
+		{
+			attr_size->setMinLimits(min);
+			attr_presentation_size->setMinLimits(min);
+			attr_size->setMaxLimits(max);
+			attr_presentation_size->setMaxLimits(max);
+		}
+		
+		//! Retrieves the minimum width and height limit.
+		/** The function retrieves the minimum width and height limit.
+		 @return The minimum width and height limit.
+		 */
+		inline Point getSizeMinLimits() const noexcept
+		{
+			return attr_size->getMinLimits();
+		}
+		
+		//! Retrieves the maximum width and height limit.
+		/** The function retrieves the maximum width and height limit.
+		 @return The maximum width and height limit.
+		 */
+		inline Point getSizeMaxLimits() const noexcept
+		{
+			return attr_size->getMaxLimits();
+		}
+		
+		//! Specifies a width-to-height ratio that the box should always maintain when it is resized.
+		/** If the value is 0, no aspect ratio is enforced. If it's non-zero, the width
+		 will always be maintained as this multiple of the height.
+		 @see setSizeLimits
+		 */
+		inline void setSizeRatio(const double ratio) noexcept
+		{
+			attr_size->setSizeRatio(ratio);
+			attr_presentation_size->setSizeRatio(ratio);
+		}
+		
+		//! Retrieves the aspect ratio that was set with setSizeRatio().
+		/** If no aspect ratio is being enforced, this will return 0.
+		 */
+		inline bool getSizeRatio() const noexcept
+		{
+			return attr_size->getSizeRatio();
+		}
 		
 		//! Retrieves if the box should be hidden when the page is locked.
 		/** The function retrieves if the box should be hidden when the page is locked.
@@ -192,35 +252,8 @@ namespace Kiwi
 		 */
 		inline bool isHiddenOnLock() const noexcept
 		{
-			return appearance_hidden->get();
+			return attr_hidden->get();
 		}
-		
-        //! Retrieve the presentation size of the box.
-        /** The function retrieves the size of the box as a point.
-         @return The size of the box as a point.
-         */
-        inline Point getPresentationPosition() const noexcept
-        {
-            return appearance_presentation_position->get();
-        }
-        
-        //! Retrieve the presentation size of the box.
-        /** The function retrieves the size of the box as a point.
-         @return The size of the box as a point.
-         */
-        inline Point getPresentationSize() const noexcept
-        {
-            return appearance_presentation_size->get();
-        }
-        
-        //! Retrieve the presentation bounds of the box.
-        /** The function retrieves the bounds of the box as a rectangle.
-         @return The bounds of the box as a rectangle.
-         */
-        inline Rectangle getPresentationBounds() const noexcept
-        {
-            return Rectangle(appearance_presentation_position->get(), appearance_presentation_size->get());
-        }
         
         //! Retrieve if the box should be displayed in presentation.
         /** The function retrieves if the box should be displayed in presentation.
@@ -228,7 +261,7 @@ namespace Kiwi
          */
         inline bool isInPresentation() const noexcept
         {
-            return appearance_presentation->get();
+            return attr_presentation->get();
         }
         
         //! Retrieve if the font of the box.

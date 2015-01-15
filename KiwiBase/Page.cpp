@@ -918,45 +918,126 @@ namespace Kiwi
 		return Rectangle();
 	}
 	
-	void Page::Controller::resizeSelectedBoxes(Point const& delta, enum Knock::Corner corner)
+	void Page::Controller::startMoveOrResizeBoxes()
 	{
-		if (isAnyBoxSelected())
+		m_last_bounds.clear();
+		for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 		{
-			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
+			if(Box::sController boxctrl = (*it).lock())
 			{
-				Box::sController boxctrl = (*it).lock();
-				if(boxctrl)
+				if(sBox box = boxctrl->getBox())
 				{
-					sBox box =  boxctrl->getBox();
-					if(box)
+					m_last_bounds[boxctrl] = box->getBounds();
+				}
+			}
+		}
+	}
+	
+	void Page::Controller::endMoveOrResizeBoxes()
+	{
+		// Todo : add undo / redo here
+		m_last_bounds.clear();
+	}
+	
+	void Page::Controller::resizeSelectedBoxes(Point const& d, const long flags, const bool preserveRatio)
+	{
+		for(auto it = m_last_bounds.begin(); it != m_last_bounds.end(); ++it)
+		{
+			Box::sController boxctrl = (*it).first.lock();
+			if(boxctrl)
+			{
+				sBox box =  boxctrl->getBox();
+				if(box)
+				{
+					double fixedRatio = box->getSizeRatio();
+					Rectangle original = it->second;
+					Rectangle newrect = original;
+					Point minLimit = box->getSizeMinLimits();
+					Point maxLimit = box->getSizeMaxLimits();
+						
+					if (flags & Left)
+						newrect.left(min(newrect.right() - minLimit.x(), newrect.x() + d.x()));
+					
+					if (flags & Right)
+						newrect.width(max(minLimit.x(), newrect.width() + d.x()));
+					
+					if (flags & Top)
+						newrect.top(min(newrect.bottom() - minLimit.y(), newrect.y() + d.y()));
+					
+					if (flags & Bottom)
+						newrect.height(max(minLimit.y(), newrect.height() + d.y()));
+					
+					// constrain the aspect ratio if one has been specified..
+					if (preserveRatio || (fixedRatio > 0.))
 					{
-						Rectangle newBounds = box->getBounds();
-						
-						if (corner == Knock::TopLeft)
+						bool adjustWidth;
+						double ratio = 1.;
+						if(fixedRatio > 0.)
 						{
-							newBounds.position(newBounds.position() + delta);
-							newBounds.size(newBounds.size() - delta);
+							ratio = fixedRatio;
 						}
-						else if (corner == Knock::TopRight)
+						else if (original.height() > 0)
 						{
-							newBounds.width(newBounds.width() + delta.x());
-							newBounds.y(newBounds.y() + delta.y());
-							newBounds.height(newBounds.height() - delta.y());
-						}
-						else if (corner == Knock::BottomRight)
-						{
-							newBounds.size(newBounds.size() + delta);
-						}
-						else if (corner == Knock::BottomLeft)
-						{
-							newBounds.x(newBounds.x() + delta.x());
-							newBounds.width(newBounds.width() - delta.x());
-							newBounds.height(newBounds.height() + delta.y());
+							ratio = original.width() / original.height();
 						}
 						
-						box->setAttributeValue(AttrBox::Tag_position, newBounds.position());
-						box->setAttributeValue(AttrBox::Tag_size, newBounds.size());
+						if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
+						{
+							adjustWidth = true;
+						}
+						else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
+						{
+							adjustWidth = false;
+						}
+						else
+						{
+							const double oldRatio = (original.height() > 0) ? abs(original.width() / (double) original.height()) : 0.0;
+							const double newRatio = abs(newrect.width() / (double) newrect.height());
+							
+							adjustWidth = (oldRatio > newRatio);
+						}
+						
+						if (adjustWidth)
+						{
+							newrect.width((int)(newrect.height() * ratio));
+							
+							if ((maxLimit.x() > 0. && newrect.width() > maxLimit.x()) || newrect.width() < minLimit.x())
+							{
+								newrect.width(clip(newrect.width(), minLimit.x(), maxLimit.x()));
+								newrect.height((int)(newrect.width() / ratio));
+							}
+						}
+						else
+						{
+							newrect.height((int)(newrect.width() / ratio));
+							
+							if ((maxLimit.y() > 0. && newrect.height() > maxLimit.y()) || newrect.height() < minLimit.y())
+							{
+								newrect.height(clip(newrect.height(), minLimit.y(), maxLimit.y()));
+								newrect.width((int) (newrect.height() * ratio));
+							}
+						}
+						
+						if ((flags & Top || flags & Bottom) && !(flags & Left || flags & Right))
+						{
+							newrect.x(original.x() + (original.width() - newrect.width()) / 2);
+						}
+						else if ((flags & Left || flags & Right) && ! (flags & Top || flags & Bottom))
+						{
+							newrect.y(original.y() + (original.height() - newrect.height()) / 2);
+						}
+						else
+						{
+							if (flags & Left)
+								newrect.x(original.right() - newrect.width());
+							
+							if (flags & Top)
+								newrect.y(original.bottom() - newrect.height());
+						}
 					}
+					
+					box->setAttributeValue(AttrBox::Tag_position, newrect.position());
+					box->setAttributeValue(AttrBox::Tag_size, newrect.size());
 				}
 			}
 		}

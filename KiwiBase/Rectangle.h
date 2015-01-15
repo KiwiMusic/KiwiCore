@@ -183,7 +183,59 @@ namespace Kiwi
 		{
 			return Rectangle(centre, Point()).expanded(size * 0.5);
 		}
-        
+		
+		/** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
+		 If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
+		 */
+		void left(double newLeft) noexcept
+		{
+			width(max(right() - newLeft, 0.));
+			x(newLeft);
+		}
+		
+		/** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
+		 If the y is moved to be below the current bottom edge, the height will be set to zero.
+		 */
+		void top(double newTop) noexcept
+		{
+			height(max(bottom() - newTop, 0.));
+			y(newTop);
+		}
+		
+		/** Adjusts the width so that the right-hand edge of the rectangle has this new value.
+		 If the new right is below the current X value, the X will be pushed down to match it.
+		 */
+		void right(double newRight) noexcept
+		{
+			x(min(x(), newRight));
+			width(newRight - x());
+		}
+		
+		//! Retrieves the right-hand edge position of the rectangle.
+		/** Retrieves the right-hand edge position of the rectangle.
+		 */
+		double right() noexcept
+		{
+			return x() + width();
+		}
+		
+		/** Adjusts the height so that the bottom edge of the rectangle has this new value.
+		 If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
+		 */
+		void bottom(double newBottom) noexcept
+		{
+			y(min(y(), newBottom));
+			height(newBottom - y());
+		}
+		
+		//! Retrieves the bottom edge position of the rectangle.
+		/** Retrieves the bottom edge position of the rectangle.
+		 */
+		double bottom() noexcept
+		{
+			return y() + height();
+		}
+		
         //! Set the position and the size with another rectangle.
         /** The function sets the position and the size with another rectangle.
          @param rect The other rectangle.

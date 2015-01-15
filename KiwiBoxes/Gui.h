@@ -154,7 +154,30 @@ namespace Kiwi
         void send() const;
         Allocate(Slider);
     };
-    
+	
+	// ================================================================================ //
+	//                                      PANEL                                       //
+	// ================================================================================ //
+	
+	class Panel : public Box
+	{
+	private:
+		const sAttrLong m_border_size;
+		const sAttrLong m_border_radius;
+	public:
+		
+		Panel(sPage page);
+		~Panel() {};
+		bool receive(unsigned long index, ElemVector const& elements) override;
+		bool draw(Doodle& doodle) const override;
+		bool attributeChanged(sAttr attr) override;
+		Allocate(Panel);
+	};
+	
+	// ================================================================================ //
+	//									PROTOTYPES                                      //
+	// ================================================================================ //
+	
     inline void gui()
     {
         Box::addPrototype(unique_ptr<Box>(new Bang(nullptr)));
@@ -162,6 +185,7 @@ namespace Kiwi
         Box::addPrototype(unique_ptr<Box>(new Message(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Number(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Slider(nullptr)));
+		Box::addPrototype(unique_ptr<Box>(new Panel(nullptr)));
     }
 }
 
