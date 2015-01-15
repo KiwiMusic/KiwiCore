@@ -102,18 +102,6 @@ namespace Kiwi
          */
         virtual inline Rectangle getBounds() = 0;
 		
-		//! Starts a new layer onto the current doodle.
-		/** When you've finished drawing to the layer, call endLayer() to complete the operation and
-		 composite the finished layer. Every call to startLayer() MUST be matched by a corresponding call to endLayer()!
-		 @return The bounds.
-		 */
-		virtual inline void startLayer(Rectangle rect, double opacity = 1.) = 0;
-		
-		/** Completes a drawing operation to a temporary semi-transparent buffer.
-		 See startLayer() for more details.
-		 */
-		virtual void endLayer() = 0;
-		
         //! Set the color.
         /** The sets the color that now will be used by the doodle.
          @param colot The color.
@@ -182,9 +170,18 @@ namespace Kiwi
         }
         
         virtual inline void drawEllipse(double x, double y, double width, double height, double thickness = 0.) = 0;
+		
+		virtual inline void drawEllipse(Rectangle const& rect, double thickness = 0.)
+		{
+			drawEllipse(rect.x(), rect.y(), rect.width(), rect.height(), thickness);
+		}
         
         virtual inline void fillEllipse(double x, double y, double width, double height) = 0;
-        
+		
+		virtual inline void fillEllipse(Rectangle const& rect)
+		{
+			fillEllipse(rect.x(), rect.y(), rect.width(), rect.height());
+		}
     };
 }
 

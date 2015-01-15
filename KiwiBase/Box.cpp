@@ -119,8 +119,7 @@ namespace Kiwi
     
     void Box::redraw() const noexcept
     {
-        sController controller = getController();
-        if(controller)
+        if(sController controller = getController())
         {
             controller->redraw();
         }
@@ -128,8 +127,7 @@ namespace Kiwi
     
     void Box::grabKeyboardFocus() const noexcept
     {
-        sController controller = getController();
-        if(controller)
+        if(sController controller = getController())
         {
             controller->grabKeyboardFocus();
         }
@@ -153,24 +151,21 @@ namespace Kiwi
         }
         if(attr == AttrBox::attr_position)
         {
-            sController controller = getController();
-            if(controller)
+            if(sController controller = getController())
             {
                 controller->positionChanged();
             }
         }
         else if(attr == AttrBox::attr_size)
         {
-            sController controller = getController();
-            if(controller)
+            if(sController controller = getController())
             {
                 controller->sizeChanged();
             }
         }
-        else if(attr == AttrBox::color_background || AttrBox::color_border || AttrBox::color_text)
+        else if(attr == AttrBox::attr_color_background || attr == AttrBox::attr_color_border || attr == AttrBox::attr_color_text)
         {
-            sController controller = getController();
-            if(controller)
+            if(sController controller = getController())
             {
                 controller->redraw();
             }
@@ -185,18 +180,15 @@ namespace Kiwi
     void Box::addInlet(Iolet::Type type, Iolet::Polarity polarity, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
-        sInlet inlet = Inlet::create(type, polarity, description);
-        if(inlet)
+        if(sInlet inlet = Inlet::create(type, polarity, description))
         {
             m_inlets.push_back(inlet);
-            sController controller = getController();
-            if(controller)
+            if(sController controller = getController())
             {
                 controller->inletsChanged();
             }
             setAttributeValue(Tag_ninlets, {m_inlets.size()});
         }
-        
     }
     
     void Box::insertInlet(unsigned long index, Iolet::Type type, Iolet::Polarity polarity, string const& description)

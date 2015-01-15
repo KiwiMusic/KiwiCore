@@ -32,9 +32,9 @@ namespace Kiwi
     
     Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse),
     m_color_circle(Attr::create<AttrColor>(Tag::create("circlecolor"),
-                                            Tag::create("Circle Color"),
-                                            Tag::create("Color"),
-                                            (ElemVector){0.4, 0.4, 0.4, 1.})),
+										   Tag::create("Circle Color"),
+                                           Tag::create("Color"),
+										   (ElemVector){0.52, 0.52, 0.52, 1.})),
     m_color_led(Attr::create<AttrColor>(Tag::create("ledcolor"),
                                             Tag::create("Led Color"),
                                             Tag::create("Color"),
@@ -95,24 +95,25 @@ namespace Kiwi
     
     bool Bang::draw(Doodle& d) const
     {
-		const double size1 = d.getWidth() * 0.25;
-		const double size2 = size1 * 2;
+		double borderSize = 1;
+		const Rectangle bounds = d.getBounds().reduced(borderSize);
+		const Rectangle ledRect = bounds.reduced(d.getWidth() * 0.4);
 		
-		double borderSize = 2;
 		d.setColor(getBorderColor());
 		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, 0);
 		
 		d.setColor(getBackgroundColor());
-		d.fillRectangle(d.getBounds().reduced(borderSize));
+		d.fillRectangle(d.getBounds().reduced(borderSize*2));
+
+		d.setColor(m_color_circle->get());
+		d.drawEllipse(ledRect, d.getWidth() * 0.1);
 		
-        d.setColor(m_color_circle->get());
-        d.drawEllipse(size1, size1, size2, size2, 1.5);
-        if(m_led)
-        {
-            d.setColor(m_color_led->get());
-            d.fillEllipse(size1 + 1.5, size1 + 1.5, size2 - 3., size2 - 3.);
-        }
-        
+		if(m_led)
+		{
+			d.setColor(m_color_led->get());
+			d.fillEllipse(ledRect);
+		}
+			
         return true;
     }
     
@@ -303,7 +304,7 @@ namespace Kiwi
         {
             Text::Editor::setColor(color_text->get());
         }
-        else if(attr == font_face || attr == font_name || attr == font_size)
+        else if(attr == attr_font_face || attr == attr_font_name || attr == attr_font_size)
         {
             Text::Editor::setFont(getFont());
         }
@@ -555,7 +556,7 @@ namespace Kiwi
         {
             Text::Editor::setColor(color_text->get());
         }
-        else if(attr == font_face || attr == font_name || attr == font_size)
+        else if(attr == attr_font_face || attr == attr_font_name || attr == attr_font_size)
         {
             Text::Editor::setFont(getFont());
         }

@@ -74,10 +74,10 @@ namespace Kiwi
 		//-----------------------------------------------------
 		
         // Font //
-        const shared_ptr<AttrTag>       font_name;
-        const shared_ptr<AttrDouble>    font_size;
-        const shared_ptr<AttrEnum>      font_face;
-        const shared_ptr<AttrEnum>      font_justification;
+        const shared_ptr<AttrTag>       attr_font_name;
+        const shared_ptr<AttrDouble>    attr_font_size;
+        const shared_ptr<AttrEnum>      attr_font_face;
+        const shared_ptr<AttrEnum>      attr_font_justification;
         
         // Color //
         const shared_ptr<AttrColor>     color_editing_background;
@@ -90,10 +90,10 @@ namespace Kiwi
 		
         AttrPage() :
         // Font //
-        font_name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
-        font_size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
-        font_face(Attr::create<AttrEnum>(Tag_fontface, Tag_Font_Face, Tag_Font, (ElemVector){Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0)),
-        font_justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0)),
+        attr_font_name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
+        attr_font_size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
+        attr_font_face(Attr::create<AttrEnum>(Tag_fontface, Tag_Font_Face, Tag_Font, (ElemVector){Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0)),
+        attr_font_justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0)),
         
         // Color //
         color_editing_background(Attr::create<AttrColor>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag_Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
@@ -103,10 +103,10 @@ namespace Kiwi
 		editing_grid_size(Attr::create<AttrLong>(Tag_gridsize, Tag_Grid_Size, Tag_Editing, 15))
         {
             // Font //
-            addAttribute(font_name);
-            addAttribute(font_size);
-            addAttribute(font_face);
-            addAttribute(font_justification);
+            addAttribute(attr_font_name);
+            addAttribute(attr_font_size);
+            addAttribute(attr_font_face);
+            addAttribute(attr_font_justification);
             
             // Color //
             addAttribute(color_editing_background);
@@ -127,7 +127,7 @@ namespace Kiwi
          */
         inline Font getFont() const noexcept
         {
-            return Font(toString(font_name->get()), font_size->get(), (Font::Face)font_face->get());
+            return Font(toString(attr_font_name->get()), attr_font_size->get(), (Font::Face)attr_font_face->get());
         }
         
         //! Retrieve the default font justification for boxes of the page.
@@ -136,7 +136,7 @@ namespace Kiwi
          */
         inline Font::Justification getFontJustification() const noexcept
         {
-            return (Font::Justification)font_justification->get();
+            return (Font::Justification)attr_font_justification->get();
         }
         
         //! Retrieve if the background color of the page when unlocked.

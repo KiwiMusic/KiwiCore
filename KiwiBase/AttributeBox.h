@@ -100,15 +100,15 @@ namespace Kiwi
         const shared_ptr<AttrBool>      attr_presentation;
         
         // Font //
-        const shared_ptr<AttrTag>       font_name;
-        const shared_ptr<AttrDouble>    font_size;
-        const shared_ptr<AttrEnum>      font_face;
-        const shared_ptr<AttrEnum>      font_justification;
+        const shared_ptr<AttrTag>       attr_font_name;
+        const shared_ptr<AttrDouble>    attr_font_size;
+        const shared_ptr<AttrEnum>      attr_font_face;
+        const shared_ptr<AttrEnum>      attr_font_justification;
         
         // Color //
-        const shared_ptr<AttrColor>     color_background;
-        const shared_ptr<AttrColor>     color_border;
-        const shared_ptr<AttrColor>     color_text;
+        const shared_ptr<AttrColor>     attr_color_background;
+        const shared_ptr<AttrColor>     attr_color_border;
+        const shared_ptr<AttrColor>     attr_color_text;
         
         AttrBox() :
         // Internal //
@@ -124,15 +124,15 @@ namespace Kiwi
         attr_presentation(Attr::create<AttrBool>(Tag_presentation,  Tag_Include_in_Presentation, Tag_Appearance, false)),
         
         // Font //
-        font_name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
-        font_size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
-        font_face(Attr::create<AttrEnum>(Tag_fontface, Tag_Font_Face, Tag_Font, (ElemVector){Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0)),
-        font_justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0)),
+        attr_font_name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
+        attr_font_size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
+        attr_font_face(Attr::create<AttrEnum>(Tag_fontface, Tag_Font_Face, Tag_Font, (ElemVector){Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0)),
+        attr_font_justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0)),
         
         // Color //
-        color_background(Attr::create<AttrColor>(Tag_bgcolor, Tag_Background_Color, Tag_Color, (ElemVector){1., 1., 1, 1.})),
-        color_border(Attr::create<AttrColor>(Tag_bdcolor, Tag_Border_Color, Tag_Color, (ElemVector){0.4, 0.4, 0.4, 1.})),
-        color_text(Attr::create<AttrColor>(Tag_textcolor, Tag_Text_Color, Tag_Color, (ElemVector){0.3, 0.3, 0.3, 1.}))
+        attr_color_background(Attr::create<AttrColor>(Tag_bgcolor, Tag_Background_Color, Tag_Color, (ElemVector){1., 1., 1, 1.})),
+        attr_color_border(Attr::create<AttrColor>(Tag_bdcolor, Tag_Border_Color, Tag_Color, (ElemVector){0.4, 0.4, 0.4, 1.})),
+        attr_color_text(Attr::create<AttrColor>(Tag_textcolor, Tag_Text_Color, Tag_Color, (ElemVector){0.3, 0.3, 0.3, 1.}))
         {
             // Appearance //
             addAttribute(attr_position);
@@ -143,15 +143,15 @@ namespace Kiwi
             addAttribute(attr_presentation);
             
             // Font //
-            addAttribute(font_name);
-            addAttribute(font_size);
-            addAttribute(font_face);
-            addAttribute(font_justification);
+            addAttribute(attr_font_name);
+            addAttribute(attr_font_size);
+            addAttribute(attr_font_face);
+            addAttribute(attr_font_justification);
             
             // Color //
-            addAttribute(color_background);
-            addAttribute(color_border);
-            addAttribute(color_text);
+            addAttribute(attr_color_background);
+            addAttribute(attr_color_border);
+            addAttribute(attr_color_text);
         }
         
         ~AttrBox()
@@ -270,7 +270,7 @@ namespace Kiwi
          */
         inline Font getFont() const noexcept
         {
-            return Font(toString(font_name->get()), font_size->get(), (Font::Face)font_face->get());
+            return Font(toString(attr_font_name->get()), attr_font_size->get(), (Font::Face)attr_font_face->get());
         }
         
         //! Retrieve if the font justification of the box.
@@ -279,7 +279,7 @@ namespace Kiwi
          */
         inline Font::Justification getFontJustification() const noexcept
         {
-            return (Font::Justification)font_justification->get();
+            return (Font::Justification)attr_font_justification->get();
         }
         
         //! Retrieve if the background color of the box.
@@ -288,7 +288,7 @@ namespace Kiwi
          */
         inline Color getBackgroundColor() const noexcept
         {
-            return color_background->get();
+            return attr_color_background->get();
         }
         
         //! Retrieve if the border color of the box.
@@ -297,7 +297,7 @@ namespace Kiwi
          */
         inline Color getBorderColor() const noexcept
         {
-            return color_border->get();
+            return attr_color_border->get();
         }
         
         //! Retrieve if the text color of the box.
@@ -306,7 +306,7 @@ namespace Kiwi
          */
         inline Color getTextColor() const noexcept
         {
-            return color_text->get();
+            return attr_color_text->get();
         }
     };
 }
