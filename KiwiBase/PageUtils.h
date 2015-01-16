@@ -333,7 +333,6 @@ namespace Kiwi
         Rectangle                   m_bounds;
         Point                       m_start;
         bool						m_dragging;
-        bool                        m_preserve;
         
         set<Box::wController,
         owner_less<Box::wController>>   m_boxes;
@@ -366,16 +365,16 @@ namespace Kiwi
          @param point The starting point.
          @param preserve The lasso should preserve the last selection.
          */
-        void begin(Point const& point, bool preserve);
+        void begin(Point const& point, const bool preserve);
         
         //! Perform the selection of the links and the boxes.
         /** The function performs the selection of the links and the boxes.
          @param point The draging point.
-         @param preserve The lasso should preserve the last selection.
          @param boxes The lasso should add boxes to the selection.
          @param links The lasso should add links to the selection.
+		 @param preserve The lasso should preserve the last selection.
          */
-        void perform(Point const& point, bool boxes, bool links);
+        void perform(Point const& point, bool boxes, bool links, const bool preserve);
         
         //! Finish the selection of the links and the boxes.
         /** The function finishes the selection of the links and the boxes.

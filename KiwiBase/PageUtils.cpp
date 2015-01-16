@@ -265,21 +265,19 @@ namespace Kiwi
 		m_links.clear();
     }
     
-	void Lasso::begin(Point const& point, bool preserve)
+	void Lasso::begin(Point const& point, const bool preserve)
 	{
         if(m_dragging)
         {
             m_boxes.clear();
             m_links.clear();
         }
-        sPage page = m_page.lock();
-        if(page)
+		
+        if(sPage page = m_page.lock())
         {
-            Page::sController ctrl = page->getController();
-            if(ctrl)
+            if(Page::sController ctrl = page->getController())
             {
-                m_preserve = preserve;
-                if(!m_preserve)
+                if(!preserve)
                 {
                     ctrl->unselectAll();
                 }
@@ -290,12 +288,13 @@ namespace Kiwi
                 }
             }
         }
+		
         m_start = point;
 		m_bounds = Rectangle(m_start, Point(0., 0));
 		m_dragging = true;
 	}
-    
-	void Lasso::perform(Point const& point, bool boxes, bool links)
+	
+	void Lasso::perform(Point const& point, bool boxes, bool links, const bool preserve)
 	{
         if(m_start.x() < point.x())
         {
@@ -319,48 +318,71 @@ namespace Kiwi
                 m_bounds = Rectangle(point, m_start - point);
             }
         }
+		boundsHasChanged();
 		
-        sPage page = m_page.lock();
-        if(page)
+        if(sPage page = m_page.lock())
         {
-            Page::sController ctrl = page->getController();
-            if(ctrl)
+            if(Page::sController ctrl = page->getController())
             {
-                if(m_preserve)
+				bool selectionHasChanged = false;
+				
+                if(preserve)
                 {
                     if(boxes)
                     {
-                        vector<Box::sController> nboxes;
-                        ctrl->knockBoxes(m_bounds, nboxes);
-                        for(vector<Box::sController>::size_type i = 0; i < nboxes.size(); i++)
-                        {
-                            if(m_boxes.find(nboxes[i]) != m_boxes.end())
-                            {
-                                ctrl->unselect(nboxes[i], false);
-                            }
-                            else
-                            {
-                                ctrl->select(nboxes[i], false);
-                            }
-                        }
+						vector<Box::sController> allBoxes;
+						ctrl->getBoxes(allBoxes);
+						vector<Box::sController> lassoBoxes;
+						ctrl->knockBoxes(m_bounds, lassoBoxes);
+						
+						for(vector<Box::sController>::size_type i = 0; i < allBoxes.size(); i++)
+						{
+							const bool isSelected = allBoxes[i]->isSelected();
+							const bool wasSelected = m_boxes.find(allBoxes[i]) != m_boxes.end();
+							const bool inLasso = find(lassoBoxes.begin(), lassoBoxes.end(), allBoxes[i]) != lassoBoxes.end();
+							
+							if (!isSelected && (wasSelected != inLasso))
+							{
+								ctrl->select(allBoxes[i], false);
+								selectionHasChanged = true;
+							}
+							else if(isSelected && (wasSelected == inLasso))
+							{
+								ctrl->unselect(allBoxes[i], false);
+								selectionHasChanged = true;
+							}
+						}
                     }
-                    if(links)
-                    {
-                        vector<Link::sController> nlinks;
-                        ctrl->knockLinks(m_bounds, nlinks);
-                        for(vector<Link::sController>::size_type i = 0; i < nlinks.size(); i++)
-                        {
-                            if(m_links.find(nlinks[i]) != m_links.end())
-                            {
-                                ctrl->unselect(nlinks[i], false);
-                            }
-                            else
-                            {
-                                ctrl->select(nlinks[i], false);
-                            }
-                        }
-                    }
-                    ctrl->selectionChanged();
+					if(links)
+					{
+						vector<Link::sController> allLinks;
+						ctrl->getLinks(allLinks);
+						vector<Link::sController> lassoLinks;
+						ctrl->knockLinks(m_bounds, lassoLinks);
+						
+						for(vector<Link::sController>::size_type i = 0; i < allLinks.size(); i++)
+						{
+							const bool isSelected = allLinks[i]->isSelected();
+							const bool wasSelected = m_links.find(allLinks[i]) != m_links.end();
+							const bool inLasso = find(lassoLinks.begin(), lassoLinks.end(), allLinks[i]) != lassoLinks.end();
+							
+							if (!isSelected && (wasSelected != inLasso))
+							{
+								ctrl->select(allLinks[i], false);
+								selectionHasChanged = true;
+							}
+							else if(isSelected && (wasSelected == inLasso))
+							{
+								ctrl->unselect(allLinks[i], false);
+								selectionHasChanged = true;
+							}
+						}
+					}
+					
+					if (selectionHasChanged)
+					{
+						ctrl->selectionChanged();
+					}
                 }
                 else
                 {
@@ -379,7 +401,6 @@ namespace Kiwi
                     }
                 }
             }
-            boundsHasChanged();
         }
 	}
     
@@ -467,19 +488,3 @@ namespace Kiwi
         d.drawEllipse(4.5, 4.5, size.x() - 9., size.y() - 9., 1.5);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

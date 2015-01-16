@@ -340,7 +340,7 @@ namespace Kiwi
 			/** The function retrieves if the link is selected.
 			 @param True if the link is selected, otherwise false.
 			 */
-			inline bool getSelectedStatus() const noexcept
+			inline bool isSelected() const noexcept
 			{
 				return m_selected;
 			}
