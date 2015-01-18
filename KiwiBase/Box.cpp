@@ -149,30 +149,32 @@ namespace Kiwi
         {
             return false;
         }
-        if(attr == AttrBox::attr_position)
-        {
-            if(sController controller = getController())
-            {
-                controller->positionChanged();
-            }
-        }
-        else if(attr == AttrBox::attr_size)
-        {
-            if(sController controller = getController())
-            {
-                controller->sizeChanged();
-            }
-        }
-        else if(attr == AttrBox::attr_color_background || attr == AttrBox::attr_color_border || attr == AttrBox::attr_color_text)
-        {
-            if(sController controller = getController())
-            {
-                controller->redraw();
-            }
-        }
+		if (sController controller = getController())
+		{
+			if(attr == AttrBox::attr_position || attr == AttrBox::attr_presentation_position)
+			{
+				int TODO_notify_depending_on_page_presentation_mode;
+				controller->positionChanged();
+			}
+			else if(attr == AttrBox::attr_size || attr == AttrBox::attr_presentation_size)
+			{
+				int TODO_notify_depending_on_page_presentation_mode;
+				controller->sizeChanged();
+			}
+			else if(attr == AttrBox::attr_presentation)
+			{
+				controller->presentationStatusChanged();
+			}
+			else if(attr == AttrBox::attr_color_background ||
+					attr == AttrBox::attr_color_border ||
+					attr == AttrBox::attr_color_text)
+			{
+				controller->redraw();
+			}
+		}
 		return true;
 	}
-    
+	
     // ================================================================================ //
     //                                      INLETS                                      //
     // ================================================================================ //
@@ -321,37 +323,46 @@ namespace Kiwi
     //                                  BOX CONTROLER                                   //
     // ================================================================================ //
     
-    void Box::Controller::setEditionStatus(bool status)
+    void Box::Controller::setPageEditionStatus(const bool edition)
     {
-        if(m_edition != status)
+        if(m_page_edition_status != edition)
         {
-            m_edition = status;
-            editionStatusChanged();
+            m_page_edition_status = edition;
+            pageEditionStatusChanged();
         }
     }
+	
+	void Box::Controller::setPagePresentationStatus(const bool presentation)
+	{
+		if(m_page_presentation_status != presentation)
+		{
+			m_page_presentation_status = presentation;
+			pagePresentationStatusChanged();
+		}
+	}
     
     void Box::Controller::setSelectedStatus(bool status)
     {
         if(m_selected != status)
         {
             m_selected = status;
-            editionStatusChanged();
+            selectionStatusChanged();
         }
     }
 
-	Rectangle Box::Controller::getBounds() const noexcept
+	Rectangle Box::Controller::getBounds(const bool presentation) const noexcept
 	{
-		return m_box->getBounds().expanded(m_framesize);
+		return m_box->getBounds(presentation).expanded(m_framesize);
 	}
 	
-	Point Box::Controller::getPosition() const noexcept
+	Point Box::Controller::getPosition(const bool presentation) const noexcept
 	{
-		return getBounds().position();
+		return getBounds(presentation).position();
 	}
 
-	Point Box::Controller::getSize() const noexcept
+	Point Box::Controller::getSize(const bool presentation) const noexcept
 	{
-		return getBounds().size();
+		return getBounds(presentation).size();
 	}
 
 #define KIO_HEIGHT 3.
@@ -379,32 +390,33 @@ namespace Kiwi
         return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
     }
     
-    bool Box::Controller::contains(Point const& pt, Knock& knock) const noexcept
+    bool Box::Controller::contains(Point const& pt, Knock& knock, const bool presentation) const noexcept
     {
-		const Rectangle bounds = m_box->getBounds();
+		const Rectangle bounds = m_box->getBounds(presentation);
+		const Rectangle ctrlbounds = getBounds(presentation);
 		
 		// test resizer
-		if(isSelected() && getBounds().contains(pt))
+		if(isSelected() && ctrlbounds.contains(pt))
 		{
-			const Point localPoint = pt - getPosition();
-			const double size = getFrameSize();
+			const Point localPoint = pt - ctrlbounds.position();
+			const double framesize = getFrameSize();
 			
-			if(localPoint.y() <= size)
+			if(localPoint.y() <= framesize)
 			{
 				knock.m_part = Knock::Border;
 				knock.m_border |= Knock::Top;
 			}
-			if(localPoint.x() >= getSize().x() - size)
+			if(localPoint.x() >= ctrlbounds.width() - framesize)
 			{
 				knock.m_part = Knock::Border;
 				knock.m_border |= Knock::Right;
 			}
-			if(localPoint.y() >= getSize().y() - size)
+			if(localPoint.y() >= ctrlbounds.height() - framesize)
 			{
 				knock.m_part = Knock::Border;
 				knock.m_border |= Knock::Bottom;
 			}
-			if(localPoint.x() <= size)
+			if(localPoint.x() <= framesize)
 			{
 				knock.m_part = Knock::Border;
 				knock.m_border |= Knock::Left;
@@ -424,7 +436,7 @@ namespace Kiwi
 			knock.m_part    = Knock::Inside;
 			knock.m_index   = 0;
 			
-			if(!isSelected())
+			if(!isSelected() && !presentation)
 			{
 				if(pt.y() < bounds.y() + KIO_HEIGHT)
 				{
@@ -477,13 +489,6 @@ namespace Kiwi
 							}
 						}
 					}
-					else
-					{
-						knock.m_box     = m_box;
-						knock.m_part    = Knock::Inside;
-						knock.m_index   = 0;
-						return true;
-					}
 				}
 			}
 			return true;
@@ -494,14 +499,14 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::Controller::overlaps(Rectangle const& rect) const noexcept
+    bool Box::Controller::overlaps(Rectangle const& rect, const bool presentation) const noexcept
     {
-        return m_box->getBounds().overlaps(rect);
+        return m_box->getBounds(presentation).overlaps(rect);
     }
     
     void Box::Controller::inletsChanged()
     {
-        if(m_edition)
+        if(m_page_presentation_status)
         {
             redraw();
         }
@@ -509,68 +514,75 @@ namespace Kiwi
     
     void Box::Controller::outletsChanged()
     {
-        if(m_edition)
+        if(m_page_presentation_status)
         {
             redraw();
         }
     }
-    
-    void Box::Controller::paint(sBox box, Doodle& d, bool edit, bool selected)
+    void Box::Controller::paintBoxFrame(sBox box, Doodle& d, const bool selected, const bool edit, const bool presentation)
     {
 		if (box)
 		{
 			if (Box::sController boxctrl = box->getController())
 			{
-				Rectangle boxFrame = boxctrl->getBounds();
-				Rectangle boxBounds = box->getBounds() - boxFrame.position();
-				boxFrame.position(Point());
-				
-				double frameSize = boxctrl->getFrameSize();
-				
 				if(edit)
 				{
-					if(!selected)
+					Rectangle boxFrame = boxctrl->getBounds(presentation);
+					double frameSize = boxctrl->getFrameSize();
+					Rectangle boxBounds = box->getBounds(presentation) - boxFrame.position();
+					boxFrame.position(Point());
+					const Color ioColor = Color(0.3, 0.3, 0.3);
+					const Color presentationColor = Color(0., 0.8, 0.);
+					const Color selectionColor = presentation ? presentationColor : Color(0., 0.6, 0.9);
+					
+					if(selected)
+					{
+						d.setColor(selectionColor);
+						d.drawRectangle(boxFrame.reduced(frameSize*0.5), frameSize*0.5);
+						
+						d.setColor(selectionColor.darker(0.3));
+						d.drawRectangle(boxFrame, 1);
+					}
+					else if(!presentation)
 					{
 						const unsigned long ninlets = box->getNumberOfInlets();
 						const unsigned long noutlets= box->getNumberOfOutlets();
 						
 						if(ninlets)
 						{
-							d.setColor({0.3, 0.3, 0.3, 1.});
+							d.setColor(ioColor);
 							d.fillRectangle(boxBounds.x(), boxBounds.y(), KIO_WIDTH, KIO_HEIGHT);
-						}
-						if(ninlets > 1)
-						{
-							const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
-							for(unsigned long i = 1; i < ninlets; i++)
+							
+							if(ninlets > 1)
 							{
-								d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y(), KIO_WIDTH, KIO_HEIGHT);
+								const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
+								for(unsigned long i = 1; i < ninlets; i++)
+								{
+									d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y(), KIO_WIDTH, KIO_HEIGHT);
+								}
 							}
 						}
 						
 						if(noutlets)
 						{
-							d.setColor({0.3, 0.3, 0.3, 1.});
+							d.setColor(ioColor);
 							d.fillRectangle(boxBounds.x(), boxBounds.y() + boxBounds.height() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT);
-						}
-						if(noutlets > 1)
-						{
-							const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
-							for(unsigned long i = 1; i < noutlets; i--)
+							
+							if(noutlets > 1)
 							{
-								d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y() + boxBounds.height() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT);
+								const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
+								for(unsigned long i = 1; i < noutlets; i--)
+								{
+									d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y() + boxBounds.height() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT);
+								}
 							}
 						}
-					}
-
-					if(selected)
-					{
-						Color selectedColor = Color(0., 0.6, 0.9);
-						d.setColor(selectedColor);
-						d.drawRectangle(boxFrame.reduced(frameSize*0.5), frameSize*0.5);
 						
-						d.setColor(selectedColor.darker(0.3));
-						d.drawRectangle(boxFrame, 1);
+						if (box->isInPresentation())
+						{
+							d.setColor(presentationColor.withAlpha(0.2));
+							d.drawRectangle(boxBounds, 3);
+						}
 					}
 				}
 			}

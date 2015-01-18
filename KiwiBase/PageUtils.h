@@ -74,7 +74,7 @@ namespace Kiwi
         wLink           m_link;
         enum Target     m_target	= Nothing;
 		long			m_part		= Outside;
-		long			m_border	= Right;
+		long			m_border	= None;
         unsigned long   m_index = 0;
 		
     public:
@@ -99,35 +99,35 @@ namespace Kiwi
         /** The function try to find a box or then link under the point otherwise it will consider that the page has been touched.
          @param point The point.
          */
-        void knockAll(Point const& point) noexcept;
+        void knockAll(Point const& point, const bool presentation) noexcept;
         
         //! Test a point.
         /** The function try to find a box under the point.
          @param page The page to test.
          @param point The point.
          */
-        void knockBoxes(Point const& point) noexcept;
+        void knockBoxes(Point const& point, const bool presentation) noexcept;
         
         //! Test a point.
-        /** The function try to find a box .
+        /** The function try to find a box.
          @param point The point.
          */
         void knockLinks(Point const& point) noexcept;
         
         //! Test a rectangle.
-        /** TThe function try to find the boxes and the links that overlaps the rectangle.
+        /** The function try to find the boxes and the links that overlaps the rectangle.
          @param rect The rectangle.
          @param boxes The vector of boxes that will be filled.
          @param links The vector of links that will be filled.
          */
-        void knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links) noexcept;
+        void knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links, const bool presentation) noexcept;
         
         //! Test a rectangle.
         /** The function try to find the boxes that overlaps the rectangle.
          @param rect The rectangle.
          @param boxes The vector of boxes that will be filled.
          */
-        void knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes) noexcept;
+        void knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes, const bool presentation) noexcept;
         
         //! Test a rectangle.
         /** The function try to find the links that overlaps the rectangle.
@@ -374,7 +374,7 @@ namespace Kiwi
          @param links The lasso should add links to the selection.
 		 @param preserve The lasso should preserve the last selection.
          */
-        void perform(Point const& point, bool boxes, bool links, const bool preserve);
+        void perform(Point const& point, bool boxes, bool links, const bool preserve, const bool presentation);
         
         //! Finish the selection of the links and the boxes.
         /** The function finishes the selection of the links and the boxes.

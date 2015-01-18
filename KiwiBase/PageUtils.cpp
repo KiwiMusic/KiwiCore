@@ -52,39 +52,48 @@ namespace Kiwi
         m_index = 0;
     }
     
-    void Knock::knockAll(Point const& point) noexcept
+    void Knock::knockAll(Point const& point, const bool presentation) noexcept
     {
         knockReset();
-        sPage page = m_page.lock();
-        if(page)
+        if(sPage page = m_page.lock())
         {
-            Page::sController ctrl = page->getController();
-            if(ctrl)
+            if(Page::sController pagectrl = page->getController())
             {
                 vector<Box::sController> boxes;
-                ctrl->getBoxes(boxes);
+                pagectrl->getBoxes(boxes);
                 for(vector<Box::sController>::size_type i = boxes.size(); i; i--)
                 {
-                    Box::sController box = boxes[i-1];
-                    if(box && box->contains(point, *this))
-                    {
-                        m_target = Box;
-                        return;
-                    }
+					if(Box::sController boxctrl = boxes[i-1])
+					{
+						if(sBox box = boxctrl->getBox())
+						{
+							if(!presentation || (presentation && box->isInPresentation()))
+							{
+								if(boxctrl->contains(point, *this, presentation))
+								{
+									m_target = Box;
+									return;
+								}
+							}
+						}
+					}
                 }
-                
-                vector<Link::sController> links;
-                ctrl->getLinks(links);
-                for(vector<Link::sController>::size_type i = links.size(); i; i--)
-                {
-                    Link::sController link = links[i-1];
-                    if(link && link->contains(point, *this))
-                    {
-                        m_target = Link;
-                        return;
-                    }
-                }
-                
+				
+				if(!presentation)
+				{
+					vector<Link::sController> links;
+					pagectrl->getLinks(links);
+					for(vector<Link::sController>::size_type i = links.size(); i; i--)
+					{
+						Link::sController link = links[i-1];
+						if(link && link->contains(point, *this))
+						{
+							m_target = Link;
+							return;
+						}
+					}
+				}
+				
                 m_target = Page;
                 m_part   = Inside;
                 return;
@@ -93,21 +102,19 @@ namespace Kiwi
         }
     }
     
-    void Knock::knockBoxes(Point const& point) noexcept
+    void Knock::knockBoxes(Point const& point, const bool presentation) noexcept
     {
         knockReset();
-        sPage page = m_page.lock();
-        if(page)
+        if(sPage page = m_page.lock())
         {
-            Page::sController ctrl = page->getController();
-            if(ctrl)
+            if(Page::sController ctrl = page->getController())
             {
                 vector<Box::sController> boxes;
                 ctrl->getBoxes(boxes);
                 for(vector<Box::sController>::size_type i = boxes.size(); i; i--)
                 {
                     Box::sController box = boxes[i-1];
-                    if(box && box->contains(point, *this))
+                    if(box && box->contains(point, *this, presentation))
                     {
                         return;
                     }
@@ -119,11 +126,9 @@ namespace Kiwi
     void Knock::knockLinks(Point const& point) noexcept
     {
         knockReset();
-        sPage page = m_page.lock();
-        if(page)
+        if(sPage page = m_page.lock())
         {
-            Page::sController ctrl = page->getController();
-            if(ctrl)
+            if(Page::sController ctrl = page->getController())
             {
                 vector<Link::sController> links;
                 ctrl->getLinks(links);
@@ -140,26 +145,24 @@ namespace Kiwi
     }
     
 
-    void Knock::knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links) noexcept
+    void Knock::knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links, const bool presentation) noexcept
     {
-        knockBoxes(rect, boxes);
+        knockBoxes(rect, boxes, presentation);
         knockLinks(rect, links);
     }
     
-    void Knock::knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes) noexcept
+    void Knock::knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes, const bool presentation) noexcept
     {
         boxes.clear();
-        sPage page = m_page.lock();
-        if(page)
+        if(sPage page = m_page.lock())
         {
-            Page::sController ctrl = page->getController();
-            if(ctrl)
+            if(Page::sController ctrl = page->getController())
             {
                 vector<Box::sController> vboxes;
                 ctrl->getBoxes(vboxes);
                 for(vector<Box::sController>::size_type i = 0; i < vboxes.size(); i++)
                 {
-                    if(vboxes[i] && vboxes[i]->overlaps(rect))
+                    if(vboxes[i] && vboxes[i]->overlaps(rect, presentation))
                     {
                         boxes.push_back(vboxes[i]);
                     }
@@ -171,11 +174,9 @@ namespace Kiwi
     void Knock::knockLinks(Rectangle const& rect, vector<Link::sController>& links) noexcept
     {
         links.clear();
-        sPage page = m_page.lock();
-        if(page)
+        if(sPage page = m_page.lock())
         {
-            Page::sController ctrl = page->getController();
-            if(ctrl)
+            if(Page::sController ctrl = page->getController())
             {
                 vector<Link::sController> vlinks;
                 ctrl->getLinks(vlinks);
@@ -294,7 +295,7 @@ namespace Kiwi
 		m_dragging = true;
 	}
 	
-	void Lasso::perform(Point const& point, bool boxes, bool links, const bool preserve)
+	void Lasso::perform(Point const& point, bool boxes, bool links, const bool preserve, const bool presentation)
 	{
         if(m_start.x() < point.x())
         {
@@ -333,7 +334,7 @@ namespace Kiwi
 						vector<Box::sController> allBoxes;
 						ctrl->getBoxes(allBoxes);
 						vector<Box::sController> lassoBoxes;
-						ctrl->knockBoxes(m_bounds, lassoBoxes);
+						ctrl->knockBoxes(m_bounds, lassoBoxes, presentation);
 						
 						for(vector<Box::sController>::size_type i = 0; i < allBoxes.size(); i++)
 						{
@@ -390,7 +391,7 @@ namespace Kiwi
                     if(boxes)
                     {
                         vector<Box::sController> nBoxes;
-                        ctrl->knockBoxes(m_bounds, nBoxes);
+                        ctrl->knockBoxes(m_bounds, nBoxes, presentation);
                         ctrl->select(nBoxes);
                     }
                     if(links)

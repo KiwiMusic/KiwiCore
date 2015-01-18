@@ -73,16 +73,17 @@ namespace Kiwi
                     break;
                 }
             }
-            sBox box = Box::create(getShared(), dico);
-            m_boxe_id++;
-            if(box)
+			
+            if(sBox box = Box::create(getShared(), dico))
             {
+				m_boxe_id++;
                 m_boxes.push_back(box);
 				m_boxes_mutex.unlock();
 				
-				sController ctrl = getController();
-				if (ctrl)
+				if (sController ctrl = getController())
+				{
 					ctrl->boxHasBeenCreated(box);
+				}
 				
                 return box;
             }
@@ -459,7 +460,7 @@ namespace Kiwi
 			m_locked = locked;
 			for(vector<Box::sController>::size_type i = 0; i < m_boxes.size(); i++)
             {
-				m_boxes[i]->setEditionStatus(!m_locked);
+				m_boxes[i]->setPageEditionStatus(!m_locked);
             }
 			unselectAll();
 			lockStatusChanged();
@@ -468,7 +469,15 @@ namespace Kiwi
 	
 	void Page::Controller::setPresentationStatus(bool presentation)
 	{
-		m_presentation = presentation;
+		if(m_presentation != presentation)
+		{
+			m_presentation = presentation;
+			for(vector<Box::sController>::size_type i = 0; i < m_boxes.size(); i++)
+			{
+				m_boxes[i]->setPagePresentationStatus(m_presentation);
+			}
+			presentationStatusChanged();
+		}
 	}
 	
 	void Page::Controller::setGridDisplayedStatus(bool display)
@@ -479,6 +488,26 @@ namespace Kiwi
 	void Page::Controller::setSnapToGridStatus(bool snap)
 	{
 		m_snap_to_grid = snap;
+	}
+	
+	void Page::Controller::setBoxesPresentationStatus(const vector<Box::sController>& boxes, const bool add)
+	{
+		for(vector<Box::sController>::size_type i = 0; i < boxes.size(); i++)
+		{
+			if(const sBox box = boxes[i]->getBox())
+			{
+				if (box->isInPresentation() != add)
+				{
+					box->setAttributeValue(AttrBox::Tag_presentation, {add});
+					if (add)
+					{
+						const Rectangle bounds = box->getBounds(false);
+						box->setAttributeValue(AttrBox::Tag_presentation_position, bounds.position());
+						box->setAttributeValue(AttrBox::Tag_presentation_size, bounds.size());
+					}
+				}
+			}
+		}
 	}
 	
 	void Page::Controller::addBoxController(Box::sController box)
@@ -929,7 +958,7 @@ namespace Kiwi
 			{
 				if(sBox box = boxctrl->getBox())
 				{
-					m_last_bounds[boxctrl] = box->getBounds();
+					m_last_bounds[boxctrl] = box->getBounds(getPresentationStatus());
 				}
 			}
 		}
@@ -945,12 +974,11 @@ namespace Kiwi
 	{
 		for(auto it = m_last_bounds.begin(); it != m_last_bounds.end(); ++it)
 		{
-			Box::sController boxctrl = (*it).first.lock();
-			if(boxctrl)
+			if(Box::sController boxctrl = (*it).first.lock())
 			{
-				sBox box =  boxctrl->getBox();
-				if(box)
+				if(sBox box =  boxctrl->getBox())
 				{
+					const bool presentation = getPresentationStatus();
 					double fixedRatio = box->getSizeRatio();
 					Rectangle original = it->second;
 					Rectangle newrect = original;
@@ -1038,8 +1066,10 @@ namespace Kiwi
 						}
 					}
 					
-					box->setAttributeValue(AttrBox::Tag_position, newrect.position());
-					box->setAttributeValue(AttrBox::Tag_size, newrect.size());
+					const sTag attrtag_pos = presentation ? AttrBox::Tag_presentation_position : AttrBox::Tag_position;
+					const sTag attrtag_size = presentation ? AttrBox::Tag_presentation_size : AttrBox::Tag_size;
+					box->setAttributeValue(attrtag_pos, newrect.position());
+					box->setAttributeValue(attrtag_size, newrect.size());
 				}
 			}
 		}
@@ -1049,15 +1079,15 @@ namespace Kiwi
 	{
 		if (isAnyBoxSelected())
 		{
+			const bool presentation = getPresentationStatus();
+			const sTag attrtag = presentation ? AttrBox::Tag_presentation_position : AttrBox::Tag_position;
 			for(auto it = m_boxes_selected.begin(); it != m_boxes_selected.end(); ++it)
 			{
-				Box::sController boxctrl = (*it).lock();
-				if(boxctrl)
+				if(Box::sController boxctrl = (*it).lock())
 				{
-                    sBox box =  boxctrl->getBox();
-                    if(box)
+                    if(sBox box = boxctrl->getBox())
                     {
-                        box->setAttributeValue(AttrBox::Tag_position, box->getPosition() + delta);
+                        box->setAttributeValue(attrtag, box->getPosition(presentation) + delta);
                     }
 				}
 			}
@@ -1141,8 +1171,8 @@ namespace Kiwi
 						sBox box = page->createBox(subdico);
 						if (box)
 						{
-							const Point pos = box->getPosition();
-							box->setAttributeValue(AttrBox::Tag_position, {pos.x() + shift.x(), pos.y() + shift.y()});
+							box->setAttributeValue(AttrBox::Tag_position, box->getPosition(false) + shift);
+							box->setAttributeValue(AttrBox::Tag_presentation_position, box->getPosition(true) + shift);
 							
 							if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
 							{
@@ -1193,6 +1223,42 @@ namespace Kiwi
 		}
 		
 		return pageModified;
+	}
+	
+	void Page::Controller::boxHasBeenCreated(sBox box)
+	{
+		if (Box::sController boxctrl = createBoxController(box))
+		{
+			addBoxController(boxctrl);
+			boxControllerHasBeenCreated(boxctrl);
+		}
+	}
+	
+	void Page::Controller::boxHasBeenRemoved(sBox box)
+	{
+		if (Box::sController boxctrl = box->getController())
+		{
+			boxControllerWillBeRemoved(boxctrl);
+			removeBoxController(boxctrl);
+		}
+	}
+	
+	void Page::Controller::linkHasBeenCreated(sLink link)
+	{
+		if (Link::sController linkctrl = createLinkController(link))
+		{
+			addLinkController(linkctrl);
+			linkControllerHasBeenCreated(linkctrl);
+		}
+	}
+	
+	void Page::Controller::linkHasBeenRemoved(sLink link)
+	{
+		if (Link::sController linkctrl = link->getController())
+		{
+			linkControllerWillBeRemoved(linkctrl);
+			removeLinkController(linkctrl);
+		}
 	}
 }
 

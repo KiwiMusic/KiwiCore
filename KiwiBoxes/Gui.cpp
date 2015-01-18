@@ -288,9 +288,18 @@ namespace Kiwi
         return Text::Editor::receive(event);
     }
     
-    bool Message::draw(Doodle& doodle) const
+    bool Message::draw(Doodle& d) const
     {
-        Text::Editor::draw(doodle);
+		const double borderSize = 1;
+		const double borderRadius = 4;
+		
+		d.setColor(getBorderColor());
+		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, borderRadius);
+		
+		d.setColor(getBackgroundColor());
+		d.fillRectangle(d.getBounds().reduced(borderSize*2), borderRadius);
+		
+        Text::Editor::draw(d);
         return true;
     }
     
