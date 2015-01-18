@@ -177,9 +177,9 @@ namespace Kiwi
         /** The function retrieves the size of the box as a point.
          @return The size of the box as a point.
          */
-        inline Point getPosition(const bool edition = true) const noexcept
+        inline Point getPosition(const bool presentation = false) const noexcept
         {
-			if(edition)
+			if(!presentation)
 				return attr_position->get();
 			else
 				return attr_presentation_position->get();
@@ -190,9 +190,9 @@ namespace Kiwi
 		 @param edition
          @return The size of the box as a point.
          */
-        inline Point getSize(const bool edition = true) const noexcept
+        inline Point getSize(const bool presentation = false) const noexcept
         {
-			if(edition)
+			if(!presentation)
 				return attr_size->get();
 			else
 				return attr_presentation_size->get();
@@ -202,9 +202,9 @@ namespace Kiwi
         /** The function retrieves the bounds of the box as a rectangle.
          @return The bounds of the box as a rectangle.
          */
-        inline Rectangle getBounds(const bool edition = true) const noexcept
+        inline Rectangle getBounds(const bool presentation = false) const noexcept
         {
-			if(edition)
+			if(!presentation)
 				return Rectangle(attr_position->get(), attr_size->get());
 			else
 				return Rectangle(attr_presentation_position->get(), attr_presentation_size->get());

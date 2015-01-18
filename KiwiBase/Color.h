@@ -172,6 +172,11 @@ namespace Kiwi
         {
             return Color(red() - value, green() - value, blue() - value, alpha());
         }
+		
+		inline Color withAlpha(const double value) const noexcept
+		{
+			return Color(red(), green(), blue(), clip(value, 0., 1.));
+		}
     };
 }
 

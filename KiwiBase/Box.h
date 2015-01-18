@@ -31,6 +31,7 @@
 #include "Text.h"
 #include "Beacon.h"
 #include "Clock.h"
+//#include "Page.h"
 
 // TODO
 // - See how to format the expression
@@ -458,8 +459,9 @@ namespace Kiwi
             const bool		m_want_keyboard_focus;
 			const double	m_framesize;
 			
-            bool    m_edition;
-            bool    m_selected;
+            bool			m_selected;
+			bool			m_page_edition_status;
+			bool			m_page_presentation_status;
         public:
             
             //! Constructor.
@@ -472,8 +474,9 @@ namespace Kiwi
 			m_want_mouse_focus(box->getFlags() & Box::Mouse),
 			m_want_keyboard_focus(box->getFlags() & Box::Keyboard),
 			m_framesize(4.),
-            m_edition(true),
-            m_selected(false)
+            m_selected(false),
+			m_page_edition_status(true),
+			m_page_presentation_status(false)
             {
                 ;
             }
@@ -521,11 +524,20 @@ namespace Kiwi
             /** The function retrieves if the page is in edition.
              @param true if the page is in edition, otherwise false.
              */
-            inline bool getEditionStatus() const noexcept
+            inline bool getPageEditionStatus() const noexcept
             {
-                return m_edition;
+                return m_page_edition_status;
             }
-            
+			
+			//! Retrieve if the page is in presentation mode.
+			/** The function retrieves if the page is in presentation mode.
+			 @param true if the page is in presentation mode, otherwise false.
+			 */
+			inline bool getPagePresentationStatus() const noexcept
+			{
+				return m_page_presentation_status;
+			}
+			
             //! Retrieve if the box is selected.
             /** The function retrieves if the box is selected.
              @param true if the box is selected, otherwise false.
@@ -584,19 +596,19 @@ namespace Kiwi
 			/** The function retrieves the bounds of the box controller.
 			 The box controller's bounds is equal to the box's bounds expanded by a framesize.
 			 */
-			Rectangle getBounds() const noexcept;
+			Rectangle getBounds(const bool presentation) const noexcept;
 			
 			//! Retrieve the position of the box controller.
 			/** The function retrieves the position of the box controller.
 			 The box controller's position is equal to the box's position expanded by a framesize.
 			 */
-			Point getPosition() const noexcept;
+			Point getPosition(const bool presentation) const noexcept;
 			
 			//! Retrieve the size of the box controller.
 			/** The function retrieves the size of the box controller.
 			 The box controller's size is equal to the box's size expanded by a framesize.
 			 */
-			Point getSize() const noexcept;
+			Point getSize(const bool presentation) const noexcept;
 			
             //! Retrieve the position of an inlet.
             /** The function retrieves the position of an inlet.
@@ -616,22 +628,30 @@ namespace Kiwi
 			/** The function retrieves if the box is touch by a point and fill the knock with the knock informations.
              @param point The point.
              @param knock The knock.
+			 @param presentation Is the page in presentation mode ?
 			 @return true if the box is touch by the point, otherwise false.
 			 */
-			virtual bool contains(Point const& point, Knock& knock) const noexcept;
+			virtual bool contains(Point const& point, Knock& knock, const bool presentation) const noexcept;
             
             //! Tests if the box overlaps the rectangle.
 			/** The function tests if the box overlaps the rectangle.
              @param rect The Rectangle.
+			 @param presentation Is the page in presentation mode ?
 			 @return True if the box overlaps the rectangle, otherwise false.
 			 */
-			virtual bool overlaps(Rectangle const& rect) const noexcept;
+			virtual bool overlaps(Rectangle const& rect, const bool presentation) const noexcept;
             
             //! Notify that the page is in edition.
             /** The function notifies that page is in edition to redraw the box.
-             @param status true if page is in edition, otherwise false.
+             @param edition true if page is in edition, otherwise false.
              */
-            void setEditionStatus(bool status);
+            void setPageEditionStatus(const bool edition);
+			
+			//! Notify that the page presentation status changed.
+			/** The function notifies that the page presentation status changed.
+			 @param presentation True if page is in presentation, otherwise false.
+			 */
+			void setPagePresentationStatus(const bool presentation);
             
             //! Notify that the box is selected.
             /** The function notifies that the box is selected to redraw the box.
@@ -662,7 +682,22 @@ namespace Kiwi
 			//! The size notification function that should be override.
 			/** The function is called by the box when its size changed.
 			 */
-			virtual void editionStatusChanged() {};
+			virtual void pageEditionStatusChanged() {};
+			
+			//! The page presentation notification function.
+			/** The function is called by the box when page presentation mode changed.
+			 */
+			virtual void pagePresentationStatusChanged() {};
+			
+			//! Called by the box when the box selection status changed.
+			/** The function is called by the box selection status changed.
+			 */
+			virtual void selectionStatusChanged() {};
+			
+			//! Called by the box when the presentation status changed.
+			/** The function is called by the box when the presentation status changed.
+			 */
+			virtual void presentationStatusChanged() {};
 			
             //! The redraw function that should be override.
             /** The function is called by the box when it should be repainted.
@@ -676,19 +711,19 @@ namespace Kiwi
 				
             //! The default paint method.
             /** The default function paint a default box with the background, border, inlets, outlets and text.
-             @param paper       A doodle to draw.
-             @param edit        If the page is in edition mode.
-             @param selected    If the box is selected
+             @param doodle			A doodle to draw.
+			 @param selected		If the box is selected.
+             @param edit			If the page is in edition mode.
+			 @param presentation    If the page is in presentation mode.
              */
-            static void paint(sBox box, Doodle& d, bool edit = false, bool selected = false);
+            static void paintBoxFrame(sBox box, Doodle& doodle, const bool selected = false,
+									  const bool edit = false, const bool presentation = false);
 			
 			//! The default paint method.
 			/** The default function paint a default box with the background, border, inlets, outlets and text.
-			 @param paper       A doodle to draw.
-			 @param edit        If the page is in edition mode.
-			 @param selected    If the box is selected
+			 @param doodle			A doodle to draw.
 			 */
-			static void paintBox(sBox box, Doodle& d);
+			static void paintBox(sBox box, Doodle& doodle);
         };
 		
         // ================================================================================ //

@@ -299,9 +299,7 @@ namespace Kiwi
         //! The page controller is an abstract class that facilitates the control of a page in an application.
         /**
          The page controller should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page controller owns a vector of box controllers and facilitates managements of boxes like the creation, the deletion, the selection, etc.
-         @see Page
-         @see Page::Listener
-         @see Box::Controller
+         @see Page, Page::Listener, Box::Controller
          */
 		class Controller : public Knock, public IoletMagnet, public enable_shared_from_this<Controller>
         {            
@@ -329,6 +327,17 @@ namespace Kiwi
 			bool m_presentation;
 			bool m_display_grid;
 			bool m_snap_to_grid;
+			
+			void addBoxController(Box::sController box);
+			void removeBoxController(Box::sController box);
+			
+			Box::sController getBoxController(sBox box) const noexcept;
+			
+			void addLinkController(Link::sController link);
+			void removeLinkController(Link::sController link);
+			
+			Link::sController getLinkController(sLink link) const noexcept;
+			
         public:
 			
 			//! Constructor.
@@ -343,7 +352,7 @@ namespace Kiwi
              */
             virtual ~Controller();
 			
-			//! The controller maker.
+			//! The page controller maker.
 			/** The function creates a page controller with arguments.
 			 */
 			template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
@@ -463,6 +472,13 @@ namespace Kiwi
 			 @param snap True to active the snap to grid, otherwise false.
 			 */
 			void setSnapToGridStatus(bool snap);
+			
+			//! Adds or removes boxes from presentation.
+			/** The function Adds or removes boxes from presentation.
+			 @param boxes The boxes to add or remove from presentation.
+			 @param add True to add boxes to presentation, false to remove them.
+			 */
+			void setBoxesPresentationStatus(const vector<Box::sController>& boxes, const bool add);
 			
 			// ================================================================================ //
 			//										SELECTION									//
@@ -658,44 +674,77 @@ namespace Kiwi
 			
 			//! Receive the notification that a box has been created.
 			/** The function is called by the page when a box has been created.
-			 @param page    The page.
 			 @param box     The box.
 			 */
-			virtual void boxHasBeenCreated(sBox box) {};
+			void boxHasBeenCreated(sBox box);
+			
+			//! Create a box controller.
+			/** Page controller's subclasses must implement this method to create custom box controller.
+			 @param box     The box.
+			 @return The newly created box controller.
+			 */
+			virtual Box::sController createBoxController(sBox box) = 0;
+			
+			//! Receive the notification that a box controller has been created.
+			/** The function is called by the page when a box controller has been created.
+			 @param boxctrl The box controller.
+			 */
+			virtual void boxControllerHasBeenCreated(Box::sController boxctrl) {};
 			
 			//! Receive the notification that a box has been removed.
 			/** The function is called by the page when a box has been removed.
-			 @param page    The page.
 			 @param box     The box.
 			 */
-			virtual void boxHasBeenRemoved(sBox box) {};
+			void boxHasBeenRemoved(sBox box);
 			
-			//! Receive the notification that a box has been replaced by another one.
-			/** The function is called by the page when a box has been replaced by another one.
-			 @param page    The page.
-			 @param oldbox  The box that has been replaced.
-			 @param newbox  The box that has replaced.
+			//! Receive the notification that a box controller before a box has been removed.
+			/** The function is called by the page controller before a box has been removed.
+			 @param boxctrl The box controller.
+			 */
+			virtual void boxControllerWillBeRemoved(Box::sController boxctrl) {};
+			
+			//! Receive the notification that a box has been replaced.
+			/** The function is called by the page when a box has been replaced.
+			 @param oldbox  The old box.
+			 @param newbox	The new box.
 			 */
 			virtual void boxHasBeenReplaced(sBox oldbox, sBox newbox) {};
 			
-			//! Receive the notification that a connection has been created.
-			/** The function is called by the page when a connection has been created.
-			 @param page        The page.
-			 @param connection  The box.
+			//! Receive the notification that a link has been created.
+			/** The function is called by the page when a link has been created.
+			 @param link     The link.
 			 */
-			virtual void linkHasBeenCreated(sLink connection) {};
+			void linkHasBeenCreated(sLink link);
 			
-			//! Receive the notification that a connection has been removed.
-			/** The function is called by the page when a connection has been removed.
-			 @param page        The page.
-			 @param connection  The connection.
+			//! Create a link controller.
+			/** Page controller's subclasses must implement this method to create custom link controller.
+			 @param link     The link.
+			 @return The newly created link controller.
 			 */
-			virtual void linkHasBeenRemoved(sLink connection) {};
+			virtual Link::sController createLinkController(sLink link) = 0;
 			
-			//! Receive the notification that a connection has been removed.
-			/** The function is called by the page when a connection has been removed.
-			 @param page        The page.
-			 @param connection  The connection.
+			//! Receive the notification that a link controller has been created.
+			/** The function is called by the page when a link controller has been created.
+			 @param linkctrl The link controller.
+			 */
+			virtual void linkControllerHasBeenCreated(Link::sController linkctrl) {};
+			
+			//! Receive the notification that a link has been removed.
+			/** The function is called by the page when a link has been removed.
+			 @param link    The link.
+			 */
+			void linkHasBeenRemoved(sLink link);
+			
+			//! Receive the notification that a link controller before a box has been removed.
+			/** The function is called by the page controller before a link has been removed.
+			 @param linkctrl The link controller.
+			 */
+			virtual void linkControllerWillBeRemoved(Link::sController linkctrl) {};
+			
+			//! Receive the notification that a connection has been replaced.
+			/** The function is called by the page when a connection has been replaced.
+			 @param oldlink  The old link.
+			 @param newlink	The new link.
 			 */
 			virtual void linkHasBeenReplaced(sLink oldlink, sLink newlink) {};
 			
@@ -707,17 +756,7 @@ namespace Kiwi
 			virtual bool pageAttributeValueChanged(sAttr attr) { return true; };
 			
         protected:
-			
-			void addBoxController(Box::sController box);
-			void removeBoxController(Box::sController box);
-			
-			Box::sController getBoxController(sBox box) const noexcept;
-			
-			void addLinkController(Link::sController link);
-			void removeLinkController(Link::sController link);
-			
-			Link::sController getLinkController(sLink link) const noexcept;
-			
+
 			//! The redraw function that must be overriden to be notified when the page needs to be redrawn.
 			/** The function is called by the page when it needs to be repainted.
 			 */
@@ -727,6 +766,11 @@ namespace Kiwi
 			/** The function is called when the page has been locked/unlocked.
 			 */
 			virtual void lockStatusChanged() {};
+			
+			//! Called when the page presentation mode has been activated/deactivated.
+			/** The function is called when the page presentation mode has been activated/deactivated.
+			 */
+			virtual void presentationStatusChanged() {};
         };
         
         static const sTag Tag_box;
