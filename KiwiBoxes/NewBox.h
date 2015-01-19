@@ -32,7 +32,7 @@ namespace Kiwi
     //                                    NEWBOX                                        //
     // ================================================================================ //
     
-    class NewBox : public Box, public TextEditor
+    class NewBox : public Box, public Gui::TextEditor
     {
     private:
 		
@@ -41,10 +41,10 @@ namespace Kiwi
         NewBox(sPage page, ElemVector const& elements = {}, string const& name = "newbox");
         ~NewBox();
         bool receive(unsigned long index, ElemVector const& elements) override;
-		bool receive(Event::Mouse const& event) override;
-		bool receive(Event::Keyboard const& event) override;
-		bool receive(Event::Focus::Type event) override;
-		bool draw(Doodle& doodle) const override;
+		bool receive(Gui::Event::Mouse const& event) override;
+		bool receive(Gui::Event::Keyboard const& event) override;
+		bool receive(Gui::Event::Focus::Type event) override;
+		bool draw(Gui::Doodle& doodle) const override;
         AllocateElemVector(NewBox);
     };
 	

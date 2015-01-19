@@ -54,7 +54,7 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool Print::receive(Event::Mouse const& event)
+	bool Print::receive(Gui::Event::Mouse const& event)
 	{
 		if(event.isDoubleClick())
 		{
@@ -120,7 +120,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Int::receive(Event::Mouse const& event)
+    bool Int::receive(Gui::Event::Mouse const& event)
     {
         if(event.isDoubleClick())
         {

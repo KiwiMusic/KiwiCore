@@ -290,7 +290,7 @@ namespace Kiwi
         /** The function shoulds perform some stuff. Return false if you don't want the mouse event then the box manager will notify other mouse listener if needed, othersize return true.
          @param event    A mouse event.
          */
-        virtual bool receive(Event::Mouse const& event)
+        virtual bool receive(Gui::Event::Mouse const& event)
         {
             return false;
         }
@@ -299,7 +299,7 @@ namespace Kiwi
         /** The function shoulds perform some stuff. Return false if you don't want the keyboard event then the box manager will notifiy other keyboard listener if needed, othersize return true.
          @param event    A keyboard event.
          */
-        virtual bool receive(Event::Keyboard const& event)
+        virtual bool receive(Gui::Event::Keyboard const& event)
         {
             return false;
         }
@@ -308,7 +308,7 @@ namespace Kiwi
         /** The function shoulds perform some stuff. Return false if you don't want the focus event then the box manager will notifiy other keyboard listener if needed, othersize return true.
          @param event    A focus event.
          */
-        virtual bool receive(Event::Focus::Type event)
+        virtual bool receive(Gui::Event::Focus::Type event)
         {
             return false;
         }
@@ -317,7 +317,7 @@ namespace Kiwi
         /** The function shoulds draw some stuff in the doodle. Return false if you don't want to draw then the box manager will draw the text of the box, othersize return true.
          @param doodle    A doodle to draw.
          */
-        virtual bool draw(Doodle& doodle) const
+        virtual bool draw(Gui::Doodle& doodle) const
         {
             return false;
         }
@@ -590,33 +590,33 @@ namespace Kiwi
 			/** The function retrieves the bounds of the box controller.
 			 The box controller's bounds is equal to the box's bounds expanded by a framesize.
 			 */
-			Rectangle getBounds(const bool presentation) const noexcept;
+			Gui::Rectangle getBounds(const bool presentation) const noexcept;
 			
 			//! Retrieve the position of the box controller.
 			/** The function retrieves the position of the box controller.
 			 The box controller's position is equal to the box's position expanded by a framesize.
 			 */
-			Point getPosition(const bool presentation) const noexcept;
+			Gui::Point getPosition(const bool presentation) const noexcept;
 			
 			//! Retrieve the size of the box controller.
 			/** The function retrieves the size of the box controller.
 			 The box controller's size is equal to the box's size expanded by a framesize.
 			 */
-			Point getSize(const bool presentation) const noexcept;
+			Gui::Point getSize(const bool presentation) const noexcept;
 			
             //! Retrieve the position of an inlet.
             /** The function retrieves the position of an inlet.
              @param index The index of the inlet.
              @return the position of the inlet as a point.
              */
-            Point getInletPosition(ulong index) const noexcept;
+            Gui::Point getInletPosition(ulong index) const noexcept;
             
             //! Retrieve the position of an outlet.
             /** The function retrieves the position of an outlet.
              @param index The index of the outlet.
              @return the position of the outlet as a point.
              */
-            Point getOutletPosition(ulong index) const noexcept;
+            Gui::Point getOutletPosition(ulong index) const noexcept;
             
             //! Retrieve if the box is touch by a point.
 			/** The function retrieves if the box is touch by a point and fill the knock with the knock informations.
@@ -625,7 +625,7 @@ namespace Kiwi
 			 @param presentation Is the page in presentation mode ?
 			 @return true if the box is touch by the point, otherwise false.
 			 */
-			virtual bool contains(Point const& point, Knock& knock, const bool presentation) const noexcept;
+			virtual bool contains(Gui::Point const& point, Knock& knock, const bool presentation) const noexcept;
             
             //! Tests if the box overlaps the rectangle.
 			/** The function tests if the box overlaps the rectangle.
@@ -633,7 +633,7 @@ namespace Kiwi
 			 @param presentation Is the page in presentation mode ?
 			 @return True if the box overlaps the rectangle, otherwise false.
 			 */
-			virtual bool overlaps(Rectangle const& rect, const bool presentation) const noexcept;
+			virtual bool overlaps(Gui::Rectangle const& rect, const bool presentation) const noexcept;
             
             //! Notify that the page is in edition.
             /** The function notifies that page is in edition to redraw the box.
@@ -710,14 +710,14 @@ namespace Kiwi
              @param edit			If the page is in edition mode.
 			 @param presentation    If the page is in presentation mode.
              */
-            static void paintBoxFrame(sBox box, Doodle& doodle, const bool selected = false,
+            static void paintBoxFrame(sBox box, Gui::Doodle& doodle, const bool selected = false,
 									  const bool edit = false, const bool presentation = false);
 			
 			//! The default paint method.
 			/** The default function paint a default box with the background, border, inlets, outlets and text.
 			 @param doodle			A doodle to draw.
 			 */
-			static void paintBox(sBox box, Doodle& doodle);
+			static void paintBox(sBox box, Gui::Doodle& doodle);
         };
 		
         // ================================================================================ //

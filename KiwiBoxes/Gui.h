@@ -21,8 +21,8 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_GUI__
-#define __DEF_KIWI_GUI__
+#ifndef __DEF_KIWI_GUI_BOXES__
+#define __DEF_KIWI_GUI_BOXES__
 
 #include "../KiwiBase/Core.h"
 
@@ -48,8 +48,8 @@ namespace Kiwi
         Bang(sPage page);
         ~Bang();
         bool receive(unsigned long index, ElemVector const& elements) override;
-        bool receive(Event::Mouse const& event) override;
-        bool draw(Doodle& doodle) const override;
+        bool receive(Gui::Event::Mouse const& event) override;
+        bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
         void tick() override;
         Allocate(Bang);
@@ -70,8 +70,8 @@ namespace Kiwi
         Toggle(sPage page);
         ~Toggle();
         bool receive(unsigned long index, ElemVector const& elements) override;
-        bool receive(Event::Mouse const& event) override;
-        bool draw(Doodle& doodle) const override;
+        bool receive(Gui::Event::Mouse const& event) override;
+        bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
         Allocate(Toggle);
     };
@@ -80,7 +80,7 @@ namespace Kiwi
     //                                      MESSAGE                                     //
     // ================================================================================ //
     
-    class Message : public Box, public TextEditor, public Clock::Maker
+    class Message : public Box, public Gui::TextEditor, public Clock::Maker
     {
     private:
         ElemVector      m_elements;
@@ -91,10 +91,10 @@ namespace Kiwi
         Message(sPage page);
         ~Message();
         bool receive(unsigned long index, ElemVector const& elements) override;
-        bool receive(Event::Mouse const& event) override;
-        bool receive(Event::Keyboard const& event) override;
-        bool receive(Event::Focus::Type event) override;
-        bool draw(Doodle& doodle) const override;
+        bool receive(Gui::Event::Mouse const& event) override;
+        bool receive(Gui::Event::Keyboard const& event) override;
+        bool receive(Gui::Event::Focus::Type event) override;
+        bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
         void tick() override;
         Allocate(Message);
@@ -104,7 +104,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    class Number : public Box, public TextEditor, public Clock::Maker
+    class Number : public Box, public Gui::TextEditor, public Clock::Maker
     {
     private:
         double m_value;
@@ -113,17 +113,17 @@ namespace Kiwi
         bool   m_edition;
         string m_text;
         bool   m_maker;
-        Point  m_selection;
+        Gui::Point  m_selection;
         sClock m_clock;
     public:
         
         Number(sPage page);
         ~Number();
         bool receive(unsigned long index, ElemVector const& elements) override;
-        bool receive(Event::Mouse const& event) override;
-        bool receive(Event::Keyboard const& event) override;
-        bool receive(Event::Focus::Type event) override;
-        bool draw(Doodle& doodle) const override;
+        bool receive(Gui::Event::Mouse const& event) override;
+        bool receive(Gui::Event::Keyboard const& event) override;
+        bool receive(Gui::Event::Focus::Type event) override;
+        bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
         void tick() override;
         Allocate(Number);
@@ -149,8 +149,8 @@ namespace Kiwi
         Slider(sPage page);
         ~Slider();
         bool receive(unsigned long index, ElemVector const& elements) override;
-        bool receive(Event::Mouse const& event) override;
-        bool draw(Doodle& doodle) const override;
+        bool receive(Gui::Event::Mouse const& event) override;
+        bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
         void send() const;
         Allocate(Slider);
@@ -170,7 +170,7 @@ namespace Kiwi
 		Panel(sPage page);
 		~Panel() {};
 		bool receive(unsigned long index, ElemVector const& elements) override;
-		bool draw(Doodle& doodle) const override;
+		bool draw(Gui::Doodle& doodle) const override;
 		bool attributeChanged(sAttr attr) override;
 		Allocate(Panel);
 	};
@@ -179,7 +179,7 @@ namespace Kiwi
 	//									PROTOTYPES                                      //
 	// ================================================================================ //
 	
-    inline void gui()
+    inline void guiInit()
     {
         Box::addPrototype(unique_ptr<Box>(new Bang(nullptr)));
         Box::addPrototype(unique_ptr<Box>(new Toggle(nullptr)));

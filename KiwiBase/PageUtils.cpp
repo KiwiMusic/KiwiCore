@@ -52,7 +52,7 @@ namespace Kiwi
         m_index = 0;
     }
     
-    void Knock::knockAll(Point const& point, const bool presentation) noexcept
+    void Knock::knockAll(Gui::Point const& point, const bool presentation) noexcept
     {
         knockReset();
         if(sPage page = m_page.lock())
@@ -102,7 +102,7 @@ namespace Kiwi
         }
     }
     
-    void Knock::knockBoxes(Point const& point, const bool presentation) noexcept
+    void Knock::knockBoxes(Gui::Point const& point, const bool presentation) noexcept
     {
         knockReset();
         if(sPage page = m_page.lock())
@@ -123,7 +123,7 @@ namespace Kiwi
         }
     }
     
-    void Knock::knockLinks(Point const& point) noexcept
+    void Knock::knockLinks(Gui::Point const& point) noexcept
     {
         knockReset();
         if(sPage page = m_page.lock())
@@ -145,13 +145,13 @@ namespace Kiwi
     }
     
 
-    void Knock::knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links, const bool presentation) noexcept
+    void Knock::knockAll(Gui::Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links, const bool presentation) noexcept
     {
         knockBoxes(rect, boxes, presentation);
         knockLinks(rect, links);
     }
     
-    void Knock::knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes, const bool presentation) noexcept
+    void Knock::knockBoxes(Gui::Rectangle const& rect, vector<Box::sController>& boxes, const bool presentation) noexcept
     {
         boxes.clear();
         if(sPage page = m_page.lock())
@@ -171,7 +171,7 @@ namespace Kiwi
         }
     }
     
-    void Knock::knockLinks(Rectangle const& rect, vector<Link::sController>& links) noexcept
+    void Knock::knockLinks(Gui::Rectangle const& rect, vector<Link::sController>& links) noexcept
     {
         links.clear();
         if(sPage page = m_page.lock())
@@ -205,7 +205,7 @@ namespace Kiwi
         
     }
     
-    bool IoletMagnet::magnetFindIolet(Point const& point, sBox box, bool inlet, double const distance)
+    bool IoletMagnet::magnetFindIolet(Gui::Point const& point, sBox box, bool inlet, double const distance)
 	{
         m_box.reset();
         sPage page = m_page.lock();
@@ -266,7 +266,7 @@ namespace Kiwi
 		m_links.clear();
     }
     
-	void Lasso::begin(Point const& point, const bool preserve)
+	void Lasso::begin(Gui::Point const& point, const bool preserve)
 	{
         if(m_dragging)
         {
@@ -291,32 +291,32 @@ namespace Kiwi
         }
 		
         m_start = point;
-		m_bounds = Rectangle(m_start, Point(0., 0));
+		m_bounds = Gui::Rectangle(m_start, Gui::Point(0., 0));
 		m_dragging = true;
 	}
 	
-	void Lasso::perform(Point const& point, bool boxes, bool links, const bool preserve, const bool presentation)
+	void Lasso::perform(Gui::Point const& point, bool boxes, bool links, const bool preserve, const bool presentation)
 	{
         if(m_start.x() < point.x())
         {
             if(m_start.y() < point.y())
             {
-                m_bounds = Rectangle(m_start, point - m_start);
+                m_bounds = Gui::Rectangle(m_start, point - m_start);
             }
             else
             {
-                m_bounds = Rectangle(m_start.x(), point.y(), point.x() - m_start.x(), m_start.y() - point.y());
+                m_bounds = Gui::Rectangle(m_start.x(), point.y(), point.x() - m_start.x(), m_start.y() - point.y());
             }
         }
         else
         {
             if(m_start.y() < point.y())
             {
-                m_bounds = Rectangle(point.x(), m_start.y(), m_start.x() - point.x(), point.y() - m_start.y());
+                m_bounds = Gui::Rectangle(point.x(), m_start.y(), m_start.x() - point.x(), point.y() - m_start.y());
             }
             else
             {
-                m_bounds = Rectangle(point, m_start - point);
+                m_bounds = Gui::Rectangle(point, m_start - point);
             }
         }
 		boundsHasChanged();
@@ -412,11 +412,11 @@ namespace Kiwi
 		m_links.clear();
 	}
 	
-	void Lasso::draw(Doodle &d)
+    void Lasso::draw(Gui::Doodle &d)
 	{
-        d.setColor(Color(0.96, 0.96, 0.96, 0.5));
+        d.setColor(Gui::Color(0.96, 0.96, 0.96, 0.5));
         d.fillAll();
-        d.setColor(Color(0.96, 0.96, 0.96, 1.));
+        d.setColor(Gui::Color(0.96, 0.96, 0.96, 1.));
         d.drawRectangle(0., 0., d.getWidth(), d.getHeight(), 1.);
 	}
     
@@ -442,9 +442,9 @@ namespace Kiwi
 			{
 				if(sInlet inlet = box->getInlet(index))
 				{
-					const Point pos = ctrl->getInletPosition(index);
+					const Gui::Point pos = ctrl->getInletPosition(index);
 					m_polarity = inlet->getPolarity();
-                    m_bounds = Rectangle(pos.x() - 8.,  pos.y() - 8., 16., 16.);
+                    m_bounds = Gui::Rectangle(pos.x() - 8.,  pos.y() - 8., 16., 16.);
                     boundsHasChanged();
 				}
 			}
@@ -459,19 +459,19 @@ namespace Kiwi
 			{
 				if(sInlet inlet = box->getInlet(index))
 				{
-					const Point pos = ctrl->getOutletPosition(index);
+					const Gui::Point pos = ctrl->getOutletPosition(index);
 					m_polarity = Iolet::Hot;
-                    m_bounds = Rectangle(pos.x() - 8.,  pos.y() - 8., 16., 16.);
+                    m_bounds = Gui::Rectangle(pos.x() - 8.,  pos.y() - 8., 16., 16.);
                     boundsHasChanged();
 				}
 			}
 		}
 	}
 	
-	void IoletHighlighter::draw(Doodle &d)
+	void IoletHighlighter::draw(Gui::Doodle &d)
 	{
-		const Point size = d.getSize();
-		const Color color = (m_polarity == Iolet::Cold) ? Color(0.28, 0.28, 0.88, 1) : Color(0.88, 0.28, 0.28, 1);
+		const Gui::Point size = d.getSize();
+		const Gui::Color color = (m_polarity == Iolet::Cold) ? Gui::Color(0.28, 0.28, 0.88, 1) : Gui::Color(0.88, 0.28, 0.28, 1);
 		d.setColor(color.brighter(0.3));
         d.fillEllipse(4.5, 4.5, size.x() - 9., size.y() - 9.);
         d.setColor(color);

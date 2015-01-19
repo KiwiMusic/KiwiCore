@@ -25,10 +25,14 @@
 #define __DEF_KIWI_TOOLS__
 
 #include "Defs.h"
-#include "ToolsMath.h"
 
 namespace Kiwi
 {
+    template <typename Type> Type clip(const Type& n, const Type& lower, const Type& upper)
+    {
+        return max(lower, min(n, upper));
+    }
+    
 	template <class InputContainer, class T> typename InputContainer::size_type find_position(InputContainer const& container, const T& val)
     {
         typename InputContainer::size_type position = 0;

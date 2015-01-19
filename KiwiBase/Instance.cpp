@@ -59,7 +59,7 @@ namespace Kiwi
         {
 			standardBoxes();
             arithmetic();
-            gui();
+            guiInit();
             wireless();
 			timing();
             GeneratorTildeInit();

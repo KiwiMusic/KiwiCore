@@ -734,7 +734,7 @@ namespace Kiwi
 	class AttrColor : public Attr
 	{
 	private:
-        Kiwi::Color m_value;
+        Gui::Color m_value;
 	public:
 		AttrColor(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0., 0., 1.}, long behavior = 0) :
         Attr(name, label, category, Attr::Style::Color, {default_value}, behavior) {;}
@@ -742,7 +742,7 @@ namespace Kiwi
 		virtual void get(ElemVector& elements) const noexcept;
 		virtual void set(ElemVector const& elements) override;
         
-        inline Kiwi::Color get() const noexcept
+        inline Gui::Color get() const noexcept
         {
             return m_value;
         }
@@ -755,7 +755,7 @@ namespace Kiwi
 	class AttrPoint : public Attr
 	{
 	protected:
-        Point m_value = {0., 0.};
+        Gui::Point m_value = {0., 0.};
 	public:
 		AttrPoint(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0.}, long behavior = 0) :
 		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}
@@ -763,7 +763,7 @@ namespace Kiwi
 		virtual void get(ElemVector& elements) const noexcept;
 		virtual void set(ElemVector const& elements) override;
         
-        inline Point get() const noexcept
+        inline Gui::Point get() const noexcept
         {
             return m_value;
         }
@@ -776,8 +776,8 @@ namespace Kiwi
 	class AttrSize : public AttrPoint
 	{
 	private:
-		Point	m_min_limits = {5., 5.};
-		Point	m_max_limits = {0., 0.};
+        Gui::Point	m_min_limits = {5., 5.};
+		Gui::Point	m_max_limits = {0., 0.};
 		double	m_ratio = 0.;
 		
 		void clipValue() noexcept
@@ -792,13 +792,13 @@ namespace Kiwi
 		virtual ~AttrSize() {};
 		virtual void set(ElemVector const& elements) override;
 		virtual void get(ElemVector& elements) const noexcept;
-		inline Point get() const noexcept
+		inline Gui::Point get() const noexcept
 		{
 			return m_value;
 		}
 		
 		//! Sets a minimum width and height limit.
-		void setMinLimits(Point const& minLimits) noexcept
+        void setMinLimits(Gui::Point const& minLimits) noexcept
 		{
 			if(minLimits != m_min_limits)
 			{
@@ -812,20 +812,20 @@ namespace Kiwi
 		/** Pass a 0 point if you don't want to limit width or height.
 		 @param maxLimits The maximum width and height limit.
 		 */
-		void setMaxLimits(Point const& maxLimits) noexcept
+        void setMaxLimits(Gui::Point const& maxLimits) noexcept
 		{
 			m_max_limits.x(maxLimits.x() > 0. ? max(maxLimits.x(), m_min_limits.x()) : 0.);
 			m_max_limits.y(maxLimits.y() > 0. ? max(maxLimits.y(), m_min_limits.y()) : 0.);
 		}
 		
 		//! Retrieves the minimum width and height limit.
-		Point getMinLimits() const noexcept
+        Gui::Point getMinLimits() const noexcept
 		{
 			return m_min_limits;
 		}
 		
 		//! Retrieves the maximum width and height limit.
-		Point getMaxLimits() const noexcept
+		Gui::Point getMaxLimits() const noexcept
 		{
 			return m_max_limits;
 		}
@@ -856,7 +856,7 @@ namespace Kiwi
 	class AttrRect : public Attr
 	{
 	private:
-		Rectangle m_value;
+		Gui::Rectangle m_value;
 	public:
 		AttrRect(sTag name, sTag label, sTag category, ElemVector const& default_value = {0., 0., 0., 0.}, long behavior = 0) :
 		Attr(name, label, category, Attr::Style::List, {default_value}, behavior) {;}

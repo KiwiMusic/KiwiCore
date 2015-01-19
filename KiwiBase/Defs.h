@@ -47,6 +47,9 @@
 #include <Accelerate/Accelerate.h>
 #endif
 
+#include "../KiwiDsp/Dsp.h"
+#include "../KiwiGui/Gui.h"
+
 using namespace std;
 
 #define _USE_MATH_DEFINES
@@ -156,8 +159,6 @@ namespace Kiwi
     class Instance;
     typedef shared_ptr<Instance>    sInstance;
     typedef weak_ptr<Instance>      wInstance;
-    
-    class Point;
     
 };
 

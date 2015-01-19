@@ -47,7 +47,7 @@ namespace Kiwi
         addAttribute(m_color_circle);
         addAttribute(m_color_led);
         setAttributeDefaultValues(Tag_size, {20., 20.});
-		setSizeLimits(Point(10, 10));
+        setSizeLimits({10, 10});
 		setSizeRatio(1.);
     }
     
@@ -75,7 +75,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Bang::receive(Event::Mouse const& event)
+    bool Bang::receive(Gui::Event::Mouse const& event)
     {
         if(event.isDown())
         {
@@ -93,11 +93,11 @@ namespace Kiwi
         return false;
     }
     
-    bool Bang::draw(Doodle& d) const
+    bool Bang::draw(Gui::Doodle& d) const
     {
 		double borderSize = 1;
-		const Rectangle bounds = d.getBounds().reduced(borderSize);
-		const Rectangle ledRect = bounds.reduced(d.getWidth() * 0.4);
+		const Gui::Rectangle bounds = d.getBounds().reduced(borderSize);
+		const Gui::Rectangle ledRect = bounds.reduced(d.getWidth() * 0.4);
 		
 		d.setColor(getBorderColor());
 		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, 0);
@@ -146,7 +146,7 @@ namespace Kiwi
         addAttribute(m_color_cross_on);
         addAttribute(m_color_cross_off);
         setAttributeDefaultValues(Tag_size, {20., 20.});
-		setSizeLimits(Point(10, 10));
+        setSizeLimits({10, 10});
 		setSizeRatio(1.);
     }
     
@@ -190,7 +190,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Toggle::receive(Event::Mouse const& event)
+    bool Toggle::receive(Gui::Event::Mouse const& event)
     {
         if(event.isDown())
         {
@@ -202,7 +202,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Toggle::draw(Doodle& d) const
+    bool Toggle::draw(Gui::Doodle& d) const
     {
 		double borderSize = 2;
 		d.setColor(getBorderColor());
@@ -252,7 +252,7 @@ namespace Kiwi
 		setAttributeValue(Tag_bgcolor, {0.66, 0.66, 0.66, 1.});
         
         TextEditor::setFont(getFont());
-        TextEditor::setJustification(Font::Justification::VerticallyCentred);
+        TextEditor::setJustification(Gui::Font::Justification::VerticallyCentred);
         TextEditor::setColor(attr_color_text->get());
         TextEditor::setSize(getSize());
         TextEditor::setPadding(3., 3., 3., 3.);
@@ -269,7 +269,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Message::receive(Event::Mouse const& e)
+    bool Message::receive(Gui::Event::Mouse const& e)
     {
 		if (e.isDown())
 		{
@@ -284,7 +284,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Message::receive(Event::Keyboard const& event)
+    bool Message::receive(Gui::Event::Keyboard const& event)
     {
         if(TextEditor::receive(event))
         {
@@ -294,12 +294,12 @@ namespace Kiwi
         return false;
     }
     
-    bool Message::receive(Event::Focus::Type event)
+    bool Message::receive(Gui::Event::Focus::Type event)
     {
         return TextEditor::receive(event);
     }
     
-    bool Message::draw(Doodle& d) const
+    bool Message::draw(Gui::Doodle& d) const
     {
 		const double borderSize = m_mouse_down ? 3 : 1;
 		const double borderRadius = 4;
@@ -353,7 +353,7 @@ namespace Kiwi
         setAttributeDefaultValues(Tag_size, {50., 20.});
 
         TextEditor::setFont(getFont());
-        TextEditor::setJustification(Font::Justification::VerticallyCentred);
+        TextEditor::setJustification(Gui::Font::Justification::VerticallyCentred);
         TextEditor::setColor(attr_color_text->get());
         TextEditor::setSize(getSize());
         TextEditor::setPadding(3., 3., 3., 3.);
@@ -402,7 +402,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Number::receive(Event::Mouse const& event)
+    bool Number::receive(Gui::Event::Mouse const& event)
     {
         if(!m_edition)
         {
@@ -474,7 +474,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Number::receive(Event::Keyboard const& event)
+    bool Number::receive(Gui::Event::Keyboard const& event)
     {
         if(m_edition && event.isEscape())
         {
@@ -518,9 +518,9 @@ namespace Kiwi
         return true;
     }
     
-    bool Number::receive(Event::Focus::Type event)
+    bool Number::receive(Gui::Event::Focus::Type event)
     {
-        if(event == Event::Focus::Out && m_edition && !m_text.empty())
+        if(event == Gui::Event::Focus::Out && m_edition && !m_text.empty())
         {
 			try
 			{
@@ -550,7 +550,7 @@ namespace Kiwi
         }
     }
     
-    bool Number::draw(Doodle& d) const
+    bool Number::draw(Gui::Doodle& d) const
     {
 		double borderSize = 2;
 		d.setColor(getBorderColor());
@@ -558,29 +558,29 @@ namespace Kiwi
 		d.setColor(getBackgroundColor());
 		d.fillRectangle(d.getBounds().reduced(borderSize));
 		
-        const Point size = getSize();
+        const Gui::Point size = getSize();
         d.setColor(getBorderColor());
         d.drawLine(12., 0., 12., size.y(), 1.);
         d.setFont(getFont());
         if(m_edition)
         {
             d.setColor(getTextColor());
-            d.drawText(m_text, 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+            d.drawText(m_text, 14., 0., size.x() - 16., size.y(), Gui::Font::VerticallyCentred);
             if(m_selection.y() != 0.)
             {
-                d.setColor(Color(0.1, 0.2, 0.3, 0.25));
+                d.setColor(Gui::Color(0.1, 0.2, 0.3, 0.25));
                 d.fillRectangle(m_selection.x() + 14., 3., m_selection.y() + 14., size.y() - 3.);
             }
             else if(m_maker)
             {
-                Point pt = Font::getStringSize(getFont(), m_text);
+                Gui::Point pt = Gui::Font::getStringSize(getFont(), m_text);
                 d.drawLine(pt.x()+15., 3., pt.x()+15., size.y() - 3., 1.);
             }
         }
         else
         {
             d.setColor(getTextColor());
-            d.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Font::VerticallyCentred);
+            d.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Gui::Font::VerticallyCentred);
         }
         
         return true;
@@ -695,7 +695,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Slider::receive(Event::Mouse const& event)
+    bool Slider::receive(Gui::Event::Mouse const& event)
     {
         if(event.isDown())
         {
@@ -707,9 +707,9 @@ namespace Kiwi
         return false;
     }
     
-    bool Slider::draw(Doodle& d) const
+    bool Slider::draw(Gui::Doodle& d) const
     {
-        const Point size = getSize();
+        const Gui::Point size = getSize();
         if(size.x() > size.y())
         {
             d.setColor(m_color_on->get());
@@ -786,11 +786,11 @@ namespace Kiwi
 		return false;
 	}
 
-	bool Panel::draw(Doodle& d) const
+	bool Panel::draw(Gui::Doodle& d) const
 	{
 		const long borderSize = m_border_size->get();
 		const long radius = m_border_radius->get();
-		const Rectangle rect = d.getBounds().reduced(borderSize);
+		const Gui::Rectangle rect = d.getBounds().reduced(borderSize);
 		
 		d.setColor(getBackgroundColor());
 		d.fillRectangle(rect, radius);

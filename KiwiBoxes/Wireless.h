@@ -45,7 +45,7 @@ namespace Kiwi
 		Print(sPage page, ElemVector const& value);
 		~Print();
 		bool receive(unsigned long index, ElemVector const& elements) override;
-		bool receive(Event::Mouse const& event) override;
+		bool receive(Gui::Event::Mouse const& event) override;
 		AllocateElemVector(Print);
 	};
 	
@@ -67,7 +67,7 @@ namespace Kiwi
         Int(sPage page, ElemVector const& value);
         ~Int();
         bool receive(unsigned long index, ElemVector const& elements) override;
-        bool receive(Event::Mouse const& event) override;
+        bool receive(Gui::Event::Mouse const& event) override;
         AllocateElemVector(Int);
     };
     

@@ -125,25 +125,25 @@ namespace Kiwi
         /** The function retrieves the default font for boxes of the page.
          @return The default font for boxes of the page.
          */
-        inline Font getFont() const noexcept
+        inline Gui::Font getFont() const noexcept
         {
-            return Font(toString(attr_font_name->get()), attr_font_size->get(), (Font::Face)attr_font_face->get());
+            return Gui::Font(toString(attr_font_name->get()), attr_font_size->get(), (Gui::Font::Face)attr_font_face->get());
         }
         
         //! Retrieve the default font justification for boxes of the page.
 		/** The function retrieves the default font justification for boxes of the page.
 		 @return The default font justification for boxes of the page.
          */
-        inline Font::Justification getFontJustification() const noexcept
+        inline Gui::Font::Justification getFontJustification() const noexcept
         {
-            return (Font::Justification)attr_font_justification->get();
+            return (Gui::Font::Justification)attr_font_justification->get();
         }
         
         //! Retrieve if the background color of the page when unlocked.
         /** The function retrieves the background color of the page when unlocked
          @return The Unlocked background color of the page.
          */
-        inline Color getEditingBgColor() const noexcept
+        inline Gui::Color getEditingBgColor() const noexcept
         {
             return color_editing_background->get();
         }
@@ -152,7 +152,7 @@ namespace Kiwi
 		/** The function retrieves the locked background color of the page.
 		 @return The locked background color of the page.
 		 */
-		inline Color getLockedBgColor() const noexcept
+		inline Gui::Color getLockedBgColor() const noexcept
 		{
 			return color_locked_background->get();
 		}

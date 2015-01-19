@@ -292,46 +292,46 @@ namespace Kiwi
 		}
 	}
     
-    void Link::Controller::paint(sLink link, Doodle& d, bool selected)
+    void Link::Controller::paint(sLink link, Gui::Doodle& d, bool selected)
     {
-        Path path;
+        Gui::Path path;
         link->getPath(path);
         if(path.size() > 1)
         {
-            const Point origin = link->getPosition() - 10.;
-            Point current = path.getPoint(0) - origin;
-            Path drawnpath(current);
+            const Gui::Point origin = link->getPosition() - 10.;
+            Gui::Point current = path.getPoint(0) - origin;
+            Gui::Path drawnpath(current);
             for(ulong i = 1; i < path.size(); i++)
             {
-                const Point next = path.getPoint(i) - origin;
-                const Point middle = Point::fromLine(current, next, 0.5);
+                const Gui::Point next = path.getPoint(i) - origin;
+                const Gui::Point middle = Gui::Point::fromLine(current, next, 0.5);
                 if(current.y() < next.y())
                 {
                     const double height = (middle.y() - current.y()) * 0.5 + 5.;
-                    drawnpath.quadraticTo(Point(current.x(), current.y() + height), middle);
-                    drawnpath.quadraticTo(Point(next.x(), next.y() - height), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x(), current.y() + height), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x(), next.y() - height), next);
                 }
                 else if(current.y() - 20. < next.y())
                 {
                     const double height = (current.y() - next.y()) * 0.5;
                     const double absi = (middle.x() - current.x()) * height * 0.05;
-                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + height + 5.), middle);
-                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - height - 5.), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x() + absi, current.y() + height + 5.), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x() - absi, next.y() - height - 5.), next);
                 }
                 else
                 {
                     const double absi = (middle.x() - current.x()) * 0.5;
-                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + 15.), middle);
-                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - 15.), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x() + absi, current.y() + 15.), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x() - absi, next.y() - 15.), next);
                 }
                 
                 current = next;
             }
             
-            Color color;
+            Gui::Color color;
             if(selected)
             {
-                color = Color(0., 0.5, 0.75, 0.4);
+                color = Gui::Color(0., 0.5, 0.75, 0.4);
             }
             else
             {
@@ -345,36 +345,36 @@ namespace Kiwi
         }
     }
 
-    bool Link::Controller::contains(Point const& point, Knock& knock) const noexcept
+    bool Link::Controller::contains(Gui::Point const& point, Knock& knock) const noexcept
     {
-        Path path;
+        Gui::Path path;
         m_link->getPath(path);
         if(path.size() > 1)
         {
-            Point current = path.getPoint(0);
-            Path drawnpath(current);
+            Gui::Point current = path.getPoint(0);
+            Gui::Path drawnpath(current);
             for(ulong i = 1; i < path.size(); i++)
             {
-                const Point next = path.getPoint(i);
-                const Point middle = Point::fromLine(current, next, 0.5);
+                const Gui::Point next = path.getPoint(i);
+                const Gui::Point middle = Gui::Point::fromLine(current, next, 0.5);
                 if(current.y() < next.y())
                 {
                     const double height = (middle.y() - current.y()) * 0.5 + 5.;
-                    drawnpath.quadraticTo(Point(current.x(), current.y() + height), middle);
-                    drawnpath.quadraticTo(Point(next.x(), next.y() - height), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x(), current.y() + height), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x(), next.y() - height), next);
                 }
                 else if(current.y() - 20. < next.y())
                 {
                     const double height = (current.y() - next.y()) * 0.5;
                     const double absi = (middle.x() - current.x()) * height * 0.05;
-                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + height + 5.), middle);
-                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - height - 5.), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x() + absi, current.y() + height + 5.), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x() - absi, next.y() - height - 5.), next);
                 }
                 else
                 {
                     const double absi = (middle.x() - current.x()) * 0.5;
-                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + 15.), middle);
-                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - 15.), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x() + absi, current.y() + 15.), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x() - absi, next.y() - 15.), next);
                 }
                 
                 current = next;
@@ -393,36 +393,36 @@ namespace Kiwi
         return false;
     }
     
-    bool Link::Controller::overlaps(Rectangle const& rect) const noexcept
+    bool Link::Controller::overlaps(Gui::Rectangle const& rect) const noexcept
     {
-        Path path;
+        Gui::Path path;
         m_link->getPath(path);
         if(path.size() > 1)
         {
-            Point current = path.getPoint(0);
-            Path drawnpath(current);
+            Gui::Point current = path.getPoint(0);
+            Gui::Path drawnpath(current);
             for(ulong i = 1; i < path.size(); i++)
             {
-                const Point next = path.getPoint(i);
-                const Point middle = Point::fromLine(current, next, 0.5);
+                const Gui::Point next = path.getPoint(i);
+                const Gui::Point middle = Gui::Point::fromLine(current, next, 0.5);
                 if(current.y() < next.y())
                 {
                     const double height = (middle.y() - current.y()) * 0.5 + 5.;
-                    drawnpath.quadraticTo(Point(current.x(), current.y() + height), middle);
-                    drawnpath.quadraticTo(Point(next.x(), next.y() - height), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x(), current.y() + height), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x(), next.y() - height), next);
                 }
                 else if(current.y() - 20. < next.y())
                 {
                     const double height = (current.y() - next.y()) * 0.5;
                     const double absi = (middle.x() - current.x()) * height * 0.05;
-                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + height + 5.), middle);
-                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - height - 5.), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x() + absi, current.y() + height + 5.), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x() - absi, next.y() - height - 5.), next);
                 }
                 else
                 {
                     const double absi = (middle.x() - current.x()) * 0.5;
-                    drawnpath.quadraticTo(Point(current.x() + absi, current.y() + 15.), middle);
-                    drawnpath.quadraticTo(Point(next.x() - absi, next.y() - 15.), next);
+                    drawnpath.quadraticTo(Gui::Point(current.x() + absi, current.y() + 15.), middle);
+                    drawnpath.quadraticTo(Gui::Point(next.x() - absi, next.y() - 15.), next);
                 }
                 
                 current = next;
@@ -444,8 +444,8 @@ namespace Kiwi
             sBox box2 = link2->getBoxTo();
             if(box1 && box2)
             {
-                const Point pt1 = box1->getPosition();
-                const Point pt2 = box2->getPosition();
+                const Gui::Point pt1 = box1->getPosition();
+                const Gui::Point pt2 = box2->getPosition();
                 if(pt1.x() > pt2.x())
                 {
                     return true;

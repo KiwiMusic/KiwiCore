@@ -99,20 +99,20 @@ namespace Kiwi
         /** The function try to find a box or then link under the point otherwise it will consider that the page has been touched.
          @param point The point.
          */
-        void knockAll(Point const& point, const bool presentation) noexcept;
+        void knockAll(Gui::Point const& point, const bool presentation) noexcept;
         
         //! Test a point.
         /** The function try to find a box under the point.
          @param page The page to test.
          @param point The point.
          */
-        void knockBoxes(Point const& point, const bool presentation) noexcept;
+        void knockBoxes(Gui::Point const& point, const bool presentation) noexcept;
         
         //! Test a point.
         /** The function try to find a box.
          @param point The point.
          */
-        void knockLinks(Point const& point) noexcept;
+        void knockLinks(Gui::Point const& point) noexcept;
         
         //! Test a rectangle.
         /** The function try to find the boxes and the links that overlaps the rectangle.
@@ -120,21 +120,21 @@ namespace Kiwi
          @param boxes The vector of boxes that will be filled.
          @param links The vector of links that will be filled.
          */
-        void knockAll(Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links, const bool presentation) noexcept;
+        void knockAll(Gui::Rectangle const& rect, vector<Box::sController>& boxes, vector<Link::sController>& links, const bool presentation) noexcept;
         
         //! Test a rectangle.
         /** The function try to find the boxes that overlaps the rectangle.
          @param rect The rectangle.
          @param boxes The vector of boxes that will be filled.
          */
-        void knockBoxes(Rectangle const& rect, vector<Box::sController>& boxes, const bool presentation) noexcept;
+        void knockBoxes(Gui::Rectangle const& rect, vector<Box::sController>& boxes, const bool presentation) noexcept;
         
         //! Test a rectangle.
         /** The function try to find the links that overlaps the rectangle.
          @param rect The rectangle.
          @param links The vector of links that will be filled.
          */
-        void knockLinks(Rectangle const& rect, vector<Link::sController>& links) noexcept;
+        void knockLinks(Gui::Rectangle const& rect, vector<Link::sController>& links) noexcept;
         
         //! Retrieve the last target touched.
         /** The function retrieves the last target touched by a point.
@@ -300,7 +300,7 @@ namespace Kiwi
          @param distance The maximum distance to for.
          @return True if an iolet has been find.
          */
-        bool magnetFindIolet(Point const& point, sBox box, bool inlet, double const distance);
+        bool magnetFindIolet(Gui::Point const& point, sBox box, bool inlet, double const distance);
         
         //! Retrieve the box that has been found.
         /** The function retrieves the box that has been found.
@@ -330,8 +330,8 @@ namespace Kiwi
     {
     private:
         const wPage                 m_page;
-        Rectangle                   m_bounds;
-        Point                       m_start;
+        Gui::Rectangle                   m_bounds;
+        Gui::Point                       m_start;
         bool						m_dragging;
         
         set<Box::wController,
@@ -365,7 +365,7 @@ namespace Kiwi
          @param point The starting point.
          @param preserve The lasso should preserve the last selection.
          */
-        void begin(Point const& point, const bool preserve);
+        void begin(Gui::Point const& point, const bool preserve);
         
         //! Perform the selection of the links and the boxes.
         /** The function performs the selection of the links and the boxes.
@@ -374,7 +374,7 @@ namespace Kiwi
          @param links The lasso should add links to the selection.
 		 @param preserve The lasso should preserve the last selection.
          */
-        void perform(Point const& point, bool boxes, bool links, const bool preserve, const bool presentation);
+        void perform(Gui::Point const& point, bool boxes, bool links, const bool preserve, const bool presentation);
         
         //! Finish the selection of the links and the boxes.
         /** The function finishes the selection of the links and the boxes.
@@ -386,7 +386,7 @@ namespace Kiwi
         /** The function draws the lasso in a doodle.
          @param d The doodle.
          */
-        virtual void draw(Doodle& d);
+        virtual void draw(Gui::Doodle& d);
         
         //! Retrieve if the lasso is performing the selection.
         /** The function retrieves if the lasso is performing the selection.
@@ -401,7 +401,7 @@ namespace Kiwi
         /** The function retrieves the bounds of the lasso.
          @return The bounds of the lasso.
          */
-        inline Rectangle getBounds() const noexcept
+        inline Gui::Rectangle getBounds() const noexcept
         {
             return m_bounds;
         }
@@ -420,7 +420,7 @@ namespace Kiwi
     {
     private:
         Iolet::Polarity m_polarity;
-        Rectangle  m_bounds;
+        Gui::Rectangle  m_bounds;
     public:
         //! Contructor.
         /** You should never have to use this method.
@@ -459,7 +459,7 @@ namespace Kiwi
         /** The function draws the iolet hightlighter in a doodle.
          @param d The doodle.
          */
-        virtual void draw(Doodle& d);
+        virtual void draw(Gui::Doodle& d);
         
         //! Retrieve the polarity of the hightlighter.
         /** The function retrieves the polarity of the hightlighter.
@@ -474,7 +474,7 @@ namespace Kiwi
         /** The function retrieves the bounds of the lasso.
          @return The bounds of the lasso.
          */
-        inline Rectangle getBounds() const noexcept
+        inline Gui::Rectangle getBounds() const noexcept
         {
             return m_bounds;
         }

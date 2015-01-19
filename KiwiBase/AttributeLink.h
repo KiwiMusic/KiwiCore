@@ -66,7 +66,7 @@ namespace Kiwi
         /** The function retrieves the message color of the link.
          @return The message color of the link.
          */
-        inline Color getMessageColor() const noexcept
+        inline Gui::Color getMessageColor() const noexcept
         {
             return attr_color_message->get();
         }
@@ -75,7 +75,7 @@ namespace Kiwi
         /** The function retrieves the signal color of the link.
          @return The signal color of the link.
          */
-        inline Color getSignalColor() const noexcept
+        inline Gui::Color getSignalColor() const noexcept
         {
             return attr_color_signal->get();
         }

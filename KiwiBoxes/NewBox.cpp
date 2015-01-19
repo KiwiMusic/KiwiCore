@@ -34,7 +34,7 @@ namespace Kiwi
     {
         //addInlet(Iolet::Message, Iolet::Hot, "inlet 1");
 		TextEditor::setFont(getFont());
-		TextEditor::setJustification(Font::Justification::VerticallyCentred);
+		TextEditor::setJustification(Gui::Font::Justification::VerticallyCentred);
 		TextEditor::setColor(attr_color_text->get());
 		TextEditor::setSize(getSize());
 		TextEditor::setPadding(3., 3., 3., 3.);
@@ -50,12 +50,12 @@ namespace Kiwi
         return false;
     }
 	
-	bool NewBox::receive(Event::Mouse const& event)
+	bool NewBox::receive(Gui::Event::Mouse const& event)
 	{
 		return false;
 	}
 	
-	bool NewBox::receive(Event::Keyboard const& event)
+	bool NewBox::receive(Gui::Event::Keyboard const& event)
 	{
 		/*
 		if(Text::Editor::receive(event))
@@ -67,12 +67,12 @@ namespace Kiwi
 		return false;
 	}
 	
-	bool NewBox::receive(Event::Focus::Type event)
+	bool NewBox::receive(Gui::Event::Focus::Type event)
 	{
 		return false; //Text::Editor::receive(event);
 	}
 	
-	bool NewBox::draw(Doodle& d) const
+	bool NewBox::draw(Gui::Doodle& d) const
 	{
 		const double borderSize = 1;
 		

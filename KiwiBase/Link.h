@@ -49,7 +49,7 @@ namespace Kiwi
         wBox			m_box_to;
         ulong           m_index_outlet;
         ulong           m_index_intlet;
-        Path            m_path;
+        Gui::Path       m_path;
         wController		m_controller;
     public:
         
@@ -229,7 +229,7 @@ namespace Kiwi
         /** The function retrieves the position of the link as a point.
          @return The position of the link as a point.
          */
-        inline Point getPosition() const noexcept
+        inline Gui::Point getPosition() const noexcept
         {
             return m_path.getPosition();
         }
@@ -238,7 +238,7 @@ namespace Kiwi
         /** The function retrieves the size of the link as a point.
          @return The size of the link as a point.
          */
-        inline Point getSize() const noexcept
+        inline Gui::Point getSize() const noexcept
         {
             return m_path.getSize();
         }
@@ -247,7 +247,7 @@ namespace Kiwi
         /** The function retrieves the bounds of the link as a rectangle.
          @return The bounds of the link as a rectangle.
          */
-        inline Rectangle getBounds() const noexcept
+        inline Gui::Rectangle getBounds() const noexcept
         {
             return m_path.getBounds();
         }
@@ -256,7 +256,7 @@ namespace Kiwi
         /** The function retrieves the path of the link.
          @return The path of the link.
          */
-        inline void getPath(Path &path) const noexcept
+        inline void getPath(Gui::Path &path) const noexcept
         {
             path = m_path;
         }
@@ -351,14 +351,14 @@ namespace Kiwi
              @param knock The knock.
 			 @return true if the link is touch by the point, otherwise false.
 			 */
-			virtual bool contains(Point const& point, Knock& knock) const noexcept;
+			virtual bool contains(Gui::Point const& point, Knock& knock) const noexcept;
             
             //! Retrieve if the link is overlaps the rectangle.
 			/** The function retrieves if the link is overlaps the rectangle.
              @param rect The Rectangle.
 			 @return true if the link overlaps the rectangle, otherwise false.
 			 */
-			virtual bool overlaps(Rectangle const& rect) const noexcept;
+			virtual bool overlaps(Gui::Rectangle const& rect) const noexcept;
 			
             //! The bounds notification function that should be override.
             /** The function is called by the link when its bounds changed.
@@ -376,7 +376,7 @@ namespace Kiwi
              @param d           The doodle to draw in.
              @param selected    If the link is selected
              */
-            static void paint(sLink link, Doodle& d, bool selected = false);
+            static void paint(sLink link, Gui::Doodle& d, bool selected = false);
         };
         
         // ================================================================================ //
@@ -390,7 +390,7 @@ namespace Kiwi
             wBox			m_box_to;
             ulong   m_index_outlet;
             ulong   m_index_intlet;
-            Path            m_path;
+            Gui::Path       m_path;
             
         public:
             
@@ -481,7 +481,7 @@ namespace Kiwi
              This must be repeatedly calling when the mouse is dragged, after you've
              first initialised the link with beginLink().
              */
-            void drag(Point const& point)
+            void drag(Gui::Point const& point)
             {
                 if(m_path.size() == 1)
                 {

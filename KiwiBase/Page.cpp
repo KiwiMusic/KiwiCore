@@ -519,9 +519,9 @@ namespace Kiwi
 					box->setAttributeValue(AttrBox::Tag_presentation, {add});
 					if (add)
 					{
-						const Rectangle bounds = box->getBounds(false);
-						box->setAttributeValue(AttrBox::Tag_presentation_position, bounds.position());
-						box->setAttributeValue(AttrBox::Tag_presentation_size, bounds.size());
+						const Gui::Rectangle bounds = box->getBounds(false);
+                        box->setAttributeValue(AttrBox::Tag_presentation_position, {bounds.x(), bounds.y()});
+						box->setAttributeValue(AttrBox::Tag_presentation_size, {bounds.width(), bounds.height()});
 					}
 				}
 			}
@@ -961,10 +961,10 @@ namespace Kiwi
 		return false;
 	}
 	
-	Rectangle Page::Controller::getSelectionBounds()
+	Gui::Rectangle Page::Controller::getSelectionBounds()
 	{
 		// to do !
-		return Rectangle();
+        return Gui::Rectangle();
 	}
 	
 	void Page::Controller::startMoveOrResizeBoxes()
@@ -988,7 +988,7 @@ namespace Kiwi
 		m_last_bounds.clear();
 	}
 	
-	void Page::Controller::resizeSelectedBoxes(Point const& d, const long flags, const bool preserveRatio)
+	void Page::Controller::resizeSelectedBoxes(Gui::Point const& d, const long flags, const bool preserveRatio)
 	{
 		for(auto it = m_last_bounds.begin(); it != m_last_bounds.end(); ++it)
 		{
@@ -998,10 +998,10 @@ namespace Kiwi
 				{
 					const bool presentation = getPresentationStatus();
 					double fixedRatio = box->getSizeRatio();
-					Rectangle original = it->second;
-					Rectangle newrect = original;
-					Point minLimit = box->getSizeMinLimits();
-					Point maxLimit = box->getSizeMaxLimits();
+					Gui::Rectangle original = it->second;
+					Gui::Rectangle newrect = original;
+					Gui::Point minLimit = box->getSizeMinLimits();
+					Gui::Point maxLimit = box->getSizeMaxLimits();
 						
 					if (flags & Left)
 						newrect.left(min(newrect.right() - minLimit.x(), newrect.x() + d.x()));
@@ -1086,14 +1086,14 @@ namespace Kiwi
 					
 					const sTag attrtag_pos = presentation ? AttrBox::Tag_presentation_position : AttrBox::Tag_position;
 					const sTag attrtag_size = presentation ? AttrBox::Tag_presentation_size : AttrBox::Tag_size;
-					box->setAttributeValue(attrtag_pos, newrect.position());
-					box->setAttributeValue(attrtag_size, newrect.size());
+                    box->setAttributeValue(attrtag_pos, {newrect.x(), newrect.y()});
+					box->setAttributeValue(attrtag_size, {newrect.width(), newrect.height()});
 				}
 			}
 		}
 	}
 	
-	void Page::Controller::moveSelectedBoxes(Point const& delta)
+    void Page::Controller::moveSelectedBoxes(Gui::Point const& delta)
 	{
 		if (isAnyBoxSelected())
 		{
@@ -1105,7 +1105,8 @@ namespace Kiwi
 				{
                     if(sBox box = boxctrl->getBox())
                     {
-                        box->setAttributeValue(attrtag, box->getPosition(presentation) + delta);
+                        const Gui::Point pt = box->getPosition(presentation) + delta;
+                        box->setAttributeValue(attrtag, {pt.x(), pt.y()});
                     }
 				}
 			}
@@ -1169,7 +1170,7 @@ namespace Kiwi
 		}
 	}
 	
-	bool Page::Controller::addBoxesFromDico(sDico dico, Point const& shift)
+	bool Page::Controller::addBoxesFromDico(sDico dico, Gui::Point const& shift)
 	{
 		sPage page = getPage();
 		bool pageModified = false;
@@ -1189,8 +1190,10 @@ namespace Kiwi
 						sBox box = page->createBox(subdico);
 						if (box)
 						{
-							box->setAttributeValue(AttrBox::Tag_position, box->getPosition(false) + shift);
-							box->setAttributeValue(AttrBox::Tag_presentation_position, box->getPosition(true) + shift);
+                            Gui::Point pos = box->getPosition(false) + shift;
+                            box->setAttributeValue(AttrBox::Tag_position, {pos.x(), pos.y()});
+                            pos = box->getPosition(true) + shift;
+							box->setAttributeValue(AttrBox::Tag_presentation_position, {pos.x(), pos.y()});
 							
 							if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
 							{

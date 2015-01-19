@@ -177,7 +177,7 @@ namespace Kiwi
         /** The function retrieves the size of the box as a point.
          @return The size of the box as a point.
          */
-        inline Point getPosition(const bool presentation = false) const noexcept
+        inline Gui::Point getPosition(const bool presentation = false) const noexcept
         {
 			if(!presentation)
 				return attr_position->get();
@@ -190,7 +190,7 @@ namespace Kiwi
 		 @param edition
          @return The size of the box as a point.
          */
-        inline Point getSize(const bool presentation = false) const noexcept
+        inline Gui::Point getSize(const bool presentation = false) const noexcept
         {
 			if(!presentation)
 				return attr_size->get();
@@ -202,12 +202,12 @@ namespace Kiwi
         /** The function retrieves the bounds of the box as a rectangle.
          @return The bounds of the box as a rectangle.
          */
-        inline Rectangle getBounds(const bool presentation = false) const noexcept
+        inline Gui::Rectangle getBounds(const bool presentation = false) const noexcept
         {
 			if(!presentation)
-				return Rectangle(attr_position->get(), attr_size->get());
+				return Gui::Rectangle(attr_position->get(), attr_size->get());
 			else
-				return Rectangle(attr_presentation_position->get(), attr_presentation_size->get());
+				return Gui::Rectangle(attr_presentation_position->get(), attr_presentation_size->get());
         }
 		
 		//! Sets a minimum and a maximum width and height limit.
@@ -215,7 +215,7 @@ namespace Kiwi
 		 @param min The minimum width and height limit.
 		 @param max The maximum width and height limit.
 		 */
-		inline void setSizeLimits(Point const& min, Point const& max = Point()) noexcept
+        inline void setSizeLimits(Gui::Point const& min, Gui::Point const& max = Gui::Point()) noexcept
 		{
 			attr_size->setMinLimits(min);
 			attr_presentation_size->setMinLimits(min);
@@ -227,7 +227,7 @@ namespace Kiwi
 		/** The function retrieves the minimum width and height limit.
 		 @return The minimum width and height limit.
 		 */
-		inline Point getSizeMinLimits() const noexcept
+		inline Gui::Point getSizeMinLimits() const noexcept
 		{
 			return attr_size->getMinLimits();
 		}
@@ -236,7 +236,7 @@ namespace Kiwi
 		/** The function retrieves the maximum width and height limit.
 		 @return The maximum width and height limit.
 		 */
-		inline Point getSizeMaxLimits() const noexcept
+		inline Gui::Point getSizeMaxLimits() const noexcept
 		{
 			return attr_size->getMaxLimits();
 		}
@@ -291,25 +291,25 @@ namespace Kiwi
         /** The function retrieves the font of the box.
          @return The font of the box.
          */
-        inline Font getFont() const noexcept
+        inline Gui::Font getFont() const noexcept
         {
-            return Font(toString(attr_font_name->get()), attr_font_size->get(), (Font::Face)attr_font_face->get());
+            return Gui::Font(toString(attr_font_name->get()), attr_font_size->get(), (Gui::Font::Face)attr_font_face->get());
         }
         
         //! Retrieve if the font justification of the box.
         /** The function retrieves the font justification of the box.
          @return The font justification of the box.
          */
-        inline Font::Justification getFontJustification() const noexcept
+        inline Gui::Font::Justification getFontJustification() const noexcept
         {
-            return (Font::Justification)attr_font_justification->get();
+            return (Gui::Font::Justification)attr_font_justification->get();
         }
         
         //! Retrieve if the background color of the box.
         /** The function retrieves the background color of the box.
          @return The background color of the box.
          */
-        inline Color getBackgroundColor() const noexcept
+        inline Gui::Color getBackgroundColor() const noexcept
         {
             return attr_color_background->get();
         }
@@ -318,7 +318,7 @@ namespace Kiwi
         /** The function retrieves the   color of the box.
          @return The border color of the box.
          */
-        inline Color getBorderColor() const noexcept
+        inline Gui::Color getBorderColor() const noexcept
         {
             return attr_color_border->get();
         }
@@ -327,7 +327,7 @@ namespace Kiwi
         /** The function retrieves the text of the box.
          @return The text color of the box.
          */
-        inline Color getTextColor() const noexcept
+        inline Gui::Color getTextColor() const noexcept
         {
             return attr_color_text->get();
         }

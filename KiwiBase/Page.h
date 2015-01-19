@@ -319,7 +319,7 @@ namespace Kiwi
 			mutable mutex					m_links_selected_mutex;
 			
 			map<Box::wController,
-			Rectangle,
+			Gui::Rectangle,
 			owner_less<Box::wController>>	m_last_bounds;
 			
 			long m_zoom;
@@ -632,13 +632,13 @@ namespace Kiwi
 			/** The function retrieves the selected boxes bounds.
 			 @return The selected boxes bounds as a rectangle.
 			 */
-			Rectangle getSelectionBounds();
+			Gui::Rectangle getSelectionBounds();
 			
 			//! Moves the boxes that are currently selected by given value.
 			/** The function moves the boxes that are currently selected by given value.
 			 @param delta A shift amount delta.
 			 */
-			void moveSelectedBoxes(Point const& delta);
+			void moveSelectedBoxes(Gui::Point const& delta);
 			
 			//! Start resizing boxes.
 			/** Call this function before to call resizeSelectedBoxes.
@@ -649,7 +649,7 @@ namespace Kiwi
 			/** The function moves the boxes that are currently selected by given value.
 			 @param delta A shift amount delta.
 			 */
-			void resizeSelectedBoxes(Point const& delta, const long borderFlags, const bool preserveRatio = false);
+			void resizeSelectedBoxes(Gui::Point const& delta, const long borderFlags, const bool preserveRatio = false);
 			
 			//! end resizing boxes.
 			/** Call this function after resizeSelectedBoxes.
@@ -670,7 +670,7 @@ namespace Kiwi
 			 @param shift Shift the position of the boxes.
 			 @return True if the page has been modified, false otherwise
 			 */
-			bool addBoxesFromDico(sDico dico, Point const& shift = Point());
+			bool addBoxesFromDico(sDico dico, Gui::Point const& shift = Gui::Point());
 			
 			//! Receive the notification that a box has been created.
 			/** The function is called by the page when a box has been created.

@@ -740,12 +740,27 @@ namespace Kiwi
 	
 	void AttrColor::set(ElemVector const& elements)
 	{
-        m_value = elements;
+        if(!elements.empty() && elements[0].isNumber())
+        {
+            m_value.red(elements[0]);
+        }
+        if(elements.size() > 1 && elements[1].isNumber())
+        {
+            m_value.green(elements[1]);
+        }
+        if(elements.size() > 2 && elements[2].isNumber())
+        {
+            m_value.blue(elements[2]);
+        }
+        if(elements.size() > 3 && elements[3].isNumber())
+        {
+            m_value.alpha(elements[3]);
+        }
 	}
 	
 	void AttrColor::get(ElemVector& elements) const noexcept
 	{
-		elements = m_value;
+		elements = {m_value.red(), m_value.green(), m_value.blue(), m_value.alpha()};
 	}
 	
     // ================================================================================ //
@@ -754,12 +769,19 @@ namespace Kiwi
 	
 	void AttrPoint::set(ElemVector const& elements)
 	{
-        m_value = elements;
+        if(!elements.empty() && elements[0].isNumber())
+        {
+            m_value.x(elements[0]);
+        }
+        if(elements.size() > 1 && elements[1].isNumber())
+        {
+            m_value.y(elements[1]);
+        }
 	}
 	
 	void AttrPoint::get(ElemVector& elements) const noexcept
 	{
-		elements = m_value;
+        elements = {m_value.x(), m_value.y()};
 	}
 	
 	// ================================================================================ //
@@ -768,13 +790,20 @@ namespace Kiwi
 	
 	void AttrSize::set(ElemVector const& elements)
 	{
-		m_value = elements;
+        if(!elements.empty() && elements[0].isNumber())
+        {
+            m_value.x(elements[0]);
+        }
+        if(elements.size() > 1 && elements[1].isNumber())
+        {
+            m_value.y(elements[1]);
+        }
 		clipValue();
 	}
 	
 	void AttrSize::get(ElemVector& elements) const noexcept
 	{
-		elements = m_value;
+        elements = {m_value.x(), m_value.y()};
 	}
 
 	
@@ -784,12 +813,27 @@ namespace Kiwi
 	
 	void AttrRect::set(ElemVector const& elements)
 	{
-        m_value = elements;
+        if(!elements.empty() && elements[0].isNumber())
+        {
+            m_value.x(elements[0]);
+        }
+        if(elements.size() > 1 && elements[1].isNumber())
+        {
+            m_value.y(elements[1]);
+        }
+        if(elements.size() > 2 && elements[2].isNumber())
+        {
+            m_value.width(elements[2]);
+        }
+        if(elements.size() > 3 && elements[3].isNumber())
+        {
+            m_value.height(elements[3]);
+        }
 	}
 	
 	void AttrRect::get(ElemVector& elements) const noexcept
 	{
-		elements = m_value;
+        elements = {m_value.x(), m_value.y(), m_value.width(), m_value.height()};
 	}
 }
 

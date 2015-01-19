@@ -90,7 +90,7 @@ namespace Kiwi
 					box->Attr::Manager::read(dico);
                     if(!dico->has(Tag_size) && !(box->isGUI()))
                     {
-                        Point size = Font::getStringSize(box->getFont(), toString(box->getText()));
+                        Gui::Point size = Gui::Font::getStringSize(box->getFont(), toString(box->getText()));
                         box->setAttributeValue(Tag_size, {max(ceil(size.x()) + 6., 25.), box->getSize().y()});
                     }
                     return box;
@@ -350,17 +350,17 @@ namespace Kiwi
         }
     }
 
-	Rectangle Box::Controller::getBounds(const bool presentation) const noexcept
+	Gui::Rectangle Box::Controller::getBounds(const bool presentation) const noexcept
 	{
 		return m_box->getBounds(presentation).expanded(m_framesize);
 	}
 	
-	Point Box::Controller::getPosition(const bool presentation) const noexcept
+	Gui::Point Box::Controller::getPosition(const bool presentation) const noexcept
 	{
 		return getBounds(presentation).position();
 	}
 
-	Point Box::Controller::getSize(const bool presentation) const noexcept
+	Gui::Point Box::Controller::getSize(const bool presentation) const noexcept
 	{
 		return getBounds(presentation).size();
 	}
@@ -368,37 +368,37 @@ namespace Kiwi
 #define KIO_HEIGHT 3.
 #define KIO_WIDTH 5.
     
-    Point Box::Controller::getInletPosition(unsigned long index) const noexcept
+    Gui::Point Box::Controller::getInletPosition(unsigned long index) const noexcept
     {
         const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
         {
             const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
-            return Point(m_box->getPosition().x() + x + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
+            return Gui::Point(m_box->getPosition().x() + x + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
         }
-        return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
+        return Gui::Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
     }
     
-    Point Box::Controller::getOutletPosition(unsigned long index) const noexcept
+    Gui::Point Box::Controller::getOutletPosition(unsigned long index) const noexcept
     {
         const unsigned long ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
         {
             const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
-            return Point(m_box->getPosition().x() + x + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
+            return Gui::Point(m_box->getPosition().x() + x + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
         }
-        return Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
+        return Gui::Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + m_box->getSize().y() - KIO_HEIGHT * 0.5);
     }
     
-    bool Box::Controller::contains(Point const& pt, Knock& knock, const bool presentation) const noexcept
+    bool Box::Controller::contains(Gui::Point const& pt, Knock& knock, const bool presentation) const noexcept
     {
-		const Rectangle bounds = m_box->getBounds(presentation);
-		const Rectangle ctrlbounds = getBounds(presentation);
+		const Gui::Rectangle bounds = m_box->getBounds(presentation);
+		const Gui::Rectangle ctrlbounds = getBounds(presentation);
 		
 		// test resizer
 		if(isSelected() && ctrlbounds.contains(pt))
 		{
-			const Point localPoint = pt - ctrlbounds.position();
+			const Gui::Point localPoint = pt - ctrlbounds.position();
 			const double framesize = getFrameSize();
 			
 			if(localPoint.y() <= framesize)
@@ -499,7 +499,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Box::Controller::overlaps(Rectangle const& rect, const bool presentation) const noexcept
+    bool Box::Controller::overlaps(Gui::Rectangle const& rect, const bool presentation) const noexcept
     {
         return m_box->getBounds(presentation).overlaps(rect);
     }
@@ -519,7 +519,7 @@ namespace Kiwi
             redraw();
         }
     }
-    void Box::Controller::paintBoxFrame(sBox box, Doodle& d, const bool selected, const bool edit, const bool presentation)
+    void Box::Controller::paintBoxFrame(sBox box, Gui::Doodle& d, const bool selected, const bool edit, const bool presentation)
     {
 		if (box)
 		{
@@ -527,13 +527,13 @@ namespace Kiwi
 			{
 				if(edit)
 				{
-					Rectangle boxFrame = boxctrl->getBounds(presentation);
+					Gui::Rectangle boxFrame = boxctrl->getBounds(presentation);
 					double frameSize = boxctrl->getFrameSize();
-					Rectangle boxBounds = box->getBounds(presentation) - boxFrame.position();
-					boxFrame.position(Point());
-					const Color ioColor = Color(0.3, 0.3, 0.3);
-					const Color presentationColor = Color(0., 0.8, 0.);
-					const Color selectionColor = presentation ? presentationColor : Color(0., 0.6, 0.9);
+					Gui::Rectangle boxBounds = box->getBounds(presentation) - boxFrame.position();
+                    boxFrame.position({0, 0});
+                    const Gui::Color ioColor = Gui::Color(0.3, 0.3, 0.3);
+					const Gui::Color presentationColor = Gui::Color(0., 0.8, 0.);
+					const Gui::Color selectionColor = presentation ? presentationColor : Gui::Color(0., 0.6, 0.9);
 					
 					if(selected)
 					{
@@ -589,7 +589,7 @@ namespace Kiwi
 		}
     }
 	
-	void Box::Controller::paintBox(sBox box, Doodle& d)
+	void Box::Controller::paintBox(sBox box, Gui::Doodle& d)
 	{
 		if (box)
 		{
