@@ -370,8 +370,9 @@ namespace Kiwi
         {
             if(elements[0].isNumber())
             {
-                Text::Editor::setText(toString((double)elements[0]));
-				redraw();
+                Console::post(toString((double)elements[0]));
+                //Text::Editor::setText(toString((double)elements[0]));
+				//redraw();
                 Box::send(0, {m_value});
                 return true;
             }
