@@ -392,6 +392,7 @@ namespace Kiwi
     
     bool Box::Controller::contains(Gui::Point const& pt, Knock& knock, const bool presentation) const noexcept
     {
+        /*
 		const Gui::Rectangle bounds = m_box->getBounds(presentation);
 		const Gui::Rectangle ctrlbounds = getBounds(presentation);
 		
@@ -496,6 +497,7 @@ namespace Kiwi
         knock.m_box.reset();
         knock.m_part    = Knock::Outside;
         knock.m_index   = 0;
+         */
         return false;
     }
     

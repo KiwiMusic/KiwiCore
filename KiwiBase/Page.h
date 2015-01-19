@@ -25,9 +25,8 @@
 #define __DEF_KIWI_PAGE__
 
 #include "Box.h"
+#include "Link.h"
 #include "AttributePage.h"
-#include "PageUtils.h"
-#include "../KiwiDsp/Context.h"
 
 // TODO
 // - Add the attributes
@@ -301,42 +300,10 @@ namespace Kiwi
          The page controller should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page controller owns a vector of box controllers and facilitates managements of boxes like the creation, the deletion, the selection, etc.
          @see Page, Page::Listener, Box::Controller
          */
-		class Controller : public Knock, public IoletMagnet, public enable_shared_from_this<Controller>
+		class Controller
         {            
         private:
-            const sPage						m_page;
-            
-			vector<Box::sController>		m_boxes;
-			mutable mutex					m_boxes_mutex;
-			set<Box::wController,
-			owner_less<Box::wController>>	m_boxes_selected;
-			mutable mutex					m_boxes_selected_mutex;
-			
-			vector<Link::sController>		m_links;
-			mutable mutex					m_links_mutex;
-			set<Link::wController,
-			owner_less<Link::wController>>	m_links_selected;
-			mutable mutex					m_links_selected_mutex;
-			
-			map<Box::wController,
-			Gui::Rectangle,
-			owner_less<Box::wController>>	m_last_bounds;
-			
-			long m_zoom;
-			bool m_locked;
-			bool m_presentation;
-			bool m_display_grid;
-			bool m_snap_to_grid;
-			
-			void addBoxController(Box::sController box);
-			void removeBoxController(Box::sController box);
-			
-			Box::sController getBoxController(sBox box) const noexcept;
-			
-			void addLinkController(Link::sController link);
-			void removeLinkController(Link::sController link);
-			
-			Link::sController getLinkController(sLink link) const noexcept;
+            const sPage m_page;
 			
         public:
 			
@@ -351,426 +318,60 @@ namespace Kiwi
             /** The destructor.
              */
             virtual ~Controller();
-			
-			//! The page controller maker.
-			/** The function creates a page controller with arguments.
-			 */
-			template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
-			{
-				shared_ptr<CtrlClass> ctrl = make_shared<CtrlClass>(forward<Args>(arguments)...);
-				if(ctrl && ctrl->m_page)
-				{
-					ctrl->m_page->setController(ctrl);
-				}
-				return ctrl;
-			}
-			
-			//! Retrieve the page.
-			/** The funtion retrieves the page.
-			 @return The page.
-			 */
-			inline sPage getPage() const noexcept
-			{
-				return m_page;
-			}
-			
-			//! Get box controllers.
-			/** The function retrieves the box controllers of the page.
-			 @param boxes   A vector of box controllers.
-			 */
-			void getBoxes(vector<Box::sController>& boxes) const
-			{
-				lock_guard<mutex> guard(m_boxes_mutex);
-				boxes = m_boxes;
-			}
-			
-			//! Get link controllers.
-			/** The function retrieves the link controllers of the page.
-			 @param boxes   A vector of link controllers.
-			 */
-			void getLinks(vector<Link::sController>& links) const
-			{
-				lock_guard<mutex> guard(m_links_mutex);
-				links = m_links;
-			}
-			
-			//! Retrieve the zoom of the page.
-			/** The function retrieves the zoom of the page.
-			 @return the zoom of the page in percent.
-			 @see setZoom
-			 */
-			inline long getZoom() const noexcept
-			{
-				return m_zoom;
-			}
-			
-			//! Set the zoom of the page.
-			/** The function sets the zoom of the page.
-			 @param zoom The zoom of the page in percent.
-			 @see getZoom
-			 */
-			void setZoom(long zoom);
-			
-			//! Retrieve if the page is locked or unlocked.
-			/** The function retrieves if the page is locked or unlocked.
-			 @return True if the page is locked, false if it is unlocked.
-			 @see setLockStatus
-			 */
-			inline bool getLockStatus() const noexcept
-			{
-				return m_locked;
-			}
-			
-			//! Lock/Unlock the page.
-			/** The function locks or unlocks the page.
-			 @param locked True to lock the page, false to unlock it.
-			 @see getLockStatus
-			 */
-			void setLockStatus(bool locked);
-			
-			//! Retrieve if the presentation mode of the page is active.
-			/** The function retrieves if the presentation mode of the page is active.
-			 @return True if the presentation mode of the page is active otherwise false.
-			 */
-			inline bool getPresentationStatus() const noexcept
-			{
-				return m_presentation;
-			}
-			
-			//! Active the presentation mode of the page.
-			/** The function actives the presentation mode of the page.
-			 @param presentation True to active the presentation mode, otherwise false.
-			 */
-			void setPresentationStatus(bool presentation);
-			
-			//! Retrieve if the page is displays the grid.
-			/** The function retrieves if the page is displays the grid.
-			 @return True if the page is displays the grid is locked otherwise false.
-			 */
-			inline bool getGridDisplayedStatus() const noexcept
-			{
-				return m_display_grid;
-			}
-			
-			//! Shows/Hides the grid of the page.
-			/** The function shows or hides the grid of the page.
-			 @param display True to show the grid, false to hide it.
-			 */
-			void setGridDisplayedStatus(bool display);
-			
-			//! Retrieve if the snap to grid mode of the page is active.
-			/** The function retrieves if the snap to grid mode of the page is active.
-			 @return True if the snap to grid mode of the page is active, otherwise false.
-			 */
-			inline bool getSnapToGridStatus() const noexcept
-			{
-				return m_snap_to_grid;
-			}
-
-			//! Active the snap to grid in the page.
-			/** The function actives the snap to grid in the page.
-			 @param snap True to active the snap to grid, otherwise false.
-			 */
-			void setSnapToGridStatus(bool snap);
-			
-			//! Adds or removes boxes from presentation.
-			/** The function Adds or removes boxes from presentation.
-			 @param boxes The boxes to add or remove from presentation.
-			 @param add True to add boxes to presentation, false to remove them.
-			 */
-			void setBoxesPresentationStatus(const vector<Box::sController>& boxes, const bool add);
-			
-			// ================================================================================ //
-			//										SELECTION									//
-			// ================================================================================ //
-			
-			//! Retrieves if some boxes or links are currently selected.
-			/** The function retrieves if some boxes or links are currently selected.
-			 @return True if some boxes or links are currently selected, false if nothing is selected.
-			 */
-			inline bool isAnythingSelected()
-			{
-				return isAnyBoxSelected() || isAnyLinksSelected();
-			}
-			
-			//! Retrieves if some boxes are currently selected.
-			/** The function retrieves if some boxes are currently selected.
-			 @return True if some boxes are currently selected, false if no box is selected.
-			 */
-			inline bool isAnyBoxSelected()
-			{
-				lock_guard<mutex> guard(m_boxes_selected_mutex);
-				return !m_boxes_selected.empty();
-			}
-			
-			//! Retrieves if some links are currently selected.
-			/** The function retrieves if some links are currently selected.
-			 @return True if some links are currently selected, false if no box is selected.
-			 */
-			inline bool isAnyLinksSelected()
-			{
-				lock_guard<mutex> guard(m_links_selected_mutex);
-				return !m_links_selected.empty();
-			}
-			
-			//! Retrieves the selected boxes.
-			/** The function retrieves the selected boxes.
-			 */
-			void getSelection(vector<Box::sController>& boxes) const noexcept;
-			
-			//! Retrieves the selected links.
-			/** The function retrieves the selected links.
-			 */
-			void getSelection(vector<Link::sController>& links) const noexcept;
             
-            //! Retrieves the selected boxes.
-			/** The function retrieves the selected boxes.
-			 */
-			void getSelection(set<Box::wController, owner_less<Box::wController>>& boxes) const noexcept;
-			
-			//! Retrieves the selected links.
-			/** The function retrieves the selected links.
-			 */
-			void getSelection(set<Link::wController, owner_less<Link::wController>>& links) const noexcept;
-			
-			//! Deletes all selected links and boxes.
-			/** The function deletes all selected links and boxes.
-			 */
-			void deleteSelection();
-			
-			//! Retrieves if a box is selected.
-			/** The function retrieve if a box is selected.
-			 */
-			bool isSelected(Box::sController box);
-			
-			//! Retrieves if a link is selected.
-			/** The function retrieve if a link is selected.
-			 */
-			bool isSelected(Link::sController link);
-			
-			//! Adds all boxes to selection.
-			/** The function adds all boxes to selection.
-			 */
-			bool selectAllBoxes();
-			
-			//! Adds all links to selection.
-			/** The function adds all links to selection.
-			 */
-			bool selectAllLinks();
-			
-			//! Selects a set of boxes.
-			/** The function selects a set of boxes.
-			 */
-			void select(vector<Box::sController>& boxes);
-			
-			//! Selects a set of links.
-			/** The function selects a set of links.
-			 */
-			void select(vector<Link::sController>& links);
-			
-			//! Adds a box to the selection.
-			/** The function adds a box to the selection.
-			 */
-			bool select(Box::sController box, const bool notify = true);
-			
-			//! Adds a link to the selection.
-			/** The function adds a link to the selection.
-			 */
-			bool select(Link::sController link, const bool notify = true);
-			
-			//! Clears the selection then the selects a box.
-			/** The function clears the selection then the selects a box.
-			 */
-			bool selectOnly(Box::sController box);
-			
-			//! Clears the selection then the selects a box.
-			/** The function clears the selection then the selects a box.
-			 */
-			bool selectOnly(Link::sController link);
-			
-			//! Unselects all boxes and links.
-			/** The function unselects all boxes and links.
-			 */
-			void unselectAll(const bool notify = true);
-			
-			//! Unselects all boxes.
-			/** The function unselects all boxes.
-			 */
-			bool unselectAllBoxes(const bool notify = true);
-			
-			//! Unselects all links.
-			/** The function unselects all links.
-			 */
-			bool unselectAllLinks(const bool notify = true);
-			
-			//! Unselects a set of boxes.
-			/** The function unselects a set of boxes.
-			 */
-			void unselect(vector<Box::sController>& boxes);
-			
-			//! Unselects a set of links.
-			/** The function unselects a set of links.
-			 */
-			void unselect(vector<Link::sController>& links);
-			
-			//! Removes a box from the selection.
-			/** The function unselects box.
-			 */
-			bool unselect(Box::sController box, const bool notify = true);
-			
-			//! Removes a link from the selection.
-			/** The function unselects link.
-			 */
-			bool unselect(Link::sController link, const bool notify = true);
-            
-            //! Called when the selection has changed.
-			/** The function is called when the selection has changed.
-			 */
-			virtual void selectionChanged() {};
-						
-			//! Retrieves the selected boxes bounds.
-			/** The function retrieves the selected boxes bounds.
-			 @return The selected boxes bounds as a rectangle.
-			 */
-			Gui::Rectangle getSelectionBounds();
-			
-			//! Moves the boxes that are currently selected by given value.
-			/** The function moves the boxes that are currently selected by given value.
-			 @param delta A shift amount delta.
-			 */
-			void moveSelectedBoxes(Gui::Point const& delta);
-			
-			//! Start resizing boxes.
-			/** Call this function before to call resizeSelectedBoxes.
-			 */
-			void startMoveOrResizeBoxes();
-			
-			//! Resizes the boxes that are currently selected by given value.
-			/** The function moves the boxes that are currently selected by given value.
-			 @param delta A shift amount delta.
-			 */
-			void resizeSelectedBoxes(Gui::Point const& delta, const long borderFlags, const bool preserveRatio = false);
-			
-			//! end resizing boxes.
-			/** Call this function after resizeSelectedBoxes.
-			 */
-			void endMoveOrResizeBoxes();
-			
-			//! Retrieve the selected boxes (including links) as a dico
-			/** The function retrieve the selected boxes (including links) as a dico.
-			 You may use it to copy selection to clipboard.
-			 @param dico The dico to fill.
-			 */
-			void getSelectedBoxesDico(sDico dico);
-			
-			//! Adds boxes to the page from a dico
-			/** The function adds boxes to the page from a dico
-			 The dico must be formated with getSelectedBoxesDico
-			 @param dico The dico.
-			 @param shift Shift the position of the boxes.
-			 @return True if the page has been modified, false otherwise
-			 */
-			bool addBoxesFromDico(sDico dico, Gui::Point const& shift = Gui::Point());
+            //! Retrieve the page.
+            /** The funtion retrieves the page.
+             @return The page.
+             */
+            inline sPage getPage() const noexcept
+            {
+                return m_page;
+            }
 			
 			//! Receive the notification that a box has been created.
 			/** The function is called by the page when a box has been created.
 			 @param box     The box.
 			 */
-			void boxHasBeenCreated(sBox box);
-			
-			//! Create a box controller.
-			/** Page controller's subclasses must implement this method to create custom box controller.
-			 @param box     The box.
-			 @return The newly created box controller.
-			 */
-			virtual Box::sController createBoxController(sBox box) = 0;
-			
-			//! Receive the notification that a box controller has been created.
-			/** The function is called by the page when a box controller has been created.
-			 @param boxctrl The box controller.
-			 */
-			virtual void boxControllerHasBeenCreated(Box::sController boxctrl) {};
+			virtual void boxHasBeenCreated(sBox box) = 0;
 			
 			//! Receive the notification that a box has been removed.
 			/** The function is called by the page when a box has been removed.
 			 @param box     The box.
 			 */
-			void boxHasBeenRemoved(sBox box);
-			
-			//! Receive the notification that a box controller before a box has been removed.
-			/** The function is called by the page controller before a box has been removed.
-			 @param boxctrl The box controller.
-			 */
-			virtual void boxControllerWillBeRemoved(Box::sController boxctrl) {};
+			virtual void boxHasBeenRemoved(sBox box) = 0;
 			
 			//! Receive the notification that a box has been replaced.
 			/** The function is called by the page when a box has been replaced.
 			 @param oldbox  The old box.
 			 @param newbox	The new box.
 			 */
-			virtual void boxHasBeenReplaced(sBox oldbox, sBox newbox) {};
+			virtual void boxHasBeenReplaced(sBox oldbox, sBox newbox) = 0;
 			
 			//! Receive the notification that a link has been created.
 			/** The function is called by the page when a link has been created.
 			 @param link     The link.
 			 */
-			void linkHasBeenCreated(sLink link);
-			
-			//! Create a link controller.
-			/** Page controller's subclasses must implement this method to create custom link controller.
-			 @param link     The link.
-			 @return The newly created link controller.
-			 */
-			virtual Link::sController createLinkController(sLink link) = 0;
-			
-			//! Receive the notification that a link controller has been created.
-			/** The function is called by the page when a link controller has been created.
-			 @param linkctrl The link controller.
-			 */
-			virtual void linkControllerHasBeenCreated(Link::sController linkctrl) {};
+			virtual void linkHasBeenCreated(sLink link) = 0;
 			
 			//! Receive the notification that a link has been removed.
 			/** The function is called by the page when a link has been removed.
 			 @param link    The link.
 			 */
-			void linkHasBeenRemoved(sLink link);
-			
-			//! Receive the notification that a link controller before a box has been removed.
-			/** The function is called by the page controller before a link has been removed.
-			 @param linkctrl The link controller.
-			 */
-			virtual void linkControllerWillBeRemoved(Link::sController linkctrl) {};
+			virtual void linkHasBeenRemoved(sLink link) = 0;
 			
 			//! Receive the notification that a connection has been replaced.
 			/** The function is called by the page when a connection has been replaced.
 			 @param oldlink  The old link.
 			 @param newlink	The new link.
 			 */
-			virtual void linkHasBeenReplaced(sLink oldlink, sLink newlink) {};
+			virtual void linkHasBeenReplaced(sLink oldlink, sLink newlink) = 0;
 			
 			//! Receives notification when an attribute value has changed.
 			/** The function receives notification when an attribute value has changed.
 			 @param attr The attribute.
 			 @return pass true to notify changes to listeners, false if you don't want them to be notified
 			 */
-			virtual bool pageAttributeValueChanged(sAttr attr) { return true; };
-			
-        protected:
-
-			//! The redraw function that must be overriden to be notified when the page needs to be redrawn.
-			/** The function is called by the page when it needs to be repainted.
-			 */
-			virtual void redraw() {};
-			
-			//! Called when the page has been locked/unlocked.
-			/** The function is called when the page has been locked/unlocked.
-			 */
-			virtual void lockStatusChanged() {};
-			
-			//! Called when the page presentation mode has been activated/deactivated.
-			/** The function is called when the page presentation mode has been activated/deactivated.
-			 */
-			virtual void presentationStatusChanged() {};
+			virtual bool pageAttributeValueChanged(sAttr attr) = 0;
         };
 		
 		static const sTag Tag_page;

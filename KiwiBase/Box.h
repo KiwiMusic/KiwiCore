@@ -31,7 +31,6 @@
 #include "Text.h"
 #include "Beacon.h"
 #include "Clock.h"
-//#include "Page.h"
 
 // TODO
 // - See how to format the expression
