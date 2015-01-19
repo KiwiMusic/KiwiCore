@@ -438,11 +438,9 @@ namespace Kiwi
 	{
 		if(box)
 		{
-            Box::sController ctrl = box->getController();
-			if(ctrl)
+			if(Box::sController ctrl = box->getController())
 			{
-                sInlet inlet = box->getInlet(index);
-				if(inlet)
+				if(sInlet inlet = box->getInlet(index))
 				{
 					const Point pos = ctrl->getInletPosition(index);
 					m_polarity = inlet->getPolarity();
@@ -457,10 +455,9 @@ namespace Kiwi
 	{
 		if(box)
 		{
-            Box::sController ctrl = box->getController();
-			if(ctrl)
+			if(Box::sController ctrl = box->getController())
 			{
-				if(index < box->getNumberOfOutlets())
+				if(sInlet inlet = box->getInlet(index))
 				{
 					const Point pos = ctrl->getOutletPosition(index);
 					m_polarity = Iolet::Hot;
@@ -474,15 +471,7 @@ namespace Kiwi
 	void IoletHighlighter::draw(Doodle &d)
 	{
 		const Point size = d.getSize();
-        Color color;
-        if(m_polarity == Iolet::Cold)
-        {
-            color = Color(0.28, 0.28, 0.88, 1);
-        }
-        else
-        {
-            color = Color(0.88, 0.28, 0.28, 1);
-        }
+		const Color color = (m_polarity == Iolet::Cold) ? Color(0.28, 0.28, 0.88, 1) : Color(0.88, 0.28, 0.28, 1);
 		d.setColor(color.brighter(0.3));
         d.fillEllipse(4.5, 4.5, size.x() - 9., size.y() - 9.);
         d.setColor(color);

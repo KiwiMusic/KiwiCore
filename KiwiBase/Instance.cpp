@@ -22,6 +22,7 @@
 */
 
 #include "Instance.h"
+#include "../KiwiBoxes/NewBox.h"
 #include "../KiwiBoxes/Arithmetic.h"
 #include "../KiwiBoxes/ArithmeticTilde.h"
 #include "../KiwiBoxes/Gui.h"
@@ -55,6 +56,7 @@ namespace Kiwi
     {
         if(!libraries_loaded)
         {
+			standardBoxes();
             arithmetic();
             gui();
             wireless();

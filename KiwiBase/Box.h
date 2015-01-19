@@ -401,20 +401,14 @@ namespace Kiwi
         /** The function writes the box in a dico.
          @param dico The dico.
          */
-        virtual void save(sDico dico) const
-        {
-            
-        }
-        
+		virtual void save(sDico dico) const {};
+		
         //! The read method that should be override.
         /** The function reads a dico to initalize the boxe.
          @param dico The dico.
          */
-        virtual void load(scDico dico)
-        {
-            
-        }
-        
+		virtual void load(scDico dico) {};
+		
         //! Notify the manager that the values of an attribute has changed.
 		/** The function notifies the manager that the values of an attribute has changed.
 		 @param attr The attribute that has changed.
@@ -741,7 +735,13 @@ namespace Kiwi
          @param     box The prototype of the box.
          */
         static void addPrototype(unique_ptr<Box> box, string const& name = "");
-        
+		
+		//! Retrieves all loaded prototype names.
+		/** This function retrieves all loaded prototype names.
+		 @param names A vector of Tag to be filled.
+		 */
+		static void getPrototypeNames(vector<sTag>& names);
+		
         // ================================================================================ //
         //                                      BOX COMMON TAG                              //
         // ================================================================================ //

@@ -772,7 +772,8 @@ namespace Kiwi
 			 */
 			virtual void presentationStatusChanged() {};
         };
-        
+		
+		static const sTag Tag_page;
         static const sTag Tag_box;
         static const sTag Tag_boxes;
         static const sTag Tag_link;

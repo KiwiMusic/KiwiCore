@@ -356,8 +356,7 @@ namespace Kiwi
         lock_guard<mutex> guard(m_attrs_mutex);
 		for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
 		{
-            sAttr attr = it->second;
-            if(attr)
+            if(sAttr attr = it->second)
             {
                 attr->write(dico);
             }
@@ -369,8 +368,7 @@ namespace Kiwi
         lock_guard<mutex> guard(m_attrs_mutex);
 		for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
         {
-            sAttr attr = it->second;
-            if(attr)
+            if(sAttr attr = it->second)
             {
                 attr->read(dico);
                 if(attributeValueChanged(attr))

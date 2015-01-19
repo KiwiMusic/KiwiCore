@@ -479,7 +479,7 @@ namespace Kiwi
 						const double ratio = (bounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
 						for(unsigned long i = 1; i < noutlets; i++)
 						{
-							double val = ratio * i + bounds.x();
+							const double val = ratio * i + bounds.x();
 							if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
 							{
 								knock.m_box     = m_box;
@@ -638,6 +638,16 @@ namespace Kiwi
             m_prototypes[tname] = move(box);
         }
     }
+	
+	void Box::getPrototypeNames(vector<sTag>& names)
+	{
+		lock_guard<mutex> guard(m_prototypes_mutex);
+		
+		for(auto it = m_prototypes.begin(); it !=  m_prototypes.end(); ++it)
+		{
+			names.push_back(it->first);
+		}
+	}
 }
 
 

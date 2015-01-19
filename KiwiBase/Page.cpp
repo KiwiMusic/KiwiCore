@@ -26,7 +26,7 @@
 
 namespace Kiwi
 {
-    
+    const sTag Page::Tag_page       = Tag::create("page");
     const sTag Page::Tag_box        = Tag::create("box");
     const sTag Page::Tag_boxes      = Tag::create("boxes");
     const sTag Page::Tag_link       = Tag::create("link");
@@ -319,51 +319,65 @@ namespace Kiwi
     
     void Page::read(sDico dico)
     {
-        m_links.clear();
-        m_boxes.clear();
-        append(dico);
+		if(sDico pageDico = Dico::create())
+		{
+			m_links.clear();
+			m_boxes.clear();
+			if (dico->has(Tag_page))
+			{
+				pageDico = dico->get(Tag_page);
+				append(pageDico);
+				Attr::Manager::read(pageDico);
+			}
+		}
     }
-    
+	
     void Page::write(sDico dico) const
     {
         if(dico)
         {
-            ElemVector elements;
-            
-            m_boxes_mutex.lock();
-            for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
-            {
-                sDico box = Dico::create();
-                sDico subbox = Dico::create();
-                if(box && subbox)
-                {
-                    m_boxes[i]->write(subbox);
-                    box->set(Tag_box, subbox);
-                    elements.push_back(box);
-                }
-            }
-            m_boxes_mutex.unlock();
-            dico->set(Tag_boxes, elements);
-            
-            elements.clear();
-      
-            m_links_mutex.lock();
-            for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
-            {
-                sDico link = Dico::create();
-                sDico sublink = Dico::create();
-                if(link && sublink)
-                {
-                    m_links[i]->write(sublink);
-                    link->set(Tag_link, sublink);
-                    elements.push_back(link);
-                }
-            }
-            m_links_mutex.unlock();
-            dico->set(Tag_links, elements);
+			sDico subpage = Dico::create();
+			if (subpage)
+			{
+				ElemVector elements;
+				Attr::Manager::write(subpage);
+				
+				m_boxes_mutex.lock();
+				for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
+				{
+					sDico box = Dico::create();
+					sDico subbox = Dico::create();
+					if(box && subbox)
+					{
+						m_boxes[i]->write(subbox);
+						box->set(Tag_box, subbox);
+						elements.push_back(box);
+					}
+				}
+				m_boxes_mutex.unlock();
+				subpage->set(Tag_boxes, elements);
+				
+				elements.clear();
+				
+				m_links_mutex.lock();
+				for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
+				{
+					sDico link = Dico::create();
+					sDico sublink = Dico::create();
+					if(link && sublink)
+					{
+						m_links[i]->write(sublink);
+						link->set(Tag_link, sublink);
+						elements.push_back(link);
+					}
+				}
+				m_links_mutex.unlock();
+				subpage->set(Tag_links, elements);
+				dico->set(Tag_page, subpage);
+			}
         }
     }
-    
+	
     bool Page::startDsp(ulong samplerate, ulong vectorsize)
     {
         /*

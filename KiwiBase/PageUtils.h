@@ -463,7 +463,7 @@ namespace Kiwi
         
         //! Retrieve the polarity of the hightlighter.
         /** The function retrieves the polarity of the hightlighter.
-         @return The the polarity of the hightlighter.
+         @return The polarity of the hightlighter.
          */
         inline Iolet::Polarity getPolarity() const noexcept
         {

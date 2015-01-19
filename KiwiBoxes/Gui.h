@@ -85,6 +85,7 @@ namespace Kiwi
     private:
         ElemVector      m_elements;
         vector<string>  m_text;
+		bool			m_mouse_down;
     public:
         
         Message(sPage page);

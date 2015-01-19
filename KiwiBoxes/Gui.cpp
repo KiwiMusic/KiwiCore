@@ -249,6 +249,7 @@ namespace Kiwi
         addInlet(Iolet::Message, Iolet::Hot, "Messages without Ouput (anything)");
         addOutlet(Iolet::Message, "Messages (anything)");
         setAttributeDefaultValues(Tag_size, {80., 20.});
+		setAttributeValue(Tag_bgcolor, {0.66, 0.66, 0.66, 1.});
         
         Text::Editor::setFont(getFont());
         Text::Editor::setJustification(Font::Justification::VerticallyCentred);
@@ -268,8 +269,18 @@ namespace Kiwi
         return false;
     }
     
-    bool Message::receive(Event::Mouse const& event)
+    bool Message::receive(Event::Mouse const& e)
     {
+		if (e.isDown())
+		{
+			m_mouse_down = true;
+			redraw();
+		}
+		else if (e.isUp())
+		{
+			m_mouse_down = false;
+			redraw();
+		}
         return false;
     }
     
@@ -290,14 +301,14 @@ namespace Kiwi
     
     bool Message::draw(Doodle& d) const
     {
-		const double borderSize = 1;
+		const double borderSize = m_mouse_down ? 3 : 1;
 		const double borderRadius = 4;
+		
+		d.setColor(getBackgroundColor());
+		d.fillRectangle(d.getBounds().reduced(borderSize), borderRadius);
 		
 		d.setColor(getBorderColor());
 		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, borderRadius);
-		
-		d.setColor(getBackgroundColor());
-		d.fillRectangle(d.getBounds().reduced(borderSize*2), borderRadius);
 		
         Text::Editor::draw(d);
         return true;
@@ -360,6 +371,7 @@ namespace Kiwi
             if(elements[0].isNumber())
             {
                 Text::Editor::setText(toString((double)elements[0]));
+				redraw();
                 Box::send(0, {m_value});
                 return true;
             }
@@ -373,6 +385,7 @@ namespace Kiwi
                 if(elements.size() > 1 && elements[1].isNumber())
                 {
                     Text::Editor::setText(toString((double)elements[1]));
+					redraw();
                     return true;
                 }
                 else
@@ -436,6 +449,15 @@ namespace Kiwi
                 
                 return true;
             }
+			else if(event.isDoubleClick())
+			{
+				if(!m_edition)
+				{
+					m_edition = true;
+					m_maker   = true;
+					m_clock->delay(getShared(), 500.);
+				}
+			}
             else
             {
                 event.setMouseUnlimited(false);
@@ -500,11 +522,20 @@ namespace Kiwi
     {
         if(event == Event::Focus::Out && m_edition && !m_text.empty())
         {
-            m_value = stod(m_text);
-            send(0, {m_value});
-            m_edition = false;
-            m_text.clear();
-            redraw();
+			try
+			{
+				m_value = stod(m_text);
+			}
+			catch (std::invalid_argument)
+			{
+				Console::error(getShared(), "invalid argument");
+				m_value = 0.;
+			}
+			
+			send(0, {m_value});
+			m_edition = false;
+			m_text.clear();
+			redraw();
         }
         return true;
     }
