@@ -27,7 +27,7 @@
 #include "Box.h"
 #include "AttributePage.h"
 #include "PageUtils.h"
-//#include "../KiwiDsp/Context.h"
+#include "../KiwiDsp/Context.h"
 
 // TODO
 // - Add the attributes
@@ -56,7 +56,7 @@ namespace Kiwi
     private:
         const wInstance             m_instance;
         
-        //Dsp::sContext               m_dsp_context;
+        Dsp::sContext               m_dsp_context;
         atomic_bool                 m_dsp_running;
         
         vector<sBox>                m_boxes;
