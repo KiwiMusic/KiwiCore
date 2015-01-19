@@ -33,11 +33,11 @@ namespace Kiwi
     NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name, Graphic | Mouse | Keyboard)
     {
         //addInlet(Iolet::Message, Iolet::Hot, "inlet 1");
-		Text::Editor::setFont(getFont());
-		Text::Editor::setJustification(Font::Justification::VerticallyCentred);
-		Text::Editor::setColor(attr_color_text->get());
-		Text::Editor::setSize(getSize());
-		Text::Editor::setMargins(3., 3., 3., 3.);
+		TextEditor::setFont(getFont());
+		TextEditor::setJustification(Font::Justification::VerticallyCentred);
+		TextEditor::setColor(attr_color_text->get());
+		TextEditor::setSize(getSize());
+		TextEditor::setPadding(3., 3., 3., 3.);
     }
 	
     NewBox::~NewBox()

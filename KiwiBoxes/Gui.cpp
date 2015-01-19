@@ -251,12 +251,12 @@ namespace Kiwi
         setAttributeDefaultValues(Tag_size, {80., 20.});
 		setAttributeValue(Tag_bgcolor, {0.66, 0.66, 0.66, 1.});
         
-        Text::Editor::setFont(getFont());
-        Text::Editor::setJustification(Font::Justification::VerticallyCentred);
-        Text::Editor::setColor(attr_color_text->get());
-        Text::Editor::setSize(getSize());
-        Text::Editor::setMargins(3., 3., 3., 3.);
-        Text::Editor::setBehavior(Text::Editor::Wrapped);
+        TextEditor::setFont(getFont());
+        TextEditor::setJustification(Font::Justification::VerticallyCentred);
+        TextEditor::setColor(attr_color_text->get());
+        TextEditor::setSize(getSize());
+        TextEditor::setPadding(3., 3., 3., 3.);
+        TextEditor::setBehavior(TextEditor::Wrapped);
     }
     
     Message::~Message()
@@ -286,7 +286,7 @@ namespace Kiwi
     
     bool Message::receive(Event::Keyboard const& event)
     {
-        if(Text::Editor::receive(event))
+        if(TextEditor::receive(event))
         {
             redraw();
             return true;
@@ -296,7 +296,7 @@ namespace Kiwi
     
     bool Message::receive(Event::Focus::Type event)
     {
-        return Text::Editor::receive(event);
+        return TextEditor::receive(event);
     }
     
     bool Message::draw(Doodle& d) const
@@ -310,7 +310,7 @@ namespace Kiwi
 		d.setColor(getBorderColor());
 		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, borderRadius);
 		
-        Text::Editor::draw(d);
+        TextEditor::draw(d);
         return true;
     }
     
@@ -318,15 +318,15 @@ namespace Kiwi
     {
         if(attr == attr_size)
         {
-            Text::Editor::setSize(attr_size->get());
+            TextEditor::setSize(attr_size->get());
         }
         else if(attr == attr_color_text)
         {
-            Text::Editor::setColor(attr_color_text->get());
+            TextEditor::setColor(attr_color_text->get());
         }
         else if(attr == attr_font_face || attr == attr_font_name || attr == attr_font_size)
         {
-            Text::Editor::setFont(getFont());
+            TextEditor::setFont(getFont());
         }
         return true;
     }
@@ -352,11 +352,11 @@ namespace Kiwi
         addOutlet(Iolet::Message, "Tab key pressed (bang)");
         setAttributeDefaultValues(Tag_size, {50., 20.});
 
-        Text::Editor::setFont(getFont());
-        Text::Editor::setJustification(Font::Justification::VerticallyCentred);
-        Text::Editor::setColor(attr_color_text->get());
-        Text::Editor::setSize(getSize());
-        Text::Editor::setMargins(3., 3., 3., 3.);
+        TextEditor::setFont(getFont());
+        TextEditor::setJustification(Font::Justification::VerticallyCentred);
+        TextEditor::setColor(attr_color_text->get());
+        TextEditor::setSize(getSize());
+        TextEditor::setPadding(3., 3., 3., 3.);
     }
     
     Number::~Number()
@@ -370,7 +370,7 @@ namespace Kiwi
         {
             if(elements[0].isNumber())
             {
-                Text::Editor::setText(toString((double)elements[0]));
+                TextEditor::setText(toString((double)elements[0]));
 				redraw();
                 Box::send(0, {m_value});
                 return true;
@@ -384,7 +384,7 @@ namespace Kiwi
             {
                 if(elements.size() > 1 && elements[1].isNumber())
                 {
-                    Text::Editor::setText(toString((double)elements[1]));
+                    TextEditor::setText(toString((double)elements[1]));
 					redraw();
                     return true;
                 }
@@ -416,7 +416,7 @@ namespace Kiwi
                 }
                 else if(!m_edition)
                 {
-                    string text = Text::Editor::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
+                    string text = TextEditor::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
                     for(unsigned long i = 0; i < text.size(); i++)
                     {
                         if(text[i] != '.')
@@ -467,7 +467,7 @@ namespace Kiwi
         }
         else
         {
-            if(Text::Editor::receive(event))
+            if(TextEditor::receive(event))
             redraw();
         }
         
@@ -573,7 +573,7 @@ namespace Kiwi
             }
             else if(m_maker)
             {
-                Point pt = Text::getStringSize(getFont(), m_text);
+                Point pt = Font::getStringSize(getFont(), m_text);
                 d.drawLine(pt.x()+15., 3., pt.x()+15., size.y() - 3., 1.);
             }
         }
@@ -590,15 +590,15 @@ namespace Kiwi
     {
         if(attr == attr_size)
         {
-            Text::Editor::setSize(attr_size->get());
+            TextEditor::setSize(attr_size->get());
         }
         else if(attr == attr_color_text)
         {
-            Text::Editor::setColor(getTextColor());
+            TextEditor::setColor(getTextColor());
         }
         else if(attr == attr_font_face || attr == attr_font_name || attr == attr_font_size)
         {
-            Text::Editor::setFont(getFont());
+            TextEditor::setFont(getFont());
         }
         return true;
     }

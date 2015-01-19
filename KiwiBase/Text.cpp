@@ -26,223 +26,209 @@
 namespace Kiwi
 {
     // ================================================================================ //
-    //                                      TEXT                                        //
-    // ================================================================================ //
-    
-    Text::Text() noexcept :
-    m_marker_start(0),
-    m_marker_end(0)
-    {
-        ;
-    }
-    
-    Text::~Text()
-    {
-        m_text.clear();
-    }
-
-    bool Text::isEmpty() const noexcept
-    {
-        return m_text.empty();
-    }
-    
-    ulong Text::getNumberOfLines() const noexcept
-    {
-        if(isEmpty())
-        {
-            return 0;
-        }
-        else
-        {
-            ulong nlines = 1;
-            string::size_type pos = string::npos;
-            while((pos = m_text.find('\n', pos)) != string::npos)
-            {
-                nlines++;
-            }
-            return nlines;
-        }
-    }
-    
-    bool Text::isSelectionEmpty() const noexcept
-    {
-        return m_marker_end == m_marker_start;
-    }
-    
-    void Text::selectAll() noexcept
-    {
-        m_marker_start  = 0;
-        m_marker_end    = m_text.size() - 1;
-    }
-
-    void Text::addPreviousCharacterToSelection() noexcept
-    {
-        if(!isEmpty() && m_marker_start)
-        {
-            m_marker_start--;
-        }
-    }
-    
-    void Text::addNextCharacterToSelection() noexcept
-    {
-        if(!isEmpty() && m_marker_end != m_text.size() - 1)
-        {
-            m_marker_end++;
-        }
-    }
-    
-    void Text::addPreviousWordToSelection() noexcept
-    {
-        if(!isEmpty() && m_marker_start)
-        {
-            while(m_text[m_marker_start] == ' ' && m_marker_start)
-            {
-                m_marker_start--;
-            }
-            if(m_marker_start)
-            {
-                m_marker_start = m_text.rfind(' ', m_marker_start);
-                if(m_marker_start == string::npos)
-                {
-                    m_marker_start = 0;
-                }
-                else
-                {
-                    m_marker_start++;
-                }
-            }
-        }
-    }
-    
-    void Text::addNextWordToSelection() noexcept
-    {
-        if(!isEmpty() && m_marker_end != m_text.size() - 1)
-        {
-            while(m_text[m_marker_end] == ' ' && m_marker_end != m_text.size() - 1)
-            {
-                m_marker_end++;
-            }
-            if(m_marker_end != m_text.size() - 1)
-            {
-                m_marker_end = m_text.find(' ', m_marker_end);
-                if(m_marker_end == string::npos)
-                {
-                    m_marker_end = m_text.size() - 1;
-                }
-                else
-                {
-                    m_marker_end--;
-                }
-            }
-        }
-    }
-    
-    void Text::eraseSelection()
-    {
-        if(!isEmpty() && !isSelectionEmpty())
-        {
-            auto it = m_text.erase(m_text.begin() + m_marker_start, m_text.begin() + m_marker_end);
-            m_marker_end = m_marker_start = it - m_text.begin();
-        }
-    }
-    
-    void Text::insertCharacter(const wchar_t c)
-    {
-        m_text.replace(m_marker_start, m_marker_end - m_marker_start, &c);
-    }
-    
-    // ================================================================================ //
     //                                  TEXT EDITOR                                     //
     // ================================================================================ //
     
-    Text::Editor::Editor() :
+    TextEditor::TextEditor() :
+	m_marker_start(0),
+	m_marker_end(0),
     m_justification(Font::Justification::VerticallyCentred),
     m_color(0., 0., 0, 1.),
-    m_margin_top(0.),
-    m_margin_left(0.),
-    m_margin_bottom(0.),
-    m_margin_right(0.),
+    m_padding_top(0.),
+    m_padding_left(0.),
+    m_padding_bottom(0.),
+    m_padding_right(0.),
     m_line_spacing(0.),
     m_behavior(Wrapped)
     {
         ;
     }
     
-    Text::Editor::~Editor()
+    TextEditor::~TextEditor()
     {
-        ;
+        m_text.clear();
     }
-    
-    void Text::Editor::setFont(Font const& font) noexcept
+	
+	bool TextEditor::isEmpty() const noexcept
+	{
+		return m_text.empty();
+	}
+	
+	ulong TextEditor::getNumberOfLines() const noexcept
+	{
+		if(isEmpty())
+		{
+			return 0;
+		}
+		else
+		{
+			ulong nlines = 1;
+			string::size_type pos = string::npos;
+			while((pos = m_text.find('\n', pos)) != string::npos)
+			{
+				nlines++;
+			}
+			return nlines;
+		}
+	}
+	
+	bool TextEditor::isSelectionEmpty() const noexcept
+	{
+		return m_marker_end == m_marker_start;
+	}
+	
+	void TextEditor::selectAll() noexcept
+	{
+		m_marker_start  = 0;
+		m_marker_end    = m_text.size() - 1;
+	}
+	
+	void TextEditor::addPreviousCharacterToSelection() noexcept
+	{
+		if(!isEmpty() && m_marker_start)
+		{
+			m_marker_start--;
+		}
+	}
+	
+	void TextEditor::addNextCharacterToSelection() noexcept
+	{
+		if(!isEmpty() && m_marker_end != m_text.size() - 1)
+		{
+			m_marker_end++;
+		}
+	}
+	
+	void TextEditor::addPreviousWordToSelection() noexcept
+	{
+		if(!isEmpty() && m_marker_start)
+		{
+			while(m_text[m_marker_start] == ' ' && m_marker_start)
+			{
+				m_marker_start--;
+			}
+			if(m_marker_start)
+			{
+				m_marker_start = m_text.rfind(' ', m_marker_start);
+				if(m_marker_start == string::npos)
+				{
+					m_marker_start = 0;
+				}
+				else
+				{
+					m_marker_start++;
+				}
+			}
+		}
+	}
+	
+	void TextEditor::addNextWordToSelection() noexcept
+	{
+		if(!isEmpty() && m_marker_end != m_text.size() - 1)
+		{
+			while(m_text[m_marker_end] == ' ' && m_marker_end != m_text.size() - 1)
+			{
+				m_marker_end++;
+			}
+			if(m_marker_end != m_text.size() - 1)
+			{
+				m_marker_end = m_text.find(' ', m_marker_end);
+				if(m_marker_end == string::npos)
+				{
+					m_marker_end = m_text.size() - 1;
+				}
+				else
+				{
+					m_marker_end--;
+				}
+			}
+		}
+	}
+	
+	void TextEditor::eraseSelection()
+	{
+		if(!isEmpty() && !isSelectionEmpty())
+		{
+			auto it = m_text.erase(m_text.begin() + m_marker_start, m_text.begin() + m_marker_end);
+			m_marker_end = m_marker_start = it - m_text.begin();
+		}
+	}
+	
+	void TextEditor::insertCharacter(const wchar_t c)
+	{
+		m_text.replace(m_marker_start, m_marker_end - m_marker_start, &c);
+	}
+	
+    void TextEditor::setFont(Font const& font) noexcept
     {
         m_font = font;
         updateBoundaries();
     }
-    
-    void Text::Editor::setJustification(Font::Justification const& j) noexcept
+	
+    void TextEditor::setJustification(Font::Justification const& j) noexcept
     {
         m_justification = j;
     }
-    
-    void Text::Editor::setColor(Color const& color) noexcept
+	
+    void TextEditor::setColor(Color const& color) noexcept
     {
         m_color = color;
     }
-    
-    void Text::Editor::setSize(Point const& size) noexcept
+	
+    void TextEditor::setSize(Point const& size) noexcept
     {
         m_size = size;
-        m_displayed_width   = m_size.x() - m_margin_left - m_margin_right;
-        m_displayed_height  = m_size.y() - m_margin_top  - m_margin_bottom;
+        m_displayed_width   = m_size.x() - m_padding_left - m_padding_right;
+        m_displayed_height  = m_size.y() - m_padding_top  - m_padding_bottom;
         updateBoundaries();
     }
-    
-    void Text::Editor::setMargins(double const top, double const left, double const bottom, double const right) noexcept
+	
+    void TextEditor::setPadding(double const top, double const left, double const bottom, double const right) noexcept
     {
-        m_margin_top    = top;
-        m_margin_left   = left;
-        m_margin_bottom = bottom;
-        m_margin_right  = right;
-        m_displayed_width   = m_size.x() - m_margin_left - m_margin_right;
-        m_displayed_height  = m_size.y() - m_margin_top  - m_margin_bottom;
+        m_padding_top    = top;
+        m_padding_left   = left;
+        m_padding_bottom = bottom;
+        m_padding_right  = right;
+        m_displayed_width   = m_size.x() - m_padding_left - m_padding_right;
+        m_displayed_height  = m_size.y() - m_padding_top  - m_padding_bottom;
         updateBoundaries();
     }
     
-    void Text::Editor::setMarginTop(double const top) noexcept
+    void TextEditor::setPaddingTop(double const top) noexcept
     {
-        m_margin_top    = top;
-        m_displayed_height  = m_size.y() - m_margin_top  - m_margin_bottom;
+        m_padding_top    = top;
+        m_displayed_height  = m_size.y() - m_padding_top  - m_padding_bottom;
         updateBoundaries();
     }
     
-    void Text::Editor::setMarginLeft(double const left) noexcept
+    void TextEditor::setPaddingLeft(double const left) noexcept
     {
-        m_margin_left   = left;
-        m_displayed_width   = m_size.x() - m_margin_left - m_margin_right;
+        m_padding_left   = left;
+        m_displayed_width   = m_size.x() - m_padding_left - m_padding_right;
         updateBoundaries();
     }
     
-    void Text::Editor::setMarginBottom(double const bottom) noexcept
+    void TextEditor::setPaddingBottom(double const bottom) noexcept
     {
-        m_margin_bottom = bottom;
-        m_displayed_height  = m_size.y() - m_margin_top  - m_margin_bottom;
+        m_padding_bottom = bottom;
+        m_displayed_height  = m_size.y() - m_padding_top  - m_padding_bottom;
         updateBoundaries();
     }
     
-    void Text::Editor::setMarginRight(double const right) noexcept
+    void TextEditor::setPaddingRight(double const right) noexcept
     {
-        m_margin_right  = right;
-        m_displayed_width   = m_size.x() - m_margin_left - m_margin_right;
+        m_padding_right  = right;
+        m_displayed_width   = m_size.x() - m_padding_left - m_padding_right;
         updateBoundaries();
     }
     
-    void Text::Editor::setLineSpacing(double const linespacing) noexcept
+    void TextEditor::setLineSpacing(double const linespacing) noexcept
     {
         m_line_spacing = linespacing;
         updateBoundaries();
     }
     
-    void Text::Editor::setBehavior(Behavior behavior) noexcept
+    void TextEditor::setBehavior(Behavior behavior) noexcept
     {
         if(behavior != m_behavior)
         {
@@ -258,7 +244,7 @@ namespace Kiwi
         }
     }
     
-    void Text::Editor::setText(string const& text)
+    void TextEditor::setText(string const& text)
     {
         for(string::size_type i = 0; i < text.size(); i++)
         {
@@ -266,18 +252,63 @@ namespace Kiwi
         }
         updateBoundaries();
     }
-    
-    void Text::Editor::truncate()
+	
+	string TextEditor::getStringSelection(Font const& font, string const& text, double const x1, double const x2) noexcept
+	{
+		string rtext, ctext;
+		ulong pos = 0;
+		while(pos < text.size())
+		{
+			ctext += text[pos];
+			Point size = Font::getStringSize(font, ctext);
+			if(size.x() >= x1 && size.x() <= x2)
+			{
+				rtext += text[pos++];
+			}
+			else if(size.x() > x2)
+			{
+				return rtext;
+			}
+		}
+		return rtext;
+	}
+	
+	Point TextEditor::getStringPosition(Font const& font, string const& text, double const x1, double const x2) noexcept
+	{
+		Point rpoint(0, 0.);
+		string ctext;
+		ulong pos = 0;
+		while(pos < text.size())
+		{
+			ctext += text[pos];
+			Point size = Font::getStringSize(font, ctext);
+			if(size.x() <= x1)
+			{
+				rpoint.x(size.x());
+			}
+			else if(size.x() > x1 && size.x() <= x2)
+			{
+				rpoint.y(size.x());
+			}
+			else if(size.x() > x2)
+			{
+				return rpoint;
+			}
+		}
+		return rpoint;
+	}
+	
+    void TextEditor::truncate()
     {
         for(vector<string>::size_type i = 0; i < getNumberOfLines(); i++)
         {
             string line;
             //getLine(i, line);
-            Point size = getStringSize(m_font, line);
+            Point size = Font::getStringSize(m_font, line);
             if(size.x() > m_displayed_width)
             {
                 line.replace(line.size() - 3, 3, "...");
-                size = getStringSize(m_font, line);
+                size = Font::getStringSize(m_font, line);
                 while(size.x() > m_displayed_width)
                 {
                     line.pop_back();
@@ -288,14 +319,14 @@ namespace Kiwi
         }
     }
     
-    void Text::Editor::wrap()
+    void TextEditor::wrap()
     {
-        m_text_size = getStringSize(m_font, m_text);
+        m_text_size = Font::getStringSize(m_font, m_text);
         for(vector<string>::size_type i = 0; i < m_text.size(); i++)
         {
             string line;
             //getLine(i, line);
-            Point size = getStringSize(m_font, line);
+            Point size = Font::getStringSize(m_font, line);
             if(size.x() > m_displayed_width)
             {
                 string nline, templine, word;
@@ -304,13 +335,13 @@ namespace Kiwi
                 while(pos_next != string::npos)
                 {
                     word.assign(line, pos, pos_next - pos);
-                    size = getStringSize(m_font, word);
+                    size = Font::getStringSize(m_font, word);
                     if(size.x() > m_displayed_width)
                     {
                         for(string::size_type i = 0; i < word.size(); i++)
                         {
                             nline += word[i];
-                            size = getStringSize(m_font, nline);
+                            size = Font::getStringSize(m_font, nline);
                             if(size.x() > m_displayed_width)
                             {
                                 nline.pop_back();
@@ -323,7 +354,7 @@ namespace Kiwi
                     else
                     {
                         templine += word;
-                        size = getStringSize(m_font, templine);
+                        size = Font::getStringSize(m_font, templine);
                         if(size.x() > m_displayed_width)
                         {
                             m_displayed_text.push_back(nline);
@@ -346,7 +377,7 @@ namespace Kiwi
         }
     }
     
-    void Text::Editor::updateBoundaries()
+    void TextEditor::updateBoundaries()
     {
         if(m_behavior)
         {
@@ -358,7 +389,7 @@ namespace Kiwi
         }
     }
     
-    bool Text::Editor::receive(Event::Mouse const& event)
+    bool TextEditor::receive(Event::Mouse const& event)
     {
         if(event.isDown())
         {
@@ -387,7 +418,7 @@ namespace Kiwi
         return true;
     }
     
-    bool Text::Editor::receive(Event::Keyboard const& event)
+    bool TextEditor::receive(Event::Keyboard const& event)
     {
         if(event.hasCmd() && event.getCharacter() == 'a')
         {
@@ -429,22 +460,22 @@ namespace Kiwi
         return false;
     }
     
-    bool Text::Editor::receive(Event::Focus::Type event)
+    bool TextEditor::receive(Event::Focus::Type event)
     {
         return true;
     }
     
-    bool Text::Editor::draw(Doodle& doodle) const
+    bool TextEditor::draw(Doodle& doodle) const
     {
         if(!isEmpty())
         {
             doodle.setFont(m_font);
             doodle.setColor(m_color);
-            const double width  = doodle.getWidth() - m_margin_left - m_margin_right;
-            const double height = getStringSize(m_font, "/").y();
+            const double width  = doodle.getWidth() - m_padding_left - m_padding_right;
+            const double height = Font::getStringSize(m_font, "/").y();
             for(vector<string>::size_type i = 0; i < m_displayed_text.size(); i++)
             {
-                doodle.drawText(m_displayed_text[i], m_margin_left, height * i + m_margin_top, width, height, m_justification);
+                doodle.drawText(m_displayed_text[i], m_padding_left, height * i + m_padding_top, width, height, m_justification);
                 cout << "line " << i << " " << m_displayed_text[i] << endl;
             }
             

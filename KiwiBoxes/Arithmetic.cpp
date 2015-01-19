@@ -27,7 +27,7 @@
 namespace Kiwi
 {
     Arithmetic::Arithmetic(sPage page, string const& name, ElemVector const& elements, string const& input1, string const& input2,string const& output) :
-    NewBox(page, elements, name)
+    Box(page, name)
     {
         m_first     = 0.;
         m_second    = 0.;

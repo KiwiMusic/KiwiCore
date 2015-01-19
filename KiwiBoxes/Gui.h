@@ -80,7 +80,7 @@ namespace Kiwi
     //                                      MESSAGE                                     //
     // ================================================================================ //
     
-    class Message : public Box, public Text::Editor, public Clock::Maker
+    class Message : public Box, public TextEditor, public Clock::Maker
     {
     private:
         ElemVector      m_elements;
@@ -104,7 +104,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    class Number : public Box, public Text::Editor, public Clock::Maker
+    class Number : public Box, public TextEditor, public Clock::Maker
     {
     private:
         double m_value;

@@ -25,8 +25,6 @@
 #define __DEF_KIWI_ARITHMETIC__
 
 #include "../KiwiBase/Core.h"
-#include "NewBox.h"
-//#include "../ThirdParty/muParser/include/muParser.h"
 
 namespace Kiwi
 {
@@ -34,7 +32,7 @@ namespace Kiwi
     //                                  ARITHMETIC                                      //
     // ================================================================================ //
     
-    class Arithmetic : public NewBox
+    class Arithmetic : public Box
     {
     protected:
         double          m_first;

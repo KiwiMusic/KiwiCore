@@ -32,7 +32,7 @@ namespace Kiwi
     //                                    NEWBOX                                        //
     // ================================================================================ //
     
-    class NewBox : public Box, public Text::Editor
+    class NewBox : public Box, public TextEditor
     {
     private:
 		
