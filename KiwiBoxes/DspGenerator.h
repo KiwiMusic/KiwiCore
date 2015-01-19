@@ -21,15 +21,28 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_ARITHMETIC_TILDE__
-#define __DEF_KIWI_ARITHMETIC_TILDE__
+#ifndef __DEF_KIWI_GENERATOR_TILDE__
+#define __DEF_KIWI_GENERATOR_TILDE__
 
 #include "../KiwiBase/Core.h"
 #include "../KiwiDsp/Dsp.h"
 
 namespace Kiwi
 {
-    ;
+    class SigTilde : public Box, public Dsp::Sig
+    {
+    public:
+        SigTilde(sPage page);
+        SigTilde(sPage page, const double value);
+        ~SigTilde();
+        bool receive(ulong index, ElemVector const& elements) override;
+        sBox allocate(sPage page, sDico dico) const override;
+    };
+    
+    inline void GeneratorTildeInit()
+    {
+        Box::addPrototype(unique_ptr<Box>(new SigTilde(sPage())));
+    }
 }
 
 #endif

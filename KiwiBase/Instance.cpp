@@ -28,6 +28,7 @@
 #include "../KiwiBoxes/Gui.h"
 #include "../KiwiBoxes/Wireless.h"
 #include "../KiwiBoxes/Time.h"
+#include "../KiwiBoxes/DspGenerator.h"
 
 namespace Kiwi
 {
@@ -61,6 +62,7 @@ namespace Kiwi
             gui();
             wireless();
 			timing();
+            GeneratorTildeInit();
             libraries_loaded = true;
         }
         return make_shared<Instance>();

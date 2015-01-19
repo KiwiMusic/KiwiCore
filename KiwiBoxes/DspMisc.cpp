@@ -21,17 +21,10 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_ARITHMETIC_TILDE__
-#define __DEF_KIWI_ARITHMETIC_TILDE__
-
-#include "../KiwiBase/Core.h"
-#include "../KiwiDsp/Dsp.h"
+#include "DspMisc.h"
 
 namespace Kiwi
 {
     ;
 }
-
-#endif
-
 

@@ -21,15 +21,33 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_ARITHMETIC_TILDE__
-#define __DEF_KIWI_ARITHMETIC_TILDE__
+#ifndef __DEF_KIWI_MISC_TILDE__
+#define __DEF_KIWI_MISC_TILDE__
 
 #include "../KiwiBase/Core.h"
 #include "../KiwiDsp/Dsp.h"
 
 namespace Kiwi
 {
-    ;
+    class SnapshotTilde : public Box, public Dsp::Process
+    {
+    public:
+        SnapshotTilde(sPage page);
+        SnapshotTilde(sPage page, const double value);
+        ~SnapshotTilde();
+        bool receive(ulong index, ElemVector const& elements) override;
+        sBox allocate(sPage page, sDico dico) const override;
+        ulong getNumberOfInputs() const noexcept override;
+        ulong getNumberOfOutputs() const noexcept override;
+        void prepare(Dsp::sNode node) const noexcept override;
+        void perform(Dsp::scNode node) const noexcept override;
+        void release(Dsp::scNode node) const noexcept override;
+    };
+    
+    inline void MiscTildeInit()
+    {
+        Box::addPrototype(unique_ptr<Box>(new SnapshotTilde(sPage())));
+    }
 }
 
 #endif

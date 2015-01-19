@@ -38,7 +38,7 @@ namespace Kiwi
     
     Page::Page(sInstance instance) :
     m_instance(instance),
-    //m_dsp_context(nullptr),
+    m_dsp_context(nullptr),
     m_boxe_id(1)
     {
         ;
@@ -380,12 +380,8 @@ namespace Kiwi
 	
     bool Page::startDsp(ulong samplerate, ulong vectorsize)
     {
-        /*
-        m_dsp_context->clear();
-        m_dsp_context->setSamplerate(samplerate);
-        m_dsp_context->setVectorsize((long)vectorsize);
-        */
-		/*
+        m_dsp_context = Dsp::Context::create(samplerate, vectorsize);
+
         for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
         {
             Dsp::sProcess process = dynamic_pointer_cast<Dsp::Process>((*it));
@@ -394,32 +390,40 @@ namespace Kiwi
                 m_dsp_context->add(process);
             }
         }
-		*/
-        /*
+
         for(auto it = m_links.begin(); it != m_links.end(); ++it)
         {
-            m_dsp_context->addConnection((*it));
+            Dsp::sProcess from = dynamic_pointer_cast<Dsp::Process>((*it)->getBoxFrom());
+            Dsp::sProcess to = dynamic_pointer_cast<Dsp::Process>((*it)->getBoxTo());
+            if(from && to)
+            {
+                int zaza;
+                Dsp::sConnection con = Dsp::Connection::create(from, (*it)->getOutletIndex(), to, (*it)->getInletIndex());
+                m_dsp_context->add(con);
+            }
+            
+            
         }
         
         try
         {
             m_dsp_context->compile();
         }
-        catch(sBox box)
+        catch(Dsp::sProcess box)
         {
-            Console::error(box, "something appened with me... sniff !");
-        }*/
+            Console::error(dynamic_pointer_cast<Box>(box), "something appened with me... sniff !");
+        }
         return true;
     }
     
     void Page::tickDsp() const noexcept
     {
-        //m_dsp_context->tick();
+        m_dsp_context->tick();
     }
     
     void Page::stopDsp()
     {
-        //m_dsp_context->clear();
+        m_dsp_context->stop();
     }
     
     bool Page::isDspRunning() const noexcept
