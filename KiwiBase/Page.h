@@ -63,14 +63,13 @@ namespace Kiwi
         mutable mutex               m_mutex;
         set<wController,
         owner_less<wController>>    m_ctrls;
-        mutex                       m_ctrls_mutex;
+        mutable mutex               m_ctrls_mutex;
         
     private:
         
         //! @internal Trigger notification to controlers.
         void send(sBox box, Notification type);
         void send(sLink link, Notification type);
-        ulong generateId() const;
     public:
         
         //! Constructor.
@@ -90,13 +89,6 @@ namespace Kiwi
          @return The page.
          */
         static sPage create(sInstance instance, sDico dico = nullptr);
-        
-        //! Create a beacon.
-        /** This function retrieves a beacon in the scope of the instance.
-         @param     The name of the beacon to retrieve.
-         @return    The beacon that match with the name.
-         */
-        sBeacon createBeacon(string const& name) const;
 		
 		//! Retrieve the sPage.
 		/** The function sPage.
@@ -124,16 +116,6 @@ namespace Kiwi
         {
             return m_instance.lock();
         }
-		
-		//! Retrieve the controller that manages the page.
-		/** The function retrieves the controller that manages the page.
-		 @return The controller that manages the page.
-		 */
-		inline sController getController() const noexcept
-		{
-            int zaza;
-			return (*m_ctrls.begin()).lock();
-		}
 
         //! Get the boxes.
         /** The function retrieves the boxes from the page.
@@ -160,7 +142,7 @@ namespace Kiwi
          */
         inline bool isDspRunning() const noexcept
         {
-            return m_dsp_context.use_count();
+            return (bool)m_dsp_context.use_count();
         }
         
         //! Append a dico.
@@ -213,12 +195,12 @@ namespace Kiwi
          @param vectorsize The vector size of the signal.
          @return true if the page can process signal.
          */
-        void startDsp(const ulong samplerate, const ulong vectorsize);
+        void dspStart(const ulong samplerate, const ulong vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain. You should never call this method if the dsp hasn't been started before.
          */
-        inline void tickDsp() const noexcept
+        inline void dspTick() const noexcept
         {
             m_dsp_context->tick();
         }
@@ -226,7 +208,7 @@ namespace Kiwi
         //! Stop the dsp.
         /** The function stop the dsp chain.
          */
-        void stopDsp();
+        void dspStop();
         
         //! Receives notification when an attribute value has changed.
         /** The function receives notification when an attribute value has changed.
@@ -295,32 +277,32 @@ namespace Kiwi
 			/** The function is called by the page when a box has been created.
 			 @param box     The box.
 			 */
-			virtual void boxHasBeenCreated(sBox box) = 0;
+			virtual void boxCreated(sBox box) = 0;
 			
 			//! Receive the notification that a box has been removed.
 			/** The function is called by the page when a box has been removed.
 			 @param box     The box.
 			 */
-			virtual void boxHasBeenRemoved(sBox box) = 0;
+			virtual void boxRemoved(sBox box) = 0;
 			
 			//! Receive the notification that a link has been created.
 			/** The function is called by the page when a link has been created.
 			 @param link     The link.
 			 */
-			virtual void linkHasBeenCreated(sLink link) = 0;
+			virtual void linkCreated(sLink link) = 0;
 			
 			//! Receive the notification that a link has been removed.
 			/** The function is called by the page when a link has been removed.
 			 @param link    The link.
 			 */
-			virtual void linkHasBeenRemoved(sLink link) = 0;
+			virtual void linkRemoved(sLink link) = 0;
 			
 			//! Receives notification when an attribute value has changed.
 			/** The function receives notification when an attribute value has changed.
 			 @param attr The attribute.
 			 @return pass true to notify changes to listeners, false if you don't want them to be notified
 			 */
-			virtual bool pageAttributeValueChanged(sAttr attr) = 0;
+			virtual bool attributeChanged(sAttr attr) = 0;
         };
 		
 		static const sTag Tag_page;

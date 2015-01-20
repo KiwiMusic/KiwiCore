@@ -110,24 +110,24 @@ namespace Kiwi
          @param vectorsize The vector size of the signal.
          @see getVectorSize()
          @see getSampleRate()
-         @see tickDsp()
-         @see stopDsp()
+         @see dspTick()
+         @see dspStop()
          */
-        void startDsp(ulong samplerate, ulong vectorsize);
+        void dspStart(ulong samplerate, ulong vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain of all the pages.
          @see getVectorSize()
          @see getSampleRate()
-         @see startDsp()
-         @see stopDsp()
+         @see dspStart()
+         @see dspStop()
          */
-        inline void tickDsp() const noexcept
+        inline void dspTick() const noexcept
         {
             m_dsp_mutex.lock();
             for(vector<sPage>::size_type i = 0; i < m_dsp_pages.size(); i++)
             {
-                m_dsp_pages[i]->tickDsp();
+                m_dsp_pages[i]->dspTick();
             }
             m_dsp_mutex.unlock();
         }
@@ -136,10 +136,10 @@ namespace Kiwi
         /** The function stop the dsp chain of all the pages.
          @see getVectorSize()
          @see getSampleRate()
-         @see startDsp()
-         @see tickDsp()
+         @see dspStart()
+         @see dspTick()
          */
-        void stopDsp();
+        void dspStop();
         
         //! Check if the dsp is running.
         /** The function checks if the dsp is running
@@ -154,7 +154,7 @@ namespace Kiwi
         /** The function retrieve the current or the last sample rate used for dsp.
          @return the sample rate.
          @see getVectorSize()
-         @see startDsp()
+         @see dspStart()
          */
         inline ulong getSampleRate() const noexcept
         {
@@ -165,7 +165,7 @@ namespace Kiwi
         /** The function retrieve the current or the last vector size of the signal.
          @return the vector size of the signal.
          @see getSampleRate()
-         @see startDsp()
+         @see dspStart()
          */
         inline ulong getVectorSize() const noexcept
         {
@@ -219,26 +219,26 @@ namespace Kiwi
              @param instance    The instance.
              @param page        The page.
              */
-            virtual void pageHasBeenCreated(sInstance instance, sPage page){};
+            virtual void pageCreated(sInstance instance, sPage page){};
             
             //! Receive the notification that a page has been closed.
             /** The function is called by the instance when a page has been closed.
              @param instance    The instance.
              @param page        The page.
              */
-            virtual void pageHasBeenRemoved(sInstance instance, sPage page){};
+            virtual void pageRemoved(sInstance instance, sPage page){};
             
             //! Receive the notification that the dsp has been started.
             /** The function is called by the instance when the dsp has been started.
              @param instance    The instance.
              */
-            virtual void dspHasBeenStarted(sInstance instance){};
+            virtual void dspStarted(sInstance instance){};
             
             //! Receive the notification that the dsp has been stopped.
             /** The function is called by the instance when the dsp has been stopped.
              @param instance    The instance.
              */
-            virtual void dspHasBeenStopped(sInstance instance){};
+            virtual void dspStopped(sInstance instance){};
         };
         
         typedef shared_ptr<Listener>    sListener;

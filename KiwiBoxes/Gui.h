@@ -47,7 +47,7 @@ namespace Kiwi
         
         Bang(sPage page);
         ~Bang();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
@@ -69,7 +69,7 @@ namespace Kiwi
  
         Toggle(sPage page);
         ~Toggle();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
@@ -90,7 +90,7 @@ namespace Kiwi
         
         Message(sPage page);
         ~Message();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool receive(Gui::Event::Keyboard const& event) override;
         bool receive(Gui::Event::Focus::Type event) override;
@@ -119,7 +119,7 @@ namespace Kiwi
         
         Number(sPage page);
         ~Number();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool receive(Gui::Event::Keyboard const& event) override;
         bool receive(Gui::Event::Focus::Type event) override;
@@ -148,7 +148,7 @@ namespace Kiwi
         
         Slider(sPage page);
         ~Slider();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool draw(Gui::Doodle& doodle) const override;
         bool attributeChanged(sAttr attr) override;
@@ -169,7 +169,7 @@ namespace Kiwi
 		
 		Panel(sPage page);
 		~Panel() {};
-		bool receive(unsigned long index, ElemVector const& elements) override;
+		bool receive(ulong index, ElemVector const& elements) override;
 		bool draw(Gui::Doodle& doodle) const override;
 		bool attributeChanged(sAttr attr) override;
 		Allocate(Panel);

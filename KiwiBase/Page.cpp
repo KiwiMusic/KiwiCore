@@ -68,23 +68,6 @@ namespace Kiwi
         return page;
     }
     
-    ulong Page::generateId() const
-    {
-        int toclean;
-        ulong _id;
-        for(_id = 1; _id <= m_boxes.size() + 1; _id++)
-        {
-            for(ulong j = 0; j < m_boxes.size(); j++)
-            {
-                if(m_boxes[j]->getId() == _id)
-                {
-                    break;
-                }
-            }
-        }
-        return _id;
-    }
-    
     void Page::add(sDico dico)
     {
         if(dico)
@@ -102,7 +85,20 @@ namespace Kiwi
                     if(subdico)
                     {
                         lock_guard<mutex> guard(m_mutex);
-                        subdico->set(Box::Tag_id, generateId());
+                        
+                        ulong _id;
+                        for(_id = 1; _id <= m_boxes.size() + 1; _id++)
+                        {
+                            for(ulong j = 0; j < m_boxes.size(); j++)
+                            {
+                                if(m_boxes[j]->getId() == _id)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        subdico->set(Box::Tag_id, _id);
                         box = Box::create(getShared(), subdico);
                         if(box)
                         {
@@ -316,9 +312,9 @@ namespace Kiwi
         }
     }
 	
-    void Page::startDsp(const ulong samplerate, const ulong vectorsize)
+    void Page::dspStart(const ulong samplerate, const ulong vectorsize)
     {
-        stopDsp();
+        dspStop();
         m_dsp_context = Dsp::Context::create(samplerate, vectorsize);
 
         for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
@@ -353,7 +349,7 @@ namespace Kiwi
         }
     }
     
-    void Page::stopDsp()
+    void Page::dspStop()
     {
         if(m_dsp_context)
         {
@@ -386,11 +382,11 @@ namespace Kiwi
                 {
                     if(type == Notification::Added)
                     {
-                        ctrl->boxHasBeenCreated(box);
+                        ctrl->boxCreated(box);
                     }
                     else
                     {
-                        ctrl->boxHasBeenRemoved(box);
+                        ctrl->boxRemoved(box);
                     }
                     
                     ++it;
@@ -415,11 +411,11 @@ namespace Kiwi
                 {
                     if(type == Notification::Added)
                     {
-                        ctrl->linkHasBeenCreated(link);
+                        ctrl->linkCreated(link);
                     }
                     else
                     {
-                        ctrl->linkHasBeenRemoved(link);
+                        ctrl->linkRemoved(link);
                     }
                     
                     ++it;
@@ -442,7 +438,7 @@ namespace Kiwi
                 sController ctrl = (*it).lock();
                 if(ctrl)
                 {
-                    ctrl->pageAttributeValueChanged(attr);
+                    ctrl->attributeChanged(attr);
                     ++it;
                 }
                 else

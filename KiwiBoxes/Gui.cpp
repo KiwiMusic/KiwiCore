@@ -62,7 +62,7 @@ namespace Kiwi
         redraw();
     }
     
-    bool Bang::receive(unsigned long index, ElemVector const& elements)
+    bool Bang::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -155,7 +155,7 @@ namespace Kiwi
         ;
     }
     
-    bool Toggle::receive(unsigned long index, ElemVector const& elements)
+    bool Toggle::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -264,7 +264,7 @@ namespace Kiwi
         m_elements.clear();
     }
     
-    bool Message::receive(unsigned long index, ElemVector const& elements)
+    bool Message::receive(ulong index, ElemVector const& elements)
     {
         return false;
     }
@@ -364,7 +364,7 @@ namespace Kiwi
         ;
     }
     
-    bool Number::receive(unsigned long index, ElemVector const& elements)
+    bool Number::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -417,7 +417,7 @@ namespace Kiwi
                 else if(!m_edition)
                 {
                     string text = TextEditor::getStringSelection(getFont(), to_string(m_value), 0., event.getX() - 14.);
-                    for(unsigned long i = 0; i < text.size(); i++)
+                    for(ulong i = 0; i < text.size(); i++)
                     {
                         if(text[i] != '.')
                             text[i] = '0';
@@ -649,7 +649,7 @@ namespace Kiwi
         Box::send(0, elements);
         if(m_beacon_send)
         {
-            for(unsigned long i = 0; i < m_beacon_send->size(); i++)
+            for(ulong i = 0; i < m_beacon_send->size(); i++)
             {
                 sBox box = m_beacon_send->getBox(i);
                 if(box)
@@ -660,7 +660,7 @@ namespace Kiwi
         }
     }
     
-    bool Slider::receive(unsigned long index, ElemVector const& elements)
+    bool Slider::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -781,7 +781,7 @@ namespace Kiwi
 		setAttributeDefaultValues(Tag_bdcolor, {0.3, 0.3, 0.3, 1.});
 	}
 	
-	bool Panel::receive(unsigned long index, ElemVector const& elements)
+	bool Panel::receive(ulong index, ElemVector const& elements)
 	{
 		return false;
 	}

@@ -40,7 +40,7 @@ namespace Kiwi
         
         NewBox(sPage page, ElemVector const& elements = {}, string const& name = "newbox");
         ~NewBox();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
 		bool receive(Gui::Event::Mouse const& event) override;
 		bool receive(Gui::Event::Keyboard const& event) override;
 		bool receive(Gui::Event::Focus::Type event) override;

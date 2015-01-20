@@ -45,7 +45,7 @@ namespace Kiwi
 		;
 	}
 	
-	bool Print::receive(unsigned long index, ElemVector const& elements)
+	bool Print::receive(ulong index, ElemVector const& elements)
 	{
 		if(!elements.empty())
 		{
@@ -90,7 +90,7 @@ namespace Kiwi
         ;
     }
     
-    bool Int::receive(unsigned long index, ElemVector const& elements)
+    bool Int::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -157,13 +157,13 @@ namespace Kiwi
         }
     }
     
-    bool Send::receive(unsigned long index, ElemVector const& elements)
+    bool Send::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
             if(!index && m_beacon)
             {
-                for(unsigned long i = 0; i < m_beacon->size(); i++)
+                for(ulong i = 0; i < m_beacon->size(); i++)
                 {
                     sBox box = m_beacon->getBox(i);
                     if(box)
@@ -214,7 +214,7 @@ namespace Kiwi
         }
     }
     
-    bool Receive::receive(unsigned long index, ElemVector const& elements)
+    bool Receive::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -285,7 +285,7 @@ namespace Kiwi
         }
     }
     
-    bool Value::receive(unsigned long index, ElemVector const& elements)
+    bool Value::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -301,7 +301,7 @@ namespace Kiwi
                     m_values = elements;
                     if(m_beacon)
                     {
-                        for(unsigned long i = 0; i < m_beacon->size(); i++)
+                        for(ulong i = 0; i < m_beacon->size(); i++)
                         {
                             sBox box = m_beacon->getBox(i);
                             if(box && box != getShared())

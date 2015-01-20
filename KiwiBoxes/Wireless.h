@@ -44,7 +44,7 @@ namespace Kiwi
 		
 		Print(sPage page, ElemVector const& value);
 		~Print();
-		bool receive(unsigned long index, ElemVector const& elements) override;
+		bool receive(ulong index, ElemVector const& elements) override;
 		bool receive(Gui::Event::Mouse const& event) override;
 		AllocateElemVector(Print);
 	};
@@ -66,7 +66,7 @@ namespace Kiwi
         
         Int(sPage page, ElemVector const& value);
         ~Int();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         AllocateElemVector(Int);
     };
@@ -84,7 +84,7 @@ namespace Kiwi
         
         Send(sPage page, sTag name);
         ~Send();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         void load(scDico dico) override;
         AllocateTag(Send);
     };
@@ -101,7 +101,7 @@ namespace Kiwi
         
         Receive(sPage page, sTag name);
         ~Receive();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         void load(scDico dico) override;
         AllocateTag(Receive);
     };
@@ -128,7 +128,7 @@ namespace Kiwi
         
         Value(sPage page, sTag name);
         ~Value();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         void load(scDico dico) override;
         AllocateTag(Value);
     };

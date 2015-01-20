@@ -61,7 +61,7 @@ namespace Kiwi
         }
     }
     
-    bool Metro::receive(unsigned long index, ElemVector const& elements)
+    bool Metro::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {

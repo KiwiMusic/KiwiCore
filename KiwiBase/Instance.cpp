@@ -86,7 +86,7 @@ namespace Kiwi
                 try
                 {
                     int todo;
-                    page->startDsp(m_sample_rate, m_vector_size);
+                    page->dspStart(m_sample_rate, m_vector_size);
                     m_dsp_mutex.lock();
                     m_dsp_pages.push_back(page);
                     m_dsp_mutex.unlock();
@@ -108,7 +108,7 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->pageHasBeenCreated(shared_from_this(), page);
+                    listener->pageCreated(shared_from_this(), page);
                     ++it;
                 }
             }
@@ -125,7 +125,7 @@ namespace Kiwi
             if(m_dsp_running && page->isDspRunning())
             {
                 m_dsp_mutex.lock();
-                page->stopDsp();
+                page->dspStop();
                 auto it  = find(m_dsp_pages.begin(), m_dsp_pages.end(), page);
                 if(it != m_dsp_pages.end())
                 {
@@ -148,7 +148,7 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->pageHasBeenRemoved(shared_from_this(), page);
+                    listener->pageRemoved(shared_from_this(), page);
                     ++it;
                 }
             }
@@ -166,11 +166,11 @@ namespace Kiwi
         pages.assign(m_pages.begin(), m_pages.end());
     }
     
-    void Instance::startDsp(ulong samplerate, ulong vectorsize)
+    void Instance::dspStart(ulong samplerate, ulong vectorsize)
     {
         if(m_dsp_running)
         {
-            stopDsp();
+            dspStop();
         }
         m_sample_rate   = samplerate;
         m_vector_size   = vectorsize;
@@ -182,7 +182,7 @@ namespace Kiwi
             int todo;
             try
             {
-                (*it)->startDsp(m_sample_rate, m_vector_size);
+                (*it)->dspStart(m_sample_rate, m_vector_size);
             }
             catch (sPage)
             {
@@ -208,7 +208,7 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->dspHasBeenStarted(shared_from_this());
+                    listener->dspStarted(shared_from_this());
                     ++it;
                 }
             }
@@ -220,14 +220,14 @@ namespace Kiwi
         }
     }
     
-    void Instance::stopDsp()
+    void Instance::dspStop()
     {
         if(m_dsp_running)
         {
             m_dsp_mutex.lock();
             for(vector<sPage>::size_type i = 0; i < m_dsp_pages.size(); i++)
             {
-                m_dsp_pages[i]->stopDsp();
+                m_dsp_pages[i]->dspStop();
             }
             m_dsp_pages.clear();
             m_dsp_mutex.unlock();
@@ -245,7 +245,7 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->dspHasBeenStopped(shared_from_this());
+                    listener->dspStopped(shared_from_this());
                     ++it;
                 }
             }

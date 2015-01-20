@@ -80,7 +80,7 @@ namespace Kiwi
          @param index   The position of the box in the binding list from 0 to the number of boxes in the binding list -1.
          @return        The pointer of the binded boxes or NULL is the index is less than 0 or greater or equal to the number of boxes in the binding list.
          */
-        inline sBox getBox(ulong index) const noexcept
+        inline sBox getBox(const ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             if(index < m_boxes.size())

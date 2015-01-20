@@ -97,18 +97,18 @@ namespace Kiwi
                 return tag;
             }
         }
-		
-        //! Tag comparaison by alphabetic order.
-        /** This function compares the strings of the tags.
-         @param  tag1  The first tag.
-         @param  tag2  The second tag.
-         @return true if the the first tag before the sedond one in the alphabetic order.
-         */
-        static inline bool compareAlphabetic(const sTag& tag1, const sTag& tag2)
-        {
-            return tag1->getName() < tag2->getName();
-        }
     };
+    
+    //! Tag comparaison by alphabetic order.
+    /** This function compares the strings of the tags.
+     @param  tag1  The first tag.
+     @param  tag2  The second tag.
+     @return true if the the first tag before the sedond one in the alphabetic order.
+     */
+    static inline bool operator<(const sTag tag1, const sTag tag2)
+    {
+        return tag1->getName() < tag2->getName();
+    }
 	
     inline string toString(sTag __val)
     {

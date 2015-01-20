@@ -484,7 +484,7 @@ namespace Kiwi
 		
 		if(sortAlphabetically)
         {
-            sort(names.begin(), names.end(), Tag::compareAlphabetic);
+            sort(names.begin(), names.end());
         }
     }
     

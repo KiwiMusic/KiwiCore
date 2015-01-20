@@ -58,7 +58,7 @@ namespace Kiwi
         return to_string(__val);
     }
     
-    inline string toString(unsigned long long __val)
+    inline string toString(ulong long __val)
     {
         return to_string(__val);
     }

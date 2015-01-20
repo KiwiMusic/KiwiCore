@@ -45,7 +45,7 @@ namespace Kiwi
         ;
     }
 	
-    bool NewBox::receive(unsigned long index, ElemVector const& elements)
+    bool NewBox::receive(ulong index, ElemVector const& elements)
     {
         return false;
     }

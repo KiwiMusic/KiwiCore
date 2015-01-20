@@ -39,7 +39,7 @@ namespace Kiwi
     //                                      BOX                                         //
     // ================================================================================ //
     
-    Box::Box(sPage page, string const& name, unsigned long flags) :
+    Box::Box(sPage page, string const& name, ulong flags) :
     m_instance(page ? page->getInstance() : weak_ptr<Instance>()),
     m_page(page),
     m_name(Tag::create(name)),
@@ -128,7 +128,7 @@ namespace Kiwi
         }
     }
     
-    void Box::send(unsigned long index, ElemVector const& elements) const noexcept
+    void Box::send(ulong index, ElemVector const& elements) const noexcept
     {
         m_io_mutex.lock();
         if(index < m_outlets.size())
@@ -189,7 +189,7 @@ namespace Kiwi
         }
     }
     
-    void Box::insertInlet(unsigned long index, Iolet::Type type, Iolet::Polarity polarity, string const& description)
+    void Box::insertInlet(ulong index, Iolet::Type type, Iolet::Polarity polarity, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
         sInlet inlet = Inlet::create(type, polarity, description);
@@ -213,7 +213,7 @@ namespace Kiwi
         }
     }
     
-    void Box::removeInlet(unsigned long index)
+    void Box::removeInlet(ulong index)
     {
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_inlets.size())
@@ -223,7 +223,7 @@ namespace Kiwi
             {
                 int zaza;
                 /*
-                for(unsigned long i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
+                for(ulong i = 0; i < m_inlets[index]->getNumberOfLinks(); i++)
                 {
                     page->removeLink(m_inlets[index]->getLink(i));
                 }
@@ -260,7 +260,7 @@ namespace Kiwi
         }
     }
     
-    void Box::insertOutlet(unsigned long index, Iolet::Type type, string const& description)
+    void Box::insertOutlet(ulong index, Iolet::Type type, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
         sOutlet outlet = Outlet::create(type, description);
@@ -284,7 +284,7 @@ namespace Kiwi
         
     }
     
-    void Box::removeOutlet(unsigned long index)
+    void Box::removeOutlet(ulong index)
     {
         lock_guard<mutex> guard(m_io_mutex);
         if(index < m_outlets.size())
@@ -294,7 +294,7 @@ namespace Kiwi
             {
                 int zaza;
                 /*
-                for(unsigned long i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
+                for(ulong i = 0; i < m_outlets[index]->getNumberOfLinks(); i++)
                 {
                     page->removeLink(m_outlets[index]->getLink(i));
                 }*/
@@ -364,9 +364,9 @@ namespace Kiwi
 #define KIO_HEIGHT 3.
 #define KIO_WIDTH 5.
     
-    Gui::Point Box::Controller::getInletPosition(unsigned long index) const noexcept
+    Gui::Point Box::Controller::getInletPosition(ulong index) const noexcept
     {
-        const unsigned long ninlets = m_box->getNumberOfInlets();
+        const ulong ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
         {
             const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
@@ -375,9 +375,9 @@ namespace Kiwi
         return Gui::Point(m_box->getPosition().x() + KIO_WIDTH * 0.5, m_box->getPosition().y() + KIO_HEIGHT * 0.5);
     }
     
-    Gui::Point Box::Controller::getOutletPosition(unsigned long index) const noexcept
+    Gui::Point Box::Controller::getOutletPosition(ulong index) const noexcept
     {
-        const unsigned long ninlets = m_box->getNumberOfInlets();
+        const ulong ninlets = m_box->getNumberOfInlets();
         if(index && ninlets > 1)
         {
             const double x = index * (m_box->getSize().x() - KIO_WIDTH) / (double)(ninlets - 1);
@@ -437,7 +437,7 @@ namespace Kiwi
 			{
 				if(pt.y() < bounds.y() + KIO_HEIGHT)
 				{
-					const unsigned long ninlets = m_box->getNumberOfInlets();
+					const ulong ninlets = m_box->getNumberOfInlets();
 					if(ninlets && pt.x() <= bounds.x() + KIO_WIDTH)
 					{
 						knock.m_box     = m_box;
@@ -448,7 +448,7 @@ namespace Kiwi
 					else if(ninlets > 1)
 					{
 						const double ratio = (bounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
-						for(unsigned long i = 1; i < ninlets; i++)
+						for(ulong i = 1; i < ninlets; i++)
 						{
 							double val = ratio * i + bounds.x();
 							if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
@@ -463,7 +463,7 @@ namespace Kiwi
 				}
 				else if(pt.y() > bounds.y() + bounds.height() - KIO_HEIGHT)
 				{
-					const unsigned long noutlets = m_box->getNumberOfOutlets();
+					const ulong noutlets = m_box->getNumberOfOutlets();
 					if(noutlets && pt.x() <= bounds.x() + KIO_WIDTH)
 					{
 						knock.m_box     = m_box;
@@ -474,7 +474,7 @@ namespace Kiwi
 					else if(noutlets > 1)
 					{
 						const double ratio = (bounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
-						for(unsigned long i = 1; i < noutlets; i++)
+						for(ulong i = 1; i < noutlets; i++)
 						{
 							const double val = ratio * i + bounds.x();
 							if(pt.x() >= val && pt.x() <= val + KIO_WIDTH)
@@ -543,8 +543,8 @@ namespace Kiwi
 					}
 					else if(!presentation)
 					{
-						const unsigned long ninlets = box->getNumberOfInlets();
-						const unsigned long noutlets= box->getNumberOfOutlets();
+						const ulong ninlets = box->getNumberOfInlets();
+						const ulong noutlets= box->getNumberOfOutlets();
 						
 						if(ninlets)
 						{
@@ -554,7 +554,7 @@ namespace Kiwi
 							if(ninlets > 1)
 							{
 								const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(ninlets - 1);
-								for(unsigned long i = 1; i < ninlets; i++)
+								for(ulong i = 1; i < ninlets; i++)
 								{
 									d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y(), KIO_WIDTH, KIO_HEIGHT);
 								}
@@ -569,7 +569,7 @@ namespace Kiwi
 							if(noutlets > 1)
 							{
 								const double ratio = (boxBounds.width() - KIO_WIDTH) / (double)(noutlets - 1);
-								for(unsigned long i = 1; i < noutlets; i--)
+								for(ulong i = 1; i < noutlets; i--)
 								{
 									d.fillRectangle(boxBounds.x() + ratio * i, boxBounds.y() + boxBounds.height() - KIO_HEIGHT, KIO_WIDTH, KIO_HEIGHT);
 								}

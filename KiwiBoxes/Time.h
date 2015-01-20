@@ -46,7 +46,7 @@ namespace Kiwi
         
         Metro(sPage page, ElemVector const& elements = {});
         ~Metro();
-        bool receive(unsigned long index, ElemVector const& elements) override;
+        bool receive(ulong index, ElemVector const& elements) override;
         void tick() override;
         AllocateElemVector(Metro);
     };

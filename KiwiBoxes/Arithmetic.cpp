@@ -48,7 +48,7 @@ namespace Kiwi
         ;
     }
     
-    bool Arithmetic::receive(unsigned long index, ElemVector const& elements)
+    bool Arithmetic::receive(ulong index, ElemVector const& elements)
     {
 		//Console::post(getShared(), "Receive " + toString(index) + " [" + toString(elements) + "]");
         if(!elements.empty())
@@ -103,7 +103,7 @@ namespace Kiwi
     /*
     Expression::Expression(sPage page, ElemVector const& elements) : Box(page, "expr")
     {
-        unsigned long   max = 0;
+        ulong   max = 0;
         string word;
         string expr = toString(elements);
         istringstream iss(expr);
@@ -113,7 +113,7 @@ namespace Kiwi
             {
                 if(isdigit(word[1]))
                 {
-                    unsigned long num = (unsigned long)atol(word.c_str()+1);
+                    ulong num = (ulong)atol(word.c_str()+1);
                     if(max < num)
                     {
                         max = num;
