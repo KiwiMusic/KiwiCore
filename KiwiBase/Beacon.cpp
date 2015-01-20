@@ -46,9 +46,21 @@ namespace Kiwi
         if(box)
         {
             lock_guard<mutex> guard(m_mutex);
-            if(find_weak(m_boxes.begin(), m_boxes.end(), box) == m_boxes.end())
+            for(auto it = m_boxes.begin(); it != m_boxes.end(); )
             {
-                m_boxes.push_back(box);
+                sBox other = (*it).lock();
+                if(other)
+                {
+                    if(other == box)
+                    {
+                        return;
+                    }
+                    ++it;
+                }
+                else
+                {
+                    it = m_boxes.erase(it);
+                }
             }
         }
     }
@@ -58,10 +70,17 @@ namespace Kiwi
         if(box)
         {
             lock_guard<mutex> guard(m_mutex);
-            auto it = find_weak(m_boxes.begin(), m_boxes.end(), box);
-            if(it == m_boxes.end())
+            for(auto it = m_boxes.begin(); it != m_boxes.end(); )
             {
-                m_boxes.erase(it);
+                sBox other = (*it).lock();
+                if(other && other != box)
+                {
+                    ++it;
+                }
+                else
+                {
+                    it = m_boxes.erase(it);
+                }
             }
         }
     }

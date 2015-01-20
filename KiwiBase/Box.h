@@ -67,9 +67,7 @@ namespace Kiwi
         const wInstance     m_instance;
         const wPage         m_page;
         const sTag          m_name;
-        const ulong         m_id;
         const ulong         m_flags;
-        sTag                m_text;
         
         vector<sOutlet>     m_outlets;
         vector<sInlet>      m_inlets;
@@ -148,15 +146,6 @@ namespace Kiwi
             return m_name;
         }
         
-        //! Retrieve the id of the box.
-        /** The function retrieves the id of the box as a tag.
-         @return The text of the id as a tag.
-         */
-        inline ulong getId() const noexcept
-        {
-            return m_id;
-        }
-        
         //! Retrieve the flags of the box.
         /** The function retrieves the flags of the box.
          @return The flags of the box.
@@ -201,15 +190,6 @@ namespace Kiwi
 		{
 			return m_flags & Keyboard;
 		}
-		
-        //! Retrieve the text of the box.
-        /** The function retrieves the text of the box as a tag.
-         @return The text of the box as a tag.
-         */
-        inline sTag getText() const noexcept
-        {
-            return m_text;
-        }
         
         //! Retrieve the expression of the box.
         /** The function retrieves the expression of the box as a string.
@@ -747,11 +727,9 @@ namespace Kiwi
         
         static const sTag Tag_arguments;
         static const sTag Tag_bang;
-        static const sTag Tag_id;
         static const sTag Tag_focus;
         static const sTag Tag_name;
         static const sTag Tag_set;
-        static const sTag Tag_text;
         
     };
     

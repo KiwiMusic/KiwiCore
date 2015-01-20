@@ -31,21 +31,18 @@ namespace Kiwi
     
     const sTag Box::Tag_arguments   = Tag::create("arguments");
     const sTag Box::Tag_bang        = Tag::create("bang");
-    const sTag Box::Tag_id          = Tag::create("id");
     const sTag Box::Tag_focus       = Tag::create("focus");
     const sTag Box::Tag_name        = Tag::create("name");
     const sTag Box::Tag_set         = Tag::create("set");
-    const sTag Box::Tag_text        = Tag::create("text");
     
     // ================================================================================ //
     //                                      BOX                                         //
     // ================================================================================ //
     
     Box::Box(sPage page, string const& name, unsigned long flags) :
-    m_instance(page ? page->m_instance : weak_ptr<Instance>()),
+    m_instance(page ? page->getInstance() : weak_ptr<Instance>()),
     m_page(page),
     m_name(Tag::create(name)),
-    m_id(page ? page->m_boxe_id : 0),
     m_flags(0 | flags),
     m_stack_count(0)
     {
@@ -67,11 +64,12 @@ namespace Kiwi
             auto it = m_prototypes.find(name);
             if(it != m_prototypes.end())
             {
+                int zaza_pourquoi;
+                /*
                 sTag text = dico->get(Tag_text);
                 if(text)
                 {
-                    sDico other = Dico::create();
-                    other->read(toString(text));
+                    sDico other = Dico::evaluateForBox(toString(text));
                     ElemVector keys;
                     other->keys(keys);
                     for(ElemVector::size_type i = 0; i < keys.size(); i++)
@@ -80,12 +78,11 @@ namespace Kiwi
                         other->get(keys[i], values);
                         dico->set(keys[i], values);
                     }
-                }
+                }*/
                 
                 sBox box = it->second->allocate(page, dico);
                 if(box)
                 {
-                    box->m_text = dico->get(Tag_text);
                     box->load(dico);
 					box->Attr::Manager::read(dico);
                     if(!dico->has(Tag_size) && !(box->isGUI()))
@@ -111,15 +108,12 @@ namespace Kiwi
         this->save(dico);
         Attr::Manager::write(dico);
         dico->set(Tag_name, getName());
-        dico->set(Tag_ninlets, getNumberOfInlets());
-        dico->set(Tag_noutlets,getNumberOfOutlets());
-        dico->set(Tag_text, getText());
-        dico->set(Tag_id, getId());
     }
     
     void Box::redraw() const noexcept
     {
-        if(sController controller = getController())
+        sController controller = getController();
+        if(controller)
         {
             controller->redraw();
         }
@@ -127,7 +121,8 @@ namespace Kiwi
     
     void Box::grabKeyboardFocus() const noexcept
     {
-        if(sController controller = getController())
+        sController controller = getController();
+        if(controller)
         {
             controller->grabKeyboardFocus();
         }
@@ -149,7 +144,8 @@ namespace Kiwi
         {
             return false;
         }
-		if (sController controller = getController())
+        sController controller = getController();
+		if(controller)
 		{
 			if(attr == AttrBox::attr_position || attr == AttrBox::attr_presentation_position)
 			{
@@ -165,9 +161,7 @@ namespace Kiwi
 			{
 				controller->presentationStatusChanged();
 			}
-			else if(attr == AttrBox::attr_color_background ||
-					attr == AttrBox::attr_color_border ||
-					attr == AttrBox::attr_color_text)
+			else if(attr == AttrBox::attr_color_background || attr == AttrBox::attr_color_border || attr == AttrBox::attr_color_text)
 			{
 				controller->redraw();
 			}
@@ -182,10 +176,12 @@ namespace Kiwi
     void Box::addInlet(Iolet::Type type, Iolet::Polarity polarity, string const& description)
     {
         lock_guard<mutex> guard(m_io_mutex);
-        if(sInlet inlet = Inlet::create(type, polarity, description))
+        sInlet inlet = Inlet::create(type, polarity, description);
+        if(inlet)
         {
             m_inlets.push_back(inlet);
-            if(sController controller = getController())
+            sController controller = getController();
+            if(controller)
             {
                 controller->inletsChanged();
             }

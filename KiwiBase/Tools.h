@@ -32,27 +32,6 @@ namespace Kiwi
     {
         return max(lower, min(n, upper));
     }
-    
-	template <class InputContainer, class T> typename InputContainer::size_type find_position(InputContainer const& container, const T& val)
-    {
-        typename InputContainer::size_type position = 0;
-        for(; position < container.size(); position++)
-        {
-            if(container[position] == val)
-            {
-                return position;
-            }
-        }
-        return position;
-    }
-    
-    template <class _InputIterator, class _Tp> inline _InputIterator find_weak(_InputIterator __first, _InputIterator __last, const _Tp& __value_)
-    {
-        for (; __first != __last; ++__first)
-            if ((*__first).lock() == __value_)
-                break;
-        return __first;
-    }
 	
     inline string toString(int __val)
     {
@@ -126,8 +105,8 @@ namespace Kiwi
         return stream.str();
     }
     
-    template<typename T>
-    struct weak_ptr_hash : public std::unary_function<std::weak_ptr<T>, size_t> {
+    template<typename T>  struct weak_ptr_hash : public std::unary_function<std::weak_ptr<T>, size_t>
+    {
         size_t operator()(const std::weak_ptr<T>& wp)
         {
             auto sp = wp.lock();
@@ -135,9 +114,8 @@ namespace Kiwi
         }
     };
     
-    template<typename T>
-    struct weak_ptr_equal : public std::unary_function<std::weak_ptr<T>, bool> {
-        
+    template<typename T> struct weak_ptr_equal : public std::unary_function<std::weak_ptr<T>, bool>
+    {
         bool operator()(const std::weak_ptr<T>& left, const std::weak_ptr<T>& right)
         {
             return !left.owner_before(right) && !right.owner_before(left);

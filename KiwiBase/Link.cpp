@@ -35,7 +35,7 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    Link::Link(sPage page, sBox from, unsigned outlet, sBox to, unsigned inlet) noexcept :
+    Link::Link(sPage page, sBox from, ulong outlet, sBox to, ulong inlet) noexcept :
     m_page(page), m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
     {
         if(page)

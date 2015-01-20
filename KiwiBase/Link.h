@@ -56,7 +56,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Link(sPage page, sBox from, unsigned outlet, sBox to, unsigned inlet) noexcept;
+        Link(sPage page, sBox from, ulong outlet, sBox to, ulong inlet) noexcept;
         
         //! The destructor.
         /** You should never use this method.
@@ -500,6 +500,29 @@ namespace Kiwi
         static bool compareBoxToPositions(sLink link1, sLink link2);
     };
     
+    static bool operator==(scLink link, scBox box) noexcept
+    {
+        if(link && box)
+        {
+            return link->getBoxFrom() == box || link->getBoxTo() == box;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    static bool operator==(sLink link, sBox box) noexcept
+    {
+        if(link && box)
+        {
+            return link->getBoxFrom() == box || link->getBoxTo() == box;
+        }
+        else
+        {
+            return false;
+        }
+    }
     
 }
 

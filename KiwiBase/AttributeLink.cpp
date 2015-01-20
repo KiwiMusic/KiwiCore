@@ -29,7 +29,7 @@ namespace Kiwi
     //                                  ATTRIBUTE LINK                                  //
     // ================================================================================ //
     
-    const sTag AttrLink::Tag_Color       = Tag::create("Color");
+    const sTag AttrLink::Tag_Color                              = Tag::create("Color");
     const sTag AttrLink::Tag_mescolor                           = Tag::create("mescolor");
     const sTag AttrLink::Tag_sigcolor                           = Tag::create("sigcolor");
     const sTag AttrLink::Tag_Message_Color                      = Tag::create("Message Color");

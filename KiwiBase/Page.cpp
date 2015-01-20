@@ -37,9 +37,7 @@ namespace Kiwi
     // ================================================================================ //
     
     Page::Page(sInstance instance) :
-    m_instance(instance),
-    m_dsp_context(nullptr),
-    m_boxe_id(1)
+    m_instance(instance)
     {
         ;
     }
@@ -48,6 +46,7 @@ namespace Kiwi
     {
         m_links.clear();
         m_boxes.clear();
+        m_ctrls.clear();
     }
     
     sPage Page::create(sInstance instance, sDico dico)
@@ -55,211 +54,38 @@ namespace Kiwi
         sPage page = make_shared<Page>(instance);
         if(page && dico)
         {
-            page->read(dico);
+            sDico pageDico = Dico::create();
+            if(pageDico)
+            {
+                if(dico->has(Tag_page))
+                {
+                    pageDico = dico->get(Tag_page);
+                    page->add(pageDico);
+                    page->Attr::Manager::read(pageDico);
+                }
+            }
         }
         return page;
     }
     
-    sBox Page::createBox(sDico dico)
+    ulong Page::generateId() const
     {
-        if(dico)
+        int toclean;
+        ulong _id;
+        for(_id = 1; _id <= m_boxes.size() + 1; _id++)
         {
-            m_boxes_mutex.lock();
-            for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
+            for(ulong j = 0; j < m_boxes.size(); j++)
             {
-                if(m_boxe_id == m_boxes[i]->getId())
+                if(m_boxes[j]->getId() == _id)
                 {
-                    m_boxe_id = m_boxes.size() + 1;
                     break;
                 }
             }
-			
-            if(sBox box = Box::create(getShared(), dico))
-            {
-				m_boxe_id++;
-                m_boxes.push_back(box);
-				m_boxes_mutex.unlock();
-				
-				if (sController ctrl = getController())
-				{
-					ctrl->boxHasBeenCreated(box);
-				}
-				
-                return box;
-            }
-            else
-            {
-                 m_boxes_mutex.unlock();
-            }
         }
-        return nullptr;
+        return _id;
     }
     
-    sBox Page::replaceBox(sBox oldbox, sDico dico)
-    {
-        m_boxes_mutex.lock();
-        vector<sBox>::size_type position = find_position(m_boxes, oldbox);
-        if(position != m_boxes.size())
-        {
-            if(dico)
-            {
-                ulong current_box_id = m_boxe_id;
-                m_boxe_id = oldbox->getId();
-                sBox newbox = Box::create(getShared(), dico);
-                m_boxe_id = current_box_id;
-                if(newbox)
-                {
-                    m_boxes[position] = newbox;
-                    m_boxes_mutex.unlock();
-                
-                    m_links_mutex.lock();
-                    for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
-                    {
-                        sLink newlink = Link::create(m_links[i], oldbox, newbox);
-                        if(newlink)
-                        {
-                            sLink oldlink  = m_links[i];
-                            m_links[i]     = newlink;
-                            oldlink->disconnect();
-							
-							sController ctrl = getController();
-							if (ctrl)
-								ctrl->linkHasBeenReplaced(oldlink, newlink);
-                        }
-                    }
-					
-					sController ctrl = getController();
-					if (ctrl)
-						ctrl->boxHasBeenReplaced(oldbox, newbox);
-					
-                    m_links_mutex.unlock();
-                }
-            }
-        }
-        m_boxes_mutex.unlock();
-        return nullptr;
-    }
-    
-    void Page::removeBox(sBox box)
-    {
-        m_boxes_mutex.lock();
-        vector<sBox>::size_type position = find_position(m_boxes, box);
-        if(position != m_boxes.size())
-        {
-            m_links_mutex.lock();
-            for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
-            {
-                if(m_links[i]->getBoxFrom() == box || m_links[i]->getBoxTo() == box)
-                {
-                    sLink oldlink = m_links[i];
-                    oldlink->disconnect();
-                    m_links.erase(m_links.begin()+(long)i);
-                    --i;
-					
-					sController ctrl = getController();
-					if (ctrl)
-						ctrl->linkHasBeenRemoved(oldlink);
-                }
-            }
-            m_links_mutex.unlock();
-            
-            m_boxes.erase(m_boxes.begin()+(long)position);
-            m_boxe_id = box->getId();
-            m_boxes_mutex.unlock();
-			
-			sController ctrl = getController();
-			if(ctrl)
-            {
-				ctrl->boxHasBeenRemoved(box);
-            }
-        }
-        else
-        {
-            m_boxes_mutex.unlock();
-        }
-    }
-	
-	bool Page::attributeValueChanged(sAttr attr)
-	{
-        Page::sController ctrl = getController();
-		if(ctrl)
-        {
-			ctrl->pageAttributeValueChanged(attr);
-        }
-		
-		return true;
-	}
-    
-    void Page::bringToFront(sBox box)
-    {
-        lock_guard<mutex> guard(m_boxes_mutex);
-        vector<sBox>::size_type pos = find_position(m_boxes, box);
-        if(pos != m_boxes.size())
-        {
-            m_boxes.erase(m_boxes.begin()+(long)pos);
-            m_boxes.push_back(box);
-        }
-    }
-    
-    void Page::bringToBack(sBox box)
-    {
-        lock_guard<mutex> guard(m_boxes_mutex);
-        vector<sBox>::size_type pos = find_position(m_boxes, box);
-        if(pos != m_boxes.size())
-        {
-            m_boxes.erase(m_boxes.begin()+(long)pos);
-            m_boxes.insert(m_boxes.begin(), box);
-        }
-    }
-    
-    sLink Page::addLink(sLink link)
-    {
-        if(link && link->connect())
-        {
-            m_links_mutex.lock();
-            m_links.push_back(link);
-            m_links_mutex.unlock();
-			
-			sController ctrl = getController();
-			if(ctrl)
-            {
-				ctrl->linkHasBeenCreated(link);
-            }
-            
-            return link;
-        }
-        return nullptr;
-    }
-    
-    sLink Page::createLink(scDico dico)
-    {
-        if(dico)
-        {
-            sLink link = Link::create(getShared(), dico);
-            if(link)
-            {
-                return addLink(link);
-            }
-        }
-        return nullptr;
-    }
-    
-    void Page::removeLink(sLink link)
-    {
-        lock_guard<mutex> guard(m_links_mutex);
-        vector<sLink>::size_type position = find_position(m_links, link);
-        if(position != m_links.size())
-        {
-            m_links[position]->disconnect();
-            m_links.erase(m_links.begin()+(long)position);
-			
-			sController ctrl = getController();
-			if (ctrl)
-				ctrl->linkHasBeenRemoved(link);
-        }
-    }
-    
-    void Page::append(sDico dico)
+    void Page::add(sDico dico)
     {
         if(dico)
         {
@@ -271,11 +97,18 @@ namespace Kiwi
                 sDico subdico = boxes[i];
                 if(subdico)
                 {
+                    sBox box;
                     subdico = subdico->get(Tag_box);
                     if(subdico)
                     {
-                        sBox box = createBox(subdico);
-                    
+                        lock_guard<mutex> guard(m_mutex);
+                        subdico->set(Box::Tag_id, generateId());
+                        box = Box::create(getShared(), subdico);
+                        if(box)
+                        {
+                            m_boxes.push_back(box);
+                        }
+                        
                         if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
                         {
                             ulong _id = subdico->get(Box::Tag_id);
@@ -285,6 +118,7 @@ namespace Kiwi
                             }
                         }
                     }
+                    send(box, Notification::Added);
                 }
             }
             
@@ -295,6 +129,7 @@ namespace Kiwi
                 sDico subdico = links[i];
                 if(subdico)
                 {
+                    sLink link;
                     subdico = subdico->get(Tag_link);
                     if(subdico)
                     {
@@ -315,26 +150,127 @@ namespace Kiwi
                                 subdico->set(Link::Tag_to, {m_ids_mapper[(ulong)elem[0]], elem[1]});
                             }
                         }
-                        createLink(subdico);
+                        
+                        lock_guard<mutex> guard(m_mutex);
+                        link = Link::create(getShared(), subdico);
+                        if(link)
+                        {
+                            m_links.push_back(link);
+                        }
                     }
+                    send(link, Notification::Added);
                 }
             }
         }
     }
     
-    void Page::read(sDico dico)
+    void Page::remove(sBox box)
     {
-		if(sDico pageDico = Dico::create())
-		{
-			m_links.clear();
-			m_boxes.clear();
-			if (dico->has(Tag_page))
-			{
-				pageDico = dico->get(Tag_page);
-				append(pageDico);
-				Attr::Manager::read(pageDico);
-			}
-		}
+        vector<sLink> links;
+        if(box)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = find(m_boxes.begin(), m_boxes.end(), box);
+            if(it != m_boxes.end())
+            {
+                auto li = find(m_links.begin(), m_links.end(), box);
+                while(li != m_links.end())
+                {
+                    links.push_back((*li));
+                    m_links.erase(li);
+                    li = find(m_links.begin(), m_links.end(), box);
+                }
+                
+                m_boxes.erase(it);
+            }
+        }
+        for(vector<sLink>::size_type i = 0; i < links.size(); i++)
+        {
+            send(links[i], Notification::Removed);
+        }
+        send(box, Notification::Removed);
+    }
+    
+    void Page::remove(sLink link)
+    {
+        if(link)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = find(m_links.begin(), m_links.end(), link);
+            if(it != m_links.end())
+            {
+                m_links.erase(it);
+            }
+        }
+        send(link, Notification::Removed);
+    }
+    
+    sBox Page::replace(sBox oldbox, sDico dico)
+    {
+        sBox newbox;
+        vector<sLink> oldlinks;
+        vector<sLink> newlinks;
+        if(oldbox && dico)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = find(m_boxes.begin(), m_boxes.end(), oldbox);
+            if(it != m_boxes.end())
+            {
+                dico->set(Box::Tag_id, oldbox->getId());
+                newbox = Box::create(getShared(), dico);
+                if(newbox)
+                {
+                    (*it) = newbox;
+                    auto li = find(m_links.begin(), m_links.end(), oldbox);
+                    while(li != m_links.end())
+                    {
+                        oldlinks.push_back((*li));
+                        (*li) = Link::create((*li), oldbox, newbox);
+                        newlinks.push_back((*li));
+                        li = find(m_links.begin(), m_links.end(), oldbox);
+                    }
+                }
+            }
+        }
+        for(vector<sLink>::size_type i = 0; i < oldlinks.size(); i++)
+        {
+            send(oldlinks[i], Notification::Removed);
+        }
+        send(oldbox, Notification::Removed);
+        send(newbox, Notification::Added);
+        for(vector<sLink>::size_type i = 0; i < newlinks.size(); i++)
+        {
+            send(newlinks[i], Notification::Added);
+        }
+        return newbox;
+    }
+    
+    void Page::toFront(sBox box)
+    {
+        if(box)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = find(m_boxes.begin(), m_boxes.end(), box);
+            if(it != m_boxes.end())
+            {
+                m_boxes.erase(it);
+                m_boxes.push_back(box);
+            }
+        }
+    }
+    
+    void Page::toBack(sBox box)
+    {
+        if(box)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = find(m_boxes.begin(), m_boxes.end(), box);
+            if(it != m_boxes.end())
+            {
+                m_boxes.erase(it);
+                m_boxes.insert(m_boxes.begin(), box);
+            }
+        }
     }
 	
     void Page::write(sDico dico) const
@@ -342,12 +278,12 @@ namespace Kiwi
         if(dico)
         {
 			sDico subpage = Dico::create();
-			if (subpage)
+			if(subpage)
 			{
 				ElemVector elements;
 				Attr::Manager::write(subpage);
-				
-				m_boxes_mutex.lock();
+				lock_guard<mutex> guard(m_mutex);
+                
 				for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
 				{
 					sDico box = Dico::create();
@@ -359,12 +295,10 @@ namespace Kiwi
 						elements.push_back(box);
 					}
 				}
-				m_boxes_mutex.unlock();
 				subpage->set(Tag_boxes, elements);
 				
 				elements.clear();
 				
-				m_links_mutex.lock();
 				for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
 				{
 					sDico link = Dico::create();
@@ -376,15 +310,15 @@ namespace Kiwi
 						elements.push_back(link);
 					}
 				}
-				m_links_mutex.unlock();
 				subpage->set(Tag_links, elements);
 				dico->set(Tag_page, subpage);
 			}
         }
     }
 	
-    bool Page::startDsp(ulong samplerate, ulong vectorsize)
+    void Page::startDsp(const ulong samplerate, const ulong vectorsize)
     {
+        stopDsp();
         m_dsp_context = Dsp::Context::create(samplerate, vectorsize);
 
         for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
@@ -405,9 +339,7 @@ namespace Kiwi
                 int zaza;
                 Dsp::sConnection con = Dsp::Connection::create(from, (*it)->getOutletIndex(), to, (*it)->getInletIndex());
                 m_dsp_context->add(con);
-            }
-            
-            
+            } 
         }
         
         try
@@ -417,49 +349,110 @@ namespace Kiwi
         catch(Dsp::sProcess box)
         {
             Console::error(dynamic_pointer_cast<Box>(box), "something appened with me... sniff !");
+            throw shared_from_this();
         }
-        return true;
-    }
-    
-    void Page::tickDsp() const noexcept
-    {
-        m_dsp_context->tick();
     }
     
     void Page::stopDsp()
     {
-        m_dsp_context->stop();
-    }
-    
-    bool Page::isDspRunning() const noexcept
-    {
-        return m_dsp_running;
+        if(m_dsp_context)
+        {
+            m_dsp_context->stop();
+            m_dsp_context.reset();
+        }
     }
 	
-	void Page::setController(sController ctrl)
+	void Page::addController(sController ctrl)
 	{
-		m_controller = ctrl;
-		
-		int TODO_makeItSmarter;
-
-		sDico dico = Dico::create();
-		write(dico);
-		read(dico);
+        lock_guard<mutex> guard(m_ctrls_mutex);
+        m_ctrls.insert(ctrl);
 	}
     
-    // ================================================================================ //
-    //                                  PAGE CONTROLER                                  //
-    // ================================================================================ //
-    
-    Page::Controller::Controller(sPage page) noexcept :
-    m_page(page)
+    void Page::removeController(sController ctrl)
     {
-        
+        lock_guard<mutex> guard(m_ctrls_mutex);
+        m_ctrls.erase(ctrl);
     }
     
-    Page::Controller::~Controller()
+    void Page::send(sBox box, Page::Notification type)
     {
-        ;
+        if(box)
+        {
+            lock_guard<mutex> guard(m_ctrls_mutex);
+            for(auto it = m_ctrls.begin(); it != m_ctrls.end(); )
+            {
+                sController ctrl = (*it).lock();
+                if(ctrl)
+                {
+                    if(type == Notification::Added)
+                    {
+                        ctrl->boxHasBeenCreated(box);
+                    }
+                    else
+                    {
+                        ctrl->boxHasBeenRemoved(box);
+                    }
+                    
+                    ++it;
+                }
+                else
+                {
+                    it = m_ctrls.erase(it);
+                }
+            }
+        }
+    }
+    
+    void Page::send(sLink link, Page::Notification type)
+    {
+        if(link)
+        {
+            lock_guard<mutex> guard(m_ctrls_mutex);
+            for(auto it = m_ctrls.begin(); it != m_ctrls.end(); )
+            {
+                sController ctrl = (*it).lock();
+                if(ctrl)
+                {
+                    if(type == Notification::Added)
+                    {
+                        ctrl->linkHasBeenCreated(link);
+                    }
+                    else
+                    {
+                        ctrl->linkHasBeenRemoved(link);
+                    }
+                    
+                    ++it;
+                }
+                else
+                {
+                    it = m_ctrls.erase(it);
+                }
+            }
+        }
+    }
+    
+    bool Page::attributeValueChanged(sAttr attr)
+    {
+        if(attr)
+        {
+            lock_guard<mutex> guard(m_ctrls_mutex);
+            for(auto it = m_ctrls.begin(); it != m_ctrls.end(); )
+            {
+                sController ctrl = (*it).lock();
+                if(ctrl)
+                {
+                    ctrl->pageAttributeValueChanged(attr);
+                    ++it;
+                }
+                else
+                {
+                    it = m_ctrls.erase(it);
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }
 

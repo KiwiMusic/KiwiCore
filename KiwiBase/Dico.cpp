@@ -23,6 +23,7 @@
 
 #include "Dico.h"
 #include "Box.h"
+#include "Page.h"
 
 namespace Kiwi
 {    
@@ -42,6 +43,129 @@ namespace Kiwi
     sDico Dico::create()
     {
         return make_shared<Dico>();
+    }
+    
+    sDico Dico::evaluateForJson(string const& text)
+    {
+        sDico dico = make_shared<Dico>();
+        if(dico)
+        {
+            size_t pos = 0;
+            if(getType(text, pos) == Element::DICO)
+            {
+                fromJson(dico, text, pos);
+            }
+        }
+        return dico;
+    }
+    
+    sDico Dico::evaluateForBox(string const& text)
+    {
+        sDico dico = make_shared<Dico>();
+        if(dico)
+        {
+            sDico box = Dico::create();
+            sDico subbox = Dico::create();
+            if(box && subbox)
+            {
+                bool mode = false;
+                string word;
+                string key = "name";
+                ElemVector elements;
+                istringstream iss(text);
+                while(iss >> word)
+                {
+                    if(mode)
+                    {
+                        if(word[0] == '@')
+                        {
+                            subbox->set(Tag::create(key), elements);
+                            elements.clear();
+                            key = word.c_str()+1;
+                        }
+                        else
+                        {
+                            if(isdigit(word[0]))
+                            {
+                                if(word.find('.') != string::npos)
+                                {
+                                    elements.push_back(atof(word.c_str()));
+                                }
+                                else
+                                {
+                                    elements.push_back(atol(word.c_str()));
+                                }
+                            }
+                            else
+                            {
+                                elements.push_back(Tag::create(word));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        subbox->set(Tag::create(key), Tag::create(word));
+                        key = "arguments";
+                        mode = true;
+                    }
+                }
+                if(mode)
+                {
+                    subbox->set(Tag::create(key), elements);
+                    subbox->set(Box::Tag_text, Tag::create(text));
+                    box->set(Page::Tag_box, subbox);
+                    dico->set(Page::Tag_boxes, ElemVector({box}));
+                    return dico;
+                }
+                
+            }
+        }
+        return nullptr;
+    }
+    
+    sDico Dico::evaluateForLink(string const& text)
+    {
+        sDico dico = make_shared<Dico>();
+        if(dico)
+        {
+            sDico link = Dico::create();
+            sDico sublink = Dico::create();
+            if(link && sublink)
+            {
+                ElemVector from, to;
+                size_t pos = text.find_first_not_of(' ', pos);
+                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                {
+                    from.push_back(stol(text.c_str()+pos));
+                    pos = text.find_first_not_of(' ', pos);
+                }
+                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                {
+                    from.push_back(stol(text.c_str()+pos));
+                    pos = text.find_first_not_of(' ', pos);
+                }
+                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                {
+                    to.push_back(stol(text.c_str()+pos));
+                    pos = text.find_first_not_of(' ', pos);
+                }
+                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                {
+                    to.push_back(stol(text.c_str()+pos));
+                    pos = text.find_first_not_of(' ', pos);
+                }
+                if(from.size() == 2 && to.size() == 2)
+                {
+                    sublink->set(Link::Tag_from, from);
+                    sublink->set(Link::Tag_to, to);
+                    link->set(Page::Tag_link, sublink);
+                    dico->set(Page::Tag_links, ElemVector({link}));
+                    return dico;
+                }
+                
+            }
+        }
+        return nullptr;
     }
     
     void Dico::clear() noexcept
@@ -146,21 +270,18 @@ namespace Kiwi
         else
             set(key, elements);
     }
-    
+    /*
     void Dico::read(string const& text)
     {
         clear();
         size_t pos = 0;
         if(getType(text, pos) == Element::DICO)
         {
+            size_t pos = 0;
             fromJson(shared_from_this(), text, pos);
         }
-        else
-        {
-            fromText(shared_from_this(), text);
-        }
     }
-    
+    */
     void Dico::read(string const& filename, string const& directoryname)
     {
         clear();
@@ -543,53 +664,6 @@ namespace Kiwi
                 }
             }
         }
-    }
-    
-    void Dico::fromText(sDico dico, string const& text)
-    {
-        bool mode = false;
-        string word;
-        string key = "name";
-        ElemVector elements;
-        istringstream iss(text);
-        while(iss >> word)
-        {
-            if(mode)
-            {
-                if(word[0] == '@')
-                {
-                    dico->set(Tag::create(key), elements);
-                    elements.clear();
-                    key = word.c_str()+1;
-                }
-                else
-                {                    
-                    if(isdigit(word[0]))
-                    {
-                        if(word.find('.') != string::npos)
-                        {
-                            elements.push_back(atof(word.c_str()));
-                        }
-                        else
-                        {
-                            elements.push_back(atol(word.c_str()));
-                        }
-                    }
-                    else
-                    {
-                        elements.push_back(Tag::create(word));
-                    }
-                }
-            }
-            else
-            {
-                dico->set(Tag::create(key), Tag::create(word));
-                key = "arguments";
-                mode = true;
-            }
-        }
-        dico->set(Tag::create(key), elements);
-        dico->set(Box::Tag_text, Tag::create(text));
     }
 }
 

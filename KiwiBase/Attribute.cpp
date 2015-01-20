@@ -702,6 +702,10 @@ namespace Kiwi
         {
             m_value = elements[0];
         }
+        else
+        {
+            m_value = Tag::create("");
+        }
     }
     
     void AttrTag::get(ElemVector& elements) const noexcept
@@ -724,7 +728,13 @@ namespace Kiwi
 			else if(elements[0].isTag())
 			{
 				sTag tag = elements[0];
-                m_value = clip(find_position(m_enum_values, tag), (ElemVector::size_type)0, m_enum_values.size()-1);
+                for(ElemVector::size_type i = 0; i < m_enum_values.size(); i++)
+                {
+                    if(m_enum_values[i] == tag)
+                    {
+                        m_value = i;
+                    }
+                }
 			}
 		}
 	}
@@ -835,6 +845,43 @@ namespace Kiwi
 	{
         elements = {m_value.x(), m_value.y(), m_value.width(), m_value.height()};
 	}
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTE FONT                                  //
+    // ================================================================================ //
+    
+    const sTag AttrFont::Tag_Font								= Tag::create("Font");
+    const sTag AttrFont::Tag_fontname                           = Tag::create("fontname");
+    const sTag AttrFont::Tag_Font_Name                          = Tag::create("Font Name");
+    const sTag AttrFont::Tag_Arial                              = Tag::create("Arial");
+    const sTag AttrFont::Tag_Menelo                             = Tag::create("Menelo");
+    const sTag AttrFont::Tag_fontsize                           = Tag::create("fontsize");
+    const sTag AttrFont::Tag_Font_Size                          = Tag::create("Font Size");
+    const sTag AttrFont::Tag_fontface                           = Tag::create("fontface");
+    const sTag AttrFont::Tag_Font_Face                          = Tag::create("Font Face");
+    const sTag AttrFont::Tag_normal                             = Tag::create("normal");
+    const sTag AttrFont::Tag_bold                               = Tag::create("bold");
+    const sTag AttrFont::Tag_italic                             = Tag::create("italic");
+    const sTag AttrFont::Tag_bold_italic                        = Tag::create("bold_italic");
+    const sTag AttrFont::Tag_fontjustification                  = Tag::create("fontjustification");
+    const sTag AttrFont::Tag_Font_Justification                 = Tag::create("Font Justification");
+    const sTag AttrFont::Tag_left                               = Tag::create("left");
+    const sTag AttrFont::Tag_center                             = Tag::create("center");
+    const sTag AttrFont::Tag_right                              = Tag::create("right");
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTE PAGE                                  //
+    // ================================================================================ //
+    
+    const sTag AttrPage::Tag_Color                              = Tag::create("Color");
+    const sTag AttrPage::Tag_editing_bgcolor                    = Tag::create("editing_bgcolor");
+    const sTag AttrPage::Tag_Unlocked_Background_Color          = Tag::create("Unlocked Background Color");
+    const sTag AttrPage::Tag_locked_bgcolor						= Tag::create("locked_bgcolor");
+    const sTag AttrPage::Tag_Locked_Background_Color			= Tag::create("Locked Background Color");
+    
+    const sTag AttrPage::Tag_Editing							= Tag::create("Editing");
+    const sTag AttrPage::Tag_gridsize							= Tag::create("gridsize");
+    const sTag AttrPage::Tag_Grid_Size							= Tag::create("Grid Size");
 }
 
 

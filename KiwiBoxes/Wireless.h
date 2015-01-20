@@ -135,13 +135,13 @@ namespace Kiwi
     
     inline void wireless()
     {
-		Box::addPrototype(unique_ptr<Box>(new Print(nullptr, {})));
-        Box::addPrototype(unique_ptr<Box>(new Int(nullptr, {})));
-        Box::addPrototype(unique_ptr<Box>(new Send(nullptr, nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Send(nullptr, nullptr)), "s");
-        Box::addPrototype(unique_ptr<Box>(new Receive(nullptr, nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Receive(nullptr, nullptr)), "r");
-        Box::addPrototype(unique_ptr<Box>(new Value(nullptr, nullptr)));
+		Box::addPrototype(unique_ptr<Box>(new Print(sPage(), {})));
+        Box::addPrototype(unique_ptr<Box>(new Int(sPage(), {})));
+        Box::addPrototype(unique_ptr<Box>(new Send(sPage(), nullptr)));
+        Box::addPrototype(unique_ptr<Box>(new Send(sPage(), nullptr)), "s");
+        Box::addPrototype(unique_ptr<Box>(new Receive(sPage(), nullptr)));
+        Box::addPrototype(unique_ptr<Box>(new Receive(sPage(), nullptr)), "r");
+        Box::addPrototype(unique_ptr<Box>(new Value(sPage(), nullptr)));
     }
 }
 

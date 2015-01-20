@@ -83,11 +83,17 @@ namespace Kiwi
             
             if(m_dsp_running)
             {
-                if(page->startDsp(m_sample_rate, m_vector_size))
+                try
                 {
+                    int todo;
+                    page->startDsp(m_sample_rate, m_vector_size);
                     m_dsp_mutex.lock();
                     m_dsp_pages.push_back(page);
                     m_dsp_mutex.unlock();
+                }
+                catch(sPage)
+                {
+                    ;
                 }
             }
             
@@ -173,10 +179,16 @@ namespace Kiwi
         m_pages_mutex.lock();
         for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
         {
-            if((*it)->startDsp(m_sample_rate, m_vector_size))
+            int todo;
+            try
             {
-                m_dsp_pages.push_back((*it));
+                (*it)->startDsp(m_sample_rate, m_vector_size);
             }
+            catch (sPage)
+            {
+                ;
+            }
+            m_dsp_pages.push_back((*it));
         }
         m_pages_mutex.unlock();
         

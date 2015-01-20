@@ -59,6 +59,21 @@ namespace Kiwi
          */
         static sDico create();
         
+        //! The dico creation method.
+        /** The function allocates a dico.
+         */
+        static sDico evaluateForJson(string const& text);
+        
+        //! The dico creation method.
+        /** The function allocates a dico.
+         */
+        static sDico evaluateForBox(string const& text);
+        
+        //! The dico creation method.
+        /** The function allocates a dico.
+         */
+        static sDico evaluateForLink(string const& text);
+        
         //! Clear the dico.
         /** The function clears the dico.
          */
@@ -203,7 +218,7 @@ namespace Kiwi
         /** The function reads a string to fill the dico.
          @param text The string to read.
          */
-        void read(string const& text);
+        //void read(string const& text);
         
         //! Write the dico in a text file.
         /** The function writes the dico in a text file.
@@ -284,13 +299,6 @@ namespace Kiwi
          @param     pos The position in the string.
          */
         static void fromJson(sDico dico, string const& text, string::size_type& pos);
-        
-        //! Get a dico from a string in the page format .
-        /** This function gets dico from a string in the page format .
-         @param     dico The dico.
-         @param     text The string.
-         */
-        static void fromText(sDico dico, string const& text);
     };
     
     inline string toString(const sDico dico)

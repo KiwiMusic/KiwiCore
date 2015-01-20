@@ -566,7 +566,7 @@ namespace Kiwi
         
         //! Notify the manager that the values of an attribute has changed.
         /** The function notifies the manager that the values of an attribute has changed.
-         @param dico A dico.
+         @param attr An attribute.
          @return pass true to notify changes to listeners, false if you don't want them to be notified
          */
         virtual bool attributeValueChanged(sAttr attr)
@@ -864,6 +864,158 @@ namespace Kiwi
 		virtual void get(ElemVector& elements) const noexcept;
 		virtual void set(ElemVector const& elements) override;
 	};
+    
+    struct AttrFont
+    {
+        // Font //
+        static const sTag Tag_Font;
+        static const sTag Tag_fontname;
+        static const sTag Tag_Font_Name;
+        static const sTag Tag_Arial;
+        static const sTag Tag_Menelo;
+        static const sTag Tag_fontsize;
+        static const sTag Tag_Font_Size;
+        static const sTag Tag_fontface;
+        static const sTag Tag_Font_Face;
+        static const sTag Tag_normal;
+        static const sTag Tag_bold;
+        static const sTag Tag_italic;
+        static const sTag Tag_bold_italic;
+        static const sTag Tag_fontjustification;
+        static const sTag Tag_Font_Justification;
+        static const sTag Tag_left;
+        static const sTag Tag_center;
+        static const sTag Tag_right;
+        
+        const shared_ptr<AttrTag>       name;
+        const shared_ptr<AttrDouble>    size;
+        const shared_ptr<AttrEnum>      face;
+        const shared_ptr<AttrEnum>      justification;
+        
+        AttrFont() :
+        name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
+        size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
+        face(Attr::create<AttrEnum>(Tag_fontface, Tag_Font_Face, Tag_Font, (ElemVector){Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0)),
+        justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0))
+        {
+            ;
+        }
+        
+        //! Retrieve the font.
+        /** The function retrieves font.
+         @return The font.
+         */
+        inline Gui::Font getFont() const noexcept
+        {
+            return Gui::Font(toString(name->get()), size->get(), (Gui::Font::Face)face->get());
+        }
+        
+        //! Retrieve the font justification.
+        /** The function retrieves the font justification.
+         @return The font justification.
+         */
+        inline Gui::Font::Justification getFontJustification() const noexcept
+        {
+            return (Gui::Font::Justification)justification->get();
+        }
+        
+    };
+    
+    // ================================================================================ //
+    //                                 ATTRIBUTE PAGE                                   //
+    // ================================================================================ //
+    
+    //! The AttrPage class manages attributes of a page.
+    /** The AttrPage class manages attributes of a page.
+     */
+    
+    class AttrPage : public Attr::Manager
+    {
+    public:
+        // Color //
+        static const sTag Tag_Color;
+        static const sTag Tag_editing_bgcolor;
+        static const sTag Tag_Unlocked_Background_Color;
+        static const sTag Tag_locked_bgcolor;
+        static const sTag Tag_Locked_Background_Color;
+        
+        // Editing //
+        static const sTag Tag_Editing;
+        static const sTag Tag_gridsize;
+        static const sTag Tag_Grid_Size;
+        
+        //-----------------------------------------------------
+    protected:
+        const AttrFont attr_font;
+        const shared_ptr<AttrColor>     attr_color_editing_background;
+        const shared_ptr<AttrColor>     attr_color_locked_background;
+        const shared_ptr<AttrLong>		attr_editing_grid_size;
+        
+    public:
+        AttrPage() :
+        attr_color_editing_background(Attr::create<AttrColor>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag_Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
+        attr_color_locked_background(Attr::create<AttrColor>(Tag_locked_bgcolor, Tag_Locked_Background_Color, Tag_Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
+        attr_editing_grid_size(Attr::create<AttrLong>(Tag_gridsize, Tag_Grid_Size, Tag_Editing, 15))
+        {
+            addAttribute(attr_font.name);
+            addAttribute(attr_font.size);
+            addAttribute(attr_font.face);
+            addAttribute(attr_font.justification);
+            addAttribute(attr_color_editing_background);
+            addAttribute(attr_color_locked_background);
+            addAttribute(attr_editing_grid_size);
+        }
+        
+        ~AttrPage()
+        {
+            ;
+        }
+        
+        //! Retrieve the default font for boxes of the page.
+        /** The function retrieves the default font for boxes of the page.
+         @return The default font for boxes of the page.
+         */
+        inline Gui::Font getFont() const noexcept
+        {
+            return attr_font.getFont();
+        }
+        
+        //! Retrieve the default font justification for boxes of the page.
+        /** The function retrieves the default font justification for boxes of the page.
+         @return The default font justification for boxes of the page.
+         */
+        inline Gui::Font::Justification getFontJustification() const noexcept
+        {
+            return attr_font.getFontJustification();
+        }
+        
+        //! Retrieve if the background color of the page when unlocked.
+        /** The function retrieves the background color of the page when unlocked
+         @return The Unlocked background color of the page.
+         */
+        inline Gui::Color getEditingBgColor() const noexcept
+        {
+            return attr_color_editing_background->get();
+        }
+        
+        //! Retrieve if the locked background color.
+        /** The function retrieves the locked background color of the page.
+         @return The locked background color of the page.
+         */
+        inline Gui::Color getLockedBgColor() const noexcept
+        {
+            return attr_color_locked_background->get();
+        }
+        
+        //! Retrieve the grid size attribute value.
+        /** The function retrieve the grid size attribute value.
+         @return The grid size attribute value.
+         */
+        inline long getGridSize() const noexcept
+        {
+            return attr_editing_grid_size->get();
+        }
+    };
 }
 
 

@@ -42,6 +42,8 @@ namespace Kiwi
         // Internal //
         static const sTag Tag_ninlets;
         static const sTag Tag_noutlets;
+        static const sTag Tag_id;
+        static const sTag Tag_text;
         
         // Appearance //
         static const sTag Tag_Appearance;
@@ -95,6 +97,8 @@ namespace Kiwi
         // Internal //
         const shared_ptr<AttrLong>      attr_ninlets;
         const shared_ptr<AttrLong>      attr_noutlets;
+        const shared_ptr<AttrLong>      attr_id;
+        const shared_ptr<AttrTag>       attr_text;
         
         // Appearance //
         const shared_ptr<AttrPoint>     attr_position;
@@ -122,6 +126,8 @@ namespace Kiwi
         // Internal //
         attr_ninlets(Attr::create<AttrLong>(Tag_ninlets, nullptr, nullptr, 0, Attr::Invisible)),
         attr_noutlets(Attr::create<AttrLong>(Tag_noutlets, nullptr, nullptr, 0, Attr::Invisible)),
+        attr_id(Attr::create<AttrLong>(Tag_id, nullptr, nullptr, 0, Attr::Invisible | Attr::Disabled)),
+        attr_text(Attr::create<AttrTag>(Tag_text, nullptr, nullptr, nullptr, Attr::Invisible | Attr::Disabled)),
         
         // Appearance //
         attr_position(Attr::create<AttrPoint>(Tag_position, Tag_Position, Tag_Appearance)),
@@ -145,6 +151,12 @@ namespace Kiwi
         attr_color_border(Attr::create<AttrColor>(Tag_bdcolor, Tag_Border_Color, Tag_Color, (ElemVector){0.4, 0.4, 0.4, 1.})),
         attr_color_text(Attr::create<AttrColor>(Tag_textcolor, Tag_Text_Color, Tag_Color, (ElemVector){0.3, 0.3, 0.3, 1.}))
         {
+            // Internal //
+            addAttribute(attr_ninlets);
+            addAttribute(attr_noutlets);
+            addAttribute(attr_id);
+            addAttribute(attr_text);
+            
             // Appearance //
             addAttribute(attr_position);
             addAttribute(attr_size);
@@ -171,6 +183,24 @@ namespace Kiwi
         ~AttrBox()
         {
             ;
+        }
+        
+        //! Retrieve the id of the box.
+        /** The function retrieves the id of the box as a tag.
+         @return The text of the id as a tag.
+         */
+        inline long getId() const noexcept
+        {
+            return attr_id->get();
+        }
+        
+        //! Retrieve the text of the box.
+        /** The function retrieves the text of the box as a tag.
+         @return The text of the box as a tag.
+         */
+        inline sTag getText() const noexcept
+        {
+            return attr_text->get();
         }
         
         //! Retrieve the size of the box.

@@ -26,11 +26,7 @@
 
 #include "Box.h"
 #include "Link.h"
-#include "AttributePage.h"
 
-// TODO
-// - Add the attributes
-// - Dsp & Mutex for Dsp
 namespace Kiwi
 {
     // ================================================================================ //
@@ -39,34 +35,42 @@ namespace Kiwi
     
     //! The page manages boxes and links.
     /**
-     The page is the counterpart of the max patcher or the pd canvas...
+     The page is...
      */
     class Page : public AttrPage
 	{
     public:
-        class Listener;
-        friend Box::Box(sPage page, string const& name, ulong flags);
-		
 		class Controller;
 		typedef shared_ptr<Controller>			sController;
 		typedef weak_ptr<Controller>			wController;
 		typedef shared_ptr<const Controller>	scController;
+        typedef weak_ptr<const Controller>      swController;
 		
+        /** Flags describing the type of the notification
+         @see Controler
+         */
+        enum Notification : bool
+        {
+            Added        = false,
+            Removed      = true
+        };
+        
     private:
         const wInstance             m_instance;
-        
         Dsp::sContext               m_dsp_context;
-        atomic_bool                 m_dsp_running;
-        
         vector<sBox>                m_boxes;
-        mutable mutex               m_boxes_mutex;
-        ulong						m_boxe_id;
-        
         vector<sLink>               m_links;
-        mutable mutex               m_links_mutex;
-		
-		wController					m_controller;
+        mutable mutex               m_mutex;
+        set<wController,
+        owner_less<wController>>    m_ctrls;
+        mutex                       m_ctrls_mutex;
         
+    private:
+        
+        //! @internal Trigger notification to controlers.
+        void send(sBox box, Notification type);
+        void send(sLink link, Notification type);
+        ulong generateId() const;
     public:
         
         //! Constructor.
@@ -86,6 +90,13 @@ namespace Kiwi
          @return The page.
          */
         static sPage create(sInstance instance, sDico dico = nullptr);
+        
+        //! Create a beacon.
+        /** This function retrieves a beacon in the scope of the instance.
+         @param     The name of the beacon to retrieve.
+         @return    The beacon that match with the name.
+         */
+        sBeacon createBeacon(string const& name) const;
 		
 		//! Retrieve the sPage.
 		/** The function sPage.
@@ -120,37 +131,18 @@ namespace Kiwi
 		 */
 		inline sController getController() const noexcept
 		{
-			return m_controller.lock();
+            int zaza;
+			return (*m_ctrls.begin()).lock();
 		}
-		
-        //! Get the number of boxes.
-        /** The function retrieves the number of boxes in the page.
-         @return The number of boxes in the page.
-         */
-        inline ulong getNumberOfBoxes() const noexcept
-        {
-            lock_guard<mutex> guard(m_boxes_mutex);
-            return m_boxes.size();
-        }
-        
+
         //! Get the boxes.
         /** The function retrieves the boxes from the page.
          @param boxes   A vector of elements.
          */
         void getBoxes(vector<sBox>& boxes) const
         {
-            lock_guard<mutex> guard(m_boxes_mutex);
+            lock_guard<mutex> guard(m_mutex);
             boxes = m_boxes;
-        }
-		
-        //! Get the number of links.
-        /** The function retrieves the number of links in the page.
-         @return The number of links in the page.
-         */
-        inline ulong getNumberOfLinks() const noexcept
-        {
-            lock_guard<mutex> guard(m_links_mutex);
-            return m_links.size();
         }
         
         //! Get the links.
@@ -159,30 +151,35 @@ namespace Kiwi
          */
         void getLinks(vector<sLink>& links) const
         {
-            lock_guard<mutex> guard(m_links_mutex);
+            lock_guard<mutex> guard(m_mutex);
             links = m_links;
         }
-		
-		//! Receives notification when an attribute value has changed.
-		/** The function receives notification when an attribute value has changed.
-		 @param attr The attribute.
-		 @return pass true to notify changes to listeners, false if you don't want them to be notified
-		 */
-		bool attributeValueChanged(sAttr attr) override;
-        
-        //! Create a beacon.
-        /** This function retrieves a beacon in the scope of the instance.
-         @param     The name of the beacon to retrieve.
-         @return    The beacon that match with the name.
+
+        //! Check if the dsp is running.
+        /** The function checks if the dsp is running
          */
-        sBeacon createBeacon(string const& name) const;
+        inline bool isDspRunning() const noexcept
+        {
+            return m_dsp_context.use_count();
+        }
         
-        //! Create a box.
-        /** The function instantiates a box with a dico.
-         @param dico        The dico that defines a box.
-         @return A pointer to the box.
+        //! Append a dico.
+        /** The function reads a dico and add the boxes and links to the page.
+         @param dico The dico.
          */
-        sBox createBox(sDico dico);
+        void add(sDico dico);
+        
+        //! Free a box.
+        /** The function removes a box from the page.
+         @param box        The pointer to the box.
+         */
+        void remove(sBox box);
+        
+        //! Free a link.
+        /** The function removes a link from the page.
+         @param link        The pointer to the link.
+         */
+        void remove(sLink link);
         
         //! Replace a box with another one.
         /** The function instantiates a box with a dico that will replace an old box.
@@ -190,57 +187,19 @@ namespace Kiwi
          @param dico       The dico that defines a box.
          @return A pointer to the box.
          */
-        sBox replaceBox(sBox box, sDico dico);
-        
-        //! Free a box.
-        /** The function removes a box from the page.
-         @param box        The pointer to the box.
-         */
-        void removeBox(sBox box);
+        sBox replace(sBox box, sDico dico);
         
         //! Bring a box to the front of the page.
         /** The function brings a box to the front of the page. The box will be setted as if it was the last box created and will be the last box of the vector of boxes.
          @param box        The pointer to the box.
          */
-        void bringToFront(sBox box);
+        void toFront(sBox box);
         
         //! Bring a box to the back of the page.
         /** The function brings a box to the back of the page. The box will be setted as if it was the first box created and will be the first box of the vector of boxes.
          @param box        The pointer to the box.
          */
-        void bringToBack(sBox box);
-        
-        //! Add a link.
-        /** The function add a link.
-         @param link The link to add.
-         @return A pointer to the link.
-         */
-        sLink addLink(sLink link);
-        
-        //! Create a link.
-        /** The function creates a link with a dico.
-         @param dico        The dico that defines a link.
-         @return A pointer to the link.
-         */
-        sLink createLink(scDico dico);
-        
-        //! Free a link.
-        /** The function removes a link from the page.
-         @param link        The pointer to the link.
-         */
-        void removeLink(sLink link);
-        
-        //! Append a dico.
-        /** The function reads a dico and add the boxes and links to the page.
-         @param dico The dico.
-         */
-        void append(sDico dico);
-        
-        //! Read a dico.
-        /** The function reads a dico that initializes the page.
-         @param dico The dico.
-         */
-        void read(sDico dico);
+        void toBack(sBox box);
         
         //! Write the page in a dico.
         /** The function writes the pagein a dico.
@@ -254,42 +213,39 @@ namespace Kiwi
          @param vectorsize The vector size of the signal.
          @return true if the page can process signal.
          */
-        bool startDsp(ulong samplerate, ulong vectorsize);
+        void startDsp(const ulong samplerate, const ulong vectorsize);
         
         //! Perform a tick on the dsp.
-        /** The function calls once the dsp chain.
+        /** The function calls once the dsp chain. You should never call this method if the dsp hasn't been started before.
          */
-        void tickDsp() const noexcept;
+        inline void tickDsp() const noexcept
+        {
+            m_dsp_context->tick();
+        }
         
         //! Stop the dsp.
         /** The function stop the dsp chain.
          */
         void stopDsp();
         
-        //! Check if the dsp is running.
-        /** The function checks if the dsp is running
+        //! Receives notification when an attribute value has changed.
+        /** The function receives notification when an attribute value has changed.
+         @param attr The attribute.
+         @return pass true to notify changes to listeners, false if you don't want them to be notified
          */
-        bool isDspRunning() const noexcept;
-        
-        //! Add a page listener in the binding list of the page.
-        /** The function adds a page listener in the binding list of the page. If the page listener is already in the binding list, the function doesn't do anything.
-         @param listener  The pointer of the page listener.
-         @see              unbind()
-         */
-        void bind(shared_ptr<Listener> listener);
-        
-        //! Remove a page listener from the binding list of the page.
-        /** The function removes a page listener from the binding list of the page. If the page listener isn't in the binding list, the function doesn't do anything.
-         @param listener  The pointer of the page listener.
-         @see           bind()
-         */
-        void unbind(shared_ptr<Listener> listener);
+        bool attributeValueChanged(sAttr attr) override;
 		
-		//! Set the controller of the box.
-		/** The function sets the controller of the box.
+		//! Add a controller to the box.
+		/** The function adds a controller to the box.
 		 @param ctrl    The controller.
 		 */
-		void setController(sController ctrl);
+		void addController(sController ctrl);
+        
+        //! Remove a controller from the box.
+        /** The function removes a controller from the box.
+         @param ctrl    The controller.
+         */
+        void removeController(sController ctrl);
         
         // ================================================================================ //
         //                                  PAGE CONTROLER                                  //
@@ -312,12 +268,19 @@ namespace Kiwi
 			 Please use the create method instead.
              @param page The page to control.
              */
-            Controller(sPage page) noexcept;
+            Controller(sPage page) noexcept :
+            m_page(page)
+            {
+                ;
+            }
             
             //! The destructor.
             /** The destructor.
              */
-            virtual ~Controller();
+            virtual ~Controller()
+            {
+                ;
+            }
             
             //! Retrieve the page.
             /** The funtion retrieves the page.
@@ -340,13 +303,6 @@ namespace Kiwi
 			 */
 			virtual void boxHasBeenRemoved(sBox box) = 0;
 			
-			//! Receive the notification that a box has been replaced.
-			/** The function is called by the page when a box has been replaced.
-			 @param oldbox  The old box.
-			 @param newbox	The new box.
-			 */
-			virtual void boxHasBeenReplaced(sBox oldbox, sBox newbox) = 0;
-			
 			//! Receive the notification that a link has been created.
 			/** The function is called by the page when a link has been created.
 			 @param link     The link.
@@ -358,13 +314,6 @@ namespace Kiwi
 			 @param link    The link.
 			 */
 			virtual void linkHasBeenRemoved(sLink link) = 0;
-			
-			//! Receive the notification that a connection has been replaced.
-			/** The function is called by the page when a connection has been replaced.
-			 @param oldlink  The old link.
-			 @param newlink	The new link.
-			 */
-			virtual void linkHasBeenReplaced(sLink oldlink, sLink newlink) = 0;
 			
 			//! Receives notification when an attribute value has changed.
 			/** The function receives notification when an attribute value has changed.
