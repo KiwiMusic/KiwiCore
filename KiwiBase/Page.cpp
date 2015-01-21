@@ -25,13 +25,7 @@
 #include "Instance.h"
 
 namespace Kiwi
-{
-    const sTag Page::Tag_page       = Tag::create("page");
-    const sTag Page::Tag_box        = Tag::create("box");
-    const sTag Page::Tag_boxes      = Tag::create("boxes");
-    const sTag Page::Tag_link       = Tag::create("link");
-    const sTag Page::Tag_links      = Tag::create("links");
-    
+{    
     // ================================================================================ //
     //                                      PAGE                                        //
     // ================================================================================ //
@@ -46,7 +40,7 @@ namespace Kiwi
     {
         m_links.clear();
         m_boxes.clear();
-        m_ctrls.clear();
+        m_lists.clear();
     }
     
     sPage Page::create(sInstance instance, sDico dico)
@@ -57,9 +51,9 @@ namespace Kiwi
             sDico pageDico = Dico::create();
             if(pageDico)
             {
-                if(dico->has(Tag_page))
+                if(dico->has(Tag::List::page))
                 {
-                    pageDico = dico->get(Tag_page);
+                    pageDico = dico->get(Tag::List::page);
                     page->add(pageDico);
                     page->Attr::Manager::read(pageDico);
                 }
@@ -74,14 +68,14 @@ namespace Kiwi
         {
             map<ulong, ulong> m_ids_mapper;
             ElemVector boxes;
-            dico->get(Tag_boxes, boxes);
+            dico->get(Tag::List::boxes, boxes);
             for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
             {
                 sDico subdico = boxes[i];
                 if(subdico)
                 {
                     sBox box;
-                    subdico = subdico->get(Tag_box);
+                    subdico = subdico->get(Tag::List::box);
                     if(subdico)
                     {
                         lock_guard<mutex> guard(m_mutex);
@@ -105,7 +99,7 @@ namespace Kiwi
                             m_boxes.push_back(box);
                         }
                         
-                        if(dico->has(Tag_links) && box && subdico->has(Box::Tag_id))
+                        if(dico->has(Tag::List::links) && box && subdico->has(Box::Tag_id))
                         {
                             ulong _id = subdico->get(Box::Tag_id);
                             if(box->getId() != _id)
@@ -119,31 +113,31 @@ namespace Kiwi
             }
             
             ElemVector links;
-            dico->get(Tag_links, links);
+            dico->get(Tag::List::links, links);
             for(vector<sLink>::size_type i = 0; i < links.size(); i++)
             {
                 sDico subdico = links[i];
                 if(subdico)
                 {
                     sLink link;
-                    subdico = subdico->get(Tag_link);
+                    subdico = subdico->get(Tag::List::link);
                     if(subdico)
                     {
                         ElemVector elem;
-                        subdico->get(Link::Tag_from, elem);
+                        subdico->get(Tag::List::from, elem);
                         if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
                         {
                             if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
                             {
-                                subdico->set(Link::Tag_from, {m_ids_mapper[(ulong)elem[0]], elem[1]});
+                                subdico->set(Tag::List::from, {m_ids_mapper[(ulong)elem[0]], elem[1]});
                             }
                         }
-                        subdico->get(Link::Tag_to, elem);
+                        subdico->get(Tag::List::to, elem);
                         if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
                         {
                             if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
                             {
-                                subdico->set(Link::Tag_to, {m_ids_mapper[(ulong)elem[0]], elem[1]});
+                                subdico->set(Tag::List::to, {m_ids_mapper[(ulong)elem[0]], elem[1]});
                             }
                         }
                         
@@ -220,9 +214,14 @@ namespace Kiwi
                     auto li = find(m_links.begin(), m_links.end(), oldbox);
                     while(li != m_links.end())
                     {
+                        int todo;
                         oldlinks.push_back((*li));
-                        (*li) = Link::create((*li), oldbox, newbox);
-                        newlinks.push_back((*li));
+                        sDico dico = Dico::create();
+                        (*li) = Link::create(getShared(), dico);
+                        if((*li))
+                        {
+                            newlinks.push_back((*li));
+                        }
                         li = find(m_links.begin(), m_links.end(), oldbox);
                     }
                 }
@@ -287,11 +286,11 @@ namespace Kiwi
 					if(box && subbox)
 					{
 						m_boxes[i]->write(subbox);
-						box->set(Tag_box, subbox);
+						box->set(Tag::List::box, subbox);
 						elements.push_back(box);
 					}
 				}
-				subpage->set(Tag_boxes, elements);
+				subpage->set(Tag::List::boxes, elements);
 				
 				elements.clear();
 				
@@ -302,12 +301,12 @@ namespace Kiwi
 					if(link && sublink)
 					{
 						m_links[i]->write(sublink);
-						link->set(Tag_link, sublink);
+						link->set(Tag::List::link, sublink);
 						elements.push_back(link);
 					}
 				}
-				subpage->set(Tag_links, elements);
-				dico->set(Tag_page, subpage);
+				subpage->set(Tag::List::links, elements);
+				dico->set(Tag::List::page, subpage);
 			}
         }
     }
@@ -357,43 +356,43 @@ namespace Kiwi
             m_dsp_context.reset();
         }
     }
-	
-	void Page::addController(sController ctrl)
-	{
-        lock_guard<mutex> guard(m_ctrls_mutex);
-        m_ctrls.insert(ctrl);
-	}
     
-    void Page::removeController(sController ctrl)
+    void Page::addListener(sListener list)
     {
-        lock_guard<mutex> guard(m_ctrls_mutex);
-        m_ctrls.erase(ctrl);
+        lock_guard<mutex> guard(m_mutex);
+        m_lists.insert(list);
     }
     
+    void Page::removeListener(sListener list)
+    {
+        lock_guard<mutex> guard(m_mutex);
+        m_lists.erase(list);
+    }
+
     void Page::send(sBox box, Page::Notification type)
     {
         if(box)
         {
-            lock_guard<mutex> guard(m_ctrls_mutex);
-            for(auto it = m_ctrls.begin(); it != m_ctrls.end(); )
+            lock_guard<mutex> guard(m_lists_mutex);
+            for(auto it = m_lists.begin(); it != m_lists.end(); )
             {
-                sController ctrl = (*it).lock();
-                if(ctrl)
+                sListener list = (*it).lock();
+                if(list)
                 {
                     if(type == Notification::Added)
                     {
-                        ctrl->boxCreated(box);
+                        list->boxCreated(box);
                     }
                     else
                     {
-                        ctrl->boxRemoved(box);
+                        list->boxRemoved(box);
                     }
                     
                     ++it;
                 }
                 else
                 {
-                    it = m_ctrls.erase(it);
+                    it = m_lists.erase(it);
                 }
             }
         }
@@ -403,26 +402,26 @@ namespace Kiwi
     {
         if(link)
         {
-            lock_guard<mutex> guard(m_ctrls_mutex);
-            for(auto it = m_ctrls.begin(); it != m_ctrls.end(); )
+            lock_guard<mutex> guard(m_lists_mutex);
+            for(auto it = m_lists.begin(); it != m_lists.end(); )
             {
-                sController ctrl = (*it).lock();
-                if(ctrl)
+                sListener list = (*it).lock();
+                if(list)
                 {
                     if(type == Notification::Added)
                     {
-                        ctrl->linkCreated(link);
+                        list->linkCreated(link);
                     }
                     else
                     {
-                        ctrl->linkRemoved(link);
+                        list->linkRemoved(link);
                     }
                     
                     ++it;
                 }
                 else
                 {
-                    it = m_ctrls.erase(it);
+                    it = m_lists.erase(it);
                 }
             }
         }
@@ -432,18 +431,18 @@ namespace Kiwi
     {
         if(attr)
         {
-            lock_guard<mutex> guard(m_ctrls_mutex);
-            for(auto it = m_ctrls.begin(); it != m_ctrls.end(); )
+            lock_guard<mutex> guard(m_lists_mutex);
+            for(auto it = m_lists.begin(); it != m_lists.end(); )
             {
-                sController ctrl = (*it).lock();
-                if(ctrl)
+                sListener list = (*it).lock();
+                if(list)
                 {
-                    ctrl->attributeChanged(attr);
+                    list->attributeChanged(attr);
                     ++it;
                 }
                 else
                 {
-                    it = m_ctrls.erase(it);
+                    it = m_lists.erase(it);
                 }
             }
             return true;

@@ -66,7 +66,7 @@ namespace Kiwi
     {
         if(!elements.empty())
         {
-            Box::send(0, {Tag_bang});
+            Box::send(0, {Tag::List::bang});
             m_led = true;
             redraw();
             m_clock->delay(getShared(), 150);
@@ -79,7 +79,7 @@ namespace Kiwi
     {
         if(event.isDown())
         {
-            Box::send(0, {Tag_bang});
+            Box::send(0, {Tag::List::bang});
             m_led = true;
             redraw();
             return true;
@@ -166,14 +166,14 @@ namespace Kiwi
                 redraw();
                 return true;
             }
-            else if(elements[0] == Tag_bang)
+            else if(elements[0] == Tag::List::bang)
             {
                 m_value = !m_value;
                 Box::send(0, {m_value});
                 redraw();
                 return true;
             }
-            else if(elements[0] == Tag_set)
+            else if(elements[0] == Tag::List::set)
             {
                 if(elements.size() > 1 && elements[1].isNumber())
                 {
@@ -375,12 +375,12 @@ namespace Kiwi
                 Box::send(0, {m_value});
                 return true;
             }
-            else if(elements[0] == Tag_bang)
+            else if(elements[0] == Tag::List::bang)
             {
                 Box::send(0, {m_value});
                 return true;
             }
-            else if(elements[0] == Tag_set)
+            else if(elements[0] == Tag::List::set)
             {
                 if(elements.size() > 1 && elements[1].isNumber())
                 {
@@ -393,7 +393,7 @@ namespace Kiwi
                     Console::error(getShared(), "The message \"set\" implies a number after it.");
                 }
             }
-            else if(elements[0] == Tag_focus)
+            else if(elements[0] == Tag::List::focus)
             {
                 grabKeyboardFocus();
             }
@@ -494,7 +494,7 @@ namespace Kiwi
         else if(m_edition && event.isTab())
         {
             m_value = stod(m_text);
-            send(1, {Tag_bang});
+            send(1, {Tag::List::bang});
             send(0, {m_value});
             m_text.clear();
             redraw();
@@ -671,14 +671,14 @@ namespace Kiwi
                 redraw();
                 return true;
             }
-            else if(elements[0] == Tag_bang)
+            else if(elements[0] == Tag::List::bang)
             {
                 m_value = !m_value;
                 send();
                 redraw();
                 return true;
             }
-            else if(elements[0] == Tag_set)
+            else if(elements[0] == Tag::List::set)
             {
                 if(elements.size() > 1 && elements[1].isNumber())
                 {

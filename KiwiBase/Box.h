@@ -718,18 +718,7 @@ namespace Kiwi
 		/** This function retrieves all loaded prototype names.
 		 @param names A vector of Tag to be filled.
 		 */
-		static void getPrototypeNames(vector<sTag>& names);
-		
-        // ================================================================================ //
-        //                                      BOX COMMON TAG                              //
-        // ================================================================================ //
-        
-        static const sTag Tag_arguments;
-        static const sTag Tag_bang;
-        static const sTag Tag_focus;
-        static const sTag Tag_name;
-        static const sTag Tag_set;
-        
+		static void getPrototypeNames(vector<sTag>& names);        
     };
     
     inline string toString(scBox box)

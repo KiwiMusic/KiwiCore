@@ -46,6 +46,8 @@ namespace Kiwi
     {
     public:
         class Listener;
+        typedef shared_ptr<Listener>    sListener;
+        typedef weak_ptr<Listener>      wListener;
     private:
         vector<sPage>                       m_dsp_pages;
         mutable mutex                       m_dsp_mutex;
@@ -185,63 +187,61 @@ namespace Kiwi
          @see           bind()
          */
         void unbind(shared_ptr<Listener> listener);
-        
-        // ================================================================================ //
-        //                              INSTANCE LISTENER                                   //
-        // ================================================================================ //
-        
-        //! The instance listener is a virtual class that can bind itself to an instance and be notified of several changes.
-        /**
-         The instance listener is a very light class with methods that receive the notifications of the creation and deletion of pages and from dsp changes. An instance listener must create a shared pointer to be binded to an instance.
-         @see Instance
+    };
+    
+    // ================================================================================ //
+    //                              INSTANCE LISTENER                                   //
+    // ================================================================================ //
+    
+    //! The instance listener is a virtual class that can bind itself to an instance and be notified of several changes.
+    /**
+     The instance listener is a very light class with methods that receive the notifications of the creation and deletion of pages and from dsp changes. An instance listener must create a shared pointer to be binded to an instance.
+     @see Instance
+     */
+    class Instance::Listener
+    {
+    public:
+        //! The constructor.
+        /** The constructor does nothing.
          */
-        class Listener
+        Listener()
         {
-        public:
-            //! The constructor.
-            /** The constructor does nothing.
-             */
-            Listener()
-            {
-                ;
-            }
-            
-            //! The destructor.
-            /** The destructor does nothing.
-             */
-            virtual ~Listener()
-            {
-                ;
-            }
-            
-            //! Receive the notification that a page has been created.
-            /** The function is called by the instance when a page has been created.
-             @param instance    The instance.
-             @param page        The page.
-             */
-            virtual void pageCreated(sInstance instance, sPage page){};
-            
-            //! Receive the notification that a page has been closed.
-            /** The function is called by the instance when a page has been closed.
-             @param instance    The instance.
-             @param page        The page.
-             */
-            virtual void pageRemoved(sInstance instance, sPage page){};
-            
-            //! Receive the notification that the dsp has been started.
-            /** The function is called by the instance when the dsp has been started.
-             @param instance    The instance.
-             */
-            virtual void dspStarted(sInstance instance){};
-            
-            //! Receive the notification that the dsp has been stopped.
-            /** The function is called by the instance when the dsp has been stopped.
-             @param instance    The instance.
-             */
-            virtual void dspStopped(sInstance instance){};
-        };
+            ;
+        }
         
-        typedef shared_ptr<Listener>    sListener;
+        //! The destructor.
+        /** The destructor does nothing.
+         */
+        virtual ~Listener()
+        {
+            ;
+        }
+        
+        //! Receive the notification that a page has been created.
+        /** The function is called by the instance when a page has been created.
+         @param instance    The instance.
+         @param page        The page.
+         */
+        virtual void pageCreated(sInstance instance, sPage page){};
+        
+        //! Receive the notification that a page has been closed.
+        /** The function is called by the instance when a page has been closed.
+         @param instance    The instance.
+         @param page        The page.
+         */
+        virtual void pageRemoved(sInstance instance, sPage page){};
+        
+        //! Receive the notification that the dsp has been started.
+        /** The function is called by the instance when the dsp has been started.
+         @param instance    The instance.
+         */
+        virtual void dspStarted(sInstance instance){};
+        
+        //! Receive the notification that the dsp has been stopped.
+        /** The function is called by the instance when the dsp has been stopped.
+         @param instance    The instance.
+         */
+        virtual void dspStopped(sInstance instance){};
     };
 }
 

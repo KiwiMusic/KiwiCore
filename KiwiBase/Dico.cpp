@@ -113,8 +113,8 @@ namespace Kiwi
                 {
                     subbox->set(Tag::create(key), elements);
                     subbox->set(Box::Tag_text, Tag::create(text));
-                    box->set(Page::Tag_box, subbox);
-                    dico->set(Page::Tag_boxes, ElemVector({box}));
+                    box->set(Tag::List::box, subbox);
+                    dico->set(Tag::List::boxes, ElemVector({box}));
                     return dico;
                 }
                 
@@ -156,10 +156,10 @@ namespace Kiwi
                 }
                 if(from.size() == 2 && to.size() == 2)
                 {
-                    sublink->set(Link::Tag_from, from);
-                    sublink->set(Link::Tag_to, to);
-                    link->set(Page::Tag_link, sublink);
-                    dico->set(Page::Tag_links, ElemVector({link}));
+                    sublink->set(Tag::List::from, from);
+                    sublink->set(Tag::List::to, to);
+                    link->set(Tag::List::link, sublink);
+                    dico->set(Tag::List::links, ElemVector({link}));
                     return dico;
                 }
                 

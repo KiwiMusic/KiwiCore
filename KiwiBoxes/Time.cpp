@@ -56,7 +56,7 @@ namespace Kiwi
     {
 		if(m_active)
         {
-            Box::send(0, {Tag_bang});
+            Box::send(0, {Tag::List::bang});
 			m_clock->delay(getShared(), m_interval);
         }
     }
@@ -74,7 +74,7 @@ namespace Kiwi
                         m_active = elements[0];
                         if(m_active)
                         {
-                            Box::send(0, {Tag_bang});
+                            Box::send(0, {Tag::List::bang});
                             m_clock->delay(getShared(), m_interval);
                         }
                     }

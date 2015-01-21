@@ -27,78 +27,44 @@
 
 namespace Kiwi
 {
-    
-    const sTag Link::Tag_from        = Tag::create("from");
-    const sTag Link::Tag_to          = Tag::create("to");
-    
     // ================================================================================ //
     //                                      LINK                                        //
     // ================================================================================ //
     
-    Link::Link(sPage page, sBox from, ulong outlet, sBox to, ulong inlet) noexcept :
+    Link::Link(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet) noexcept :
     m_page(page), m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
     {
-        if(page)
+        if(from && to)
         {
-            if(from && outlet < from->getNumberOfOutlets() && to && inlet < to->getNumberOfInlets())
+            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            if(outlet)
             {
-                Box::sController from_ctrl   = from->getController();
-                Box::sController to_ctrl     = to->getController();
-                if(from_ctrl && to_ctrl)
-                {
-                    m_path.moveTo(from_ctrl->getOutletPosition(outlet));
-                    m_path.lineTo(to_ctrl->getInletPosition(inlet));
-                }
+                outlet->append(to, m_index_outlet);
             }
-            else if(from && outlet < from->getNumberOfOutlets())
+            sInlet inlet    = to->getInlet(m_index_intlet);
+            if(inlet)
             {
-                Box::sController from_ctrl   = from->getController();
-                if(from_ctrl)
-                {
-                    m_path.moveTo(from_ctrl->getOutletPosition(outlet));
-                }
-            }
-            else if(to && inlet < to->getNumberOfInlets())
-            {
-                Box::sController to_ctrl   = to->getController();
-                if(to_ctrl)
-                {
-                    m_path.moveTo(to_ctrl->getInletPosition(inlet));
-                }
+                inlet->append(from, m_index_intlet);
             }
         }
     }
     
     Link::~Link()
     {
-        
-    }
-    
-    sLink Link::create(sPage page, const sBox from, const unsigned outlet, const sBox to, const unsigned inlet)
-    {
-        if((from && outlet < from->getNumberOfOutlets()) || (to && inlet < to->getNumberOfInlets()))
+        sBox     from    = getBoxFrom();
+        sBox     to      = getBoxTo();
+        if(from && to)
         {
-            sLink link = make_shared<Link>(page, from, outlet, to, inlet);
-            if(link && from)
+            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            if(outlet)
             {
-                from->bind(link, Box::Tag_ninlets, Attr::ValueChanged);
-                from->bind(link, Box::Tag_noutlets, Attr::ValueChanged);
-                from->bind(link, Box::Tag_position, Attr::ValueChanged);
-                from->bind(link, Box::Tag_size, Attr::ValueChanged);
-                
+                outlet->erase(to, m_index_outlet);
             }
-            if(link && to)
+            sInlet inlet    = to->getInlet(m_index_intlet);
+            if(inlet)
             {
-                to->bind(link, Box::Tag_ninlets, Attr::ValueChanged);
-                to->bind(link, Box::Tag_noutlets, Attr::ValueChanged);
-                to->bind(link, Box::Tag_position, Attr::ValueChanged);
-                to->bind(link, Box::Tag_size, Attr::ValueChanged);
+                inlet->erase(from, m_index_intlet);
             }
-            return link;
-        }
-        else
-        {
-            return nullptr;
         }
     }
     
@@ -111,7 +77,7 @@ namespace Kiwi
             ulong from_id, to_id;
             
             ElemVector elements;
-            dico->get(Tag_from, elements);
+            dico->get(Tag::List::from, elements);
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
                 from_id = elements[0];
@@ -122,7 +88,7 @@ namespace Kiwi
                 return nullptr;
             }
             
-            dico->get(Tag_to, elements);
+            dico->get(Tag::List::to, elements);
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
                 to_id   = elements[0];
@@ -159,80 +125,12 @@ namespace Kiwi
                 
                 if(from && to)
                 {
-                    return Link::create(page, from, outlet, to, inlet);
+                    return make_shared<Link>(page, from, outlet, to, inlet);
                 }
             }
             
         }
         return nullptr;
-    }
-    
-    sLink Link::create(scLink link, const sBox oldbox, const sBox newbox)
-    {
-        if(link)
-        {
-            sPage page = link->getPage();
-            if(page && link->getBoxFrom() == oldbox)
-            {
-                if(link->getOutletIndex() < newbox->getNumberOfOutlets())
-                {
-                    return create(page, newbox, link->getOutletIndex(), link->getBoxTo(), link->getInletIndex());
-                }
-            }
-            else if(page && link->getBoxTo() == oldbox)
-            {
-                if(link->getInletIndex() < newbox->getNumberOfInlets())
-                {
-                    return create(page, link->getBoxFrom(), link->getOutletIndex(), newbox, link->getInletIndex());
-                }
-            }
-        }
-        return nullptr;
-    }
-    
-    bool Link::connect() noexcept
-    {
-        sBox     from    = getBoxFrom();
-        sBox     to      = getBoxTo();
-        if(from && to)
-        {
-            sOutlet outlet  = from->getOutlet(m_index_outlet);
-            sInlet inlet    = to->getInlet(m_index_intlet);
-            if(outlet && inlet)
-            {
-                if(outlet->append(to, m_index_outlet) && inlet->append(from, m_index_intlet))
-                {
-                    return true;
-                }
-                else
-                {
-                    outlet->erase(to, m_index_outlet);
-                    inlet->erase(from, m_index_intlet);
-                    return false;
-                }
-            }
-        }
-        return false;
-    }
-    
-
-    bool Link::disconnect() noexcept
-    {
-        sBox     from    = getBoxFrom();
-        sBox     to      = getBoxTo();
-        if(from && to)
-        {
-            sOutlet outlet  = from->getOutlet(m_index_outlet);
-            sInlet inlet    = to->getInlet(m_index_intlet);
-            if(outlet && inlet)
-            {
-                if(outlet->erase(to, m_index_outlet) && inlet->erase(from, m_index_intlet))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
     
     void Link::write(sDico dico) const noexcept
@@ -241,42 +139,19 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            dico->set(Tag_from, {from->getId(), getOutletIndex()});
-            dico->set(Tag_to, {to->getId(), getInletIndex()});
+            dico->set(Tag::List::from, {from->getId(), getOutletIndex()});
+            dico->set(Tag::List::to, {to->getId(), getInletIndex()});
         }
         else
         {
-            dico->clear(Tag_from);
-            dico->clear(Tag_to);
+            dico->clear(Tag::List::from);
+            dico->clear(Tag::List::to);
         }
     }
     
     void Link::setController(sController ctrl)
     {
         m_controller = ctrl;
-    }
-    
-    void Link::notify(Attr::sManager manager, sAttr attr, Attr::Notification type)
-    {
-        sBox from   = getBoxFrom();
-        sBox to     = getBoxTo();
-        if(from && to)
-        {
-            Box::sController from_ctrl   = getBoxFrom()->getController();
-            Box::sController to_ctrl     = getBoxTo()->getController();
-            if(from_ctrl && to_ctrl)
-            {
-                m_path.clear();
-                m_path.moveTo(from_ctrl->getOutletPosition(getOutletIndex()));
-                m_path.lineTo(to_ctrl->getInletPosition(getInletIndex()));
-                
-                sController ctrl = getController();
-                if(ctrl)
-                {
-                    ctrl->boundsChanged();
-                }
-            }
-        }
     }
 }
 

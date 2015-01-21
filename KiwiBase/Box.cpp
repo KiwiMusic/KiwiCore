@@ -29,12 +29,6 @@ namespace Kiwi
 {
     map<sTag, unique_ptr<Box>>  Box::m_prototypes;
     
-    const sTag Box::Tag_arguments   = Tag::create("arguments");
-    const sTag Box::Tag_bang        = Tag::create("bang");
-    const sTag Box::Tag_focus       = Tag::create("focus");
-    const sTag Box::Tag_name        = Tag::create("name");
-    const sTag Box::Tag_set         = Tag::create("set");
-    
     // ================================================================================ //
     //                                      BOX                                         //
     // ================================================================================ //
@@ -57,7 +51,7 @@ namespace Kiwi
     
     sBox Box::create(sPage page, sDico dico)
     {
-        sTag name = dico->get(Tag_name);
+        sTag name = dico->get(Tag::List::name);
         if(name)
         {
             lock_guard<mutex> guard(m_prototypes_mutex);
@@ -107,7 +101,7 @@ namespace Kiwi
     {
         this->save(dico);
         Attr::Manager::write(dico);
-        dico->set(Tag_name, getName());
+        dico->set(Tag::List::name, getName());
     }
     
     void Box::redraw() const noexcept

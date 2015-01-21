@@ -36,7 +36,7 @@ namespace Kiwi
     /**
      The link is a combination of two sockets used to create the connection between boxes in a page.
      */
-    class Link : public AttrLink, public Attr::Listener
+    class Link : public AttrLink
     {
     public:
         class Controller;
@@ -56,22 +56,12 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Link(sPage page, sBox from, ulong outlet, sBox to, ulong inlet) noexcept;
+        Link(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet) noexcept;
         
         //! The destructor.
         /** You should never use this method.
          */
         ~Link();
-        
-        //! The link creation method with sockets.
-        /** The function allocates a link, checks if the link is valid and returns it. If the link isn't valid it returns an invalid pointer.
-         @param from    The box that send.
-         @param outlet  The index of the outlet.
-         @param to      The box that receive.
-         @param inlet   The index of the inlet.
-         @return The link.
-         */
-        static sLink create(sPage page, const sBox from, const unsigned outlet, const sBox to, const unsigned inlet);
         
         //! The link creation method with a dico.
         /** The function allocates a link with a page and a dico.
@@ -80,15 +70,6 @@ namespace Kiwi
          @return The link.
          */
         static sLink create(sPage page, scDico dico);
-        
-        //! The link creation method with another link but change one of the boxes with another one.
-        /** The function allocates a link with another link.
-         @param link The other link.
-         @param oldbox  The old box to replace.
-         @param newbox  The newbox box that replace.
-         @return The link.
-         */
-        static sLink create(scLink link, const sBox oldbox, const sBox newbox);
         
         //! Retrieve the sLink.
         /** The function sLink.
@@ -115,33 +96,6 @@ namespace Kiwi
         inline sPage getPage() const noexcept
         {
             return m_page.lock();
-        }
-        
-        //! Retrieve if the link owns the boxes.
-        /** The function retrieves if the link owns the two boxes.
-         @return true if the link owns the two boxes, otherwise false.
-         */
-        inline bool hasBoxes() const noexcept
-        {
-            return m_box_from.expired() && m_box_to.expired();
-        }
-        
-        //! Retrieve if the link owns the output box.
-        /** The function retrieves if the link owns the output box.
-         @return true if the link owns the output box, otherwise false.
-         */
-        inline bool hasBoxFrom() const noexcept
-        {
-            return m_box_from.expired();
-        }
-        
-        //! Retrieve if the link owns the input box.
-        /** The function retrieves if the link owns the input box.
-         @return true if the link owns the input box, otherwise false.
-         */
-        inline bool hasBoxTo() const noexcept
-        {
-            return m_box_to.expired();
         }
         
         //! Retrieve the output box.
@@ -180,24 +134,6 @@ namespace Kiwi
             return m_index_intlet;
         }
         
-        //! Retrieve the outlet of the link.
-        /** The function retrieves the outlet of the link.
-         @return The outlet of the link.
-         */
-        inline sOutlet getOutlet() const noexcept
-        {
-            return nullptr;
-        }
-        
-        //! Retrieve the inlet of the link.
-        /** The function retrieves the inlet of the link.
-         @return The inlet of the link.
-         */
-        inline sInlet getInlet() const noexcept
-        {
-            return nullptr;
-        }
-        
         //! Retrieve the controller that manages the box.
         /** The function retrieves the controller that manages the box.
          @return The controller that manages the box.
@@ -206,18 +142,6 @@ namespace Kiwi
         {
             return m_controller.lock();
         }
-        
-        //! Connect the link.
-        /** The function connects link.
-         @return True if the link has been connected, otherwise false.
-         */
-        bool connect() noexcept;
-        
-        //! Disconnect the link.
-        /** The function disconnects link.
-         @return True if the link has been disconnected, otherwise false.
-         */
-        bool disconnect() noexcept;
         
         //! Write the page in a dico.
         /** The function writes the link in a dico.
@@ -267,14 +191,6 @@ namespace Kiwi
          */
         void setController(sController ctrl);
         
-        //! Receive the notification that an attribute has changed.
-        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
-         @param manager		The manager that manages the attribute.
-         @param attr		The attribute that has been modified.
-         @param type		The type of notification.
-         */
-        void notify(Attr::sManager manager, sAttr attr, Attr::Notification type);
-        
         // ================================================================================ //
         //                                  LINK CONTROLER                                  //
         // ================================================================================ //
@@ -322,9 +238,6 @@ namespace Kiwi
              */
             virtual void boundsChanged() = 0;
         };
-        
-        static const sTag Tag_from;
-        static const sTag Tag_to;
     };
     
     static bool operator==(scLink link, scBox box) noexcept

@@ -69,7 +69,7 @@ namespace Kiwi
                         m_second = elements[0];
                     }
                 }
-                else if(elements[0] == Tag_set)
+                else if(elements[0] == Tag::List::set)
                 {
                     if(!index)
                     {

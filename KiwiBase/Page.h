@@ -40,11 +40,11 @@ namespace Kiwi
     class Page : public AttrPage
 	{
     public:
-		class Controller;
-		typedef shared_ptr<Controller>			sController;
-		typedef weak_ptr<Controller>			wController;
-		typedef shared_ptr<const Controller>	scController;
-        typedef weak_ptr<const Controller>      swController;
+		class Listener;
+		typedef shared_ptr<Listener>			sListener;
+		typedef weak_ptr<Listener>              wListener;
+		typedef shared_ptr<const Listener>      scListener;
+        typedef weak_ptr<const Listener>        swListener;
 		
         /** Flags describing the type of the notification
          @see Controler
@@ -61,9 +61,9 @@ namespace Kiwi
         vector<sBox>                m_boxes;
         vector<sLink>               m_links;
         mutable mutex               m_mutex;
-        set<wController,
-        owner_less<wController>>    m_ctrls;
-        mutable mutex               m_ctrls_mutex;
+        set<wListener,
+        owner_less<wListener>>      m_lists;
+        mutable mutex               m_lists_mutex;
         
     private:
         
@@ -217,100 +217,81 @@ namespace Kiwi
          */
         bool attributeChanged(sAttr attr) override;
 		
-		//! Add a controller to the box.
-		/** The function adds a controller to the box.
-		 @param ctrl    The controller.
+		//! Add a listener to the box.
+		/** The function adds a listener to the box.
+		 @param list    The listener.
 		 */
-		void addController(sController ctrl);
+		void addListener(sListener list);
         
-        //! Remove a controller from the box.
-        /** The function removes a controller from the box.
-         @param ctrl    The controller.
+        //! Remove a listener from the box.
+        /** The function removes a listener from the box.
+         @param list    The listener.
          */
-        void removeController(sController ctrl);
+        void removeListener(sListener list);
+    };
+    
+    
+    // ================================================================================ //
+    //                                  PAGE LISTENER                                   //
+    // ================================================================================ //
+    
+    //! The page listener is an abstract class that facilitates the control of a page in an application.
+    /**
+     The page listener should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page listener owns a vector of box listeners and facilitates managements of boxes like the creation, the deletion, the selection, etc.
+     @see Page, Page::Listener, Box::Listener
+     */
+    class Page::Listener
+    {
+    public:
         
-        // ================================================================================ //
-        //                                  PAGE CONTROLER                                  //
-        // ================================================================================ //
-        
-        //! The page controller is an abstract class that facilitates the control of a page in an application.
-        /**
-         The page controller should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page controller owns a vector of box controllers and facilitates managements of boxes like the creation, the deletion, the selection, etc.
-         @see Page, Page::Listener, Box::Controller
+        //! Constructor.
+        /** You should never call this method except if you really know what you're doing.
+         Please use the create method instead.
+         @param page The page to control.
          */
-		class Controller
-        {            
-        private:
-            const sPage m_page;
-			
-        public:
-			
-			//! Constructor.
-			/** You should never call this method except if you really know what you're doing.
-			 Please use the create method instead.
-             @param page The page to control.
-             */
-            Controller(sPage page) noexcept :
-            m_page(page)
-            {
-                ;
-            }
-            
-            //! The destructor.
-            /** The destructor.
-             */
-            virtual ~Controller()
-            {
-                ;
-            }
-            
-            //! Retrieve the page.
-            /** The funtion retrieves the page.
-             @return The page.
-             */
-            inline sPage getPage() const noexcept
-            {
-                return m_page;
-            }
-			
-			//! Receive the notification that a box has been created.
-			/** The function is called by the page when a box has been created.
-			 @param box     The box.
-			 */
-			virtual void boxCreated(sBox box) = 0;
-			
-			//! Receive the notification that a box has been removed.
-			/** The function is called by the page when a box has been removed.
-			 @param box     The box.
-			 */
-			virtual void boxRemoved(sBox box) = 0;
-			
-			//! Receive the notification that a link has been created.
-			/** The function is called by the page when a link has been created.
-			 @param link     The link.
-			 */
-			virtual void linkCreated(sLink link) = 0;
-			
-			//! Receive the notification that a link has been removed.
-			/** The function is called by the page when a link has been removed.
-			 @param link    The link.
-			 */
-			virtual void linkRemoved(sLink link) = 0;
-			
-			//! Receives notification when an attribute value has changed.
-			/** The function receives notification when an attribute value has changed.
-			 @param attr The attribute.
-			 @return pass true to notify changes to listeners, false if you don't want them to be notified
-			 */
-			virtual bool attributeChanged(sAttr attr) = 0;
-        };
-		
-		static const sTag Tag_page;
-        static const sTag Tag_box;
-        static const sTag Tag_boxes;
-        static const sTag Tag_link;
-        static const sTag Tag_links;
-    };    
+        Listener() noexcept
+        {
+            ;
+        }
+        
+        //! The destructor.
+        /** The destructor.
+         */
+        virtual ~Listener()
+        {
+            ;
+        }
+        
+        //! Receive the notification that a box has been created.
+        /** The function is called by the page when a box has been created.
+         @param box     The box.
+         */
+        virtual void boxCreated(sBox box) = 0;
+        
+        //! Receive the notification that a box has been removed.
+        /** The function is called by the page when a box has been removed.
+         @param box     The box.
+         */
+        virtual void boxRemoved(sBox box) = 0;
+        
+        //! Receive the notification that a link has been created.
+        /** The function is called by the page when a link has been created.
+         @param link     The link.
+         */
+        virtual void linkCreated(sLink link) = 0;
+        
+        //! Receive the notification that a link has been removed.
+        /** The function is called by the page when a link has been removed.
+         @param link    The link.
+         */
+        virtual void linkRemoved(sLink link) = 0;
+        
+        //! Receives notification when an value has changed.
+        /** The function receives notification when an attribute has changed.
+         @param attr The attribute.
+         */
+        virtual void attributeChanged(sAttr attr) = 0;
+    };
 }
 
 

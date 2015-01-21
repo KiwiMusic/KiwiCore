@@ -58,7 +58,7 @@ namespace Kiwi
     sBox SigTilde::allocate(sPage page, sDico dico) const
     {
         ElemVector elements;
-        dico->get(Tag_arguments, elements);
+        dico->get(Tag::List::arguments, elements);
         if(!elements.empty() && elements[0].isNumber())
         {
             return make_shared<SigTilde>(page, (double)elements[0]);

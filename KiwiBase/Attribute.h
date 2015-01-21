@@ -362,7 +362,7 @@ namespace Kiwi
          @param  attr2  The second attribute.
          @return true if the the first attribute before the sedond attribute.
          */
-        static inline bool compareOrderOrLabel(sAttr const& attr1, sAttr const& attr2)
+        static inline bool compareOrderOrLabel(sAttr attr1, sAttr attr2)
         {
             if(attr1->getCategory() == attr2->getCategory())
             {

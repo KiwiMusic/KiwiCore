@@ -96,7 +96,7 @@ namespace Kiwi
         {
             if(!index)
             {
-                if(elements[0] == Tag_bang)
+                if(elements[0] == Tag::List::bang)
                 {
                     send(0, {m_value});
                     return true;
@@ -292,7 +292,7 @@ namespace Kiwi
             if(!index)
             {
                 /*
-                if(elements[0].isTag() && elements[0] == Tag_bang)
+                if(elements[0].isTag() && elements[0] == Tag::List::bang)
                 {
                     Box::send(0, m_values);
                 }

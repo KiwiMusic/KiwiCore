@@ -97,6 +97,23 @@ namespace Kiwi
                 return tag;
             }
         }
+        
+        class List
+        {
+        public:
+            static const sTag arguments;
+            static const sTag bang;
+            static const sTag box;
+            static const sTag boxes;
+            static const sTag focus;
+            static const sTag from;
+            static const sTag link;
+            static const sTag links;
+            static const sTag name;
+            static const sTag page;
+            static const sTag set;
+            static const sTag to;
+        };
     };
     
     //! Tag comparaison by alphabetic order.
