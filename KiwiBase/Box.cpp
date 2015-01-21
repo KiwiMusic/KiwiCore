@@ -138,9 +138,9 @@ namespace Kiwi
         m_io_mutex.unlock();
     }
 	
-	bool Box::attributeValueChanged(sAttr attr)
+	bool Box::attributeChanged(sAttr attr)
 	{
-        if(!this->attributeChanged(attr))
+        if(!this->notify(attr))
         {
             return false;
         }

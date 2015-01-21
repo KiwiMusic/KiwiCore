@@ -50,7 +50,7 @@ namespace Kiwi
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool draw(Gui::Doodle& doodle) const override;
-        bool attributeChanged(sAttr attr) override;
+        bool notify(sAttr attr) override;
         void tick() override;
         Allocate(Bang);
     };
@@ -72,7 +72,7 @@ namespace Kiwi
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool draw(Gui::Doodle& doodle) const override;
-        bool attributeChanged(sAttr attr) override;
+        bool notify(sAttr attr) override;
         Allocate(Toggle);
     };
     
@@ -95,7 +95,7 @@ namespace Kiwi
         bool receive(Gui::Event::Keyboard const& event) override;
         bool receive(Gui::Event::Focus::Type event) override;
         bool draw(Gui::Doodle& doodle) const override;
-        bool attributeChanged(sAttr attr) override;
+        bool notify(sAttr attr) override;
         void tick() override;
         Allocate(Message);
     };
@@ -124,7 +124,7 @@ namespace Kiwi
         bool receive(Gui::Event::Keyboard const& event) override;
         bool receive(Gui::Event::Focus::Type event) override;
         bool draw(Gui::Doodle& doodle) const override;
-        bool attributeChanged(sAttr attr) override;
+        bool notify(sAttr attr) override;
         void tick() override;
         Allocate(Number);
     };
@@ -151,7 +151,7 @@ namespace Kiwi
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool draw(Gui::Doodle& doodle) const override;
-        bool attributeChanged(sAttr attr) override;
+        bool notify(sAttr attr) override;
         void send() const;
         Allocate(Slider);
     };
@@ -171,7 +171,7 @@ namespace Kiwi
 		~Panel() {};
 		bool receive(ulong index, ElemVector const& elements) override;
 		bool draw(Gui::Doodle& doodle) const override;
-		bool attributeChanged(sAttr attr) override;
+		bool notify(sAttr attr) override;
 		Allocate(Panel);
 	};
 	

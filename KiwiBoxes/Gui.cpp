@@ -117,7 +117,7 @@ namespace Kiwi
         return true;
     }
     
-    bool Bang::attributeChanged(sAttr attr)
+    bool Bang::notify(sAttr attr)
     {
         if(attr == m_color_circle)
         {
@@ -226,7 +226,7 @@ namespace Kiwi
         return true;
     }
     
-    bool Toggle::attributeChanged(sAttr attr)
+    bool Toggle::notify(sAttr attr)
     {
         if(attr == m_color_cross_on && m_value)
         {
@@ -314,7 +314,7 @@ namespace Kiwi
         return true;
     }
     
-    bool Message::attributeChanged(sAttr attr)
+    bool Message::notify(sAttr attr)
     {
         if(attr == attr_size)
         {
@@ -586,7 +586,7 @@ namespace Kiwi
         return true;
     }
     
-    bool Number::attributeChanged(sAttr attr)
+    bool Number::notify(sAttr attr)
     {
         if(attr == attr_size)
         {
@@ -722,7 +722,7 @@ namespace Kiwi
         return true;
     }
     
-    bool Slider::attributeChanged(sAttr attr)
+    bool Slider::notify(sAttr attr)
     {
         if(attr == m_tag_receive)
         {
@@ -801,7 +801,7 @@ namespace Kiwi
 		return true;
 	}
 	
-	bool Panel::attributeChanged(sAttr attr)
+	bool Panel::notify(sAttr attr)
 	{
 		if(attr == m_border_radius || attr == m_border_size)
 		{

@@ -428,7 +428,7 @@ namespace Kiwi
         }
     }
     
-    bool Page::attributeValueChanged(sAttr attr)
+    bool Page::attributeChanged(sAttr attr)
     {
         if(attr)
         {

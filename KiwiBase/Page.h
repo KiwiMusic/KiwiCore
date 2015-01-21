@@ -215,7 +215,7 @@ namespace Kiwi
          @param attr The attribute.
          @return pass true to notify changes to listeners, false if you don't want them to be notified
          */
-        bool attributeValueChanged(sAttr attr) override;
+        bool attributeChanged(sAttr attr) override;
 		
 		//! Add a controller to the box.
 		/** The function adds a controller to the box.

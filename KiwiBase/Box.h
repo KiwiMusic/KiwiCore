@@ -25,7 +25,6 @@
 #define __DEF_KIWI_BOX__
 
 #include "Iolets.h"
-#include "AttributeBox.h"
 #include "Event.h"
 #include "Doodle.h"
 #include "Text.h"
@@ -393,7 +392,7 @@ namespace Kiwi
 		 @param attr The attribute that has changed.
 		 @return pass true to notify changes to listeners, false if you don't want them to be notified
 		 */
-        virtual bool attributeChanged(sAttr attr)
+        virtual bool notify(sAttr attr)
         {
             return true;
         }
@@ -403,7 +402,7 @@ namespace Kiwi
 		 @param attr The attribute that has changed.
 		 @return pass true to notify changes to listeners, false if you don't want them to be notified
 		 */
-		bool attributeValueChanged(sAttr attr);
+		bool attributeChanged(sAttr attr);
 
         //! Set the controller of the box.
         /** The function sets the controller of the box.
