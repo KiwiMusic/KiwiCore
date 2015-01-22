@@ -1251,7 +1251,7 @@ namespace Kiwi
         /** The function retrieves if the box should be displayed in presentation.
          @return True if the box should be displayed in presentation, otherwise false.
          */
-        inline bool isInPresentation() const noexcept
+        inline bool isIncludeInPresentation() const noexcept
         {
             return attr_presentation->get();
         }
