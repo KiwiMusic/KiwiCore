@@ -847,33 +847,9 @@ namespace Kiwi
 	}
     
     // ================================================================================ //
-    //                                  ATTRIBUTE FONT                                  //
-    // ================================================================================ //
-    
-    const sTag AttrFont::Tag_Font								= Tag::create("Font");
-    const sTag AttrFont::Tag_fontname                           = Tag::create("fontname");
-    const sTag AttrFont::Tag_Font_Name                          = Tag::create("Font Name");
-    const sTag AttrFont::Tag_Arial                              = Tag::create("Arial");
-    const sTag AttrFont::Tag_Menelo                             = Tag::create("Menelo");
-    const sTag AttrFont::Tag_fontsize                           = Tag::create("fontsize");
-    const sTag AttrFont::Tag_Font_Size                          = Tag::create("Font Size");
-    const sTag AttrFont::Tag_fontface                           = Tag::create("fontface");
-    const sTag AttrFont::Tag_Font_Face                          = Tag::create("Font Face");
-    const sTag AttrFont::Tag_normal                             = Tag::create("normal");
-    const sTag AttrFont::Tag_bold                               = Tag::create("bold");
-    const sTag AttrFont::Tag_italic                             = Tag::create("italic");
-    const sTag AttrFont::Tag_bold_italic                        = Tag::create("bold_italic");
-    const sTag AttrFont::Tag_fontjustification                  = Tag::create("fontjustification");
-    const sTag AttrFont::Tag_Font_Justification                 = Tag::create("Font Justification");
-    const sTag AttrFont::Tag_left                               = Tag::create("left");
-    const sTag AttrFont::Tag_center                             = Tag::create("center");
-    const sTag AttrFont::Tag_right                              = Tag::create("right");
-    
-    // ================================================================================ //
     //                                  ATTRIBUTE PAGE                                  //
     // ================================================================================ //
     
-    const sTag AttrPage::Tag_Color                              = Tag::create("Color");
     const sTag AttrPage::Tag_editing_bgcolor                    = Tag::create("editing_bgcolor");
     const sTag AttrPage::Tag_Unlocked_Background_Color          = Tag::create("Unlocked Background Color");
     const sTag AttrPage::Tag_locked_bgcolor						= Tag::create("locked_bgcolor");
@@ -891,25 +867,6 @@ namespace Kiwi
     const sTag AttrBox::Tag_noutlets						= Tag::create("noutlets");
     const sTag AttrBox::Tag_id                              = Tag::create("id");
     const sTag AttrBox::Tag_text                            = Tag::create("text");
-    
-    const sTag AttrBox::Tag_Font							= Tag::create("Font");
-    const sTag AttrBox::Tag_fontname						= Tag::create("fontname");
-    const sTag AttrBox::Tag_Font_Name						= Tag::create("Font Name");
-    const sTag AttrBox::Tag_Arial							= Tag::create("Arial");
-    const sTag AttrBox::Tag_Menelo							= Tag::create("Menelo");
-    const sTag AttrBox::Tag_fontsize						= Tag::create("fontsize");
-    const sTag AttrBox::Tag_Font_Size						= Tag::create("Font Size");
-    const sTag AttrBox::Tag_fontface						= Tag::create("fontface");
-    const sTag AttrBox::Tag_Font_Face						= Tag::create("Font Face");
-    const sTag AttrBox::Tag_normal							= Tag::create("normal");
-    const sTag AttrBox::Tag_bold							= Tag::create("bold");
-    const sTag AttrBox::Tag_italic							= Tag::create("italic");
-    const sTag AttrBox::Tag_bold_italic						= Tag::create("bold_italic");
-    const sTag AttrBox::Tag_fontjustification				= Tag::create("fontjustification");
-    const sTag AttrBox::Tag_Font_Justification				= Tag::create("Font Justification");
-    const sTag AttrBox::Tag_left							= Tag::create("left");
-    const sTag AttrBox::Tag_center							= Tag::create("center");
-    const sTag AttrBox::Tag_right							= Tag::create("right");
     
     const sTag AttrBox::Tag_Appearance						= Tag::create("Appearance");
     const sTag AttrBox::Tag_position						= Tag::create("position");
@@ -929,7 +886,6 @@ namespace Kiwi
     const sTag AttrBox::Tag_ignoreclick						= Tag::create("ignoreclick");
     const sTag AttrBox::Tag_Ignore_Click					= Tag::create("Ignore Click");
     
-    const sTag AttrBox::Tag_Color							= Tag::create("Color");
     const sTag AttrBox::Tag_bgcolor							= Tag::create("bgcolor");
     const sTag AttrBox::Tag_Background_Color				= Tag::create("Background Color");
     const sTag AttrBox::Tag_bdcolor							= Tag::create("bdcolor");

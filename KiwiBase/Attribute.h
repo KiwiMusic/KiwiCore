@@ -868,36 +868,16 @@ namespace Kiwi
     
     struct AttrFont
     {
-        // Font //
-        static const sTag Tag_Font;
-        static const sTag Tag_fontname;
-        static const sTag Tag_Font_Name;
-        static const sTag Tag_Arial;
-        static const sTag Tag_Menelo;
-        static const sTag Tag_fontsize;
-        static const sTag Tag_Font_Size;
-        static const sTag Tag_fontface;
-        static const sTag Tag_Font_Face;
-        static const sTag Tag_normal;
-        static const sTag Tag_bold;
-        static const sTag Tag_italic;
-        static const sTag Tag_bold_italic;
-        static const sTag Tag_fontjustification;
-        static const sTag Tag_Font_Justification;
-        static const sTag Tag_left;
-        static const sTag Tag_center;
-        static const sTag Tag_right;
-        
         const shared_ptr<AttrTag>       name;
         const shared_ptr<AttrDouble>    size;
         const shared_ptr<AttrEnum>      face;
         const shared_ptr<AttrEnum>      justification;
         
         AttrFont() :
-        name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
-        size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
-        face(Attr::create<AttrEnum>(Tag_fontface, Tag_Font_Face, Tag_Font, (ElemVector){Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0)),
-        justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0))
+        name(Attr::create<AttrTag>(Tag::List::fontname, Tag::List::Font_Name, Tag::List::Font, Tag::List::Menelo)),
+        size(Attr::create<AttrDouble>(Tag::List::fontsize, Tag::List::Font_Size, Tag::List::Font, 13)),
+        face(Attr::create<AttrEnum>(Tag::List::fontface, Tag::List::Font_Face, Tag::List::Font, (ElemVector){Tag::List::normal, Tag::List::bold, Tag::List::italic, Tag::List::bold_italic}, 0)),
+        justification(Attr::create<AttrEnum>(Tag::List::fontjustification, Tag::List::Font_Justification, Tag::List::Font, (ElemVector){Tag::List::left, Tag::List::center, Tag::List::right}, 0))
         {
             ;
         }
@@ -934,7 +914,6 @@ namespace Kiwi
     {
     public:
         // Color //
-        static const sTag Tag_Color;
         static const sTag Tag_editing_bgcolor;
         static const sTag Tag_Unlocked_Background_Color;
         static const sTag Tag_locked_bgcolor;
@@ -954,8 +933,8 @@ namespace Kiwi
         
     public:
         AttrPage() :
-        attr_color_editing_background(Attr::create<AttrColor>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag_Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
-        attr_color_locked_background(Attr::create<AttrColor>(Tag_locked_bgcolor, Tag_Locked_Background_Color, Tag_Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
+        attr_color_editing_background(Attr::create<AttrColor>(Tag_editing_bgcolor, Tag_Unlocked_Background_Color, Tag::List::Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
+        attr_color_locked_background(Attr::create<AttrColor>(Tag_locked_bgcolor, Tag_Locked_Background_Color, Tag::List::Color, (ElemVector){0.88, 0.89, 0.88, 1.})),
         attr_editing_grid_size(Attr::create<AttrLong>(Tag_gridsize, Tag_Grid_Size, Tag_Editing, 15))
         {
             addAttribute(attr_font.name);
@@ -1055,28 +1034,7 @@ namespace Kiwi
         static const sTag Tag_ignoreclick;
         static const sTag Tag_Ignore_Click;
         
-        // Font //
-        static const sTag Tag_Font;
-        static const sTag Tag_fontname;
-        static const sTag Tag_Font_Name;
-        static const sTag Tag_Arial;
-        static const sTag Tag_Menelo;
-        static const sTag Tag_fontsize;
-        static const sTag Tag_Font_Size;
-        static const sTag Tag_fontface;
-        static const sTag Tag_Font_Face;
-        static const sTag Tag_normal;
-        static const sTag Tag_bold;
-        static const sTag Tag_italic;
-        static const sTag Tag_bold_italic;
-        static const sTag Tag_fontjustification;
-        static const sTag Tag_Font_Justification;
-        static const sTag Tag_left;
-        static const sTag Tag_center;
-        static const sTag Tag_right;
-        
         // Color //
-        static const sTag Tag_Color;
         static const sTag Tag_bgcolor;
         static const sTag Tag_Background_Color;
         static const sTag Tag_bdcolor;
@@ -1131,15 +1089,15 @@ namespace Kiwi
         attr_ignoreclick(Attr::create<AttrBool>(Tag_ignoreclick, Tag_Ignore_Click, Tag_Behavior, false)),
         
         // Font //
-        attr_font_name(Attr::create<AttrTag>(Tag_fontname, Tag_Font_Name, Tag_Font, Tag_Menelo)),
-        attr_font_size(Attr::create<AttrDouble>(Tag_fontsize, Tag_Font_Size, Tag_Font, 13)),
-        attr_font_face(Attr::create<AttrEnum>(Tag_fontface, Tag_Font_Face, Tag_Font, (ElemVector){Tag_normal, Tag_bold, Tag_italic, Tag_bold_italic}, 0)),
-        attr_font_justification(Attr::create<AttrEnum>(Tag_fontjustification, Tag_Font_Justification, Tag_Font, (ElemVector){Tag_left, Tag_center, Tag_right}, 0)),
+        attr_font_name(Attr::create<AttrTag>(Tag::List::fontname, Tag::List::Font_Name, Tag::List::Font, Tag::List::Menelo)),
+        attr_font_size(Attr::create<AttrDouble>(Tag::List::fontsize, Tag::List::Font_Size, Tag::List::Font, 13)),
+        attr_font_face(Attr::create<AttrEnum>(Tag::List::fontface, Tag::List::Font_Face, Tag::List::Font, (ElemVector){Tag::List::normal, Tag::List::bold, Tag::List::italic, Tag::List::bold_italic}, 0)),
+        attr_font_justification(Attr::create<AttrEnum>(Tag::List::fontjustification, Tag::List::Font_Justification, Tag::List::Font, (ElemVector){Tag::List::left, Tag::List::center, Tag::List::right}, 0)),
         
         // Color //
-        attr_color_background(Attr::create<AttrColor>(Tag_bgcolor, Tag_Background_Color, Tag_Color, (ElemVector){1., 1., 1, 1.})),
-        attr_color_border(Attr::create<AttrColor>(Tag_bdcolor, Tag_Border_Color, Tag_Color, (ElemVector){0.4, 0.4, 0.4, 1.})),
-        attr_color_text(Attr::create<AttrColor>(Tag_textcolor, Tag_Text_Color, Tag_Color, (ElemVector){0.3, 0.3, 0.3, 1.}))
+        attr_color_background(Attr::create<AttrColor>(Tag_bgcolor, Tag_Background_Color, Tag::List::Color, (ElemVector){1., 1., 1, 1.})),
+        attr_color_border(Attr::create<AttrColor>(Tag_bdcolor, Tag_Border_Color, Tag::List::Color, (ElemVector){0.4, 0.4, 0.4, 1.})),
+        attr_color_text(Attr::create<AttrColor>(Tag_textcolor, Tag_Text_Color, Tag::List::Color, (ElemVector){0.3, 0.3, 0.3, 1.}))
         {
             // Internal //
             addAttribute(attr_ninlets);

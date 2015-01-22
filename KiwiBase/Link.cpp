@@ -81,8 +81,8 @@ namespace Kiwi
             dico->get(Tag::List::from, elements);
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
-                from_id = elements[0];
-                outlet_index  = elements[1];
+                from_id     = elements[0];
+                outlet_index= elements[1];
             }
             else
             {
@@ -92,8 +92,8 @@ namespace Kiwi
             dico->get(Tag::List::to, elements);
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
-                to_id   = elements[0];
-                inlet_index   = elements[1];
+                to_id       = elements[0];
+                inlet_index = elements[1];
             }
             else
             {
@@ -102,43 +102,79 @@ namespace Kiwi
         
             if(from_id != to_id)
             {
-                vector<sBox> boxes;
-                page->getBoxes(boxes);
-                for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
-                {
-                    if(boxes[i]->getId() == from_id)
-                    {
-                        from = boxes[i];
-                        if(from->getNumberOfOutlets() <=  outlet_index)
-                        {
-                            return nullptr;
-                        }
-                    }
-                    else if(boxes[i]->getId() == to_id)
-                    {
-                        to = boxes[i];
-                        if(to->getNumberOfInlets() <=  inlet_index)
-                        {
-                            return nullptr;
-                        }
-                    }
-                }
-                
+                from = page->getBoxe(from_id);
+                to   = page->getBoxe(to_id);
                 if(from && to)
                 {
                     Box::sOutlet outlet  = from->getOutlet(outlet_index);
                     Box::sInlet inlet    = to->getInlet(inlet_index);
                     if(outlet && inlet)
                     {
-                        if(outlet->getType() != inlet->getType() && outlet->getType() < Box::Io::Both && inlet->getType() < Box::Io::Both)
+                        if(outlet->getType() & inlet->getType() || inlet->getType() & outlet->getType())
                         {
-                            return nullptr;
+                            Box::Io::Type type = min(outlet->getType(), inlet->getType());
+                            if(type & Box::Io::Signal)
+                            {
+                                Dsp::sProcess pfrom = dynamic_pointer_cast<Dsp::Process>(from);
+                                Dsp::sProcess pto   = dynamic_pointer_cast<Dsp::Process>(to);
+                                if(from && to)
+                                {
+                                    ulong poutlet = 0, pinlet = 0;
+                                    for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
+                                    {
+                                        Box::sOutlet out = from->getOutlet(poutlet);
+                                        if(out)
+                                        {
+                                            if(out == outlet)
+                                            {
+                                                break;
+                                            }
+                                            else if(out->getType() & Box::Io::Signal)
+                                            {
+                                                poutlet++;
+                                            }
+                                        }
+                                    }
+                                    if(poutlet >= pfrom->getNumberOfOutputs())
+                                    {
+                                        return nullptr;
+                                    }
+                                    
+                                    for(ulong i = 0; i < from->getNumberOfInlets(); i++)
+                                    {
+                                        Box::sInlet in = from->getInlet(poutlet);
+                                        if(in)
+                                        {
+                                            if(in == inlet)
+                                            {
+                                                break;
+                                            }
+                                            else if(in->getType() & Box::Io::Signal)
+                                            {
+                                                pinlet++;
+                                            }
+                                        }
+                                    }
+                                    if(pinlet >= pfrom->getNumberOfInputs())
+                                    {
+                                        return nullptr;
+                                    }
+                                    
+                                    outlet->append(to, outlet_index);
+                                    inlet->append(from, inlet_index);
+                                    return make_shared<DspLink>(page, from, outlet_index, to, inlet_index, type, pfrom, poutlet, pto, pinlet);
+                                }
+                            }
+                            else
+                            {
+                                outlet->append(to, outlet_index);
+                                inlet->append(from, inlet_index);
+                                return make_shared<Link>(page, from, outlet_index, to, inlet_index, type);
+                            }
                         }
                         else
                         {
-                            outlet->append(to, outlet_index);
-                            inlet->append(from, inlet_index);
-                            return make_shared<Link>(page, from, outlet_index, to, inlet_index, min(outlet->getType(), inlet->getType()));
+                            return nullptr;
                         }
                     } 
                 }

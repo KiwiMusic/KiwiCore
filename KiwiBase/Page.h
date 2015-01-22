@@ -127,6 +127,37 @@ namespace Kiwi
             boxes = m_boxes;
         }
         
+        //! Get the number of boxes.
+        /** The function retrieves the number of boxes.
+         @return The number of boxes.
+         */
+        ulong getNumberOfBoxes() const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            return m_boxes.size();
+        }
+        
+        //! Get the number of boxes.
+        /** The function retrieves a boxes from the page.
+         @param _id   The id of the boxe.
+         @return The boxe that match with the id.
+         */
+        sBox getBoxe(const ulong _id) const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            if(_id < m_boxes.size())
+            {
+                for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
+                {
+                    if(m_boxes[i]->getId() == _id)
+                    {
+                        return m_boxes[i];
+                    }
+                }
+            }
+            return nullptr;
+        }
+        
         //! Get the links.
         /** The function retrieves the links from the page.
          @param links   A vector of links.

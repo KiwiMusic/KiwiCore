@@ -162,6 +162,20 @@ namespace Kiwi
          @param dico The dico.
          */
         void write(sDico dico) const noexcept;
+        
+    private:
+        class DspLink;
+    };
+    
+    class Link::DspLink : public Link, public Dsp::Connection
+    {
+    public:
+        DspLink(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet, const Box::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
+        Link(page, from, outlet, to, inlet, type),
+        Dsp::Connection(pfrom, poutlet, pto, pinlet)
+        {
+            ;
+        }
     };
     
     static bool operator==(scLink link, scBox box) noexcept

@@ -98,29 +98,7 @@ namespace Kiwi
             }
         }
         
-        class List
-        {
-        public:
-            static const sTag arguments;
-            static const sTag bang;
-            static const sTag box;
-            static const sTag boxes;
-            static const sTag color;
-            static const sTag Color;
-            static const sTag focus;
-            static const sTag from;
-            static const sTag link;
-            static const sTag links;
-            static const sTag mescolor;
-            static const sTag Message_Color;
-            static const sTag name;
-            static const sTag page;
-            static const sTag set;
-            static const sTag sigcolor;
-            static const sTag Signal_Color;
-            static const sTag to;
- 
-        };
+        class List;
     };
     
     //! Tag comparaison by alphabetic order.
@@ -138,6 +116,59 @@ namespace Kiwi
     {
         return __val->getName();
     }
+    
+    class Tag::List
+    {
+    public:
+        static const sTag arguments;
+        static const sTag Arial;
+        
+        static const sTag bang;
+        static const sTag bold;
+        static const sTag bold_italic;
+        static const sTag box;
+        static const sTag boxes;
+        
+        static const sTag center;
+        static const sTag color;
+        static const sTag Color;
+        
+        static const sTag focus;
+        static const sTag Font;
+        static const sTag Font_Face;
+        static const sTag Font_Justification;
+        static const sTag Font_Name;
+        static const sTag Font_Size;
+        static const sTag fontface;
+        static const sTag fontjustification;
+        static const sTag fontname;
+        static const sTag fontsize;
+        static const sTag from;
+        
+        static const sTag italic;
+        
+        static const sTag left;
+        static const sTag link;
+        static const sTag links;
+        
+        static const sTag Menelo;
+        static const sTag mescolor;
+        static const sTag Message_Color;
+        
+        static const sTag name;
+        static const sTag normal;
+        
+        static const sTag page;
+        
+        static const sTag right;
+        
+        static const sTag set;
+        static const sTag sigcolor;
+        static const sTag Signal_Color;
+        
+        static const sTag to;
+        
+    };
 };
 
 

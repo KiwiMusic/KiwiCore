@@ -78,24 +78,26 @@ namespace Kiwi
                     subdico = subdico->get(Tag::List::box);
                     if(subdico)
                     {
-                        lock_guard<mutex> guard(m_mutex);
-                        
-                        ulong _id;
-                        for(_id = 1; _id <= m_boxes.size() + 1; _id++)
                         {
-                            for(ulong j = 0; j < m_boxes.size(); j++)
+                            lock_guard<mutex> guard(m_mutex);
+                            ulong _id;
+                            for(_id = 1; _id <= m_boxes.size() + 1; _id++)
                             {
-                                if(m_boxes[j]->getId() == _id)
+                                for(ulong j = 0; j < m_boxes.size(); j++)
                                 {
-                                    break;
+                                    if(m_boxes[j]->getId() == _id)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
+                            subdico->set(Box::Tag_id, _id);
                         }
                         
-                        subdico->set(Box::Tag_id, _id);
                         box = Box::create(getShared(), subdico);
                         if(box)
                         {
+                            lock_guard<mutex> guard(m_mutex);
                             m_boxes.push_back(box);
                         }
                         
@@ -141,10 +143,10 @@ namespace Kiwi
                             }
                         }
                         
-                        lock_guard<mutex> guard(m_mutex);
                         link = Link::create(getShared(), subdico);
                         if(link)
                         {
+                            lock_guard<mutex> guard(m_mutex);
                             m_links.push_back(link);
                         }
                     }
@@ -327,13 +329,10 @@ namespace Kiwi
 
         for(auto it = m_links.begin(); it != m_links.end(); ++it)
         {
-            Dsp::sProcess from = dynamic_pointer_cast<Dsp::Process>((*it)->getBoxFrom());
-            Dsp::sProcess to = dynamic_pointer_cast<Dsp::Process>((*it)->getBoxTo());
-            if(from && to)
+            Dsp::sConnection connection = dynamic_pointer_cast<Dsp::Connection>((*it));
+            if(connection)
             {
-                int zaza;
-                Dsp::sConnection con = Dsp::Connection::create(from, (*it)->getOutletIndex(), to, (*it)->getInletIndex());
-                m_dsp_context->add(con);
+                m_dsp_context->add(connection);
             } 
         }
         
