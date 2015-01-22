@@ -198,11 +198,10 @@ namespace Kiwi
     
     map<sTag, unique_ptr<Box>>  Box::m_prototypes;
     
-    Box::Box(sPage page, string const& name, ulong flags) :
+    Box::Box(sPage page, string const& name) :
     m_instance(page ? page->getInstance() : weak_ptr<Instance>()),
     m_page(page),
     m_name(Tag::create(name)),
-    m_flags(0 | flags),
     m_stack_count(0)
     {
         ;
@@ -244,11 +243,14 @@ namespace Kiwi
                 {
                     box->load(dico);
 					box->Attr::Manager::read(dico);
+                    int todo;
+                    /*
                     if(!dico->has(Tag_size) && !(box->isGUI()))
                     {
                         Gui::Point size = Gui::Font::getStringSize(box->getFont(), toString(box->getText()));
                         box->setAttributeValue(Tag_size, {max(ceil(size.x()) + 6., 25.), box->getSize().y()});
                     }
+                     */
                     return box;
                 }
             }
@@ -267,24 +269,6 @@ namespace Kiwi
         this->save(dico);
         Attr::Manager::write(dico);
         dico->set(Tag::List::name, getName());
-    }
-    
-    void Box::redraw() const noexcept
-    {
-        sListener list = getListener();
-        if(list)
-        {
-            list->redraw();
-        }
-    }
-    
-    void Box::grabKeyboardFocus() const noexcept
-    {
-        sListener list = getListener();
-        if(list)
-        {
-            list->grabKeyboardFocus();
-        }
     }
     
     void Box::send(ulong index, ElemVector const& elements) const noexcept
@@ -469,7 +453,12 @@ namespace Kiwi
         }
     }
 
-    void Box::setListener(sListener list)
+    void Box::addListener(sListener list)
+    {
+        int todo;
+    }
+    
+    void Box::removeListener(sListener list)
     {
         int todo;
     }

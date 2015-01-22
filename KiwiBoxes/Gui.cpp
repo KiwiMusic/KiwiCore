@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    Bang::Bang(sPage page) : Box(page, "bang", Graphic | Mouse),
+    Bang::Bang(sPage page) : Box(page, "bang"),
     m_color_circle(Attr::create<AttrColor>(Tag::create("circlecolor"),
 										   Tag::create("Circle Color"),
                                            Tag::create("Color"),
@@ -93,7 +93,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Bang::draw(Gui::Doodle& d) const
+    void Bang::draw(Gui::Doodle& d) const
     {
 		double borderSize = 1;
 		const Gui::Rectangle bounds = d.getBounds().reduced(borderSize);
@@ -113,8 +113,6 @@ namespace Kiwi
 			d.setColor(m_color_led->get());
 			d.fillEllipse(ledRect);
 		}
-			
-        return true;
     }
     
     bool Bang::notify(sAttr attr)
@@ -130,7 +128,7 @@ namespace Kiwi
     //                                      TOGGLE                                      //
     // ================================================================================ //
     
-    Toggle::Toggle(sPage page) : Box(page, "toggle", Graphic | Mouse),
+    Toggle::Toggle(sPage page) : Box(page, "toggle"),
     m_color_cross_on(Attr::create<AttrColor>(Tag::create("crosscoloron"),
                                             Tag::create("Cross Color On"),
                                             Tag::create("Color"),
@@ -202,7 +200,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Toggle::draw(Gui::Doodle& d) const
+    void Toggle::draw(Gui::Doodle& d) const
     {
 		double borderSize = 2;
 		d.setColor(getBorderColor());
@@ -223,7 +221,6 @@ namespace Kiwi
 		const double size2 = size1 * 3;
         d.drawLine(size1, size1, size2, size2, 1.5);
         d.drawLine(size2, size1, size1, size2, 1.5);
-        return true;
     }
     
     bool Toggle::notify(sAttr attr)
@@ -243,7 +240,7 @@ namespace Kiwi
     //                                      MESSAGE                                     //
     // ================================================================================ //
     
-    Message::Message(sPage page) : Box(page, "message", Graphic | Mouse | Keyboard)
+    Message::Message(sPage page) : Box(page, "message")
     {
         addInlet(Io::Message, Io::Hot, "Messages and Ouput (anything)");
         addInlet(Io::Message, Io::Hot, "Messages without Ouput (anything)");
@@ -294,12 +291,12 @@ namespace Kiwi
         return false;
     }
     
-    bool Message::receive(Gui::Event::Focus::Type event)
+    bool Message::receive(Gui::Event::Focus event)
     {
         return TextEditor::receive(event);
     }
     
-    bool Message::draw(Gui::Doodle& d) const
+    void Message::draw(Gui::Doodle& d) const
     {
 		const double borderSize = m_mouse_down ? 3 : 1;
 		const double borderRadius = 4;
@@ -311,7 +308,6 @@ namespace Kiwi
 		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, borderRadius);
 		
         TextEditor::draw(d);
-        return true;
     }
     
     bool Message::notify(sAttr attr)
@@ -340,7 +336,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    Number::Number(sPage page) : Box(page, "number", Graphic | Mouse | Keyboard),
+    Number::Number(sPage page) : Box(page, "number"),
     m_value(0.),
     m_increment(0.),
     m_last_y(0.),
@@ -518,9 +514,9 @@ namespace Kiwi
         return true;
     }
     
-    bool Number::receive(Gui::Event::Focus::Type event)
+    bool Number::receive(Gui::Event::Focus event)
     {
-        if(event == Gui::Event::Focus::Out && m_edition && !m_text.empty())
+        if(event == Gui::Event::Out && m_edition && !m_text.empty())
         {
 			try
 			{
@@ -550,7 +546,7 @@ namespace Kiwi
         }
     }
     
-    bool Number::draw(Gui::Doodle& d) const
+    void Number::draw(Gui::Doodle& d) const
     {
 		double borderSize = 2;
 		d.setColor(getBorderColor());
@@ -582,8 +578,6 @@ namespace Kiwi
             d.setColor(getTextColor());
             d.drawText(toString(m_value), 14., 0., size.x() - 16., size.y(), Gui::Font::VerticallyCentred);
         }
-        
-        return true;
     }
     
     bool Number::notify(sAttr attr)
@@ -607,7 +601,7 @@ namespace Kiwi
     //                                      SLIDER                                      //
     // ================================================================================ //
     
-    Slider::Slider(sPage page) : Box(page, "slider", Graphic | Mouse),
+    Slider::Slider(sPage page) : Box(page, "slider"),
     m_color_on(Attr::create<AttrColor>(Tag::create("coloron"),
                                        Tag::create("Color On"),
                                        Tag::create("Color"),
@@ -707,7 +701,7 @@ namespace Kiwi
         return false;
     }
     
-    bool Slider::draw(Gui::Doodle& d) const
+    void Slider::draw(Gui::Doodle& d) const
     {
         const Gui::Point size = getSize();
         if(size.x() > size.y())
@@ -719,7 +713,6 @@ namespace Kiwi
             d.setColor(m_color_knob->get());
             d.drawLine(size.x() * 0.5, 0., size.x() * 0.5, size.y(), 3.);
         }
-        return true;
     }
     
     bool Slider::notify(sAttr attr)
@@ -763,7 +756,7 @@ namespace Kiwi
 	//                                      PANEL                                       //
 	// ================================================================================ //
 	
-	Panel::Panel(sPage page) : Box(page, "panel", Graphic),
+	Panel::Panel(sPage page) : Box(page, "panel"),
 	m_border_size(Attr::create<AttrLong>(Tag::create("border"),
 										  Tag::create("Border Size"),
 										  AttrBox::Tag_Appearance,
@@ -786,7 +779,7 @@ namespace Kiwi
 		return false;
 	}
 
-	bool Panel::draw(Gui::Doodle& d) const
+	void Panel::draw(Gui::Doodle& d) const
 	{
 		const long borderSize = m_border_size->get();
 		const long radius = m_border_radius->get();
@@ -797,8 +790,6 @@ namespace Kiwi
 		
 		d.setColor(getBorderColor());
 		d.drawRectangle(rect, borderSize, radius);
-		
-		return true;
 	}
 	
 	bool Panel::notify(sAttr attr)

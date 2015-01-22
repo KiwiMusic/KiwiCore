@@ -53,7 +53,7 @@ namespace Kiwi
         typedef weak_ptr<Listener>          wListener;
         typedef shared_ptr<const Listener>  scListener;
         typedef weak_ptr<const Listener>    wcListener;
-        
+
         enum Behavior
         {
             Mouse       = 1<<2,
@@ -103,7 +103,6 @@ namespace Kiwi
         const wInstance     m_instance;
         const wPage         m_page;
         const sTag          m_name;
-        const ulong         m_flags;
         
         vector<sOutlet>     m_outlets;
         vector<sInlet>      m_inlets;
@@ -116,7 +115,7 @@ namespace Kiwi
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Box(sPage page, string const& name, ulong type = 1<<0);
+        Box(sPage page, string const& name);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
@@ -181,42 +180,6 @@ namespace Kiwi
         {
             return m_name;
         }
-        
-        //! Retrieve the flags of the box.
-        /** The function retrieves the flags of the box.
-         @return The flags of the box.
-         */
-        inline ulong getFlags() const noexcept
-        {
-            return m_flags;
-        }
-		
-		//! Retrieve if the box is a graphical object.
-		/** The function retrieves if the box is a graphical object.
-		 @return true if the box is a graphical object otherwise false.
-		 */
-		inline bool isGUI() const noexcept
-		{
-			return m_flags & Graphic;
-		}
-		
-		//! Retrieve if the box wants the mouse focus.
-		/** The function retrieves if the box wants the mouse focus.
-		 @return true if the box wants the mouse focus otherwise false.
-		 */
-		inline bool isMouseListener() const noexcept
-		{
-			return m_flags & Mouse;
-		}
-		
-		//! Retrieve if the box wants the keyboard focus.
-		/** The function retrieves if the box wants the keyboard focus.
-		 @return true if the box wants the keyboard focus otherwise false.
-		 */
-		inline bool isKeyboardListener() const noexcept
-		{
-			return m_flags & Keyboard;
-		}
         
         //! Retrieve the expression of the box.
         /** The function retrieves the expression of the box as a string.
@@ -292,42 +255,6 @@ namespace Kiwi
             return false;
         }
         
-        //! The receive method that should be override.
-        /** The function shoulds perform some stuff. Return false if you don't want the mouse event then the box manager will notify other mouse listener if needed, othersize return true.
-         @param event    A mouse event.
-         */
-        virtual bool receive(Gui::Event::Mouse const& event)
-        {
-            return false;
-        }
-        
-        //! The receive method that should be override.
-        /** The function shoulds perform some stuff. Return false if you don't want the keyboard event then the box manager will notifiy other keyboard listener if needed, othersize return true.
-         @param event    A keyboard event.
-         */
-        virtual bool receive(Gui::Event::Keyboard const& event)
-        {
-            return false;
-        }
-        
-        //! The receive method that should be override.
-        /** The function shoulds perform some stuff. Return false if you don't want the focus event then the box manager will notifiy other keyboard listener if needed, othersize return true.
-         @param event    A focus event.
-         */
-        virtual bool receive(Gui::Event::Focus::Type event)
-        {
-            return false;
-        }
-        
-        //! The paint method that should be override.
-        /** The function shoulds draw some stuff in the doodle. Return false if you don't want to draw then the box manager will draw the text of the box, othersize return true.
-         @param doodle    A doodle to draw.
-         */
-        virtual bool draw(Gui::Doodle& doodle) const
-        {
-            return false;
-        }
-        
         //! Write the box in a dico.
         /** The function writes the box in a dico.
          @param dico The dico.
@@ -335,16 +262,6 @@ namespace Kiwi
         void write(sDico dico) const;
         
     protected:
-        
-        //! Send a notification to the controler that the box should be redraw.
-        /** The function sends a notification to the controler that the box should be redraw.
-         */
-        void    redraw() const noexcept;
-        
-        //! Send a notification to the controler that the box should be redraw.
-        /** The function sends a notification to the controler that the box should be redraw.
-         */
-        void    grabKeyboardFocus() const noexcept;
         
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
@@ -432,11 +349,19 @@ namespace Kiwi
 		 */
 		bool attributeChanged(sAttr attr);
 
-        //! Set the listener of the box.
-        /** The function sets the listener of the box.
-         @param list    The listener.
+    public:
+        
+        //! Add the listener of the box.
+        /** The function adds the listener of the box.
+         @param list The listener.
          */
-        void setListener(sListener list);
+        void addListener(sListener list);
+        
+        //! Remove the listener of the box.
+        /** The function removes the listener of the box.
+         @param list The listener.
+         */
+        void removeListener(sListener list);
         
         // ================================================================================ //
         //                                      BOX FACTORY                                 //

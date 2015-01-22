@@ -166,7 +166,7 @@ namespace Kiwi
     private:
         class DspLink;
     };
-    
+
     class Link::DspLink : public Link, public Dsp::Connection
     {
     public:

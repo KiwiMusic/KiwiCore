@@ -79,6 +79,7 @@ namespace Kiwi
                     if(subdico)
                     {
                         {
+                            int notworking;
                             lock_guard<mutex> guard(m_mutex);
                             ulong _id;
                             for(_id = 1; _id <= m_boxes.size() + 1; _id++)

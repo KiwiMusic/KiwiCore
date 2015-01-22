@@ -30,7 +30,7 @@ namespace Kiwi
     //                                     METRO                                        //
     // ================================================================================ //
     
-    NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name, Graphic | Mouse | Keyboard)
+    NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name)
     {
         //addInlet(Io::Message, Io::Hot, "inlet 1");
 		TextEditor::setFont(getFont());
@@ -52,7 +52,7 @@ namespace Kiwi
 	
 	bool NewBox::receive(Gui::Event::Mouse const& event)
 	{
-		return false;
+        return false;
 	}
 	
 	bool NewBox::receive(Gui::Event::Keyboard const& event)
@@ -64,15 +64,16 @@ namespace Kiwi
 			return true;
 		}
 		*/
-		return false;
+        return false;
 	}
 	
-	bool NewBox::receive(Gui::Event::Focus::Type event)
+	bool NewBox::receive(Gui::Event::Focus event)
 	{
-		return false; //Text::Editor::receive(event);
+		//Text::Editor::receive(event);
+        return false;
 	}
 	
-	bool NewBox::draw(Gui::Doodle& d) const
+	void NewBox::draw(Gui::Doodle& d) const
 	{
 		const double borderSize = 1;
 		
@@ -87,6 +88,5 @@ namespace Kiwi
 			d.drawText(toString(getText()), 3, 0, d.getWidth(), d.getHeight(), getFontJustification());
 		}
 		//Text::Editor::draw(d);
-		return true;
 	}
 }

@@ -36,7 +36,7 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    class Bang : public Box, public Clock::Maker
+    class Bang : public Box, public Gui::Sketcher, public Gui::Mouser, public Clock::Maker
     {
     private:
         const sAttrColor    m_color_circle;
@@ -49,7 +49,7 @@ namespace Kiwi
         ~Bang();
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
-        bool draw(Gui::Doodle& doodle) const override;
+        void draw(Gui::Doodle& doodle) const override;
         bool notify(sAttr attr) override;
         void tick() override;
         Allocate(Bang);
@@ -59,7 +59,7 @@ namespace Kiwi
     //                                      TOGGLE                                      //
     // ================================================================================ //
     
-    class Toggle : public Box
+    class Toggle : public Box, public Gui::Sketcher, public Gui::Mouser
     {
     private:
         const sAttrColor    m_color_cross_on;
@@ -71,7 +71,7 @@ namespace Kiwi
         ~Toggle();
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
-        bool draw(Gui::Doodle& doodle) const override;
+        void draw(Gui::Doodle& doodle) const override;
         bool notify(sAttr attr) override;
         Allocate(Toggle);
     };
@@ -80,7 +80,7 @@ namespace Kiwi
     //                                      MESSAGE                                     //
     // ================================================================================ //
     
-    class Message : public Box, public Gui::TextEditor, public Clock::Maker
+    class Message : public Box, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder, public Gui::TextEditor, public Clock::Maker
     {
     private:
         ElemVector      m_elements;
@@ -93,8 +93,8 @@ namespace Kiwi
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool receive(Gui::Event::Keyboard const& event) override;
-        bool receive(Gui::Event::Focus::Type event) override;
-        bool draw(Gui::Doodle& doodle) const override;
+        bool receive(Gui::Event::Focus event) override;
+        void draw(Gui::Doodle& doodle) const override;
         bool notify(sAttr attr) override;
         void tick() override;
         Allocate(Message);
@@ -104,7 +104,7 @@ namespace Kiwi
     //                                      NUMBER                                      //
     // ================================================================================ //
     
-    class Number : public Box, public Gui::TextEditor, public Clock::Maker
+    class Number : public Box, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder, public Gui::TextEditor, public Clock::Maker
     {
     private:
         double m_value;
@@ -122,8 +122,8 @@ namespace Kiwi
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
         bool receive(Gui::Event::Keyboard const& event) override;
-        bool receive(Gui::Event::Focus::Type event) override;
-        bool draw(Gui::Doodle& doodle) const override;
+        bool receive(Gui::Event::Focus event) override;
+        void draw(Gui::Doodle& doodle) const override;
         bool notify(sAttr attr) override;
         void tick() override;
         Allocate(Number);
@@ -133,7 +133,7 @@ namespace Kiwi
     //                                      SLIDER                                      //
     // ================================================================================ //
     
-    class Slider : public Box
+    class Slider : public Box, public Gui::Sketcher, public Gui::Mouser
     {
     private:
         const sAttrColor    m_color_on;
@@ -150,7 +150,7 @@ namespace Kiwi
         ~Slider();
         bool receive(ulong index, ElemVector const& elements) override;
         bool receive(Gui::Event::Mouse const& event) override;
-        bool draw(Gui::Doodle& doodle) const override;
+        void draw(Gui::Doodle& doodle) const override;
         bool notify(sAttr attr) override;
         void send() const;
         Allocate(Slider);
@@ -160,7 +160,7 @@ namespace Kiwi
 	//                                      PANEL                                       //
 	// ================================================================================ //
 	
-	class Panel : public Box
+	class Panel : public Box, public Gui::Sketcher
 	{
 	private:
 		const sAttrLong m_border_size;
@@ -170,7 +170,7 @@ namespace Kiwi
 		Panel(sPage page);
 		~Panel() {};
 		bool receive(ulong index, ElemVector const& elements) override;
-		bool draw(Gui::Doodle& doodle) const override;
+		void draw(Gui::Doodle& doodle) const override;
 		bool notify(sAttr attr) override;
 		Allocate(Panel);
 	};

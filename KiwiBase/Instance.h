@@ -223,26 +223,26 @@ namespace Kiwi
          @param instance    The instance.
          @param page        The page.
          */
-        virtual void pageCreated(sInstance instance, sPage page){};
+        virtual void pageCreated(sInstance instance, sPage page) = 0;
         
         //! Receive the notification that a page has been closed.
         /** The function is called by the instance when a page has been closed.
          @param instance    The instance.
          @param page        The page.
          */
-        virtual void pageRemoved(sInstance instance, sPage page){};
+        virtual void pageRemoved(sInstance instance, sPage page) = 0;
         
         //! Receive the notification that the dsp has been started.
         /** The function is called by the instance when the dsp has been started.
          @param instance    The instance.
          */
-        virtual void dspStarted(sInstance instance){};
+        virtual void dspStarted(sInstance instance) = 0;
         
         //! Receive the notification that the dsp has been stopped.
         /** The function is called by the instance when the dsp has been stopped.
          @param instance    The instance.
          */
-        virtual void dspStopped(sInstance instance){};
+        virtual void dspStopped(sInstance instance) = 0;
     };
 }
 

@@ -31,7 +31,7 @@
 namespace Kiwi
 {
     class Element;
-    
+
     //! The vector of elements
     /**
      The elements is a standard vector of elements.
@@ -73,7 +73,7 @@ namespace Kiwi
         
         Element::Type   m_type;
         Ele             m_val;
-        
+    
         inline void changeType(Element::Type type) noexcept
         {
             if(m_type != type)

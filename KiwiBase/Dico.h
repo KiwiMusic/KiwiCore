@@ -214,12 +214,6 @@ namespace Kiwi
          */
         void read(string const& filename, string const& directoryname);
         
-        //! Read a string to fill the dico.
-        /** The function reads a string to fill the dico.
-         @param text The string to read.
-         */
-        //void read(string const& text);
-        
         //! Write the dico in a text file.
         /** The function writes the dico in a text file.
          @param file The name of the file.

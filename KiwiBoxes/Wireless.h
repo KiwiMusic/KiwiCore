@@ -36,7 +36,7 @@ namespace Kiwi
 	//										PRINT                                       //
 	// ================================================================================ //
 	
-	class Print : public Box
+    class Print : public Box, public Gui::Mouser
 	{
 	private:
 		string m_name;
@@ -45,7 +45,7 @@ namespace Kiwi
 		Print(sPage page, ElemVector const& value);
 		~Print();
 		bool receive(ulong index, ElemVector const& elements) override;
-		bool receive(Gui::Event::Mouse const& event) override;
+        bool receive(Gui::Event::Mouse const& event) override;
 		AllocateElemVector(Print);
 	};
 	
@@ -57,7 +57,7 @@ namespace Kiwi
     //                                      INT                                         //
     // ================================================================================ //
     
-    class Int : public Box
+    class Int : public Box, public Gui::Mouser
     {
     private:
         bool m_init;

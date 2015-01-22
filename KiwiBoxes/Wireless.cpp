@@ -30,7 +30,7 @@ namespace Kiwi
 	//										PRINT                                       //
 	// ================================================================================ //
 	
-	Print::Print(sPage page, ElemVector const& value) : Box(page, "print", Mouse), m_name("print")
+	Print::Print(sPage page, ElemVector const& value) : Box(page, "print"), m_name("print")
 	{
 		addInlet(Io::Message, Io::Hot, "Anything to be printed in the kiwi console");
 		
@@ -61,14 +61,14 @@ namespace Kiwi
 			// brings kiwi console to front
 			return true;
 		}
-		return false;
+        return false;
 	}
 	
     // ================================================================================ //
     //                                      INT                                         //
     // ================================================================================ //
 	
-    Int::Int(sPage page, ElemVector const& value) : Box(page, "int", Mouse),
+    Int::Int(sPage page, ElemVector const& value) : Box(page, "int"),
     m_init(!value.empty()),
     m_value(0)
     {
