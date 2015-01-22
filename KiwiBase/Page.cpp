@@ -359,14 +359,20 @@ namespace Kiwi
     
     void Page::addListener(sListener list)
     {
-        lock_guard<mutex> guard(m_mutex);
-        m_lists.insert(list);
+        if(list)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            m_lists.insert(list);
+        }
     }
     
     void Page::removeListener(sListener list)
     {
-        lock_guard<mutex> guard(m_mutex);
-        m_lists.erase(list);
+        if(list)
+        {
+            lock_guard<mutex> guard(m_mutex);
+            m_lists.erase(list);
+        }
     }
 
     void Page::send(sBox box, Page::Notification type)
@@ -381,11 +387,11 @@ namespace Kiwi
                 {
                     if(type == Notification::Added)
                     {
-                        list->boxCreated(box);
+                        list->boxCreated(getShared(), box);
                     }
                     else
                     {
-                        list->boxRemoved(box);
+                        list->boxRemoved(getShared(), box);
                     }
                     
                     ++it;
@@ -410,11 +416,11 @@ namespace Kiwi
                 {
                     if(type == Notification::Added)
                     {
-                        list->linkCreated(link);
+                        list->linkCreated(getShared(), link);
                     }
                     else
                     {
-                        list->linkRemoved(link);
+                        list->linkRemoved(getShared(), link);
                     }
                     
                     ++it;
@@ -437,7 +443,7 @@ namespace Kiwi
                 sListener list = (*it).lock();
                 if(list)
                 {
-                    list->attributeChanged(attr);
+                    list->attributeChanged(getShared(), attr);
                     ++it;
                 }
                 else

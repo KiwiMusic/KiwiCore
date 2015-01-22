@@ -31,16 +31,16 @@ namespace Kiwi
     {
         m_first     = 0.;
         m_second    = 0.;
-        addInlet(Iolet::Message, Iolet::Hot, input1 + " (int or float)");
+        addInlet(Io::Message, Io::Hot, input1 + " (int or float)");
         if(!elements.empty() && (elements[0].isDouble() || elements[0].isLong()))
         {
             m_second = elements[0];
         }
         else
         {
-            addInlet(Iolet::Message, Iolet::Cold, input2 + " (int or float)");
+            addInlet(Io::Message, Io::Cold, input2 + " (int or float)");
         }
-        addOutlet(Iolet::Message, output + " (float)");
+        addOutlet(Io::Message, output + " (float)");
     }
     
     Arithmetic::~Arithmetic()
@@ -125,9 +125,9 @@ namespace Kiwi
         for(size_t i = 0; i < m_values.size(); i++)
         {
             m_parser.DefineVar("i" + toString(i+1), &m_values[i]);
-            addInlet(Iolet::Message, Iolet::Hot, "i" + toString(i+1) + " (int or float)");
+            addInlet(Io::Message, Io::Hot, "i" + toString(i+1) + " (int or float)");
         }
-        addOutlet(Iolet::Message, "result (float)");
+        addOutlet(Io::Message, "result (float)");
         m_parser.SetExpr(expr);
     }
     

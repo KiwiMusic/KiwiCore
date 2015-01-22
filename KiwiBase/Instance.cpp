@@ -49,7 +49,7 @@ namespace Kiwi
     Instance::~Instance()
     {
         m_pages.clear();
-        m_listeners.clear();
+        m_lists.clear();
         m_dsp_pages.clear();
     }
     
@@ -97,13 +97,13 @@ namespace Kiwi
                 }
             }
             
-            m_listeners_mutex.lock();
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+            m_lists_mutex.lock();
+            auto it = m_lists.begin();
+            while(it != m_lists.end())
             {
                 if((*it).expired())
                 {
-                    it = m_listeners.erase(it);
+                    it = m_lists.erase(it);
                 }
                 else
                 {
@@ -112,7 +112,7 @@ namespace Kiwi
                     ++it;
                 }
             }
-            m_listeners_mutex.unlock();
+            m_lists_mutex.unlock();
         }
         return page;
     }
@@ -137,13 +137,13 @@ namespace Kiwi
             m_pages.erase(page);
             m_pages_mutex.unlock();
             
-            m_listeners_mutex.lock();
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+            m_lists_mutex.lock();
+            auto it = m_lists.begin();
+            while(it != m_lists.end())
             {
                 if((*it).expired())
                 {
-                    it = m_listeners.erase(it);
+                    it = m_lists.erase(it);
                 }
                 else
                 {
@@ -152,7 +152,7 @@ namespace Kiwi
                     ++it;
                 }
             }
-            m_listeners_mutex.unlock();
+            m_lists_mutex.unlock();
         }
         else
         {
@@ -197,13 +197,13 @@ namespace Kiwi
             m_dsp_running   = true;
             m_dsp_mutex.unlock();
             
-            m_listeners_mutex.lock();
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+            m_lists_mutex.lock();
+            auto it = m_lists.begin();
+            while(it != m_lists.end())
             {
                 if((*it).expired())
                 {
-                    it = m_listeners.erase(it);
+                    it = m_lists.erase(it);
                 }
                 else
                 {
@@ -212,7 +212,7 @@ namespace Kiwi
                     ++it;
                 }
             }
-            m_listeners_mutex.unlock();
+            m_lists_mutex.unlock();
         }
         else
         {
@@ -234,13 +234,13 @@ namespace Kiwi
             
             m_dsp_running = false;
             
-            m_listeners_mutex.lock();
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+            m_lists_mutex.lock();
+            auto it = m_lists.begin();
+            while(it != m_lists.end())
             {
                 if((*it).expired())
                 {
-                    it = m_listeners.erase(it);
+                    it = m_lists.erase(it);
                 }
                 else
                 {
@@ -249,25 +249,25 @@ namespace Kiwi
                     ++it;
                 }
             }
-            m_listeners_mutex.unlock();
+            m_lists_mutex.unlock();
         }
     }    
     
-    void Instance::bind(shared_ptr<Instance::Listener> listener)
+    void Instance::bind(sListener listener)
     {
         if(listener)
         {
-            lock_guard<mutex> guard(m_listeners_mutex);
-            m_listeners.insert(listener);
+            lock_guard<mutex> guard(m_lists_mutex);
+            m_lists.insert(listener);
         }
     }
     
-    void Instance::unbind(shared_ptr<Instance::Listener> listener)
+    void Instance::unbind(sListener listener)
     {
         if(listener)
         {
-            lock_guard<mutex> guard(m_listeners_mutex);
-            m_listeners.erase(listener);
+            lock_guard<mutex> guard(m_lists_mutex);
+            m_lists.erase(listener);
         }
     }
 }

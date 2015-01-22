@@ -27,14 +27,14 @@ namespace Kiwi
 {
     SigTilde::SigTilde(sPage page) : Box(page, "sig~")
     {
-        addInlet(Iolet::Message, Iolet::Hot, "Value (long or double)");
-        addOutlet(Iolet::Signal, "Value (signal)");
+        addInlet(Io::Message, Io::Hot, "Value (long or double)");
+        addOutlet(Io::Signal, "Value (signal)");
     }
     
     SigTilde::SigTilde(sPage page, const double value) : Box(page, "sig~")
     {
         Dsp::Sig::setValue(value);
-        addOutlet(Iolet::Signal, "Value (signal)");
+        addOutlet(Io::Signal, "Value (signal)");
     }
 
     SigTilde::~SigTilde()

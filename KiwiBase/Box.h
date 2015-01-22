@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_BOX__
 #define __DEF_KIWI_BOX__
 
-#include "Iolets.h"
+#include "Attribute.h"
 #include "Event.h"
 #include "Doodle.h"
 #include "Text.h"
@@ -48,20 +48,57 @@ namespace Kiwi
 	class Box : public AttrBox
     {
     public:
-        class Controller;
-        typedef shared_ptr<Controller>   sController;
-        typedef weak_ptr<Controller>     wController;
+        class Listener;
+        typedef shared_ptr<Listener>        sListener;
+        typedef weak_ptr<Listener>          wListener;
+        typedef shared_ptr<const Listener>  scListener;
+        typedef weak_ptr<const Listener>    wcListener;
         
         enum Behavior
         {
-            Signal      = 1<<1,
             Mouse       = 1<<2,
             Keyboard    = 1<<3,
             Graphic     = 1<<4
         };
         
+        struct Io
+        {
+            enum Type
+            {
+                Message = 0,
+                Signal  = 1,
+                Both    = 2
+            };
+            
+            enum Polarity
+            {
+                Cold   = 0,
+                Hot    = 1
+            };
+        };
+        
+    
+        class Iolet;
+        
+        class Inlet;
+        typedef shared_ptr<Inlet>       sInlet;
+        typedef weak_ptr<Inlet>         wInlet;
+        typedef shared_ptr<const Inlet> scInlet;
+        typedef weak_ptr<const Inlet>   wcInlet;
+        
+        class Outlet;
+        typedef shared_ptr<Outlet>      sOutlet;
+        typedef weak_ptr<Outlet>        wOutlet;
+        typedef shared_ptr<const Outlet>scOutlet;
+        typedef weak_ptr<const Outlet>  wcOutlet;
+    
     private:
-        friend void Outlet::send(ElemVector const& elements) const noexcept;
+        struct Connection
+        {
+            wBox box;
+            ulong index;
+            bool operator<(Connection const& other) const noexcept;
+        };
         
         const wInstance     m_instance;
         const wPage         m_page;
@@ -71,9 +108,9 @@ namespace Kiwi
         vector<sOutlet>     m_outlets;
         vector<sInlet>      m_inlets;
         atomic_ullong       m_stack_count;
-        mutable mutex       m_io_mutex;
+        mutable mutex       m_mutex;
         
-        wController         m_controller;
+        wListener         m_listener;
     public:
         
         //! Constructor.
@@ -127,13 +164,13 @@ namespace Kiwi
             return m_page.lock();
         }
         
-        //! Retrieve the controller that manages the box.
-        /** The function retrieves the controller that manages the box.
-         @return The controller that manages the box.
+        //! Retrieve the listener that manages the box.
+        /** The function retrieves the listener that manages the box.
+         @return The listener that manages the box.
          */
-        inline sController getController() const noexcept
+        inline sListener getListener() const noexcept
         {
-            return m_controller.lock();
+            return m_listener.lock();
         }
         
         //! Retrieve the name of the box.
@@ -161,15 +198,6 @@ namespace Kiwi
 		inline bool isGUI() const noexcept
 		{
 			return m_flags & Graphic;
-		}
-		
-		//! Retrieve if the box is a DSP object.
-		/** The function retrieves if the box is a DSP object.
-		 @return true if the box is a DSP object otherwise false.
-		 */
-		inline bool isDSP() const noexcept
-		{
-			return m_flags & Signal;
 		}
 		
 		//! Retrieve if the box wants the mouse focus.
@@ -205,7 +233,7 @@ namespace Kiwi
          */
         inline ulong getNumberOfInlets() const noexcept
         {
-            lock_guard<mutex> guard(m_io_mutex);
+            lock_guard<mutex> guard(m_mutex);
             return (ulong)m_inlets.size();
         }
         
@@ -216,7 +244,7 @@ namespace Kiwi
          */
         inline sInlet getInlet(ulong index) const noexcept
         {
-            lock_guard<mutex> guard(m_io_mutex);
+            lock_guard<mutex> guard(m_mutex);
             if(index < m_inlets.size())
             {
                 return m_inlets[(vector<sInlet>::size_type)index];
@@ -233,7 +261,7 @@ namespace Kiwi
          */
         inline ulong getNumberOfOutlets() const noexcept
         {
-            lock_guard<mutex> guard(m_io_mutex);
+            lock_guard<mutex> guard(m_mutex);
             return (ulong)m_outlets.size();
         }
         
@@ -244,7 +272,7 @@ namespace Kiwi
          */
         inline sOutlet getOutlet(ulong index) const noexcept
         {
-            lock_guard<mutex> guard(m_io_mutex);
+            lock_guard<mutex> guard(m_mutex);
             if(index < m_outlets.size())
             {
                 return m_outlets[(vector<sOutlet>::size_type)index];
@@ -330,7 +358,7 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    addInlet(Iolet::Type type, Iolet::Polarity polarity, string const& description = "");
+        void    addInlet(Io::Type type, Io::Polarity polarity, string const& description = "");
         
         //! Insert a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -338,7 +366,7 @@ namespace Kiwi
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
-        void    insertInlet(ulong index, Iolet::Type type, Iolet::Polarity polarity, string const& description = "");
+        void    insertInlet(ulong index, Io::Type type, Io::Polarity polarity, string const& description = "");
         
         //! Remove an inlet from the box.
         /** The function removes an inlet from the box.
@@ -351,7 +379,7 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    addOutlet(Iolet::Type type, string const& description = "");
+        void    addOutlet(Io::Type type, string const& description = "");
         
         //! Insert a new inlet to the box.
         /** The function adds a new inlet to the box.
@@ -359,7 +387,7 @@ namespace Kiwi
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
-        void    insertOutlet(ulong index, Iolet::Type type, string const& description = "");
+        void    insertOutlet(ulong index, Io::Type type, string const& description = "");
         
         //! Remove an outlet.
         /** The function removes an outlet.
@@ -387,9 +415,9 @@ namespace Kiwi
          */
 		virtual void load(scDico dico) {};
 		
-        //! Notify the manager that the values of an attribute has changed.
-		/** The function notifies the manager that the values of an attribute has changed.
-		 @param attr The attribute that has changed.
+        //! Notify that an attribute changed.
+		/** The function notifies that an attribute changed.
+		 @param attr The attribute.
 		 @return pass true to notify changes to listeners, false if you don't want them to be notified
 		 */
         virtual bool notify(sAttr attr)
@@ -404,300 +432,12 @@ namespace Kiwi
 		 */
 		bool attributeChanged(sAttr attr);
 
-        //! Set the controller of the box.
-        /** The function sets the controller of the box.
-         @param ctrl    The controller.
+        //! Set the listener of the box.
+        /** The function sets the listener of the box.
+         @param list    The listener.
          */
-        void setController(sController ctrl);
+        void setListener(sListener list);
         
-    public:
-        
-        // ================================================================================ //
-        //                                  BOX CONTROLER                                   //
-        // ================================================================================ //
-        
-        //! The box controller .
-        /**
-         The box controller...
-         */
-		class Controller
-        {
-        private:
-            
-            const sBox		m_box;
-			const bool		m_boxgui;
-			const bool		m_boxdsp;
-            const bool  	m_want_mouse_focus;
-            const bool		m_want_keyboard_focus;
-			const double	m_framesize;
-			
-            bool			m_selected;
-			bool			m_page_edition_status;
-			bool			m_page_presentation_status;
-        public:
-            
-            //! Constructor.
-            /** You should never call this method except if you really know what you're doing.
-             */
-            Controller(sBox box) :
-            m_box(box),
-            m_boxgui(box->getFlags() & Box::Graphic),
-            m_boxdsp(box->getFlags() & Box::Signal),
-			m_want_mouse_focus(box->getFlags() & Box::Mouse),
-			m_want_keyboard_focus(box->getFlags() & Box::Keyboard),
-			m_framesize(4.),
-            m_selected(false),
-			m_page_edition_status(true),
-			m_page_presentation_status(false)
-            {
-                ;
-            }
-            
-            //! The destructor.
-            /** You should never call this method except if you really know what you're doing.
-             */
-            virtual ~Controller()
-            {
-                ;
-            }
-            
-            //! The controller maker.
-            /** The function creates a controller with arguments.
-             */
-            template<class CtrlClass, class ...Args> static shared_ptr<CtrlClass> create(Args&& ...arguments)
-            {
-                shared_ptr<CtrlClass> ctrl = make_shared<CtrlClass>(forward<Args>(arguments)...);
-                if(ctrl && ctrl->m_box)
-                {
-                    ctrl->m_box->setController(ctrl);
-                }
-                return ctrl;
-            }
-            
-            //! Retrieve the box.
-            /** The funtion retrieves the box.
-             @return The box.
-             */
-            inline sBox getBox() const noexcept
-            {
-                return m_box;
-            }
-            
-            //! Retrieve the text of the box.
-            /** The funtion retrieves the text of the box.
-             @return The text of the box.
-             */
-            inline string getText() const noexcept
-            {
-                return toString(m_box->getText());
-            }
-            
-            //! Retrieve if the page is in edition.
-            /** The function retrieves if the page is in edition.
-             @param true if the page is in edition, otherwise false.
-             */
-            inline bool getPageEditionStatus() const noexcept
-            {
-                return m_page_edition_status;
-            }
-			
-			//! Retrieve if the page is in presentation mode.
-			/** The function retrieves if the page is in presentation mode.
-			 @param true if the page is in presentation mode, otherwise false.
-			 */
-			inline bool getPagePresentationStatus() const noexcept
-			{
-				return m_page_presentation_status;
-			}
-			
-            //! Retrieve if the box is selected.
-            /** The function retrieves if the box is selected.
-             @param true if the box is selected, otherwise false.
-             */
-            inline bool isSelected() const noexcept
-            {
-                return m_selected;
-            }
-			
-			//! Retrieve if the box is a graphical object.
-			/** The function retrieves if the box is a graphical object.
-			 @return true if the box is a graphical object otherwise false.
-			 */
-			inline bool isGUI() const noexcept
-			{
-				return m_boxgui;
-			}
-			
-			//! Retrieve if the box is a DSP object.
-			/** The function retrieves if the box is a DSP object.
-			 @return true if the box is a DSP object otherwise false.
-			 */
-			inline bool isDSP() const noexcept
-			{
-				return m_boxdsp;
-			}
-			
-            //! Retrieve if the box wants the mouse focus.
-            /** The function retrieves if the box wants the mouse focus.
-             @return true if the box wants the mouse focus otherwise false.
-             */
-            inline bool isMouseListener() const noexcept
-            {
-                return m_want_mouse_focus;
-            }
-            
-            //! Retrieve if the box wants the keyboard focus.
-            /** The function retrieves if the box wants the keyboard focus.
-             @return true if the box wants the keyboard focus otherwise false.
-             */
-            inline bool isKeyboardListener() const noexcept
-            {
-                return m_want_keyboard_focus;
-            }
-			
-			//! Retrieve the frame size.
-			/** The function retrieves the frame size.
-			 @return The frame size value.
-			 */
-			inline double getFrameSize() const noexcept
-			{
-				return m_framesize;
-			}
-			
-			//! Retrieve the bounds of the box controller.
-			/** The function retrieves the bounds of the box controller.
-			 The box controller's bounds is equal to the box's bounds expanded by a framesize.
-			 */
-			Gui::Rectangle getBounds(const bool presentation) const noexcept;
-			
-			//! Retrieve the position of the box controller.
-			/** The function retrieves the position of the box controller.
-			 The box controller's position is equal to the box's position expanded by a framesize.
-			 */
-			Gui::Point getPosition(const bool presentation) const noexcept;
-			
-			//! Retrieve the size of the box controller.
-			/** The function retrieves the size of the box controller.
-			 The box controller's size is equal to the box's size expanded by a framesize.
-			 */
-			Gui::Point getSize(const bool presentation) const noexcept;
-			
-            //! Retrieve the position of an inlet.
-            /** The function retrieves the position of an inlet.
-             @param index The index of the inlet.
-             @return the position of the inlet as a point.
-             */
-            Gui::Point getInletPosition(ulong index) const noexcept;
-            
-            //! Retrieve the position of an outlet.
-            /** The function retrieves the position of an outlet.
-             @param index The index of the outlet.
-             @return the position of the outlet as a point.
-             */
-            Gui::Point getOutletPosition(ulong index) const noexcept;
-            
-            //! Retrieve if the box is touch by a point.
-			/** The function retrieves if the box is touch by a point and fill the knock with the knock informations.
-             @param point The point.
-             @param knock The knock.
-			 @param presentation Is the page in presentation mode ?
-			 @return true if the box is touch by the point, otherwise false.
-			 */
-			virtual bool contains(Gui::Point const& point, Knock& knock, const bool presentation) const noexcept;
-            
-            //! Tests if the box overlaps the rectangle.
-			/** The function tests if the box overlaps the rectangle.
-             @param rect The Rectangle.
-			 @param presentation Is the page in presentation mode ?
-			 @return True if the box overlaps the rectangle, otherwise false.
-			 */
-			virtual bool overlaps(Gui::Rectangle const& rect, const bool presentation) const noexcept;
-            
-            //! Notify that the page is in edition.
-            /** The function notifies that page is in edition to redraw the box.
-             @param edition true if page is in edition, otherwise false.
-             */
-            void setPageEditionStatus(const bool edition);
-			
-			//! Notify that the page presentation status changed.
-			/** The function notifies that the page presentation status changed.
-			 @param presentation True if page is in presentation, otherwise false.
-			 */
-			void setPagePresentationStatus(const bool presentation);
-            
-            //! Notify that the box is selected.
-            /** The function notifies that the box is selected to redraw the box.
-             @param status true if the box is selected, otherwise false.
-             */
-            void setSelectedStatus(bool status);
-            
-            //! The inlets notification function that should be override.
-            /** The function is called by the box when its inlets changed.
-             */
-            virtual void inletsChanged();
-            
-            //! The outlets notification function that should be override.
-            /** TThe function is called by the box when its outlets changed.
-             */
-            virtual void outletsChanged();
-            
-            //! The position notification function that should be override.
-            /** The function is called by the box when its position changed.
-             */
-			virtual void positionChanged() {};
-				
-            //! The size notification function that should be override.
-            /** The function is called by the box when its size changed.
-             */
-			virtual void sizeChanged() {};
-			
-			//! The size notification function that should be override.
-			/** The function is called by the box when its size changed.
-			 */
-			virtual void pageEditionStatusChanged() {};
-			
-			//! The page presentation notification function.
-			/** The function is called by the box when page presentation mode changed.
-			 */
-			virtual void pagePresentationStatusChanged() {};
-			
-			//! Called by the box when the box selection status changed.
-			/** The function is called by the box selection status changed.
-			 */
-			virtual void selectionStatusChanged() {};
-			
-			//! Called by the box when the presentation status changed.
-			/** The function is called by the box when the presentation status changed.
-			 */
-			virtual void presentationStatusChanged() {};
-			
-            //! The redraw function that should be override.
-            /** The function is called by the box when it should be repainted.
-             */
-			virtual void redraw() {};
-            
-            //! The grab focus function that should be override.
-            /** The function is called by the box when it want to grab keyboard focus.
-             */
-			virtual void grabKeyboardFocus() {};
-				
-            //! The default paint method.
-            /** The default function paint a default box with the background, border, inlets, outlets and text.
-             @param doodle			A doodle to draw.
-			 @param selected		If the box is selected.
-             @param edit			If the page is in edition mode.
-			 @param presentation    If the page is in presentation mode.
-             */
-            static void paintBoxFrame(sBox box, Gui::Doodle& doodle, const bool selected = false,
-									  const bool edit = false, const bool presentation = false);
-			
-			//! The default paint method.
-			/** The default function paint a default box with the background, border, inlets, outlets and text.
-			 @param doodle			A doodle to draw.
-			 */
-			static void paintBox(sBox box, Gui::Doodle& doodle);
-        };
-		
         // ================================================================================ //
         //                                      BOX FACTORY                                 //
         // ================================================================================ //
@@ -719,6 +459,313 @@ namespace Kiwi
 		 @param names A vector of Tag to be filled.
 		 */
 		static void getPrototypeNames(vector<sTag>& names);        
+    };
+    
+    //! The outlet owns a set of links.
+    /**
+     The outlet owns a set of links that are used to manage links in a box. It also have a type and a description.
+     */
+    class Box::Iolet : public Attr::Listener, public enable_shared_from_this<Iolet>
+    {
+    protected:
+        friend Link;
+        
+        vector<Connection>  m_connections;
+        const Io::Type      m_type;
+        const Io::Polarity  m_polarity;
+        const string        m_description;
+        mutable mutex       m_mutex;
+        
+        //! Check if a connection is in the iolet.
+        /** The functions checks if a connection is in the iolet.
+         @param box The box.
+         @param index the iolet's index.
+         @return true if the connection is in the iolet, otherwise false.
+         */
+        bool has(sBox box, ulong index) const noexcept;
+        
+        //! Append a new connection to the iolet.
+        /** The functions appends a new connection to the iolet.
+         @param box The box.
+         @param index the iolet's index.
+         @return true if the connection has been added, otherwise false.
+         */
+        bool append(sBox box, ulong index) noexcept;
+        
+        //! Remove a connection from the iolet.
+        /** The functions removes a connection from the iolet.
+         @param box The box.
+         @param index the iolet's index.
+         @return true if the connection has been removed, otherwise false.
+         */
+        bool erase(sBox box, ulong index) noexcept;
+        
+    public:
+        //! Constructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        Iolet(Io::Type type, Io::Polarity polarity, string const& description) noexcept :
+        m_type(type),
+        m_polarity(polarity),
+        m_description(description)
+        {
+            ;
+        }
+        
+        //! Destructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        ~Iolet()
+        {
+            m_connections.clear();
+        }
+        
+        //! Retrieve the type of the iolet.
+        /** The functions retrieves the type of the iolet.
+         @return The type of the iolet.
+         */
+        inline Io::Type getType() const noexcept
+        {
+            return m_type;
+        }
+        
+        //! Retrieve the polarity of the iolet.
+        /** The functions retrieves the polarity of the iolet.
+         @return The polarity of the iolet.
+         */
+        inline Io::Polarity getPolarity() const noexcept
+        {
+            return m_polarity;
+        }
+        
+        //! Retrieve the description of the iolet.
+        /** The functions retrieves the description of the iolet.
+         @return The description of the iolet.
+         */
+        inline string getDescription() const noexcept
+        {
+            return m_description;
+        }
+        
+        //! Retrieve the number of connections.
+        /** The functions retrieves the number of connections of the iolet.
+         @return The number of connections.
+         */
+        inline ulong getNumberOfConnection() const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            return (ulong)m_connections.size();
+        }
+        
+        //! Retrieve the a connection.
+        /** The functions retrieves a connection.
+         @param index The index of the connection.
+         @return The connection.
+         */
+        inline Connection getConnection(const ulong index) const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            if(index < (ulong)m_connections.size())
+            {
+                return m_connections[(vector<Connection>::size_type)index];
+            }
+            else
+            {
+                return {sBox(), 0};
+            }
+        }
+        
+        //! Retrieve the box of a connection.
+        /** The functions retrieves the box of a connection.
+         @param index The index of the connection.
+         @return The box of a connection.
+         */
+        inline sBox getBox(const ulong index) const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            if(index < (ulong)m_connections.size())
+            {
+                return m_connections[(vector<Connection>::size_type)index].box.lock();
+            }
+            else
+            {
+                return nullptr;
+            }
+        }
+        
+        //! Retrieve the iolet's index of a connection.
+        /** The functions retrieves the iolet's index of a connection.
+         @param index The index of the connection.
+         @return The iolet's index of a connection.
+         */
+        inline ulong getIndex(const ulong index) const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            if(index < (ulong)m_connections.size())
+            {
+                return m_connections[(vector<Connection>::size_type)index].index;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        
+        //! Receive the notification that an attribute has changed.
+        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+         @param manager		The manager that manages the attribute.
+         @param attr		The attribute that has been modified.
+         @param type		The type of notification.
+         */
+        void notify(Attr::sManager manager, sAttr attr, Attr::Notification type);
+    };
+    
+    // ================================================================================ //
+    //                                      INLET                                       //
+    // ================================================================================ //
+    
+    //! The inlet owns a set of links.
+    /**
+     The inlet owns a set of links that are used to manage links in a box. It also have a type and a description.
+     */
+    class Box::Inlet : public Iolet
+    {
+    public:
+        
+        //! Constructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        Inlet(Io::Type type, Io::Polarity polarity, string const& description) noexcept;
+        
+        //! Destructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        ~Inlet();
+        
+        //! The creation method.
+        /** The function creates a shared pointer of an inlet.
+         @param type        The type of the inlet.
+         @param polarity    The polarity of the inlet.
+         @param description The description of the inlet.
+         @return The inlet.
+         */
+        static sInlet create(Io::Type type, Io::Polarity polarity, string const& description);
+    };
+    
+    // ================================================================================ //
+    //                                      OUTLET                                      //
+    // ================================================================================ //
+    
+    //! The outlet owns a set of links.
+    /**
+     The outlet owns a set of links that are used to manage links in a box. It also have a type and a description.
+     */
+    class Box::Outlet : public Iolet
+    {
+    public:
+        //! Constructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        Outlet(Io::Type type, string const& description) noexcept;
+        
+        //! Destructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        ~Outlet();
+        
+        //! The creation method.
+        /** The function creates a shared pointer of an outlet.
+         @param type        The type of the outlet.
+         @param polarity    The polarity of the outlet.
+         @param description The description of the outlet.
+         @return The outlet.
+         */
+        static sOutlet create(Io::Type type, string const& description);
+        
+        //! Send a vector of elements to the connected inlets.
+        /** The function sends of elements to the connected inlets.
+         @param elements The vector of elements.
+         */
+        void send(ElemVector const& elements) const noexcept;
+    };
+    
+    // ================================================================================ //
+    //                                  BOX LISTENER                                    //
+    // ================================================================================ //
+    
+    //! The box listener .
+    /**
+     The box listener...
+     */
+    class Box::Listener
+    {
+    public:
+        
+        //! Constructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        Listener() noexcept
+        {
+            ;
+        }
+        
+        //! The destructor.
+        /** You should never call this method except if you really know what you're doing.
+         */
+        virtual ~Listener()
+        {
+            ;
+        }
+        
+        //! The inlets notification function that should be override.
+        /** The function is called by the box when its inlets changed.
+         */
+        virtual void inletsChanged() = 0;
+        
+        //! The outlets notification function that should be override.
+        /** TThe function is called by the box when its outlets changed.
+         */
+        virtual void outletsChanged() = 0;
+        
+        //! The position notification function that should be override.
+        /** The function is called by the box when its position changed.
+         */
+        virtual void positionChanged() = 0;
+        
+        //! The size notification function that should be override.
+        /** The function is called by the box when its size changed.
+         */
+        virtual void sizeChanged() = 0;
+        
+        //! The size notification function that should be override.
+        /** The function is called by the box when its size changed.
+         */
+        virtual void pageEditionStatusChanged() = 0;
+        
+        //! The page presentation notification function.
+        /** The function is called by the box when page presentation mode changed.
+         */
+        virtual void pagePresentationStatusChanged() = 0;
+        
+        //! Called by the box when the box selection status changed.
+        /** The function is called by the box selection status changed.
+         */
+        virtual void selectionStatusChanged() = 0;
+        
+        //! Called by the box when the presentation status changed.
+        /** The function is called by the box when the presentation status changed.
+         */
+        virtual void presentationStatusChanged() = 0;
+        
+        //! The redraw function that should be override.
+        /** The function is called by the box when it should be repainted.
+         */
+        virtual void redraw() = 0;
+        
+        //! The grab focus function that should be override.
+        /** The function is called by the box when it want to grab keyboard focus.
+         */
+        virtual void grabKeyboardFocus() = 0;
     };
     
     inline string toString(scBox box)

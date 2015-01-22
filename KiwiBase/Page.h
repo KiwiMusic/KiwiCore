@@ -266,31 +266,31 @@ namespace Kiwi
         /** The function is called by the page when a box has been created.
          @param box     The box.
          */
-        virtual void boxCreated(sBox box) = 0;
+        virtual void boxCreated(sPage page, sBox box) = 0;
         
         //! Receive the notification that a box has been removed.
         /** The function is called by the page when a box has been removed.
          @param box     The box.
          */
-        virtual void boxRemoved(sBox box) = 0;
+        virtual void boxRemoved(sPage page, sBox box) = 0;
         
         //! Receive the notification that a link has been created.
         /** The function is called by the page when a link has been created.
          @param link     The link.
          */
-        virtual void linkCreated(sLink link) = 0;
+        virtual void linkCreated(sPage page, sLink link) = 0;
         
         //! Receive the notification that a link has been removed.
         /** The function is called by the page when a link has been removed.
          @param link    The link.
          */
-        virtual void linkRemoved(sLink link) = 0;
+        virtual void linkRemoved(sPage page, sLink link) = 0;
         
         //! Receives notification when an value has changed.
         /** The function receives notification when an attribute has changed.
          @param attr The attribute.
          */
-        virtual void attributeChanged(sAttr attr) = 0;
+        virtual void attributeChanged(sPage page, sAttr attr) = 0;
     };
 }
 

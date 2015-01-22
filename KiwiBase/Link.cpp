@@ -36,12 +36,12 @@ namespace Kiwi
     {
         if(from && to)
         {
-            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            Box::sOutlet outlet  = from->getOutlet(m_index_outlet);
             if(outlet)
             {
                 outlet->append(to, m_index_outlet);
             }
-            sInlet inlet    = to->getInlet(m_index_intlet);
+            Box::sInlet inlet    = to->getInlet(m_index_intlet);
             if(inlet)
             {
                 inlet->append(from, m_index_intlet);
@@ -55,12 +55,12 @@ namespace Kiwi
         sBox     to      = getBoxTo();
         if(from && to)
         {
-            sOutlet outlet  = from->getOutlet(m_index_outlet);
+            Box::sOutlet outlet  = from->getOutlet(m_index_outlet);
             if(outlet)
             {
                 outlet->erase(to, m_index_outlet);
             }
-            sInlet inlet    = to->getInlet(m_index_intlet);
+            Box::sInlet inlet    = to->getInlet(m_index_intlet);
             if(inlet)
             {
                 inlet->erase(from, m_index_intlet);
@@ -147,11 +147,6 @@ namespace Kiwi
             dico->clear(Tag::List::from);
             dico->clear(Tag::List::to);
         }
-    }
-    
-    void Link::setController(sController ctrl)
-    {
-        m_controller = ctrl;
     }
 }
 

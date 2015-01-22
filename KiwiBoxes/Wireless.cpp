@@ -32,7 +32,7 @@ namespace Kiwi
 	
 	Print::Print(sPage page, ElemVector const& value) : Box(page, "print", Mouse), m_name("print")
 	{
-		addInlet(Iolet::Message, Iolet::Hot, "Anything to be printed in the kiwi console");
+		addInlet(Io::Message, Io::Hot, "Anything to be printed in the kiwi console");
 		
 		if(value.size() >= 1)
 		{
@@ -74,15 +74,15 @@ namespace Kiwi
     {
         if(value.empty())
         {
-            addInlet(Iolet::Message, Iolet::Hot, "Value or Bang to output (int, float or bang)");
-            addInlet(Iolet::Message, Iolet::Cold, "Value to set (int or float)");
+            addInlet(Io::Message, Io::Hot, "Value or Bang to output (int, float or bang)");
+            addInlet(Io::Message, Io::Cold, "Value to set (int or float)");
         }
         else if(value[0].isNumber())
         {
-            addInlet(Iolet::Message, Iolet::Hot, "Bang to output (bang)");
+            addInlet(Io::Message, Io::Hot, "Bang to output (bang)");
             m_value = value[0];
         }
-        addOutlet(Iolet::Message, "The integer (int)");
+        addOutlet(Io::Message, "The integer (int)");
     }
     
     Int::~Int()
@@ -137,10 +137,10 @@ namespace Kiwi
     Send::Send(sPage page, sTag name) : Box(page, "send"),
     m_name(name)
     {
-        addInlet(Iolet::Message, Iolet::Hot, "Messages to send (anything)");
+        addInlet(Io::Message, Io::Hot, "Messages to send (anything)");
         if(!name)
         {
-            addInlet(Iolet::Message, Iolet::Cold, "Link name (tag)");
+            addInlet(Io::Message, Io::Cold, "Link name (tag)");
         }
     }
     
@@ -190,10 +190,10 @@ namespace Kiwi
     Receive::Receive(sPage page, sTag name) : Box(page, "receive"),
     m_name(name)
     {
-        addOutlet(Iolet::Message, "Messages received (anything)");
+        addOutlet(Io::Message, "Messages received (anything)");
         if(!name)
         {
-            addInlet(Iolet::Message, Iolet::Cold, "Link name (tag)");
+            addInlet(Io::Message, Io::Cold, "Link name (tag)");
         }
     }
     
@@ -252,11 +252,11 @@ namespace Kiwi
     Value::Value(sPage page, sTag name) : Box(page, "value"),
     m_name(name)
     {
-        addOutlet(Iolet::Message, "Messages received (anything)");
-        addInlet(Iolet::Message, Iolet::Cold, "Messages to send or bang to send (anything)");
+        addOutlet(Io::Message, "Messages received (anything)");
+        addInlet(Io::Message, Io::Cold, "Messages to send or bang to send (anything)");
         if(!name)
         {
-            addInlet(Iolet::Message, Iolet::Cold, "Link name (tag)");
+            addInlet(Io::Message, Io::Cold, "Link name (tag)");
         }
         else
         {

@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_LINK__
 #define __DEF_KIWI_LINK__
 
-#include "Attribute.h"
+#include "Box.h"
 
 namespace Kiwi
 {
@@ -38,19 +38,12 @@ namespace Kiwi
      */
     class Link : public AttrLink
     {
-    public:
-        class Controller;
-        typedef shared_ptr<Controller>   sController;
-        typedef weak_ptr<Controller>     wController;
-        
     private:
-        wPage           m_page;
-        wBox			m_box_from;
-        wBox			m_box_to;
-        ulong           m_index_outlet;
-        ulong           m_index_intlet;
-        Gui::Path       m_path;
-        wController		m_controller;
+        const wPage m_page;
+        const wBox	m_box_from;
+        const wBox	m_box_to;
+        const ulong m_index_outlet;
+        const ulong m_index_intlet;
     public:
         
         //! The constructor.
@@ -134,110 +127,11 @@ namespace Kiwi
             return m_index_intlet;
         }
         
-        //! Retrieve the controller that manages the box.
-        /** The function retrieves the controller that manages the box.
-         @return The controller that manages the box.
-         */
-        inline sController getController() const noexcept
-        {
-            return m_controller.lock();
-        }
-        
         //! Write the page in a dico.
         /** The function writes the link in a dico.
          @param dico The dico.
          */
         void write(sDico dico) const noexcept;
-        
-        //! Retrieve the position of the link.
-        /** The function retrieves the position of the link as a point.
-         @return The position of the link as a point.
-         */
-        inline Gui::Point getPosition() const noexcept
-        {
-            return m_path.getPosition();
-        }
-        
-        //! Retrieve the size of the link.
-        /** The function retrieves the size of the link as a point.
-         @return The size of the link as a point.
-         */
-        inline Gui::Point getSize() const noexcept
-        {
-            return m_path.getSize();
-        }
-        
-        //! Retrieve the bounds of the link.
-        /** The function retrieves the bounds of the link as a rectangle.
-         @return The bounds of the link as a rectangle.
-         */
-        inline Gui::Rectangle getBounds() const noexcept
-        {
-            return m_path.getBounds();
-        }
-        
-        //! Retrieve the path of the link.
-        /** The function retrieves the path of the link.
-         @return The path of the link.
-         */
-        inline void getPath(Gui::Path &path) const noexcept
-        {
-            path = m_path;
-        }
-        
-        //! Set the controller of the box.
-        /** The function sets the controller of the box.
-         @param ctrl    The controller.
-         */
-        void setController(sController ctrl);
-        
-        // ================================================================================ //
-        //                                  LINK CONTROLER                                  //
-        // ================================================================================ //
-        
-        //! The link controller .
-        /**
-         The link controller...
-         */
-        class Controller
-        {
-        private:
-            const sLink		m_link;
-			bool			m_selected;
-
-        public:
-			
-            //! Constructor.
-            /** You should never call this method except if you really know what you're doing.
-             */
-            Controller(sLink link) :
-            m_link(link)
-            {
-                ;
-            }
-			
-            //! The destructor.
-            /** You should never call this method except if you really know what you're doing.
-             */
-            virtual ~Controller()
-            {
-                ;
-            }
-            
-            //! Retrieve the link.
-            /** The funtion retrieves the link.
-             @return The link.
-             */
-            sLink getLink() const noexcept
-            {
-                return m_link;
-            }
-			
-            //! The bounds notification function that should be override.
-            /** The function is called by the link when its bounds changed.
-             */
-            virtual void boundsChanged() = 0;
-        };
     };
     
     static bool operator==(scLink link, scBox box) noexcept

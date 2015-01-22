@@ -46,22 +46,23 @@ namespace Kiwi
     {
     public:
         class Listener;
-        typedef shared_ptr<Listener>    sListener;
-        typedef weak_ptr<Listener>      wListener;
+        typedef shared_ptr<Listener>        sListener;
+        typedef weak_ptr<Listener>          wListener;
+        typedef shared_ptr<const Listener>  scListener;
+        typedef weak_ptr<const Listener>    wcListener;
+        
     private:
-        vector<sPage>                       m_dsp_pages;
-        mutable mutex                       m_dsp_mutex;
-        atomic_bool                         m_dsp_running;
-        atomic_ulong                        m_sample_rate;
-        atomic_ulong                        m_vector_size;
+        vector<sPage>           m_dsp_pages;
+        mutable mutex           m_dsp_mutex;
+        atomic_bool             m_dsp_running;
+        atomic_ulong            m_sample_rate;
+        atomic_ulong            m_vector_size;
         
-        unordered_set<sPage>                m_pages;
-        mutex                               m_pages_mutex;
-        
-        unordered_set<weak_ptr<Listener>,
-        weak_ptr_hash<Listener>,
-        weak_ptr_equal<Listener>>           m_listeners;
-        mutex                               m_listeners_mutex;
+        set<sPage>              m_pages;
+        mutex                   m_pages_mutex;
+        set<wListener,
+        owner_less<wListener>>  m_lists;
+        mutable mutex           m_lists_mutex;
         
     public:
         
@@ -179,14 +180,14 @@ namespace Kiwi
          @param listener  The pointer of the instance listener.
          @see              unbind()
          */
-        void bind(shared_ptr<Listener> listener);
+        void bind(sListener listener);
         
         //! Remove an instance listener from the binding list of the instance.
         /** The function removes an instance listener from the binding list of the instance. If the instance listener isn't in the binding list, the function doesn't do anything.
          @param listener  The pointer of the instance listener.
          @see           bind()
          */
-        void unbind(shared_ptr<Listener> listener);
+        void unbind(sListener listener);
     };
     
     // ================================================================================ //

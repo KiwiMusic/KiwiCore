@@ -32,7 +32,7 @@ namespace Kiwi
     
     NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name, Graphic | Mouse | Keyboard)
     {
-        //addInlet(Iolet::Message, Iolet::Hot, "inlet 1");
+        //addInlet(Io::Message, Io::Hot, "inlet 1");
 		TextEditor::setFont(getFont());
 		TextEditor::setJustification(Gui::Font::Justification::VerticallyCentred);
 		TextEditor::setColor(attr_color_text->get());
