@@ -65,12 +65,12 @@ namespace Kiwi
         {
             enum Type
             {
-                Message = 0,
-                Signal  = 1,
-                Both    = 2
+                Message = 0 | 1<<1,
+                Signal  = 0 | 1<<2,
+                Both    = 0 | 1<<1 | 1<<2
             };
             
-            enum Polarity
+            enum Polarity : bool
             {
                 Cold   = 0,
                 Hot    = 1

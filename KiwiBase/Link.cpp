@@ -31,22 +31,23 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    Link::Link(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet) noexcept :
-    m_page(page), m_box_from(from), m_box_to(to), m_index_outlet(outlet), m_index_intlet(inlet)
+    Link::Link(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet, const Box::Io::Type type) noexcept :
+    m_page(page),
+    m_box_from(from),
+    m_box_to(to),
+    m_index_outlet(outlet),
+    m_index_intlet(inlet),
+    m_type(type),
+    m_attr_color_message(Attr::create<AttrColor>(Tag::List::mescolor,
+                                                 Tag::List::Message_Color,
+                                                 Tag::List::Color, (ElemVector){0.42, 0.42, 0.42, 1.},
+                                                 m_type & Box::Io::Message ? 0 : Attr::All)),
+    m_attr_color_signal(Attr::create<AttrColor>(Tag::List::sigcolor,
+                                                Tag::List::Signal_Color,
+                                                Tag::List::Color, (ElemVector){0.4, 0.4, 0.4, 1.},
+                                                m_type & Box::Io::Signal ? 0 : Attr::All))
     {
-        if(from && to)
-        {
-            Box::sOutlet outlet  = from->getOutlet(m_index_outlet);
-            if(outlet)
-            {
-                outlet->append(to, m_index_outlet);
-            }
-            Box::sInlet inlet    = to->getInlet(m_index_intlet);
-            if(inlet)
-            {
-                inlet->append(from, m_index_intlet);
-            }
-        }
+        ;
     }
     
     Link::~Link()
@@ -73,7 +74,7 @@ namespace Kiwi
         if(page && dico)
         {
             sBox from, to;
-            ulong outlet, inlet;
+            ulong outlet_index, inlet_index;
             ulong from_id, to_id;
             
             ElemVector elements;
@@ -81,7 +82,7 @@ namespace Kiwi
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
                 from_id = elements[0];
-                outlet  = elements[1];
+                outlet_index  = elements[1];
             }
             else
             {
@@ -92,7 +93,7 @@ namespace Kiwi
             if(elements.size() == 2 && elements[0].isLong() && elements[1].isLong())
             {
                 to_id   = elements[0];
-                inlet   = elements[1];
+                inlet_index   = elements[1];
             }
             else
             {
@@ -108,7 +109,7 @@ namespace Kiwi
                     if(boxes[i]->getId() == from_id)
                     {
                         from = boxes[i];
-                        if(from->getNumberOfOutlets() <=  outlet)
+                        if(from->getNumberOfOutlets() <=  outlet_index)
                         {
                             return nullptr;
                         }
@@ -116,7 +117,7 @@ namespace Kiwi
                     else if(boxes[i]->getId() == to_id)
                     {
                         to = boxes[i];
-                        if(to->getNumberOfInlets() <=  inlet)
+                        if(to->getNumberOfInlets() <=  inlet_index)
                         {
                             return nullptr;
                         }
@@ -125,7 +126,21 @@ namespace Kiwi
                 
                 if(from && to)
                 {
-                    return make_shared<Link>(page, from, outlet, to, inlet);
+                    Box::sOutlet outlet  = from->getOutlet(outlet_index);
+                    Box::sInlet inlet    = to->getInlet(inlet_index);
+                    if(outlet && inlet)
+                    {
+                        if(outlet->getType() != inlet->getType() && outlet->getType() < Box::Io::Both && inlet->getType() < Box::Io::Both)
+                        {
+                            return nullptr;
+                        }
+                        else
+                        {
+                            outlet->append(to, outlet_index);
+                            inlet->append(from, inlet_index);
+                            return make_shared<Link>(page, from, outlet_index, to, inlet_index, min(outlet->getType(), inlet->getType()));
+                        }
+                    } 
                 }
             }
             

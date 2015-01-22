@@ -32,14 +32,20 @@ namespace Kiwi
     const sTag Tag::List::arguments             = Tag::create("arguments");
     const sTag Tag::List::bang                  = Tag::create("bang");
     const sTag Tag::List::box                   = Tag::create("box");
+    const sTag Tag::List::color                 = Tag::create("color");
+    const sTag Tag::List::Color                 = Tag::create("Color");
     const sTag Tag::List::boxes                 = Tag::create("boxes");
     const sTag Tag::List::from                  = Tag::create("from");
     const sTag Tag::List::focus                 = Tag::create("focus");
     const sTag Tag::List::link                  = Tag::create("link");
     const sTag Tag::List::links                 = Tag::create("links");
+    const sTag Tag::List::mescolor              = Tag::create("mescolor");
+    const sTag Tag::List::Message_Color         = Tag::create("Message Color");
     const sTag Tag::List::name                  = Tag::create("name");
     const sTag Tag::List::page                  = Tag::create("page");
     const sTag Tag::List::set                   = Tag::create("set");
+    const sTag Tag::List::sigcolor              = Tag::create("sigcolor");
+    const sTag Tag::List::Signal_Color          = Tag::create("Signal Color");
     const sTag Tag::List::to                    = Tag::create("to");
 }
 

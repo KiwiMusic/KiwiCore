@@ -36,20 +36,23 @@ namespace Kiwi
     /**
      The link is a combination of two sockets used to create the connection between boxes in a page.
      */
-    class Link : public AttrLink
+    class Link : public Attr::Manager
     {
     private:
-        const wPage m_page;
-        const wBox	m_box_from;
-        const wBox	m_box_to;
-        const ulong m_index_outlet;
-        const ulong m_index_intlet;
+        const wPage         m_page;
+        const wBox          m_box_from;
+        const wBox          m_box_to;
+        const ulong         m_index_outlet;
+        const ulong         m_index_intlet;
+        const Box::Io::Type m_type;
+        const sAttrColor    m_attr_color_message;
+        const sAttrColor    m_attr_color_signal;
     public:
         
         //! The constructor.
         /** You should never use this method.
          */
-        Link(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet) noexcept;
+        Link(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet, const Box::Io::Type type) noexcept;
         
         //! The destructor.
         /** You should never use this method.
@@ -125,6 +128,33 @@ namespace Kiwi
         inline ulong getInletIndex() const noexcept
         {
             return m_index_intlet;
+        }
+        
+        //! Retrieve the io type of the link.
+        /** The function retrieves the io type of the link.
+         @return The io type of the link.
+         */
+        inline Box::Io::Type getType() const noexcept
+        {
+            return m_type;
+        }
+        
+        //! Retrieve if the message color of the link.
+        /** The function retrieves the message color of the link.
+         @return The message color of the link.
+         */
+        inline Gui::Color getMessageColor() const noexcept
+        {
+            return m_attr_color_message->get();
+        }
+        
+        //! Retrieve if the signal color of the link.
+        /** The function retrieves the signal color of the link.
+         @return The signal color of the link.
+         */
+        inline Gui::Color getSignalColor() const noexcept
+        {
+            return m_attr_color_signal->get();
         }
         
         //! Write the page in a dico.

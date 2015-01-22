@@ -71,8 +71,10 @@ using namespace std;
 #endif
 
 namespace Kiwi
-{    
-    typedef ulong ulong;
+{
+#ifndef ulong
+    typedef unsigned long ulong;
+#endif
     
     class Clock;
     typedef shared_ptr<Clock>       sClock;

@@ -936,16 +936,6 @@ namespace Kiwi
     const sTag AttrBox::Tag_Border_Color					= Tag::create("Border Color");
     const sTag AttrBox::Tag_textcolor						= Tag::create("textcolor");
     const sTag AttrBox::Tag_Text_Color						= Tag::create("Text Color");
-    
-    // ================================================================================ //
-    //                                  ATTRIBUTE LINK                                  //
-    // ================================================================================ //
-    
-    const sTag AttrLink::Tag_Color                              = Tag::create("Color");
-    const sTag AttrLink::Tag_mescolor                           = Tag::create("mescolor");
-    const sTag AttrLink::Tag_sigcolor                           = Tag::create("sigcolor");
-    const sTag AttrLink::Tag_Message_Color                      = Tag::create("Message Color");
-    const sTag AttrLink::Tag_Signal_Color                       = Tag::create("Signal Color");
 }
 
 

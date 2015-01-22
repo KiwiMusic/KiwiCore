@@ -71,7 +71,8 @@ namespace Kiwi
             Invisible			= 1<<0,///< Indicates that the attribute is invisible.
 			Disabled			= 1<<1,///< Indicates that the attribute can't be changed.
             Unsaved             = 1<<2,///< Indicates that the attribute is not saved.
-            Notifier            = 1<<3 ///< Indicates that the attribute should not notify its changes.
+            Notifier            = 1<<3,///< Indicates that the attribute should not notify its changes.
+            All                 = 1<<0 | 1<<1 | 1<<2 | 1<<3
         };
         
 		/** Flags describing the display style of the attribute.
@@ -1349,59 +1350,6 @@ namespace Kiwi
         inline Gui::Color getTextColor() const noexcept
         {
             return attr_color_text->get();
-        }
-    };
-    
-    // ================================================================================ //
-    //                                  ATTRIBUTE LINK                                  //
-    // ================================================================================ //
-    
-    //!
-    /**
-     */
-    class AttrLink : public Attr::Manager
-    {
-    public:
-        static const sTag Tag_Color;
-        static const sTag Tag_mescolor;
-        static const sTag Tag_sigcolor;
-        static const sTag Tag_Message_Color;
-        static const sTag Tag_Signal_Color;
-        
-        const shared_ptr<AttrColor>     attr_color_message;
-        const shared_ptr<AttrColor>     attr_color_signal;
-        
-        AttrLink() :
-        attr_color_message(
-                           Attr::create<AttrColor>(Tag_mescolor, Tag_Message_Color, Tag_Color, (ElemVector){0.42, 0.42, 0.42, 1.})),
-        attr_color_signal(
-                          Attr::create<AttrColor>(Tag_sigcolor, Tag_Signal_Color, Tag_Color, (ElemVector){0.4, 0.4, 0.4, 1.}))
-        {
-            addAttribute(attr_color_message);
-            addAttribute(attr_color_signal);
-        }
-        
-        ~AttrLink()
-        {
-            ;
-        }
-        
-        //! Retrieve if the message color of the link.
-        /** The function retrieves the message color of the link.
-         @return The message color of the link.
-         */
-        inline Gui::Color getMessageColor() const noexcept
-        {
-            return attr_color_message->get();
-        }
-        
-        //! Retrieve if the signal color of the link.
-        /** The function retrieves the signal color of the link.
-         @return The signal color of the link.
-         */
-        inline Gui::Color getSignalColor() const noexcept
-        {
-            return attr_color_signal->get();
         }
     };
 }

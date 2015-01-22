@@ -105,14 +105,21 @@ namespace Kiwi
             static const sTag bang;
             static const sTag box;
             static const sTag boxes;
+            static const sTag color;
+            static const sTag Color;
             static const sTag focus;
             static const sTag from;
             static const sTag link;
             static const sTag links;
+            static const sTag mescolor;
+            static const sTag Message_Color;
             static const sTag name;
             static const sTag page;
             static const sTag set;
+            static const sTag sigcolor;
+            static const sTag Signal_Color;
             static const sTag to;
+ 
         };
     };
     
