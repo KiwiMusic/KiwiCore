@@ -54,126 +54,6 @@ namespace Kiwi
         void tick() override;
         Allocate(Bang);
     };
-    
-    // ================================================================================ //
-    //                                      TOGGLE                                      //
-    // ================================================================================ //
-    
-    class Toggle : public Box, public Gui::Sketcher, public Gui::Mouser
-    {
-    private:
-        const sAttrColor    m_color_cross_on;
-        const sAttrColor    m_color_cross_off;
-        bool  m_value;
-    public:
- 
-        Toggle(sPage page);
-        ~Toggle();
-        bool receive(ulong index, ElemVector const& elements) override;
-        bool receive(Gui::Event::Mouse const& event) override;
-        void draw(Gui::Doodle& doodle) const override;
-        bool notify(sAttr attr) override;
-        Allocate(Toggle);
-    };
-    
-    // ================================================================================ //
-    //                                      MESSAGE                                     //
-    // ================================================================================ //
-    
-    class Message : public Box, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder, public Gui::TextEditor, public Clock::Maker
-    {
-    private:
-        ElemVector      m_elements;
-        vector<string>  m_text;
-		bool			m_mouse_down;
-    public:
-        
-        Message(sPage page);
-        ~Message();
-        bool receive(ulong index, ElemVector const& elements) override;
-        bool receive(Gui::Event::Mouse const& event) override;
-        bool receive(Gui::Event::Keyboard const& event) override;
-        bool receive(Gui::Event::Focus event) override;
-        void draw(Gui::Doodle& doodle) const override;
-        bool notify(sAttr attr) override;
-        void tick() override;
-        Allocate(Message);
-    };
-    
-    // ================================================================================ //
-    //                                      NUMBER                                      //
-    // ================================================================================ //
-    
-    class Number : public Box, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder, public Gui::TextEditor, public Clock::Maker
-    {
-    private:
-        double m_value;
-        double m_increment;
-        double m_last_y;
-        bool   m_edition;
-        string m_text;
-        bool   m_maker;
-        Gui::Point  m_selection;
-        sClock m_clock;
-    public:
-        
-        Number(sPage page);
-        ~Number();
-        bool receive(ulong index, ElemVector const& elements) override;
-        bool receive(Gui::Event::Mouse const& event) override;
-        bool receive(Gui::Event::Keyboard const& event) override;
-        bool receive(Gui::Event::Focus event) override;
-        void draw(Gui::Doodle& doodle) const override;
-        bool notify(sAttr attr) override;
-        void tick() override;
-        Allocate(Number);
-    };
-    
-    // ================================================================================ //
-    //                                      SLIDER                                      //
-    // ================================================================================ //
-    
-    class Slider : public Box, public Gui::Sketcher, public Gui::Mouser
-    {
-    private:
-        const sAttrColor    m_color_on;
-        const sAttrColor    m_color_off;
-        const sAttrColor    m_color_knob;
-        const sAttrTag      m_tag_receive;
-        const sAttrTag      m_tag_send;
-        sBeacon             m_beacon_receive;
-        sBeacon             m_beacon_send;
-        double              m_value;
-    public:
-        
-        Slider(sPage page);
-        ~Slider();
-        bool receive(ulong index, ElemVector const& elements) override;
-        bool receive(Gui::Event::Mouse const& event) override;
-        void draw(Gui::Doodle& doodle) const override;
-        bool notify(sAttr attr) override;
-        void send() const;
-        Allocate(Slider);
-    };
-	
-	// ================================================================================ //
-	//                                      PANEL                                       //
-	// ================================================================================ //
-	
-	class Panel : public Box, public Gui::Sketcher
-	{
-	private:
-		const sAttrLong m_border_size;
-		const sAttrLong m_border_radius;
-	public:
-		
-		Panel(sPage page);
-		~Panel() {};
-		bool receive(ulong index, ElemVector const& elements) override;
-		void draw(Gui::Doodle& doodle) const override;
-		bool notify(sAttr attr) override;
-		Allocate(Panel);
-	};
 	
 	// ================================================================================ //
 	//									PROTOTYPES                                      //
@@ -182,11 +62,6 @@ namespace Kiwi
     inline void guiInit()
     {
         Box::addPrototype(unique_ptr<Box>(new Bang(nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Toggle(nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Message(nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Number(nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Slider(nullptr)));
-		Box::addPrototype(unique_ptr<Box>(new Panel(nullptr)));
     }
 }
 

@@ -888,7 +888,7 @@ namespace Kiwi
          */
         inline Gui::Font getFont() const noexcept
         {
-            return Gui::Font(toString(name->get()), size->get(), (Gui::Font::Face)face->get());
+            return Gui::Font(toString(name->get()), size->get(), (Gui::Font::Style)face->get());
         }
         
         //! Retrieve the font justification.
@@ -1271,7 +1271,7 @@ namespace Kiwi
          */
         inline Gui::Font getFont() const noexcept
         {
-            return Gui::Font(toString(attr_font_name->get()), attr_font_size->get(), (Gui::Font::Face)attr_font_face->get());
+            return Gui::Font(toString(attr_font_name->get()), attr_font_size->get(), (Gui::Font::Style)attr_font_face->get());
         }
         
         //! Retrieve if the font justification of the box.

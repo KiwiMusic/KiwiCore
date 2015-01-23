@@ -27,7 +27,6 @@
 #include "Attribute.h"
 #include "Event.h"
 #include "Doodle.h"
-#include "Text.h"
 #include "Beacon.h"
 #include "Clock.h"
 

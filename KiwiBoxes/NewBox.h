@@ -32,7 +32,7 @@ namespace Kiwi
     //                                    NEWBOX                                        //
     // ================================================================================ //
     
-    class NewBox : public Box, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder, public Gui::TextEditor
+    class NewBox : public Box, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder
     {
     private:
 		

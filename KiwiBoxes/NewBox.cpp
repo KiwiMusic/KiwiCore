@@ -33,11 +33,6 @@ namespace Kiwi
     NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name)
     {
         //addInlet(Io::Message, Io::Hot, "inlet 1");
-		TextEditor::setFont(getFont());
-		TextEditor::setJustification(Gui::Font::Justification::VerticallyCentred);
-		TextEditor::setColor(attr_color_text->get());
-		TextEditor::setSize(getSize());
-		TextEditor::setPadding(3., 3., 3., 3.);
     }
 	
     NewBox::~NewBox()
