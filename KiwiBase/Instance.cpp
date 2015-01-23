@@ -253,7 +253,7 @@ namespace Kiwi
         }
     }    
     
-    void Instance::bind(sListener listener)
+    void Instance::addListener(sListener listener)
     {
         if(listener)
         {
@@ -262,7 +262,7 @@ namespace Kiwi
         }
     }
     
-    void Instance::unbind(sListener listener)
+    void Instance::removeListener(sListener listener)
     {
         if(listener)
         {

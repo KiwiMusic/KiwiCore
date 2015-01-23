@@ -180,14 +180,14 @@ namespace Kiwi
          @param listener  The pointer of the instance listener.
          @see              unbind()
          */
-        void bind(sListener listener);
+        void addListener(sListener listener);
         
         //! Remove an instance listener from the binding list of the instance.
         /** The function removes an instance listener from the binding list of the instance. If the instance listener isn't in the binding list, the function doesn't do anything.
          @param listener  The pointer of the instance listener.
          @see           bind()
          */
-        void unbind(sListener listener);
+        void removeListener(sListener listener);
     };
     
     // ================================================================================ //
