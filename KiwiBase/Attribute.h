@@ -72,7 +72,7 @@ namespace Kiwi
 			Disabled			= 1<<1,///< Indicates that the attribute can't be changed.
             Unsaved             = 1<<2,///< Indicates that the attribute is not saved.
             Notifier            = 1<<3,///< Indicates that the attribute should not notify its changes.
-            All                 = 1<<0 | 1<<1 | 1<<2 | 1<<3
+            All                 = Invisible | Disabled | Unsaved | Notifier
         };
         
 		/** Flags describing the display style of the attribute.
@@ -1158,10 +1158,14 @@ namespace Kiwi
         inline Gui::Point getPosition(const bool presentation = false) const noexcept
         {
             if(!presentation)
+			{
                 return attr_position->get();
-                else
-                    return attr_presentation_position->get();
-                    }
+			}
+			else
+			{
+				return attr_presentation_position->get();
+			}
+		}
         
         //! Retrieve the size of the box.
         /** The function retrieves the size of the box as a point.
@@ -1171,10 +1175,14 @@ namespace Kiwi
         inline Gui::Point getSize(const bool presentation = false) const noexcept
         {
             if(!presentation)
+			{
                 return attr_size->get();
-                else
-                    return attr_presentation_size->get();
-                    }
+			}
+			else
+			{
+				return attr_presentation_size->get();
+			}
+		}
         
         //! Retrieve the bounds of the box.
         /** The function retrieves the bounds of the box as a rectangle.
@@ -1183,9 +1191,13 @@ namespace Kiwi
         inline Gui::Rectangle getBounds(const bool presentation = false) const noexcept
         {
             if(!presentation)
+			{
                 return Gui::Rectangle(attr_position->get(), attr_size->get());
+			}
             else
+			{
                 return Gui::Rectangle(attr_presentation_position->get(), attr_presentation_size->get());
+			}
         }
         
         //! Sets a minimum and a maximum width and height limit.

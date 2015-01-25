@@ -67,13 +67,12 @@ namespace Kiwi
     public:
         
         //! The constructor.
-        /** You should never use this method.
+        /** You should never use this method, please use the create method instead.
+		 @see create
          */
         Instance() noexcept;
         
-        //! The constructor.
-        /** You should never use this method.
-         */
+        //! The destructor.
         ~Instance();
         
         //! The instance creation method.
@@ -86,24 +85,21 @@ namespace Kiwi
         /** The function creates a page with a dico or creates an empty one if the dico is empty.
          @param dico The dico that defines of the page.
          @return The page.
-         @see removePage()
-         @see getPages()
+         @see removePage, getPages
          */
         sPage createPage(sDico dico = nullptr);
         
         //! Close a page.
         /** The function closes page.
          @param page The page.
-         @see createPage()
-         @see getPages()
+         @see createPage, getPages
          */
         void removePage(sPage page);
         
         //! Retreive all the pages of the instance.
         /** The function retreives all the pages of the instance.
          @param pages A vector that will be filled with the pages.
-         @see createPage()
-         @see removePage()
+         @see createPage, removePage
          */
         void getPages(vector<sPage>& pages);
         
@@ -111,19 +107,13 @@ namespace Kiwi
         /** The function start the dsp chain of all the pages.
          @param samplerate The sample rate.
          @param vectorsize The vector size of the signal.
-         @see getVectorSize()
-         @see getSampleRate()
-         @see dspTick()
-         @see dspStop()
+         @see getVectorSize, getSampleRate, dspTick, dspStop
          */
         void dspStart(ulong samplerate, ulong vectorsize);
         
         //! Perform a tick on the dsp.
         /** The function calls once the dsp chain of all the pages.
-         @see getVectorSize()
-         @see getSampleRate()
-         @see dspStart()
-         @see dspStop()
+         @see getVectorSize, getSampleRate, dspStart, dspStop
          */
         inline void dspTick() const noexcept
         {
@@ -137,10 +127,7 @@ namespace Kiwi
         
         //! Stop the dsp.
         /** The function stop the dsp chain of all the pages.
-         @see getVectorSize()
-         @see getSampleRate()
-         @see dspStart()
-         @see dspTick()
+         @see getVectorSize, getSampleRate, dspStart, dspTick
          */
         void dspStop();
         
@@ -156,8 +143,7 @@ namespace Kiwi
         //! Retrieve the current sample rate.
         /** The function retrieve the current or the last sample rate used for dsp.
          @return the sample rate.
-         @see getVectorSize()
-         @see dspStart()
+         @see getVectorSize, dspStart
          */
         inline ulong getSampleRate() const noexcept
         {
@@ -167,8 +153,7 @@ namespace Kiwi
         //! Retrieve the current vector size of the signal.
         /** The function retrieve the current or the last vector size of the signal.
          @return the vector size of the signal.
-         @see getSampleRate()
-         @see dspStart()
+         @see getSampleRate, dspStart
          */
         inline ulong getVectorSize() const noexcept
         {
@@ -176,16 +161,18 @@ namespace Kiwi
         }
         
         //! Add an instance listener in the binding list of the instance.
-        /** The function adds an instance listener in the binding list of the instance. If the instance listener is already in the binding list, the function doesn't do anything.
+        /** The function adds an instance listener in the binding list of the instance. 
+		 If the instance listener is already in the binding list, the function doesn't do anything.
          @param listener  The pointer of the instance listener.
-         @see              unbind()
+         @see unbind
          */
         void addListener(sListener listener);
         
         //! Remove an instance listener from the binding list of the instance.
-        /** The function removes an instance listener from the binding list of the instance. If the instance listener isn't in the binding list, the function doesn't do anything.
+        /** The function removes an instance listener from the binding list of the instance. 
+		 If the instance listener isn't in the binding list, the function doesn't do anything.
          @param listener  The pointer of the instance listener.
-         @see           bind()
+         @see bind
          */
         void removeListener(sListener listener);
     };
@@ -195,8 +182,7 @@ namespace Kiwi
     // ================================================================================ //
     
     //! The instance listener is a virtual class that can bind itself to an instance and be notified of several changes.
-    /**
-     The instance listener is a very light class with methods that receive the notifications of the creation and deletion of pages and from dsp changes. An instance listener must create a shared pointer to be binded to an instance.
+    /** The instance listener is a very light class with methods that receive the notifications of the creation and deletion of pages and from dsp changes. An instance listener must create a shared pointer to be binded to an instance.
      @see Instance
      */
     class Instance::Listener

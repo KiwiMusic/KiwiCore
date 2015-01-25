@@ -66,7 +66,7 @@ namespace Kiwi
             {
                 Message = 0 | 1<<1,
                 Signal  = 0 | 1<<2,
-                Both    = 0 | 1<<1 | 1<<2
+                Both    = 0 | Message | Signal
             };
             
             enum Polarity : bool
@@ -661,10 +661,10 @@ namespace Kiwi
          */
         virtual void sizeChanged() = 0;
         
-        //! The size notification function that should be override.
+        //! The lock notification function that should be override.
         /** The function is called by the box when its size changed.
          */
-        virtual void pageEditionStatusChanged() = 0;
+        virtual void pageLockStatusChanged() = 0;
         
         //! The page presentation notification function.
         /** The function is called by the box when page presentation mode changed.
