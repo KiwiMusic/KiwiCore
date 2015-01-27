@@ -99,16 +99,18 @@ namespace Kiwi
             bool operator<(Connection const& other) const noexcept;
         };
         
-        const wInstance     m_instance;
-        const wPage         m_page;
-        const sTag          m_name;
+        const wInstance			m_instance;
+        const wPage				m_page;
+        const sTag				m_name;
         
-        vector<sOutlet>     m_outlets;
-        vector<sInlet>      m_inlets;
-        atomic_ullong       m_stack_count;
-        mutable mutex       m_mutex;
-        
-        wListener         m_listener;
+        vector<sOutlet>			m_outlets;
+        vector<sInlet>			m_inlets;
+        atomic_ullong			m_stack_count;
+        mutable mutex			m_mutex;
+		
+		set<wListener,
+		owner_less<wListener>>  m_listeners;
+		mutable mutex           m_listeners_mutex;
     public:
         
         //! Constructor.
@@ -160,15 +162,6 @@ namespace Kiwi
         inline sPage getPage() const noexcept
         {
             return m_page.lock();
-        }
-        
-        //! Retrieve the listener that manages the box.
-        /** The function retrieves the listener that manages the box.
-         @return The listener that manages the box.
-         */
-        inline sListener getListener() const noexcept
-        {
-            return m_listener.lock();
         }
         
         //! Retrieve the name of the box.

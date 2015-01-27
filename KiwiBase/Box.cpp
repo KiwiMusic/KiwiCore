@@ -287,28 +287,43 @@ namespace Kiwi
         {
             return false;
         }
-        sListener list = getListener();
-		if(list)
+		
+		m_listeners_mutex.lock();
+		auto it = m_listeners.begin();
+		while(it != m_listeners.end())
 		{
-			if(attr == AttrBox::attr_position || attr == AttrBox::attr_presentation_position)
+			if((*it).expired())
 			{
-				int TODO_notify_depending_on_page_presentation_mode;
-				list->positionChanged();
+				it = m_listeners.erase(it);
 			}
-			else if(attr == AttrBox::attr_size || attr == AttrBox::attr_presentation_size)
+			else
 			{
-				int TODO_notify_depending_on_page_presentation_mode;
-				list->sizeChanged();
-			}
-			else if(attr == AttrBox::attr_presentation)
-			{
-				list->presentationStatusChanged();
-			}
-			else if(attr == AttrBox::attr_color_background || attr == AttrBox::attr_color_border || attr == AttrBox::attr_color_text)
-			{
-				list->redraw();
+				Box::sListener listener = (*it).lock();
+				
+				if(attr == AttrBox::attr_position || attr == AttrBox::attr_presentation_position)
+				{
+					int TODO_notify_depending_on_page_presentation_mode;
+					listener->positionChanged();
+				}
+				else if(attr == AttrBox::attr_size || attr == AttrBox::attr_presentation_size)
+				{
+					int TODO_notify_depending_on_page_presentation_mode;
+					listener->sizeChanged();
+				}
+				else if(attr == AttrBox::attr_presentation)
+				{
+					listener->presentationStatusChanged();
+				}
+				else if(attr == AttrBox::attr_color_background || attr == AttrBox::attr_color_border || attr == AttrBox::attr_color_text)
+				{
+					listener->redraw();
+				}
+				
+				++it;
 			}
 		}
+		m_listeners_mutex.unlock();
+		
 		return true;
 	}
 	
@@ -323,11 +338,24 @@ namespace Kiwi
         if(inlet)
         {
             m_inlets.push_back(inlet);
-            sListener list = getListener();
-            if(list)
-            {
-                list->inletsChanged();
-            }
+			
+			m_listeners_mutex.lock();
+			auto it = m_listeners.begin();
+			while(it != m_listeners.end())
+			{
+				if((*it).expired())
+				{
+					it = m_listeners.erase(it);
+				}
+				else
+				{
+					Box::sListener listener = (*it).lock();
+					listener->inletsChanged();
+					++it;
+				}
+			}
+			m_listeners_mutex.unlock();
+			
             setAttributeValue(Tag_ninlets, {m_inlets.size()});
         }
     }
@@ -347,11 +375,23 @@ namespace Kiwi
                 m_inlets.insert(m_inlets.begin()+(long)index, inlet);
             }
             
-            sListener list = getListener();
-            if(list)
-            {
-                list->inletsChanged();
-            }
+			m_listeners_mutex.lock();
+			auto it = m_listeners.begin();
+			while(it != m_listeners.end())
+			{
+				if((*it).expired())
+				{
+					it = m_listeners.erase(it);
+				}
+				else
+				{
+					Box::sListener listener = (*it).lock();
+					listener->inletsChanged();
+					++it;
+				}
+			}
+			m_listeners_mutex.unlock();
+			
             setAttributeValue(Tag_ninlets, {m_inlets.size()});
         }
     }
@@ -374,11 +414,23 @@ namespace Kiwi
             }
             m_inlets.erase(m_inlets.begin()+(long)index);
             
-            sListener list = getListener();
-            if(list)
-            {
-                list->inletsChanged();
-            }
+			m_listeners_mutex.lock();
+			auto it = m_listeners.begin();
+			while(it != m_listeners.end())
+			{
+				if((*it).expired())
+				{
+					it = m_listeners.erase(it);
+				}
+				else
+				{
+					Box::sListener listener = (*it).lock();
+					listener->inletsChanged();
+					++it;
+				}
+			}
+			m_listeners_mutex.unlock();
+			
             setAttributeValue(Tag_ninlets, {m_inlets.size()});
         }
     }
@@ -394,11 +446,24 @@ namespace Kiwi
         if(outlet)
         {
             m_outlets.push_back(outlet);
-            sListener list = getListener();
-            if(list)
-            {
-                list->outletsChanged();
-            }
+			
+			m_listeners_mutex.lock();
+			auto it = m_listeners.begin();
+			while(it != m_listeners.end())
+			{
+				if((*it).expired())
+				{
+					it = m_listeners.erase(it);
+				}
+				else
+				{
+					Box::sListener listener = (*it).lock();
+					listener->outletsChanged();
+					++it;
+				}
+			}
+			m_listeners_mutex.unlock();
+			
             setAttributeValue(Tag_noutlets, {m_outlets.size()});
         }
     }
@@ -417,11 +482,24 @@ namespace Kiwi
             {
                 m_outlets.insert(m_outlets.begin()+(long)index, outlet);
             }
-            sListener list = getListener();
-            if(list)
-            {
-                list->outletsChanged();
-            }
+			
+			m_listeners_mutex.lock();
+			auto it = m_listeners.begin();
+			while(it != m_listeners.end())
+			{
+				if((*it).expired())
+				{
+					it = m_listeners.erase(it);
+				}
+				else
+				{
+					Box::sListener listener = (*it).lock();
+					listener->outletsChanged();
+					++it;
+				}
+			}
+			m_listeners_mutex.unlock();
+			
             setAttributeValue(Tag_noutlets, {m_outlets.size()});
         }
         
@@ -443,26 +521,45 @@ namespace Kiwi
                 }*/
             }
             m_outlets.erase(m_outlets.begin()+(long)index);
-            
-            sListener list = getListener();
-            if(list)
-            {
-                list->outletsChanged();
-            }
+			
+			m_listeners_mutex.lock();
+			auto it = m_listeners.begin();
+			while(it != m_listeners.end())
+			{
+				if((*it).expired())
+				{
+					it = m_listeners.erase(it);
+				}
+				else
+				{
+					Box::sListener listener = (*it).lock();
+					listener->outletsChanged();
+					++it;
+				}
+			}
+			m_listeners_mutex.unlock();
+			
             setAttributeValue(Tag_noutlets, {m_outlets.size()});
         }
     }
-
-    void Box::addListener(sListener list)
-    {
-        int todo;
-    }
-    
-    void Box::removeListener(sListener list)
-    {
-        int todo;
-    }
-    
+	
+	void Box::addListener(sListener listener)
+	{
+		if(listener)
+		{
+			lock_guard<mutex> guard(m_listeners_mutex);
+			m_listeners.insert(listener);
+		}
+	}
+	
+	void Box::removeListener(sListener listener)
+	{
+		if(listener)
+		{
+			lock_guard<mutex> guard(m_listeners_mutex);
+			m_listeners.erase(listener);
+		}
+	}
 	
     // ================================================================================ //
     //                                      BOX FACTORY                                 //
