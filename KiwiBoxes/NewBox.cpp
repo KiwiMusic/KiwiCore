@@ -72,10 +72,10 @@ namespace Kiwi
 	{
 		const double borderSize = 1;
 		
+		d.fillAll(getBackgroundColor());
+		
 		d.setColor(getBorderColor());
-		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize);
-		d.setColor(getBackgroundColor());
-		d.fillRectangle(d.getBounds().reduced(borderSize*2));
+		d.drawRectangle(d.getBounds().reduced(borderSize*0.5), borderSize);
 		
 		if (toString(getName()) != "newbox")
 		{

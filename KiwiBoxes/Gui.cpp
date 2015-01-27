@@ -95,15 +95,13 @@ namespace Kiwi
     
     void Bang::draw(Gui::Doodle& d) const
     {
-		double borderSize = 1;
-		const Gui::Rectangle bounds = d.getBounds().reduced(borderSize);
-		const Gui::Rectangle ledRect = bounds.reduced(d.getWidth() * 0.4);
+		const double borderSize = 1;
+		const Gui::Rectangle ledRect = d.getBounds().reduced(d.getWidth() * 0.2);
+
+		d.fillAll(getBackgroundColor());
 		
 		d.setColor(getBorderColor());
-		d.drawRectangle(d.getBounds().reduced(borderSize), borderSize, 0);
-		
-		d.setColor(getBackgroundColor());
-		d.fillRectangle(d.getBounds().reduced(borderSize*2));
+		d.drawRectangle(d.getBounds().reduced(borderSize*0.5), borderSize, 0);
 
 		d.setColor(m_color_circle->get());
 		d.drawEllipse(ledRect, d.getWidth() * 0.1);
