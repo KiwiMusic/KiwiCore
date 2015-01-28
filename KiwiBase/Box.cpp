@@ -299,26 +299,7 @@ namespace Kiwi
 			else
 			{
 				Box::sListener listener = (*it).lock();
-				
-				if(attr == AttrBox::attr_position || attr == AttrBox::attr_presentation_position)
-				{
-					int TODO_notify_depending_on_page_presentation_mode;
-					listener->positionChanged();
-				}
-				else if(attr == AttrBox::attr_size || attr == AttrBox::attr_presentation_size)
-				{
-					int TODO_notify_depending_on_page_presentation_mode;
-					listener->sizeChanged();
-				}
-				else if(attr == AttrBox::attr_presentation)
-				{
-					listener->presentationStatusChanged();
-				}
-				else if(attr == AttrBox::attr_color_background || attr == AttrBox::attr_color_border || attr == AttrBox::attr_color_text)
-				{
-					listener->redraw();
-				}
-				
+				listener->attributeChanged(attr);
 				++it;
 			}
 		}

@@ -617,23 +617,13 @@ namespace Kiwi
     class Box::Listener
     {
     public:
-        
-        //! Constructor.
-        /** You should never call this method except if you really know what you're doing.
-         */
-        Listener() noexcept
-        {
-            ;
-        }
-        
-        //! The destructor.
-        /** You should never call this method except if you really know what you're doing.
-         */
-        virtual ~Listener()
-        {
-            ;
-        }
-        
+		virtual ~Listener() {};
+		
+		//! Called by the box when an attribute changed.
+		/** The function is called by the box when an attribute changed.
+		 */
+		virtual void attributeChanged(sAttr attr) = 0;
+		
         //! The inlets notification function that should be override.
         /** The function is called by the box when its inlets changed.
          */
@@ -643,17 +633,8 @@ namespace Kiwi
         /** TThe function is called by the box when its outlets changed.
          */
         virtual void outletsChanged() = 0;
-        
-        //! The position notification function that should be override.
-        /** The function is called by the box when its position changed.
-         */
-        virtual void positionChanged() = 0;
-        
-        //! The size notification function that should be override.
-        /** The function is called by the box when its size changed.
-         */
-        virtual void sizeChanged() = 0;
-        
+		
+		int TODO_move_all_bellow_to_pageview_listener;
         //! The lock notification function that should be override.
         /** The function is called by the box when its size changed.
          */
@@ -668,16 +649,6 @@ namespace Kiwi
         /** The function is called by the box selection status changed.
          */
         virtual void selectionStatusChanged() = 0;
-        
-        //! Called by the box when the presentation status changed.
-        /** The function is called by the box when the presentation status changed.
-         */
-        virtual void presentationStatusChanged() = 0;
-        
-        //! The redraw function that should be override.
-        /** The function is called by the box when it should be repainted.
-         */
-        virtual void redraw() = 0;
         
         //! The grab focus function that should be override.
         /** The function is called by the box when it want to grab keyboard focus.
