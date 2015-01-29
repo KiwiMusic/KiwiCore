@@ -633,27 +633,6 @@ namespace Kiwi
         /** TThe function is called by the box when its outlets changed.
          */
         virtual void outletsChanged() = 0;
-		
-		int TODO_move_all_bellow_to_pageview_listener;
-        //! The lock notification function that should be override.
-        /** The function is called by the box when its size changed.
-         */
-        virtual void pageLockStatusChanged() = 0;
-        
-        //! The page presentation notification function.
-        /** The function is called by the box when page presentation mode changed.
-         */
-        virtual void pagePresentationStatusChanged() = 0;
-        
-        //! Called by the box when the box selection status changed.
-        /** The function is called by the box selection status changed.
-         */
-        virtual void selectionStatusChanged() = 0;
-        
-        //! The grab focus function that should be override.
-        /** The function is called by the box when it want to grab keyboard focus.
-         */
-        virtual void grabKeyboardFocus() = 0;
     };
     
     inline string toString(scBox box)
