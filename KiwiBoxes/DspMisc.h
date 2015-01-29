@@ -29,6 +29,7 @@
 
 namespace Kiwi
 {
+    /*
     class SnapshotTilde : public Box, public Dsp::Process
     {
     public:
@@ -47,7 +48,7 @@ namespace Kiwi
     inline void MiscTildeInit()
     {
         Box::addPrototype(unique_ptr<Box>(new SnapshotTilde(sPage())));
-    }
+    }*/
 }
 
 #endif
