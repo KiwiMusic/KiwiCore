@@ -127,7 +127,7 @@ namespace Kiwi
         /** The function allocates a box and initialize the defaults members.
          */
         static sBox create(sPage page, sDico dico);
-    
+		
         //! Retrieve the sBox.
         /** The function sBox.
          @return The sBox.

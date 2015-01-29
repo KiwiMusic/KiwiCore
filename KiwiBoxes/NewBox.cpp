@@ -47,18 +47,12 @@ namespace Kiwi
 	
 	bool NewBox::receive(Gui::Event::Mouse const& event)
 	{
+		setText(L"testtttt");
         return false;
 	}
 	
 	bool NewBox::receive(Gui::Event::Keyboard const& event)
 	{
-		/*
-		if(Text::Editor::receive(event))
-		{
-			redraw();
-			return true;
-		}
-		*/
         return false;
 	}
 	
