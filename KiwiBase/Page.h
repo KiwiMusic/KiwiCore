@@ -60,6 +60,7 @@ namespace Kiwi
         Dsp::sContext               m_dsp_context;
         vector<sObject>             m_objects;
         vector<sLink>               m_links;
+        vector<ulong>               m_free_ids;
         mutable mutex               m_mutex;
         set<wListener,
         owner_less<wListener>>      m_lists;

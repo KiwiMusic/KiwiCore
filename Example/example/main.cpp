@@ -26,7 +26,9 @@ int main(int argc, const char * argv[])
             cout << "Page created" << endl;
             page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
             page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
+            page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
             page->add(Dico::evaluateForLink("1 0 2 0"));
+            page->add(Dico::evaluateForLink("3 0 2 0"));
             
             vector<sObject> objs;
             page->getObjects(objs);
@@ -38,8 +40,7 @@ int main(int argc, const char * argv[])
                 cout << "size : " << objs[i]->getSize().width() << " "<< objs[i]->getSize().height() << endl;
                 objs[i]->receive(0, {Tag::List::bang});
                 vector<sAttr> attrs;
-                //objs[i]->getAttrs(attrs);
-                objs[i]->getAttrs(attrs, {"bdcolor", "bgcolor"});
+                objs[i]->getAttrs(attrs);
                 for(int i = 0; i < attrs.size(); i++)
                 {
                     if(attrs[i]->isType<Color>())

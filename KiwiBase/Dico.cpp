@@ -75,8 +75,7 @@ namespace Kiwi
         if(dico)
         {
             sDico object = Dico::create();
-            sDico subbox = Dico::create();
-            if(object && subbox)
+            if(object)
             {
                 bool mode = false;
                 string word;
@@ -89,7 +88,7 @@ namespace Kiwi
                     {
                         if(word[0] == '@')
                         {
-                            subbox->set(Tag::create(key), elements);
+                            object->set(Tag::create(key), elements);
                             elements.clear();
                             key = word.c_str()+1;
                         }
@@ -114,16 +113,15 @@ namespace Kiwi
                     }
                     else
                     {
-                        subbox->set(Tag::create(key), Tag::create(word));
+                        object->set(Tag::create(key), Tag::create(word));
                         key = "arguments";
                         mode = true;
                     }
                 }
                 if(mode)
                 {
-                    subbox->set(Tag::create(key), elements);
-                    subbox->set(Tag::List::text, Tag::create(text));
-                    object->set(Tag::List::object, subbox);
+                    object->set(Tag::create(key), elements);
+                    object->set(Tag::List::text, Tag::create(text));
                     dico->set(Tag::List::objects, ElemVector({object}));
                     return dico;
                 }
@@ -139,8 +137,7 @@ namespace Kiwi
         if(dico)
         {
             sDico link = Dico::create();
-            sDico sublink = Dico::create();
-            if(link && sublink)
+            if(link)
             {
                 ElemVector from, to;
                 size_t pos = text.find_first_not_of(' ', 0);
@@ -172,9 +169,8 @@ namespace Kiwi
                 }
                 if(from.size() == 2 && to.size() == 2)
                 {
-                    sublink->set(Tag::List::from, from);
-                    sublink->set(Tag::List::to, to);
-                    link->set(Tag::List::link, sublink);
+                    link->set(Tag::List::from, from);
+                    link->set(Tag::List::to, to);
                     dico->set(Tag::List::links, ElemVector({link}));
                     return dico;
                 }

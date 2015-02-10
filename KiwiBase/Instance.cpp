@@ -275,29 +275,15 @@ namespace Kiwi
     //                                      OBJECT FACTORY                              //
     // ================================================================================ //
     
-    map<sTag, sObject> Prototypes::m_objects;
+    map<sTag, shared_ptr<Prototypes::ObjectCreator>> Prototypes::m_creators;
     mutex Prototypes::m_mutex;
-    
-    sObject Prototypes::get(sTag name)
-    {
-        lock_guard<mutex> guard(m_mutex);
-        auto it = m_objects.find(name);
-        if(it != m_objects.end())
-        {
-            return it->second;
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
     
     sObject Prototypes::create(sTag name, Initializer const& init)
     {
-        sObject proto = Prototypes::get(name);
-        if(proto)
+        auto it = m_creators.find(name);
+        if(it != m_creators.end())
         {
-            return proto->create(init);
+            return it->second->create(init);
         }
         else
         {
@@ -308,13 +294,13 @@ namespace Kiwi
     bool Prototypes::has(sTag name)
     {
         lock_guard<mutex> guard(m_mutex);
-        return m_objects.find(name) != m_objects.end();
+        return m_creators.find(name) != m_creators.end();
     }
     
     void Prototypes::getNames(vector<sTag>& names)
     {
         lock_guard<mutex> guard(m_mutex);
-        for(auto it = m_objects.begin(); it !=  m_objects.end(); ++it)
+        for(auto it = m_creators.begin(); it !=  m_creators.end(); ++it)
         {
             names.push_back(it->first);
         }

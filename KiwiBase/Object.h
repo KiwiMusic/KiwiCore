@@ -158,11 +158,6 @@ namespace Kiwi
         
     public:
         
-        //! Contructor.
-        /** The real contructor of the object.
-         */
-        virtual sObject create(Initializer const& initiliazer) const = 0;
-        
         //! Retrieve the instance that manages the page of the object.
         /** The function retrieves the instance that manages the page of the object.
          @return The instance that manages the page of the object.

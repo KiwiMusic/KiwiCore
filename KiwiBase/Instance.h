@@ -239,7 +239,24 @@ namespace Kiwi
     {
     private:
         
-        static map<sTag, sObject>  m_objects;
+        class ObjectCreator
+        {
+        public:
+            virtual ~ObjectCreator(){};
+            virtual sObject create(Initializer const& init) = 0;
+        };
+        
+        
+        template <class T> class ObjectCreatorType : public ObjectCreator
+        {
+        public:
+            sObject create(Initializer const& init) override
+            {
+                return make_shared<T>(init);
+            }
+        };
+        
+        static map<sTag, shared_ptr<ObjectCreator>> m_creators;
         static mutex m_mutex;
     public:
         
@@ -263,13 +280,13 @@ namespace Kiwi
                 }
                 
                 lock_guard<mutex> guard(m_mutex);
-                if(m_objects.find(tname) != m_objects.end())
+                if(m_creators.find(tname) != m_creators.end())
                 {
                     Console::error("The object " + toString(object->getName()) + " already exist !");
                 }
                 else
                 {
-                    m_objects[tname] = object;
+                    m_creators[tname] = make_shared<ObjectCreatorType<T>>();
                 }
             }
             else
@@ -277,11 +294,6 @@ namespace Kiwi
                 Console::error("The prototype of an object has a wrong constructor !");
             }
         }
-        
-        //! ...
-        /** ...
-         */
-        static sObject get(sTag name);
         
         //! ...
         /** ...

@@ -40,6 +40,7 @@ namespace Kiwi
     {
         m_links.clear();
         m_objects.clear();
+        m_free_ids.clear();
         m_lists.clear();
     }
     
@@ -69,11 +70,6 @@ namespace Kiwi
             sTag name = dico->get(Tag::List::name);
             sTag text = dico->get(Tag::List::text);
             ulong _id = dico->get(Tag::List::id);
-            if(!_id)
-            {
-                lock_guard<mutex> guard(m_mutex);
-                _id = m_objects.size() + 1;
-            }
             ElemVector args;
             dico->get(Tag::List::arguments, args);
             object = Prototypes::create(name, Initializer(getInstance(), getShared(), _id, name->getName(), text->getName(), dico, args));
@@ -112,7 +108,6 @@ namespace Kiwi
             }
             
             sObject from, to;
-            lock_guard<mutex> guard(m_mutex);
             if(ido < m_objects.size() + 1 && idi <  m_objects.size() + 1 && ido != idi)
             {
                 for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
@@ -216,35 +211,54 @@ namespace Kiwi
         sDico rdico = Dico::create(dico);
         if(rdico)
         {
-            ElemVector objects;
-            dico->get(Tag::List::objects, objects);
+            ElemVector objects, links;
+            rdico->get(Tag::List::links, links);
+            rdico->get(Tag::List::objects, objects);
+            
+            lock_guard<mutex> guard(m_mutex);
             for(vector<sObject>::size_type i = 0; i < objects.size(); i++)
             {
-                sDico subdico = objects[i];
-                if(subdico)
+                sDico objdico = objects[i];
+                if(objdico)
                 {
-                    sObject object = createObject(subdico->get(Tag::List::object));
+                    const ulong r_id = (ulong)objdico->get(Tag::List::id);
+                    const ulong n_id = m_free_ids.empty() ? m_objects.size() + 1 : m_free_ids[0];
+                    if(!m_free_ids.empty())
+                    {
+                        m_free_ids.erase(m_free_ids.begin());
+                    }
+                    objdico->set(Tag::List::id, n_id);
+                    ElemVector elements;
+                    for(vector<sLink>::size_type i = 0; i < links.size(); i++)
+                    {
+                        objdico->get(Tag::List::from, elements);
+                        if(elements.size() > 1 && r_id == (ulong)elements[0])
+                        {
+                            objdico->set(Tag::List::from, {n_id, elements[1]});
+                        }
+                        objdico->get(Tag::List::to, elements);
+                        if(elements.size() > 1 && r_id == (ulong)elements[0])
+                        {
+                            objdico->set(Tag::List::from, {n_id, elements[1]});
+                        }
+                    }
+                    sObject object = createObject(objdico);
                     if(object)
                     {
-                        lock_guard<mutex> guard(m_mutex);
                         m_objects.push_back(object);
                     }
-                    
                     send(object, Notification::Added);
                 }
             }
             
-            ElemVector links;
-            dico->get(Tag::List::links, links);
             for(vector<sLink>::size_type i = 0; i < links.size(); i++)
             {
-                sDico subdico = links[i];
-                if(subdico)
+                sDico linkdico = links[i];
+                if(linkdico)
                 {
-                    sLink link = createLink(subdico->get(Tag::List::link));
+                    sLink link = createLink(linkdico);
                     if(link)
                     {
-                        lock_guard<mutex> guard(m_mutex);
                         m_links.push_back(link);
                     }
                     send(link, Notification::Added);
@@ -271,6 +285,7 @@ namespace Kiwi
                 }
                 
                 m_objects.erase(it);
+                m_free_ids.push_back(object->getId());
             }
         }
         for(vector<sLink>::size_type i = 0; i < links.size(); i++)
@@ -340,12 +355,10 @@ namespace Kiwi
 				for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
 				{
 					sDico object = Dico::create();
-					sDico subobject = Dico::create();
-					if(object && subobject)
+					if(object)
 					{
-						m_objects[i]->write(subobject);
-						object->set(Tag::List::object, subobject);
-						elements.push_back(object);
+						m_objects[i]->write(object);
+                        elements.push_back(object);
 					}
 				}
 				subpage->set(Tag::List::objects, elements);
@@ -354,12 +367,10 @@ namespace Kiwi
 				
 				for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
 				{
-					sDico link = Dico::create();
-					sDico sublink = Dico::create();
-					if(link && sublink)
+                    sDico link = Dico::create();
+					if(link)
 					{
-						m_links[i]->write(sublink);
-						link->set(Tag::List::link, sublink);
+						m_links[i]->write(link);
 						elements.push_back(link);
 					}
 				}
@@ -373,7 +384,8 @@ namespace Kiwi
     {
         dspStop();
         m_dsp_context = Dsp::Context::create(samplerate, vectorsize);
-
+        
+        lock_guard<mutex> guard(m_mutex);
         for(auto it = m_objects.begin(); it != m_objects.end(); ++it)
         {
             Dsp::sProcess process = dynamic_pointer_cast<Dsp::Process>((*it));

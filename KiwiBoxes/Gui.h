@@ -41,7 +41,6 @@ namespace Kiwi
     private:
         sClock  m_clock;
     public:
-        sObject create(Initializer const& initiliazer) const override;
         BangBox(Initializer const& init);
         ~BangBox();
         void receive(ulong index, ElemVector const& elements) override;

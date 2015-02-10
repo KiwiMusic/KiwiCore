@@ -30,11 +30,6 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    sObject BangBox::create(Initializer const& initiliazer) const
-    {
-        return make_shared<BangBox>(initiliazer);
-    }
-    
     BangBox::BangBox(Initializer const& init) : Object(init, "bang"),
     m_clock(Clock::create())
     {
