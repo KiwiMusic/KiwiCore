@@ -61,6 +61,12 @@ namespace Kiwi
         
         //! The dico creation method.
         /** The function allocates a dico.
+         @param dico another dico.
+         */
+        static sDico create(scDico dico);
+        
+        //! The dico creation method.
+        /** The function allocates a dico.
          */
         static sDico evaluateForJson(string const& text);
         
@@ -142,7 +148,7 @@ namespace Kiwi
          */
         inline bool isObject(sTag key) const noexcept
         {
-            return type(key) == Element::BOX;
+            return type(key) == Element::OBJECT;
         }
         
         //! Check if an entry is of type object.
@@ -170,7 +176,14 @@ namespace Kiwi
          @param key The name of the entry.
          @return    The element from a dico.
          */
-        Element get(sTag key) const noexcept;
+        const Element get(sTag key) const noexcept;
+        
+        //! Retrieve the element from a dico.
+        /** The function retrieves the element from a dico.
+         @param key The name of the entry.
+         @return    The element from a dico.
+         */
+        Element get(sTag key) noexcept;
         
         //! Retrieve the elements from a dico.
         /** The function retrieves the elements from a dico.
@@ -295,7 +308,7 @@ namespace Kiwi
         static void fromJson(sDico dico, string const& text, string::size_type& pos);
     };
     
-    inline string toString(const sDico dico)
+    inline string toString(const scDico dico)
     {
         string text;
         dico->write(text);

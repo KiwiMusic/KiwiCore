@@ -22,7 +22,7 @@
 */
 
 #include "Dico.h"
-#include "Box.h"
+#include "Object.h"
 #include "Page.h"
 
 namespace Kiwi
@@ -45,6 +45,16 @@ namespace Kiwi
         return make_shared<Dico>();
     }
     
+    sDico Dico::create(scDico dico)
+    {
+        sDico ndico = make_shared<Dico>();
+        if(ndico && dico)
+        {
+            ndico->m_entries = dico->m_entries;
+        }
+        return ndico;
+    }
+    
     sDico Dico::evaluateForJson(string const& text)
     {
         sDico dico = make_shared<Dico>();
@@ -64,9 +74,9 @@ namespace Kiwi
         sDico dico = make_shared<Dico>();
         if(dico)
         {
-            sDico box = Dico::create();
+            sDico object = Dico::create();
             sDico subbox = Dico::create();
-            if(box && subbox)
+            if(object && subbox)
             {
                 bool mode = false;
                 string word;
@@ -112,9 +122,9 @@ namespace Kiwi
                 if(mode)
                 {
                     subbox->set(Tag::create(key), elements);
-                    subbox->set(Box::Tag_text, Tag::create(text));
-                    box->set(Tag::List::box, subbox);
-                    dico->set(Tag::List::boxes, ElemVector({box}));
+                    subbox->set(Tag::List::text, Tag::create(text));
+                    object->set(Tag::List::object, subbox);
+                    dico->set(Tag::List::objects, ElemVector({object}));
                     return dico;
                 }
                 
@@ -133,26 +143,32 @@ namespace Kiwi
             if(link && sublink)
             {
                 ElemVector from, to;
-                size_t pos = text.find_first_not_of(' ', pos);
-                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                size_t pos = text.find_first_not_of(' ', 0);
+                Element::Type type = getType(text, pos);
+                if(type == Element::LONG || type == Element::DOUBLE)
                 {
                     from.push_back(stol(text.c_str()+pos));
+                    pos = text.find(' ', pos);
                     pos = text.find_first_not_of(' ', pos);
+                    type = getType(text, pos);
                 }
-                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                if(type == Element::LONG || type == Element::DOUBLE)
                 {
                     from.push_back(stol(text.c_str()+pos));
+                    pos = text.find(' ', pos);
                     pos = text.find_first_not_of(' ', pos);
+                    type = getType(text, pos);
                 }
-                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                if(type == Element::LONG || type == Element::DOUBLE)
                 {
                     to.push_back(stol(text.c_str()+pos));
+                    pos = text.find(' ', pos);
                     pos = text.find_first_not_of(' ', pos);
+                    type = getType(text, pos);
                 }
-                if(getType(text, pos) == Element::LONG || getType(text, pos) == Element::DOUBLE)
+                if(type == Element::LONG || type == Element::DOUBLE)
                 {
                     to.push_back(stol(text.c_str()+pos));
-                    pos = text.find_first_not_of(' ', pos);
                 }
                 if(from.size() == 2 && to.size() == 2)
                 {
@@ -210,7 +226,20 @@ namespace Kiwi
             return Element::NOTHING;
     }
     
-    Element Dico::get(sTag key) const noexcept
+    const Element Dico::get(sTag key) const noexcept
+    {
+        auto it = m_entries.find(key);
+        if(it != m_entries.end())
+        {
+            if(it->second.size())
+            {
+                return  it->second[0];
+            }
+        }
+        return 0;
+    }
+    
+    Element Dico::get(sTag key) noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
@@ -397,9 +426,9 @@ namespace Kiwi
                     text.append("null");
                 break;
             }
-            case Element::BOX:
+            case Element::OBJECT:
             {
-                sBox obj = element;
+                scObject obj = element;
                 if(obj)
                     text.append(toString(obj->getName()));
                 else
@@ -408,9 +437,9 @@ namespace Kiwi
             }
             case Element::DICO:
             {
-                sDico dico = element;
+                scDico dico = element;
                 if(dico)
-                    toJson((scDico)dico, text, line + "    ");
+                    toJson(dico, text, line + "    ");
                 else
                     text.append("null");
                 break;

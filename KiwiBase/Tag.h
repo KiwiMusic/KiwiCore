@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_TAG__
 #define __DEF_KIWI_TAG__
 
-#include "Tools.h"
+#include "Defs.h"
 #include "Console.h"
 
 namespace Kiwi
@@ -41,7 +41,6 @@ namespace Kiwi
     class Tag
     {
     private:
-        
         const string m_name;
     public:
         
@@ -56,7 +55,7 @@ namespace Kiwi
         //! The destructor.
         /** You should never use this method except if you really know what you do.
          */
-        ~Tag()
+        ~Tag() noexcept
         {
             ;
         }
@@ -72,8 +71,8 @@ namespace Kiwi
         
     private:
         
-        static unordered_map<string, sTag> m_tags;
-        static mutex                       m_mutex;
+        static map<string, sTag> m_tags;
+        static mutex             m_mutex;
 
     public:
         
@@ -82,7 +81,7 @@ namespace Kiwi
          @param  name   The name of the tag to retrieve.
          @return    The tag that match with the name.
          */
-        static inline sTag create(string const& name)
+        static inline sTag create(string const& name) noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             auto it = m_tags.find(name);
@@ -126,8 +125,6 @@ namespace Kiwi
         static const sTag bang;
         static const sTag bold;
         static const sTag bold_italic;
-        static const sTag box;
-        static const sTag boxes;
         
         static const sTag center;
         static const sTag color;
@@ -145,6 +142,7 @@ namespace Kiwi
         static const sTag fontsize;
         static const sTag from;
         
+        static const sTag id;
         static const sTag italic;
         
         static const sTag left;
@@ -156,7 +154,12 @@ namespace Kiwi
         static const sTag Message_Color;
         
         static const sTag name;
+        static const sTag ninlets;
         static const sTag normal;
+        static const sTag noutlets;
+        
+        static const sTag object;
+        static const sTag objects;
         
         static const sTag page;
         
@@ -166,6 +169,7 @@ namespace Kiwi
         static const sTag sigcolor;
         static const sTag Signal_Color;
         
+        static const sTag text;
         static const sTag to;
         
     };

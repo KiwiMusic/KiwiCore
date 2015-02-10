@@ -21,44 +21,53 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_BOX__
-#define __DEF_KIWI_BOX__
+#ifndef __DEF_KIWI_OBJECT__
+#define __DEF_KIWI_OBJECT__
 
-#include "Attribute.h"
-#include "Event.h"
-#include "Doodle.h"
+#include "Dico.h"
 #include "Beacon.h"
 #include "Clock.h"
 
 // TODO
 // - See how to format the expression
-// - Box should deletes it owns links at deletion
+// - Object should deletes it owns links at deletion
 // - Links and Iolets behavior (resize ect..)
 namespace Kiwi
-{    
+{
+    struct Initializer
+    {
+        const sInstance     instance;
+        const sPage         page;
+        const ulong         lid;
+        const string        name;
+        const string        text;
+        const scDico        dico;
+        const ElemVector    args;
+        
+        Initializer() :
+        instance(nullptr), page(nullptr), lid(0), name(""), text(""), dico(nullptr), args({})
+        {
+            ;
+        }
+        
+        Initializer(sInstance _instance, sPage _page, const ulong _id, const string _name, const string _text, scDico _dico, ElemVector const& _args) :
+        instance(_instance), page(_page), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
+        {
+            ;
+        }
+    };
+    
     // ================================================================================ //
-    //                                      BOX                                         //
+    //                                      OBJECT                                         //
     // ================================================================================ //
     
-    //! The box is a graphical box.
+    //! The object is a graphical object.
     /**
-     The box is a graphical class that aims to be instantiate in a page.
+     The object is a graphical class that aims to be instantiate in a page.
      */
-	class Box : public AttrBox
+    class Object : virtual public Sketcher
     {
     public:
-        class Listener;
-        typedef shared_ptr<Listener>        sListener;
-        typedef weak_ptr<Listener>          wListener;
-        typedef shared_ptr<const Listener>  scListener;
-        typedef weak_ptr<const Listener>    wcListener;
-
-        enum Behavior
-        {
-            Mouse       = 1<<2,
-            Keyboard    = 1<<3,
-            Graphic     = 1<<4
-        };
         
         struct Io
         {
@@ -94,96 +103,122 @@ namespace Kiwi
     private:
         struct Connection
         {
-            wBox box;
+            wObject object;
             ulong index;
-            bool operator<(Connection const& other) const noexcept;
         };
         
         const wInstance			m_instance;
         const wPage				m_page;
         const sTag				m_name;
+        const string            m_text;
+        const ulong             m_id;
         
         vector<sOutlet>			m_outlets;
         vector<sInlet>			m_inlets;
         atomic_ullong			m_stack_count;
         mutable mutex			m_mutex;
-		
-		set<wListener,
-		owner_less<wListener>>  m_listeners;
-		mutable mutex           m_listeners_mutex;
+        
+    protected:
+        const sAttrPoint        m_presentation_position;
+        const sAttrSize         m_presentation_size;
+        const sAttrBool         m_hidden;
+        const sAttrBool         m_presentation;
+        const sAttrBool         m_ignoreclick;
     public:
         
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Box(sPage page, string const& name);
+        Object(Initializer const& initiliazer, string const& name);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        virtual ~Box();
+        virtual ~Object();
         
-        //! The box creation method.
-        /** The function allocates a box and initialize the defaults members.
-         */
-        static sBox create(sPage page, sDico dico);
-		
-        //! Retrieve the sBox.
-        /** The function sBox.
-         @return The sBox.
-         */
-		inline sBox getShared() noexcept
-		{
-			return static_pointer_cast<Box>(shared_from_this());
-		}
+    protected:
         
-        //! Retrieve the scBox.
-        /** The function scBox.
-         @return The scBox.
+        //! Retrieve the shared pointer of the attribute manager.
+        /** The function retrieves the shared pointer of the attribute manager.
+         @return The shared pointer of the attribute manager.
          */
-		inline scBox getShared() const noexcept
-		{
-			return static_pointer_cast<const Box>(shared_from_this());
-		}
+        sObject getShared() noexcept
+        {
+            return dynamic_pointer_cast<Object>(shared_from_this());
+        }
         
-        //! Retrieve the instance that manages the page of the box.
-        /** The function retrieves the instance that manages the page of the box.
-         @return The instance that manages the page of the box.
+        //! Retrieve the shared pointer of the attribute manager.
+        /** The function retrieves the shared pointer of the attribute manager.
+         @return The shared pointer of the attribute manager.
+         */
+        scObject getShared() const noexcept
+        {
+            return dynamic_pointer_cast<const Object>(shared_from_this());
+        }
+        
+    public:
+        
+        //! Contructor.
+        /** The real contructor of the object.
+         */
+        virtual sObject create(Initializer const& initiliazer) const = 0;
+        
+        //! Retrieve the instance that manages the page of the object.
+        /** The function retrieves the instance that manages the page of the object.
+         @return The instance that manages the page of the object.
          */
         inline sInstance getInstance() const noexcept
         {
             return m_instance.lock();
         }
         
-        //! Retrieve the page that manages the box.
-        /** The function retrieves the page that manages the box.
-         @return The page that manages the box.
+        //! Retrieve the page that manages the object.
+        /** The function retrieves the page that manages the object.
+         @return The page that manages the object.
          */
         inline sPage getPage() const noexcept
         {
             return m_page.lock();
         }
         
-        //! Retrieve the name of the box.
-        /** The function retrieves the name of the box as a tag.
-         @return The name of the box as a tag.
+        //! Retrieve the name of the object.
+        /** The function retrieves the name of the object as a tag.
+         @return The name of the object as a tag.
          */
         inline sTag getName() const noexcept
         {
             return m_name;
         }
         
-        //! Retrieve the expression of the box.
-        /** The function retrieves the expression of the box as a string.
-         @return The expression of the box as a string.
+        //! Retrieve the text of the object.
+        /** The function retrieves the text of the object.
+         @return The text of the object.
+         */
+        inline string getText() const noexcept
+        {
+            return m_text;
+        }
+        
+        //! Retrieve the id of the object.
+        /** The function retrieves the id of the object.
+         @return The id of the object.
+         */
+        inline ulong getId() const noexcept
+        {
+            return m_id;
+        }
+        
+        //! Retrieve the expression of the object.
+        /** The function retrieves the expression of the object as a string.
+         @return The expression of the object as a string.
          */
         virtual string getExpression() const noexcept
         {
             return "error";
         }
         
-        //! Retrieve the number of inlets of the box.
-        /** The functions retrieves the number of inlets of the box.
+        //! Retrieve the number of inlets of the object.
+        /** The functions retrieves the number of inlets of the object.
          @return The number of inlets.
          */
         inline ulong getNumberOfInlets() const noexcept
@@ -210,8 +245,8 @@ namespace Kiwi
             }
         }
         
-        //! Retrieve the number of outlets of the box.
-        /** The functions retrieves the number of outlets of the box.
+        //! Retrieve the number of outlets of the object.
+        /** The functions retrieves the number of outlets of the object.
          @return The number of outlets.
          */
         inline ulong getNumberOfOutlets() const noexcept
@@ -239,19 +274,85 @@ namespace Kiwi
         }
         
         //! The receive method that should be override.
-        /** The function shoulds perform some stuff. Return false if the vector of element doesn't match with your method then the box will check if the vector match with attributes methods, othersize return true.
+        /** The function shoulds perform some stuff.
          @param elements    A list of elements to pass.
          */
-        virtual bool receive(ulong index, ElemVector const& elements)
-        {
-            return false;
-        }
+        virtual void receive(ulong index, ElemVector const& elements) = 0;
         
-        //! Write the box in a dico.
-        /** The function writes the box in a dico.
+        //! Write the object in a dico.
+        /** The function writes the object in a dico.
          @param dico The dico.
          */
         void write(sDico dico) const;
+        
+        //! Retrieves if the object should be hidden when the page is locked.
+        /** The function retrieves if the object should be hidden when the page is locked.
+         @return True if the object should be hidden when the page is locked, false otherwise.
+         */
+        inline bool isHiddenOnLock() const noexcept
+        {
+            return m_hidden->getValue();
+        }
+        
+        //! Retrieve if the object should be displayed in presentation.
+        /** The function retrieves if the object should be displayed in presentation.
+         @return True if the object should be displayed in presentation, otherwise false.
+         */
+        inline bool isIncludeInPresentation() const noexcept
+        {
+            return m_presentation->getValue();
+        }
+        
+        //! Retrieve the position of the object.
+        /** The function retrieves the position of the object.
+         @param presentation The presentation state.
+         @return The position of the object.
+         */
+        inline Point getPosition(const bool presentation = false) const noexcept
+        {
+            if(!presentation)
+            {
+                return m_position->getValue();
+            }
+            else
+            {
+                return m_presentation_position->getValue();
+            }
+        }
+        
+        //! Retrieve the size of the object.
+        /** The function retrieves the size of the object.
+         @param presentation The presentation state.
+         @return The size of the object.
+         */
+        inline Size getSize(const bool presentation = false) const noexcept
+        {
+            if(!presentation)
+            {
+                return m_size->getValue();
+            }
+            else
+            {
+                return m_presentation_size->getValue();
+            }
+        }
+        
+        //! Retrieve the bounds of the object.
+        /** The function retrieves the bounds of the object.
+         @param presentation The presentation state.
+         @return The bounds of the object.
+         */
+        inline Rectangle getBounds(const bool presentation = false) const noexcept
+        {
+            if(!presentation)
+            {
+                return Rectangle(m_position->getValue(), m_size->getValue());
+            }
+            else
+            {
+                return Rectangle(m_presentation_position->getValue(), m_presentation_size->getValue());
+            }
+        }
         
     protected:
         
@@ -262,129 +363,43 @@ namespace Kiwi
          */
         void    send(ulong index, ElemVector const& elements) const noexcept;
         
-        //! Add a new inlet to the box.
-        /** The function adds a new inlet to the box.
+        //! Add a new inlet to the object.
+        /** The function adds a new inlet to the object.
          @param type The type of the inlet.
          @param description The description of the inlet.
          */
         void    addInlet(Io::Type type, Io::Polarity polarity, string const& description = "");
         
-        //! Insert a new inlet to the box.
-        /** The function adds a new inlet to the box.
-         @param index The index of the inlet;
-         @param type The type of the inlet.
-         @param description The description of the inlet.
-         */
-        void    insertInlet(ulong index, Io::Type type, Io::Polarity polarity, string const& description = "");
-        
-        //! Remove an inlet from the box.
-        /** The function removes an inlet from the box.
-         @param index The index of the inlet
-         */
-        void    removeInlet(ulong index);
-        
-        //! Add a new outlet the the box.
-        /** The function adds a new outlet the the box.
+        //! Add a new outlet the the object.
+        /** The function adds a new outlet the the object.
          @param type The type of the outlet.
          @param description The description of the outlet.
          */
         void    addOutlet(Io::Type type, string const& description = "");
-        
-        //! Insert a new inlet to the box.
-        /** The function adds a new inlet to the box.
-         @pram index The index of the outlet.
-         @param type The type of the outlet.
-         @param description The description of the outlet.
-         */
-        void    insertOutlet(ulong index, Io::Type type, string const& description = "");
-        
-        //! Remove an outlet.
-        /** The function removes an outlet.
-         @param index The index of the outlet.
-         */
-        void    removeOutlet(ulong index);
 
     private:
         
-        //! The virtual constructor called by the page to create an instance of box.
-        /** The function retrieves an instance of the box.
-         @param dico        The dico that defines the box.
-         */
-        virtual sBox allocate(sPage page, sDico dico) const = 0;
-        
         //! The write method that should be override.
-        /** The function writes the box in a dico.
+        /** The function writes the object in a dico.
          @param dico The dico.
          */
 		virtual void save(sDico dico) const {};
 		
         //! The read method that should be override.
-        /** The function reads a dico to initalize the boxe.
+        /** The function reads a dico to initalize the objecte.
          @param dico The dico.
          */
 		virtual void load(scDico dico) {};
-		
-        //! Notify that an attribute changed.
-		/** The function notifies that an attribute changed.
-		 @param attr The attribute.
-		 @return pass true to notify changes to listeners, false if you don't want them to be notified
-		 */
-        virtual bool notify(sAttr attr)
-        {
-            return true;
-        }
-		
-		//! Notify the manager that the values of an attribute has changed.
-		/** The function notifies the manager that the values of an attribute has changed.
-		 @param attr The attribute that has changed.
-		 @return pass true to notify changes to listeners, false if you don't want them to be notified
-		 */
-		bool attributeChanged(sAttr attr);
-
-    public:
-        
-        //! Add the listener of the box.
-        /** The function adds the listener of the box.
-         @param list The listener.
-         */
-        void addListener(sListener list);
-        
-        //! Remove the listener of the box.
-        /** The function removes the listener of the box.
-         @param list The listener.
-         */
-        void removeListener(sListener list);
-        
-        // ================================================================================ //
-        //                                      BOX FACTORY                                 //
-        // ================================================================================ //
-        
-    private:
-        
-        static map<sTag, unique_ptr<Box>>  m_prototypes;
-        static mutex m_prototypes_mutex;
-    public:
-    
-        //! Box factory
-        /** This function adds a new prototype of a box. If the prototype already exists, the function doesn't do anything otherwise the box is added to the prototype list.
-         @param     box The prototype of the box.
-         */
-        static void addPrototype(unique_ptr<Box> box, string const& name = "");
-		
-		//! Retrieves all loaded prototype names.
-		/** This function retrieves all loaded prototype names.
-		 @param names A vector of Tag to be filled.
-		 */
-		static void getPrototypeNames(vector<sTag>& names);        
     };
     
     //! The outlet owns a set of links.
     /**
-     The outlet owns a set of links that are used to manage links in a box. It also have a type and a description.
+     The outlet owns a set of links that are used to manage links in a object. It also have a type and a description.
      */
-    class Box::Iolet : public Attr::Listener, public enable_shared_from_this<Iolet>
+    class Object::Iolet : public enable_shared_from_this<Iolet>
     {
     protected:
+        friend Page;
         friend Link;
         
         vector<Connection>  m_connections;
@@ -395,27 +410,27 @@ namespace Kiwi
         
         //! Check if a connection is in the iolet.
         /** The functions checks if a connection is in the iolet.
-         @param box The box.
+         @param object The object.
          @param index the iolet's index.
          @return true if the connection is in the iolet, otherwise false.
          */
-        bool has(sBox box, ulong index) const noexcept;
+        bool has(sObject object, ulong index) const noexcept;
         
         //! Append a new connection to the iolet.
         /** The functions appends a new connection to the iolet.
-         @param box The box.
+         @param object The object.
          @param index the iolet's index.
          @return true if the connection has been added, otherwise false.
          */
-        bool append(sBox box, ulong index) noexcept;
+        bool append(sObject object, ulong index) noexcept;
         
         //! Remove a connection from the iolet.
         /** The functions removes a connection from the iolet.
-         @param box The box.
+         @param object The object.
          @param index the iolet's index.
          @return true if the connection has been removed, otherwise false.
          */
-        bool erase(sBox box, ulong index) noexcept;
+        bool erase(sObject object, ulong index) noexcept;
         
     public:
         //! Constructor.
@@ -488,21 +503,21 @@ namespace Kiwi
             }
             else
             {
-                return {sBox(), 0};
+                return {sObject(), 0};
             }
         }
         
-        //! Retrieve the box of a connection.
-        /** The functions retrieves the box of a connection.
+        //! Retrieve the object of a connection.
+        /** The functions retrieves the object of a connection.
          @param index The index of the connection.
-         @return The box of a connection.
+         @return The object of a connection.
          */
-        inline sBox getBox(const ulong index) const noexcept
+        inline sObject getBox(const ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             if(index < (ulong)m_connections.size())
             {
-                return m_connections[(vector<Connection>::size_type)index].box.lock();
+                return m_connections[(vector<Connection>::size_type)index].object.lock();
             }
             else
             {
@@ -527,14 +542,6 @@ namespace Kiwi
                 return 0;
             }
         }
-        
-        //! Receive the notification that an attribute has changed.
-        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
-         @param manager		The manager that manages the attribute.
-         @param attr		The attribute that has been modified.
-         @param type		The type of notification.
-         */
-        void notify(Attr::sManager manager, sAttr attr, Attr::Notification type);
     };
     
     // ================================================================================ //
@@ -543,9 +550,9 @@ namespace Kiwi
     
     //! The inlet owns a set of links.
     /**
-     The inlet owns a set of links that are used to manage links in a box. It also have a type and a description.
+     The inlet owns a set of links that are used to manage links in a object. It also have a type and a description.
      */
-    class Box::Inlet : public Iolet
+    class Object::Inlet : public Iolet
     {
     public:
         
@@ -558,15 +565,6 @@ namespace Kiwi
         /** You should never call this method except if you really know what you're doing.
          */
         ~Inlet();
-        
-        //! The creation method.
-        /** The function creates a shared pointer of an inlet.
-         @param type        The type of the inlet.
-         @param polarity    The polarity of the inlet.
-         @param description The description of the inlet.
-         @return The inlet.
-         */
-        static sInlet create(Io::Type type, Io::Polarity polarity, string const& description);
     };
     
     // ================================================================================ //
@@ -575,13 +573,15 @@ namespace Kiwi
     
     //! The outlet owns a set of links.
     /**
-     The outlet owns a set of links that are used to manage links in a box. It also have a type and a description.
+     The outlet owns a set of links that are used to manage links in a object. It also have a type and a description.
      */
-    class Box::Outlet : public Iolet
+    class Object::Outlet : public Iolet
     {
     public:
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
+         @param type        The type of the outlet.
+         @param description The description of the outlet.
          */
         Outlet(Io::Type type, string const& description) noexcept;
         
@@ -590,15 +590,6 @@ namespace Kiwi
          */
         ~Outlet();
         
-        //! The creation method.
-        /** The function creates a shared pointer of an outlet.
-         @param type        The type of the outlet.
-         @param polarity    The polarity of the outlet.
-         @param description The description of the outlet.
-         @return The outlet.
-         */
-        static sOutlet create(Io::Type type, string const& description);
-        
         //! Send a vector of elements to the connected inlets.
         /** The function sends of elements to the connected inlets.
          @param elements The vector of elements.
@@ -606,38 +597,9 @@ namespace Kiwi
         void send(ElemVector const& elements) const noexcept;
     };
     
-    // ================================================================================ //
-    //                                  BOX LISTENER                                    //
-    // ================================================================================ //
-    
-    //! The box listener .
-    /**
-     The box listener...
-     */
-    class Box::Listener
+    inline string toString(scObject object)
     {
-    public:
-		virtual ~Listener() {};
-		
-		//! Called by the box when an attribute changed.
-		/** The function is called by the box when an attribute changed.
-		 */
-		virtual void attributeChanged(sAttr attr) = 0;
-		
-        //! The inlets notification function that should be override.
-        /** The function is called by the box when its inlets changed.
-         */
-        virtual void inletsChanged() = 0;
-        
-        //! The outlets notification function that should be override.
-        /** TThe function is called by the box when its outlets changed.
-         */
-        virtual void outletsChanged() = 0;
-    };
-    
-    inline string toString(scBox box)
-    {
-        return toString(box->getName());
+        return toString(object->getName());
     }
 }
 

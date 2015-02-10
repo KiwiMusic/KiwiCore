@@ -24,13 +24,13 @@
 #ifndef __DEF_KIWI_CONSOLE__
 #define __DEF_KIWI_CONSOLE__
 
-#include "Tools.h"
+#include "Defs.h"
 
 // TODO
 // - Clean and make it thread safe
 namespace Kiwi
 {
-    class Box;
+    class Object;
     class Page;
     class Instance;
     
@@ -49,14 +49,18 @@ namespace Kiwi
     {
     public:
         class Listener;
+        typedef shared_ptr<Listener>        sListener;
+        typedef weak_ptr<Listener>          wListener;
+        typedef shared_ptr<const Listener>  scListener;
+        typedef weak_ptr<const Listener>    wcListener;
+        
         class Message;
             
     private:
         
-        static unordered_set<weak_ptr<Listener>,
-        weak_ptr_hash<Listener>,
-        weak_ptr_equal<Listener>> m_listeners;
-        static mutex              m_mutex;
+        static set<wListener,
+        owner_less<wListener>> m_listeners;
+        static mutex           m_mutex;
     public:
         
         // ================================================================================ //
@@ -72,7 +76,7 @@ namespace Kiwi
         
         //! Remove an console listener from the binding list of the console.
         /** The function removes an console listener from the binding list of the console. If the console listener isn't in the binding list, the function doesn't do anything.
-         @param box  The pointer of the console listener.
+         @param object  The pointer of the console listener.
          @see           bind()
          */
         static void unbind(shared_ptr<Listener> listener);
@@ -83,12 +87,12 @@ namespace Kiwi
          */
         static void post(string const& message) noexcept;
         
-        //! Post a standard message that refers to a specific box.
-        /** The function post a message and notify the console listeners that a message has been received from this box.
-         @param box  The box sender.
+        //! Post a standard message that refers to a specific object.
+        /** The function post a message and notify the console listeners that a message has been received from this object.
+         @param object  The object sender.
          @param message The message in the string format.
          */
-        static void post(const scBox box, string const& message) noexcept;
+        static void post(const scObject object, string const& message) noexcept;
         
         //! Post a warning.
         /** The function post a warning and notify the console listeners that a warning has been received.
@@ -96,12 +100,12 @@ namespace Kiwi
          */
         static void warning(string const& message) noexcept;
         
-        //! Post a warning that refers to a specific box.
-        /** The function post a warning and notify the console listeners that a warning has been received from this box.
-         @param box  The box sender.
+        //! Post a warning that refers to a specific object.
+        /** The function post a warning and notify the console listeners that a warning has been received from this object.
+         @param object  The object sender.
          @param message The warning in the string format.
          */
-        static void warning(const scBox box, string const& message) noexcept;
+        static void warning(const scObject object, string const& message) noexcept;
         
         //! Post an error.
         /** The function post a error and notify the console listeners that a error has been received.
@@ -109,12 +113,12 @@ namespace Kiwi
          */
         static void error(string const& message) noexcept;
         
-        //! Post an error that refers to a specific box.
-        /** The function post a error and notify the console listeners that a error has been received from this box.
-         @param box  The box sender.
+        //! Post an error that refers to a specific object.
+        /** The function post a error and notify the console listeners that a error has been received from this object.
+         @param object  The object sender.
          @param message The error in the string format.
          */
-        static void error(const scBox box, string const& message) noexcept;
+        static void error(const scObject object, string const& message) noexcept;
         
         // ================================================================================ //
         //                                  INSTANCE LISTENER                               //
@@ -157,172 +161,7 @@ namespace Kiwi
                 ;
             }
         };
-        
-        // ================================================================================ //
-        //                                  CONSOLE HISTORY                                 //
-        // ================================================================================ //
-        
-        //! The console history is a console listener that keeps an history of the messages.
-        /**
-         The console history keeps and retrieves an history of messages. It offers functions to sort the messages by date, message, name of the sender an type.
-         @see Console
-         @see Console::Listener
-         @see Console::Message
-         */
-        class History : public Console::Listener, public enable_shared_from_this<History>
-        {
-        public:
-            class Listener;
-        
-            enum Sort
-            {
-                Index   = 0,
-                Name    = 1,
-                Kind    = 2,
-                Content = 3
-            };
-        private:
-            struct MessageHolder
-            {
-                shared_ptr<const Console::Message> m_message;
-                size_t                             m_index;
-            };
-            
-            mutex                  m_hmutex;
-            vector<MessageHolder>  m_messages;
-            Sort                   m_sort;
-            unordered_set<weak_ptr<Listener>,
-            weak_ptr_hash<Listener>,
-            weak_ptr_equal<Listener>> m_listeners;
-            
-            
-            static bool compareIndex(MessageHolder const& i, MessageHolder const& j);
-            static bool compareName(MessageHolder const& i, MessageHolder const& j);
-            static bool compareContent(MessageHolder const& i, MessageHolder const& j);
-            static bool compareKind(MessageHolder const& i, MessageHolder const& j);
-            
-            //! Receive the messages.
-            /** The function is called by the console when a message has been received.
-             @param console The console that received the message.
-             @param message The message.
-             */
-            void receive(shared_ptr<const Console::Message> message) override;
-        public:
-            
-            //! The constructor.
-            /** The constructor bind itself to the console.
-             */
-            History();
-            
-            //! The destructor.
-            /** The destructor clear all the messages.
-             */
-            ~History();
-            
-            //! The console history creation method.
-            /** The function allocates a console history and bind it to the console.
-             */
-            static shared_ptr<History> create();
-        
-            //! Clear the messages.
-            /** The function clears the history of messages.
-             */
-            void clear();
-            
-            //! Retreives the number of messages in the history.
-            /** The function retreives the number of messages in the history.
-             @return The number of messages.
-             */
-            size_t size();
-            
-            //! Retreives a message from the history.
-            /** The function retreives a message from the history.
-             @param index The index of the message.
-             @return The message.
-             */
-            shared_ptr<const Console::Message> get(size_t index);
-            
-            //! Erase a message from the history.
-            /** The function erases a message from the history.
-             @param index The index of the message.
-             */
-            void erase(size_t index);
-            
-            //! Erase a range of messages from the history.
-            /** The function a range of messages from the history.
-             @param begin The index of the message of the first message.
-             @param last The index of the message of the last message.
-             */
-            void erase(size_t begin, size_t last);
-            
-            //! Erase a set of messages from the history.
-            /** The function a set of messages from the history.
-             @param indices The indices of the messages
-             */
-            void erase(vector<size_t>& indices);
-            
-            //! Sort the message.
-            /** The function sorts the message by index, name, kind or content.
-             @param sort The type of sorting.
-             */
-            void sort(Sort type = Index);
-            
-            //! Add an history listener in the binding list of the console history.
-            /** The function adds an history listener in the binding list of the console history. If the history listener is already in the binding list, the function doesn't do anything.
-             @param listener  The pointer of the history listener.
-             @see              unbind()
-             */
-            void bind(shared_ptr<Listener> listener);
-            
-            //! Remove an history listener from the binding list of the console history.
-            /** The function removes an history listener from the binding list of the console history. If the history listener isn't in the binding list, the function doesn't do anything.
-             @param box  The pointer of the history listener.
-             @see           bind()
-             */
-            void unbind(shared_ptr<Listener> listener);
-            
-            // ================================================================================ //
-            //                                  INSTANCE LISTENER                               //
-            // ================================================================================ //
-            
-            //! The console listener is a virtual class that can bind itself to a console and be notified of the sevreal messages.
-            /**
-             The console listener is a very light class with three methods that can receive the post, warning and error messages notifications from consoles.
-             @see Console
-             @see Console::Message
-             @see Console::History
-             */
-            class Listener
-            {
-            public:
-                
-                //! The constructor.
-                /** The constructor does nothing.
-                 */
-                Listener()
-                {
-                    ;
-                }
-                
-                //! The destructor.
-                /** The destructor does nothing.
-                 */
-                virtual ~Listener()
-                {
-                    ;
-                }
-                
-                //! Receive the notification that an history has changed.
-                /** The function is called by an hisotry when it has changed.
-                 @param history The console history.
-                 */
-                virtual void historyHasChanged(shared_ptr<History> history)
-                {
-                    ;
-                }
-            };
-        };
-        
+    
         // ================================================================================ //
         //                                  CONSOLE MESSAGE                                 //
         // ================================================================================ //
@@ -345,17 +184,17 @@ namespace Kiwi
                 Warning = 3
             };
             
-            const string                          content;
-            const Kind                            kind;
-            const weak_ptr<const Kiwi::Box>       box;
-            const weak_ptr<const Kiwi::Page>      page;
-            const weak_ptr<const Kiwi::Instance>  instance;
+            const string        content;
+            const Kind          kind;
+            const wcObject      object;
+            const wcPage        page;
+            const wcInstance    instance;
             
             //! The constructor.
             /** The constructor initialize the members.
              */
-            Message(shared_ptr<const Kiwi::Instance> instance, shared_ptr<const Kiwi::Page> page, shared_ptr<const Kiwi::Box> box, Kind kind, string const& content) noexcept :
-            content(content), kind(kind), box(box), page(page), instance(instance)
+            Message(scInstance instance, scPage page, scObject object, Kind kind, string const& content) noexcept :
+            content(content), kind(kind), object(object), page(page), instance(instance)
             {
                 ;
             }

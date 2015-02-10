@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_LINK__
 #define __DEF_KIWI_LINK__
 
-#include "Box.h"
+#include "Object.h"
 
 namespace Kiwi
 {
@@ -36,54 +36,26 @@ namespace Kiwi
     /**
      The link is a combination of two sockets used to create the connection between boxes in a page.
      */
-    class Link : public Attr::Manager
+    class Link
     {
     private:
         const wPage         m_page;
-        const wBox          m_box_from;
-        const wBox          m_box_to;
+        const wObject       m_box_from;
+        const wObject       m_box_to;
         const ulong         m_index_outlet;
         const ulong         m_index_intlet;
-        const Box::Io::Type m_type;
-        const sAttrColor    m_attr_color_message;
-        const sAttrColor    m_attr_color_signal;
+        const Object::Io::Type m_type;
     public:
         
         //! The constructor.
         /** You should never use this method.
          */
-        Link(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet, const Box::Io::Type type) noexcept;
+        Link(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept;
         
         //! The destructor.
         /** You should never use this method.
          */
-        ~Link();
-        
-        //! The link creation method with a dico.
-        /** The function allocates a link with a page and a dico.
-         @param page    The page that owns the boxes.
-         @param dico    The dico that defines the link.
-         @return The link.
-         */
-        static sLink create(sPage page, scDico dico);
-        
-        //! Retrieve the sLink.
-        /** The function sLink.
-         @return The sLink.
-         */
-		inline sLink getShared() noexcept
-		{
-			return static_pointer_cast<Link>(shared_from_this());
-		}
-        
-        //! Retrieve the scLink.
-        /** The function scLink.
-         @return The scLink.
-         */
-		inline scLink getShared() const noexcept
-		{
-			return static_pointer_cast<const Link>(shared_from_this());
-		}
+        virtual ~Link();
         
         //! Retrieve the page of the link.
         /** The function retrieves the page of the link.
@@ -94,20 +66,20 @@ namespace Kiwi
             return m_page.lock();
         }
         
-        //! Retrieve the output box.
-        /** The function retrieves the output box of the link.
-         @return The output box.
+        //! Retrieve the output object.
+        /** The function retrieves the output object of the link.
+         @return The output object.
          */
-        inline sBox getBoxFrom() const noexcept
+        inline sObject getBoxFrom() const noexcept
         {
             return m_box_from.lock();
         }
         
-        //! Retrieve the input box.
-        /** The function retrieves the input box of the link.
-         @return The input box.
+        //! Retrieve the input object.
+        /** The function retrieves the input object of the link.
+         @return The input object.
          */
-        inline sBox getBoxTo() const noexcept
+        inline sObject getBoxTo() const noexcept
         {
             return m_box_to.lock();
         }
@@ -134,27 +106,9 @@ namespace Kiwi
         /** The function retrieves the io type of the link.
          @return The io type of the link.
          */
-        inline Box::Io::Type getType() const noexcept
+        inline Object::Io::Type getType() const noexcept
         {
             return m_type;
-        }
-        
-        //! Retrieve if the message color of the link.
-        /** The function retrieves the message color of the link.
-         @return The message color of the link.
-         */
-        inline Gui::Color getMessageColor() const noexcept
-        {
-            return m_attr_color_message->get();
-        }
-        
-        //! Retrieve if the signal color of the link.
-        /** The function retrieves the signal color of the link.
-         @return The signal color of the link.
-         */
-        inline Gui::Color getSignalColor() const noexcept
-        {
-            return m_attr_color_signal->get();
         }
         
         //! Write the page in a dico.
@@ -163,14 +117,13 @@ namespace Kiwi
          */
         void write(sDico dico) const noexcept;
         
-    private:
         class DspLink;
     };
 
     class Link::DspLink : public Link, public Dsp::Connection
     {
     public:
-        DspLink(const sPage page, const sBox from, const ulong outlet, const sBox to, const ulong inlet, const Box::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
+        DspLink(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
         Link(page, from, outlet, to, inlet, type),
         Dsp::Connection(pfrom, poutlet, pto, pinlet)
         {
@@ -178,11 +131,11 @@ namespace Kiwi
         }
     };
     
-    static bool operator==(scLink link, scBox box) noexcept
+    static bool operator==(scLink link, scObject object) noexcept
     {
-        if(link && box)
+        if(link && object)
         {
-            return link->getBoxFrom() == box || link->getBoxTo() == box;
+            return link->getBoxFrom() == object || link->getBoxTo() == object;
         }
         else
         {
@@ -190,11 +143,11 @@ namespace Kiwi
         }
     }
     
-    static bool operator==(sLink link, sBox box) noexcept
+    static bool operator==(sLink link, sObject object) noexcept
     {
-        if(link && box)
+        if(link && object)
         {
-            return link->getBoxFrom() == box || link->getBoxTo() == box;
+            return link->getBoxFrom() == object || link->getBoxTo() == object;
         }
         else
         {

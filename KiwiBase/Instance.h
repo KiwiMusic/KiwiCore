@@ -230,6 +230,75 @@ namespace Kiwi
          */
         virtual void dspStopped(sInstance instance) = 0;
     };
+    
+    // ================================================================================ //
+    //                                      OBJECT FACTORY                                 //
+    // ================================================================================ //
+    
+    class Prototypes
+    {
+    private:
+        
+        static map<sTag, sObject>  m_objects;
+        static mutex m_mutex;
+    public:
+        
+        //! Object factory
+        /** This function adds a new prototype of a object. If the prototype already exists, the function doesn't do anything otherwise the object is added to the prototype list.
+         @param     object The prototype of the object.
+         */
+        template <class T> static void add(string const& name = "")
+        {
+            sObject object = make_shared<T>(Initializer());
+            if(object)
+            {
+                sTag tname;
+                if(name.empty())
+                {
+                    tname = object->getName();
+                }
+                else
+                {
+                    tname = Tag::create(name);
+                }
+                
+                lock_guard<mutex> guard(m_mutex);
+                if(m_objects.find(tname) != m_objects.end())
+                {
+                    Console::error("The object " + toString(object->getName()) + " already exist !");
+                }
+                else
+                {
+                    m_objects[tname] = object;
+                }
+            }
+            else
+            {
+                Console::error("The prototype of an object has a wrong constructor !");
+            }
+        }
+        
+        //! ...
+        /** ...
+         */
+        static sObject get(sTag name);
+        
+        //! ...
+        /** ...
+         */
+        static sObject create(sTag name, Initializer const& init);
+        
+        //! ...
+        /** ...
+         */
+        static bool has(sTag name);
+        
+        //! Retrieves all loaded prototype names.
+        /** This function retrieves all loaded prototype names.
+         @param names A vector of Tag to be filled.
+         */
+        static void getNames(vector<sTag>& names);
+    };
 }
 
 

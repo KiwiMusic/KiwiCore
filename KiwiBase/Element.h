@@ -44,7 +44,7 @@ namespace Kiwi
     
     //! The element holds variables of different kinds.
     /**
-     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and a box but can receives an int, a long, a float, a double, a tag (weak or shared) or a box (weak or shared).
+     The element operates like the javasacript "var" by changing automatically the kind of value depending of the allocation, the initialization or the cast. The element holds a long, a double, a tag and a object but can receives an int, a long, a float, a double, a tag (weak or shared) or a object (weak or shared).
      */
     class Element
     {
@@ -56,7 +56,7 @@ namespace Kiwi
             LONG      = 1,
             DOUBLE    = 2,
             TAG       = 3,
-            BOX       = 4,
+            OBJECT    = 4,
             DICO      = 5,
             VECTOR    = 6
         };
@@ -67,7 +67,7 @@ namespace Kiwi
             long            m_long      = 0;
             double          m_double    = 0.;
             sTag            m_tag       = nullptr;
-            sBox            m_box       = nullptr;
+            sObject         m_box       = nullptr;
             sDico           m_dico      = nullptr;
         };
         
@@ -83,7 +83,7 @@ namespace Kiwi
                     case TAG:
                         m_val.m_tag.reset();
                         break;
-                    case BOX:
+                    case OBJECT:
                         m_val.m_box.reset();
                         break;
                     case DICO:
@@ -187,13 +187,13 @@ namespace Kiwi
             m_val.m_tag = tag;
         }
         
-        //! Constructor with a box.
-        /** The function allocates the element with a box.
+        //! Constructor with a object.
+        /** The function allocates the element with a object.
          */
-        Element(sBox box) noexcept
+        Element(sObject object) noexcept
         {
-            m_type = BOX;
-            m_val.m_box = box;
+            m_type = OBJECT;
+            m_val.m_box = object;
         }
         
         //! Constructor with a dico.
@@ -228,7 +228,7 @@ namespace Kiwi
                     m_val.m_tag = other.m_val.m_tag;
                 }
                     break;
-                case BOX:
+                case OBJECT:
                 {
                     m_val.m_box = other.m_val.m_box;
                 }
@@ -298,13 +298,13 @@ namespace Kiwi
             return m_type == TAG;
         }
         
-        //! Check if the element is of type box.
-        /** The function checks if the element is of type box.
-         @return    true if the element is a box.
+        //! Check if the element is of type object.
+        /** The function checks if the element is of type object.
+         @return    true if the element is a object.
          */
         inline bool isObject() const noexcept
         {
-            return m_type == BOX;
+            return m_type == OBJECT;
         }
         
         //! Check if the element is of type dico.
@@ -445,11 +445,20 @@ namespace Kiwi
             return m_val.m_tag;
         }
         
-        //! Cast the element to a box.
-        /** The function casts the element to a box.
-         @return An box if the element is a box otherwise a nullptr.
+        //! Cast the element to a object.
+        /** The function casts the element to a object.
+         @return An object if the element is a object otherwise a nullptr.
          */
-        inline operator sBox() const noexcept
+        inline operator scObject() const noexcept
+        {
+            return m_val.m_box;
+        }
+        
+        //! Cast the element to a object.
+        /** The function casts the element to a object.
+         @return An object if the element is a object otherwise a nullptr.
+         */
+        inline operator sObject() noexcept
         {
             return m_val.m_box;
         }
@@ -458,7 +467,16 @@ namespace Kiwi
         /** The function casts the element to a dico.
          @return An dico if the element is a dico otherwise a nullptr.
          */
-        inline operator sDico() const noexcept
+        inline operator scDico() const noexcept
+        {
+            return m_val.m_dico;
+        }
+        
+        //! Cast the element to a dico.
+        /** The function casts the element to a dico.
+         @return An dico if the element is a dico otherwise a nullptr.
+         */
+        inline operator sDico() noexcept
         {
             return m_val.m_dico;
         }
@@ -488,7 +506,7 @@ namespace Kiwi
                     m_val.m_tag = other.m_val.m_tag;
                 }
                     break;
-                case BOX:
+                case OBJECT:
                 {
                     m_val.m_box = other.m_val.m_box;
                 }
@@ -612,15 +630,15 @@ namespace Kiwi
             return *this;
         }
         
-        //! Set up the element with a box.
-        /** The function sets up the element with a box.
-         @param box   The box.
+        //! Set up the element with a object.
+        /** The function sets up the element with a object.
+         @param object   The object.
          @return An element.
          */
-        inline Element& operator=(sBox box) noexcept
+        inline Element& operator=(sObject object) noexcept
         {
-            changeType(BOX);
-            m_val.m_box = box;
+            changeType(OBJECT);
+            m_val.m_box = object;
             return *this;
         }
         
@@ -662,7 +680,7 @@ namespace Kiwi
                         return m_val.m_tag == other.m_val.m_tag;
                     }
                         break;
-                    case BOX:
+                    case OBJECT:
                     {
                         return m_val.m_box == other.m_val.m_box;
                     }
@@ -767,14 +785,14 @@ namespace Kiwi
             return m_type == TAG && m_val.m_tag == tag;
         }
         
-        //! Compare the element with a box.
-        /** The function compares the element with a box.
-         @param box   The box.
-         @return true if the element hold the box otherwise false.
+        //! Compare the element with a object.
+        /** The function compares the element with a object.
+         @param object   The object.
+         @return true if the element hold the object otherwise false.
          */
-        inline bool operator==(sBox box) const noexcept
+        inline bool operator==(sObject object) const noexcept
         {
-            return m_type == BOX && m_val.m_box == box;
+            return m_type == OBJECT && m_val.m_box == object;
         }
         
         //! Compare the element with a dico.
@@ -877,14 +895,14 @@ namespace Kiwi
             return !(*this == tag);
         }
         
-        //! Compare the element with a box.
-        /** The function compares the element with a box.
-         @param box   The box.
-         @return true if the element differ from the box otherwise false.
+        //! Compare the element with a object.
+        /** The function compares the element with a object.
+         @param object   The object.
+         @return true if the element differ from the object otherwise false.
          */
-        inline bool operator!=(sBox box) const noexcept
+        inline bool operator!=(sObject object) const noexcept
         {
-            return !(*this == box);
+            return !(*this == object);
         }
         
         //! Compare the element with a dico.

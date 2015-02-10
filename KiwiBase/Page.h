@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_PAGE__
 #define __DEF_KIWI_PAGE__
 
-#include "Box.h"
+#include "Object.h"
 #include "Link.h"
 
 namespace Kiwi
@@ -33,11 +33,11 @@ namespace Kiwi
     //                                      PAGE                                        //
     // ================================================================================ //
     
-    //! The page manages boxes and links.
+    //! The page manages objects and links.
     /**
      The page is...
      */
-    class Page : public AttrPage
+    class Page : public enable_shared_from_this<Page>
 	{
     public:
 		class Listener;
@@ -58,7 +58,7 @@ namespace Kiwi
     private:
         const wInstance             m_instance;
         Dsp::sContext               m_dsp_context;
-        vector<sBox>                m_boxes;
+        vector<sObject>             m_objects;
         vector<sLink>               m_links;
         mutable mutex               m_mutex;
         set<wListener,
@@ -68,8 +68,11 @@ namespace Kiwi
     private:
         
         //! @internal Trigger notification to controlers.
-        void send(sBox box, Notification type);
+        void send(sObject object, Notification type);
         void send(sLink link, Notification type);
+        
+        sObject createObject(scDico dico);
+        sLink   createLink(scDico dico);
     public:
         
         //! Constructor.
@@ -83,30 +86,12 @@ namespace Kiwi
         ~Page();
         
         //! The page creation method.
-        /** The function allocates a page and initialize the defaults boxes.
+        /** The function allocates a page and initialize the defaults objects.
          @param instance The instance that will manage the page.
          @param dico The dico that will initialize the page.
          @return The page.
          */
         static sPage create(sInstance instance, sDico dico = nullptr);
-		
-		//! Retrieve the sPage.
-		/** The function sPage.
-		 @return The sPage.
-		 */
-		inline sPage getShared() noexcept
-		{
-			return static_pointer_cast<Page>(shared_from_this());
-		}
-		
-		//! Retrieve the scPage.
-		/** The function scPage.
-		 @return The scPage.
-		 */
-		inline scPage getShared() const noexcept
-		{
-			return static_pointer_cast<const Page>(shared_from_this());
-		}
 		
         //! Retrieve the instance that manages the page.
         /** The function retrieves the instance that manages the page.
@@ -116,46 +101,43 @@ namespace Kiwi
         {
             return m_instance.lock();
         }
+            
+        //! Retrieve the shared pointer of the page.
+        /** The function retrieves the shared pointer of the page.
+         @return The shared pointer of the page.
+         */
+        inline scPage getShared() const noexcept
+        {
+            return static_pointer_cast<const Page>(shared_from_this());
+        }
+            
+        //! Retrieve the shared pointer of the page.
+        /** The function retrieves the shared pointer of the page.
+         @return The shared pointer of the page.
+         */
+        inline sPage getShared() noexcept
+        {
+            return static_pointer_cast<Page>(shared_from_this());
+        }
 
-        //! Get the boxes.
-        /** The function retrieves the boxes from the page.
-         @param boxes   A vector of elements.
+        //! Get the objects.
+        /** The function retrieves the objects from the page.
+         @param objects   A vector of elements.
          */
-        void getBoxes(vector<sBox>& boxes) const
+        void getObjects(vector<sObject>& objects) const
         {
             lock_guard<mutex> guard(m_mutex);
-            boxes = m_boxes;
+            objects = m_objects;
         }
         
-        //! Get the number of boxes.
-        /** The function retrieves the number of boxes.
-         @return The number of boxes.
+        //! Get the number of objects.
+        /** The function retrieves the number of objects.
+         @return The number of objects.
          */
-        ulong getNumberOfBoxes() const noexcept
+        ulong getNumberOfObjects() const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
-            return m_boxes.size();
-        }
-        
-        //! Get the number of boxes.
-        /** The function retrieves a boxes from the page.
-         @param _id   The id of the boxe.
-         @return The boxe that match with the id.
-         */
-        sBox getBoxe(const ulong _id) const noexcept
-        {
-            lock_guard<mutex> guard(m_mutex);
-            if(_id < m_boxes.size())
-            {
-                for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
-                {
-                    if(m_boxes[i]->getId() == _id)
-                    {
-                        return m_boxes[i];
-                    }
-                }
-            }
-            return nullptr;
+            return m_objects.size();
         }
         
         //! Get the links.
@@ -177,16 +159,16 @@ namespace Kiwi
         }
         
         //! Append a dico.
-        /** The function reads a dico and add the boxes and links to the page.
+        /** The function reads a dico and add the objects and links to the page.
          @param dico The dico.
          */
-        void add(sDico dico);
+        void add(scDico dico);
         
-        //! Free a box.
-        /** The function removes a box from the page.
-         @param box        The pointer to the box.
+        //! Free a object.
+        /** The function removes a object from the page.
+         @param object        The pointer to the object.
          */
-        void remove(sBox box);
+        void remove(sObject object);
         
         //! Free a link.
         /** The function removes a link from the page.
@@ -194,25 +176,25 @@ namespace Kiwi
          */
         void remove(sLink link);
         
-        //! Replace a box with another one.
-        /** The function instantiates a box with a dico that will replace an old box.
-         @param box        The box to replace.
-         @param dico       The dico that defines a box.
-         @return A pointer to the box.
+        //! Replace a object with another one.
+        /** The function instantiates a object with a dico that will replace an old object.
+         @param object        The object to replace.
+         @param dico       The dico that defines a object.
+         @return A pointer to the object.
          */
-        sBox replace(sBox box, sDico dico);
+        sObject replace(sObject object, sDico dico);
         
-        //! Bring a box to the front of the page.
-        /** The function brings a box to the front of the page. The box will be setted as if it was the last box created and will be the last box of the vector of boxes.
-         @param box        The pointer to the box.
+        //! Bring a object to the front of the page.
+        /** The function brings a object to the front of the page. The object will be setted as if it was the last object created and will be the last object of the vector of objects.
+         @param object        The pointer to the object.
          */
-        void toFront(sBox box);
+        void toFront(sObject object);
         
-        //! Bring a box to the back of the page.
-        /** The function brings a box to the back of the page. The box will be setted as if it was the first box created and will be the first box of the vector of boxes.
-         @param box        The pointer to the box.
+        //! Bring a object to the back of the page.
+        /** The function brings a object to the back of the page. The object will be setted as if it was the first object created and will be the first object of the vector of objects.
+         @param object        The pointer to the object.
          */
-        void toBack(sBox box);
+        void toBack(sObject object);
         
         //! Write the page in a dico.
         /** The function writes the pagein a dico.
@@ -240,22 +222,15 @@ namespace Kiwi
         /** The function stop the dsp chain.
          */
         void dspStop();
-        
-        //! Receives notification when an attribute value has changed.
-        /** The function receives notification when an attribute value has changed.
-         @param attr The attribute.
-         @return pass true to notify changes to listeners, false if you don't want them to be notified
-         */
-        bool attributeChanged(sAttr attr) override;
 		
-		//! Add a listener to the box.
-		/** The function adds a listener to the box.
+		//! Add a listener to the object.
+		/** The function adds a listener to the object.
 		 @param list    The listener.
 		 */
 		void addListener(sListener list);
         
-        //! Remove a listener from the box.
-        /** The function removes a listener from the box.
+        //! Remove a listener from the object.
+        /** The function removes a listener from the object.
          @param list    The listener.
          */
         void removeListener(sListener list);
@@ -268,8 +243,8 @@ namespace Kiwi
     
     //! The page listener is an abstract class that facilitates the control of a page in an application.
     /**
-     The page listener should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page listener owns a vector of box listeners and facilitates managements of boxes like the creation, the deletion, the selection, etc.
-     @see Page, Page::Listener, Box::Listener
+     The page listener should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page listener owns a vector of object listeners and facilitates managements of objects like the creation, the deletion, the selection, etc.
+     @see Page, Page::Listener, Object::Listener
      */
     class Page::Listener
     {
@@ -293,17 +268,17 @@ namespace Kiwi
             ;
         }
         
-        //! Receive the notification that a box has been created.
-        /** The function is called by the page when a box has been created.
-         @param box     The box.
+        //! Receive the notification that a object has been created.
+        /** The function is called by the page when a object has been created.
+         @param object     The object.
          */
-        virtual void boxCreated(sPage page, sBox box) = 0;
+        virtual void objectCreated(sPage page, sObject object) = 0;
         
-        //! Receive the notification that a box has been removed.
-        /** The function is called by the page when a box has been removed.
-         @param box     The box.
+        //! Receive the notification that a object has been removed.
+        /** The function is called by the page when a object has been removed.
+         @param object     The object.
          */
-        virtual void boxRemoved(sPage page, sBox box) = 0;
+        virtual void objectRemoved(sPage page, sObject object) = 0;
         
         //! Receive the notification that a link has been created.
         /** The function is called by the page when a link has been created.
@@ -316,12 +291,6 @@ namespace Kiwi
          @param link    The link.
          */
         virtual void linkRemoved(sPage page, sLink link) = 0;
-        
-        //! Receives notification when an value has changed.
-        /** The function receives notification when an attribute has changed.
-         @param attr The attribute.
-         */
-        virtual void attributeChanged(sPage page, sAttr attr) = 0;
     };
 }
 

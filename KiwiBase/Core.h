@@ -26,18 +26,6 @@
 
 #include "Instance.h"
 
-#define Allocate(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page); }
-
-#define AllocateLong(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (long)dico->get(Tag::List::arguments)); }
-
-#define AllocateDouble(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (double)dico->get(Tag::List::arguments)); }
-
-#define AllocateTag(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, (sTag)dico->get(Tag::List::arguments)); }
-
-#define AllocateElement(boxclass) sBox allocate(sPage page, sDico dico) const override { return make_shared<boxclass>(page, dico->get(Tag::List::arguments)); }
-
-#define AllocateElemVector(boxclass) sBox allocate(sPage page, sDico dico) const override { ElemVector elements; dico->get(Tag::List::arguments, elements);return make_shared<boxclass>(page, elements); }
-
 #endif
 
 

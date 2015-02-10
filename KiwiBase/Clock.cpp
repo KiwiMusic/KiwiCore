@@ -23,7 +23,7 @@
 
 
 #include "Clock.h"
-#include "Box.h"
+#include "Object.h"
 
 namespace Kiwi
 {
@@ -85,18 +85,18 @@ namespace Kiwi
     }
     
     
-    void Clock::delay(sBox box, const ulong ms)
+    void Clock::delay(sObject object, const ulong ms)
     {
-        sMaker maker = dynamic_pointer_cast<Clock::Maker>(box);
+        sMaker maker = dynamic_pointer_cast<Clock::Maker>(object);
         if(maker)
         {
             thread(tick, shared_from_this(), ms, maker).detach();
         }
     }
     
-    void Clock::delay(sBox box, ElemVector const& elements, const ulong ms)
+    void Clock::delay(sObject object, ElemVector const& elements, const ulong ms)
     {
-        sMaker maker = dynamic_pointer_cast<Clock::Maker>(box);
+        sMaker maker = dynamic_pointer_cast<Clock::Maker>(object);
         if(maker)
         {
             thread(tick_elements, shared_from_this(), ms, maker, elements).detach();
