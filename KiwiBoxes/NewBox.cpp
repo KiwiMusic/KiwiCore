@@ -32,13 +32,33 @@ namespace Kiwi
     
     NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name)
     {
-        //addInlet(Io::Message, Io::Hot, "inlet 1");
+		//m_textfield->setText(L"newbox test");
+		//textfield_setText()
     }
 	
     NewBox::~NewBox()
     {
         ;
     }
+	
+	sBox NewBox::allocate(sPage page, sDico dico) const
+	{
+		ElemVector elements;
+		dico->get(Tag::List::arguments, elements);
+		sBox box = make_shared<NewBox>(page, elements);
+		
+		Gui::sWriter writer = dynamic_pointer_cast<Gui::Writer>(box);
+		if(writer)
+		{
+			Gui::Writer::sTextField textfield = writer->getTextField();
+			if(textfield)
+			{
+				textfield->setWriter(writer);
+			}
+		}
+		
+		return box;
+	}
 	
     bool NewBox::receive(ulong index, ElemVector const& elements)
     {
@@ -47,35 +67,38 @@ namespace Kiwi
 	
 	bool NewBox::receive(Gui::Event::Mouse const& event)
 	{
-		setText(L"testtttt");
+		setText(L"newbox newtext");
         return false;
 	}
 	
 	bool NewBox::receive(Gui::Event::Keyboard const& event)
 	{
-        return false;
+		Console::post("newbox keybord event");
+        return false; // return true to block keyboard events
 	}
 	
 	bool NewBox::receive(Gui::Event::Focus event)
 	{
-		//Text::Editor::receive(event);
         return false;
+	}
+	
+	bool NewBox::textFilter(wstring& newtext)
+	{
+		string text = string(newtext.begin(), newtext.end());
+		Console::post("newbox textenter: " + text + ";");
+		return true;
+	}
+	
+	void NewBox::textChanged()
+	{
+		;
 	}
 	
 	void NewBox::draw(Gui::Doodle& d) const
 	{
 		const double borderSize = 1;
-		
 		d.fillAll(getBackgroundColor());
-		
 		d.setColor(getBorderColor());
 		d.drawRectangle(d.getBounds().reduced(borderSize*0.5), borderSize);
-		
-		if (toString(getName()) != "newbox")
-		{
-			d.setColor(getTextColor());
-			d.drawText(toString(getText()), 3, 0, d.getWidth(), d.getHeight(), getFontJustification());
-		}
-		//Text::Editor::draw(d);
 	}
 }
