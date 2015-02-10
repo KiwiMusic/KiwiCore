@@ -32,7 +32,7 @@ namespace Kiwi
     //                                    NEWBOX                                        //
     // ================================================================================ //
     
-	class NewBox : public Box, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder, public Gui::TextField::Owner
+	class NewBox : public Object, public Gui::Sketcher, public Gui::Mouser, public Gui::Keyboarder, public Gui::TextField::Owner
     {
     private:
 		
@@ -81,7 +81,7 @@ namespace Kiwi
 	
     inline void standardBoxes()
     {
-		Box::addPrototype(unique_ptr<Box>(new NewBox(sPage())));
+		Object::addPrototype(unique_ptr<Object>(new NewBox(sPage())));
     }
 }
 

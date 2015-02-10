@@ -30,7 +30,7 @@ namespace Kiwi
 	//										PRINT                                       //
 	// ================================================================================ //
 	
-	Print::Print(sPage page, ElemVector const& value) : Box(page, "print"), m_name("print")
+	Print::Print(sPage page, ElemVector const& value) : Object(page, "print"), m_name("print")
 	{
 		addInlet(Io::Message, Io::Hot, "Anything to be printed in the kiwi console");
 		
@@ -68,7 +68,7 @@ namespace Kiwi
     //                                      INT                                         //
     // ================================================================================ //
 	
-    Int::Int(sPage page, ElemVector const& value) : Box(page, "int"),
+    Int::Int(sPage page, ElemVector const& value) : Object(page, "int"),
     m_init(!value.empty()),
     m_value(0)
     {
@@ -134,7 +134,7 @@ namespace Kiwi
     //                                      SEND                                        //
     // ================================================================================ //
     
-    Send::Send(sPage page, sTag name) : Box(page, "send"),
+    Send::Send(sPage page, sTag name) : Object(page, "send"),
     m_name(name)
     {
         addInlet(Io::Message, Io::Hot, "Messages to send (anything)");
@@ -165,10 +165,10 @@ namespace Kiwi
             {
                 for(ulong i = 0; i < m_beacon->size(); i++)
                 {
-                    sBox box = m_beacon->getBox(i);
-                    if(box)
+                    sObject object = m_beacon->getBox(i);
+                    if(object)
                     {
-                        box->receive(1, elements);
+                        object->receive(1, elements);
                     }
                 }
                 return true;
@@ -187,7 +187,7 @@ namespace Kiwi
     //                                      RECEIVE                                     //
     // ================================================================================ //
     
-    Receive::Receive(sPage page, sTag name) : Box(page, "receive"),
+    Receive::Receive(sPage page, sTag name) : Object(page, "receive"),
     m_name(name)
     {
         addOutlet(Io::Message, "Messages received (anything)");
@@ -220,7 +220,7 @@ namespace Kiwi
         {
             if(index)
             {
-                Box::send(0, elements);
+                Object::send(0, elements);
             }
             else if(!index && elements[0].isTag())
             {
@@ -249,7 +249,7 @@ namespace Kiwi
     //                                      VALUE                                       //
     // ================================================================================ //
     
-    Value::Value(sPage page, sTag name) : Box(page, "value"),
+    Value::Value(sPage page, sTag name) : Object(page, "value"),
     m_name(name)
     {
         addOutlet(Io::Message, "Messages received (anything)");
@@ -294,7 +294,7 @@ namespace Kiwi
                 /*
                 if(elements[0].isTag() && elements[0] == Tag::List::bang)
                 {
-                    Box::send(0, m_values);
+                    Object::send(0, m_values);
                 }
                 else
                 {
@@ -303,10 +303,10 @@ namespace Kiwi
                     {
                         for(ulong i = 0; i < m_beacon->size(); i++)
                         {
-                            sBox box = m_beacon->getBox(i);
-                            if(box && box != getShared())
+                            sObject object = m_beacon->getBox(i);
+                            if(object && object != getShared())
                             {
-                                box->receive(0, m_values);
+                                object->receive(0, m_values);
                             }
                         }
                     }

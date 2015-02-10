@@ -30,7 +30,7 @@ namespace Kiwi
     //                                     METRO                                        //
     // ================================================================================ //
     
-    NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name)
+    NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Object(page, name)
     {
         //addInlet(Io::Message, Io::Hot, "inlet 1");
     }

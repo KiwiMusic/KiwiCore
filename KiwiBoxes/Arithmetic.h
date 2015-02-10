@@ -32,114 +32,96 @@ namespace Kiwi
     //                                  ARITHMETIC                                      //
     // ================================================================================ //
     
-    class Arithmetic : public Box
+    class ArithmeticBox : public Object
     {
     protected:
         double          m_first;
         double          m_second;
     public:
-        Arithmetic(sPage page, string const& name, ElemVector const& elements, string const& input1, string const& input2,string const& output);
-        virtual ~Arithmetic();
+        ArithmeticBox(sPage page, string const& name, ElemVector const& elements, string const& input1, string const& input2,string const& output);
+        virtual ~ArithmeticBox();
         virtual string getExpression() const noexcept override;
     private:
-        bool receive(ulong index, ElemVector const& elements) override;
+        void receive(ulong index, ElemVector const& elements) override;
         virtual inline double compute() = 0;
-        virtual sBox allocate(sPage page, sDico dico) const = 0;
+        virtual sObject allocate(sPage page, sDico dico) const = 0;
     };
     
-    class Plus : public Arithmetic
+    class PlusBox : public ArithmeticBox
     {
     public:
-        Plus(sPage page = nullptr, ElemVector const& elements = {}) :
-        Arithmetic(page, "+", elements, "Augend", "Addend", "Sum"){}
-        ~Plus(){}
+        PlusBox(sPage page = nullptr, ElemVector const& elements = {}) :
+        ArithmeticBox(page, "+", elements, "Augend", "Addend", "Sum"){}
+        ~PlusBox(){}
     private:
         inline double compute() override{return m_first + m_second;}
-        AllocateElemVector(Plus);
+        AllocateElemVector(PlusBox);
     };
     
-    class Minus : public Arithmetic
+    class MinusBox : public ArithmeticBox
     {
     public:
-        Minus(sPage page = nullptr, ElemVector const& elements = {}) :
-        Arithmetic(page, "-", elements, "Minuend", "Subtrahend", "Difference"){}
-        ~Minus(){}
+        MinusBox(sPage page = nullptr, ElemVector const& elements = {}) :
+        ArithmeticBox(page, "-", elements, "Minuend", "Subtrahend", "Difference"){}
+        ~MinusBox(){}
     private:
         inline double compute() override{return m_first - m_second;}
-        AllocateElemVector(Minus);
+        AllocateElemVector(MinusBox);
     };
     
-    class Times : public Arithmetic
+    class TimesBox : public ArithmeticBox
     {
     public:
-        Times(sPage page = nullptr, ElemVector const& elements = {}) :
-        Arithmetic(page, "*", elements, "Multiplicand", "Multiplier", "Product"){}
-        ~Times(){}
+        TimesBox(sPage page = nullptr, ElemVector const& elements = {}) :
+        ArithmeticBox(page, "*", elements, "Multiplicand", "Multiplier", "Product"){}
+        ~TimesBox(){}
     private:
         inline double compute() override{return m_first * m_second;}
-        AllocateElemVector(Times);
+        AllocateElemVector(TimesBox);
     };
     
-    class Divide : public Arithmetic
+    class DivideBox : public ArithmeticBox
     {
     public:
-        Divide(sPage page = nullptr, ElemVector const& elements = {}) :
-        Arithmetic(page, "/", elements, "Dividend", "Divisor", "Quotient"){}
-        ~Divide(){}
+        DivideBox(sPage page = nullptr, ElemVector const& elements = {}) :
+        ArithmeticBox(page, "/", elements, "Dividend", "Divisor", "Quotient"){}
+        ~DivideBox(){}
     private:
         inline double compute() override{return m_first / m_second;}
-        AllocateElemVector(Divide);
+        AllocateElemVector(DivideBox);
     };
     
-    class Modulo : public Arithmetic
+    class ModuloBox : public ArithmeticBox
     {
     public:
-        Modulo(sPage page = nullptr, ElemVector const& elements = {}) :
-        Arithmetic(page, "%", elements, "Dividend", "Divisor", "Remainder"){}
-        ~Modulo(){}
+        ModuloBox(sPage page = nullptr, ElemVector const& elements = {}) :
+        ArithmeticBox(page, "%", elements, "Dividend", "Divisor", "Remainder"){}
+        ~ModuloBox(){}
     private:
         inline double compute() override{return fmod(m_first, m_second);}
-        AllocateElemVector(Modulo);
+        AllocateElemVector(ModuloBox);
     };
     
-    class Power : public Arithmetic
+    class PowerBox : public ArithmeticBox
     {
     public:
-        Power(sPage page = nullptr, ElemVector const& elements = {}) :
-        Arithmetic(page, "^", elements, "Base", "Exponent", "Power"){}
-        ~Power(){}
+        PowerBox(sPage page = nullptr, ElemVector const& elements = {}) :
+        ArithmeticBox(page, "^", elements, "Base", "Exponent", "PowerBox"){}
+        ~PowerBox(){}
     private:
         inline double compute() override{return pow(m_first, m_second);}
-        AllocateElemVector(Power);
+        AllocateElemVector(PowerBox);
     };
-    /*
-    class Expression : public Box
-    {
-    private:
-        mu::Parser      m_parser;
-        vector<double>  m_values;
-    public:
-        Expression(sPage page, ElemVector const& elements);
-        ~Expression();
-    private:
-        bool receive(size_t index, ElemVector const& elements) override;
-        sBox allocate(sPage page, sDico dico) const override
-        {
-            ElemVector elements;
-            dico->get(Tag::create("arguments"), elements);
-            return make_shared<Expression>(page, elements);
-        }
-    };*/
     
     inline void arithmetic()
     {
-        Box::addPrototype(unique_ptr<Box>(new Plus()));
-        Box::addPrototype(unique_ptr<Box>(new Minus()));
-        Box::addPrototype(unique_ptr<Box>(new Times()));
-        Box::addPrototype(unique_ptr<Box>(new Divide()));
-        Box::addPrototype(unique_ptr<Box>(new Modulo()));
-        Box::addPrototype(unique_ptr<Box>(new Power()));
-        //Box::addPrototype(unique_ptr<Box>(new Expression(nullptr, {})));
+        Object::addPrototype(unique_ptr<Object>(new PlusBox()));
+        Object::addPrototype(unique_ptr<Object>(new MinusBox()));
+        Object::addPrototype(unique_ptr<Object>(new TimesBox()));
+        Object::addPrototype(unique_ptr<Object>(new DivideBox()));
+        Object::addPrototype(unique_ptr<Object>(new ModuloBox()));
+        Object::addPrototype(unique_ptr<Object>(new PowerBox()));
+        //Object::addPrototype(unique_ptr<Object>(new Expression(nullptr, {})));
     }
 }
 

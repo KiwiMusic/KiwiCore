@@ -36,23 +36,18 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    class Bang : public Box, public Gui::Sketcher, public Gui::Mouser, public Clock::Maker
+    class BangBox : public Object, public Gui::Bang, public Clock::Maker
     {
     private:
-        const sAttrColor    m_color_circle;
-        const sAttrColor    m_color_led;
-        atomic_bool         m_led;
-        sClock              m_clock;
+        sClock  m_clock;
     public:
-        
-        Bang(sPage page);
-        ~Bang();
-        bool receive(ulong index, ElemVector const& elements) override;
-        bool receive(Gui::Event::Mouse const& event) override;
-        void draw(Gui::Doodle& doodle) const override;
-        bool notify(sAttr attr) override;
+        sObject create(Initializer const& initiliazer) const override;
+        BangBox(Initializer const& init);
+        ~BangBox();
+        void receive(ulong index, ElemVector const& elements) override;
         void tick() override;
-        Allocate(Bang);
+    protected:
+        void bang() override;
     };
 	
 	// ================================================================================ //
@@ -61,7 +56,7 @@ namespace Kiwi
 	
     inline void guiInit()
     {
-        Box::addPrototype(unique_ptr<Box>(new Bang(nullptr)));
+        Prototypes::add<BangBox>();
     }
 }
 

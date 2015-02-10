@@ -36,7 +36,7 @@ namespace Kiwi
     //                                     METRO                                        //
     // ================================================================================ //
     
-    class Metro : public Box, public Clock::Maker
+    class Metro : public Object, public Clock::Maker
     {
     private:
 		atomic_bool	m_active;
@@ -46,14 +46,14 @@ namespace Kiwi
         
         Metro(sPage page, ElemVector const& elements = {});
         ~Metro();
-        bool receive(ulong index, ElemVector const& elements) override;
+        void receive(ulong index, ElemVector const& elements) override;
         void tick() override;
         AllocateElemVector(Metro);
     };
     
     inline void timing()
     {
-		Box::addPrototype(unique_ptr<Box>(new Metro(sPage())));
+		Object::addPrototype(unique_ptr<Object>(new Metro(sPage())));
     }
 }
 
