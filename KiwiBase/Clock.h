@@ -98,18 +98,18 @@ namespace Kiwi
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
-         @param  box        The box that will be used.
+         @param  object        The object that will be used.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sBox box, const ulong ms);
+        void delay(sObject object, const ulong ms);
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
-         @param  box        The box that will be used.
+         @param  object        The object that will be used.
          @param  elements   The elements that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sBox box, ElemVector const& elements, const ulong ms);
+        void delay(sObject object, ElemVector const& elements, const ulong ms);
         
         // ================================================================================ //
         //                                      MAKER                                       //

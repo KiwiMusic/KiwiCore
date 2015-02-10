@@ -38,20 +38,20 @@ namespace Kiwi
     
     Beacon::~Beacon()
     {
-        m_boxes.clear();
+        m_objects.clear();
     }
     
-    void Beacon::bind(sBox box)
+    void Beacon::bind(sObject object)
     {
-        if(box)
+        if(object)
         {
             lock_guard<mutex> guard(m_mutex);
-            for(auto it = m_boxes.begin(); it != m_boxes.end(); )
+            for(auto it = m_objects.begin(); it != m_objects.end(); )
             {
-                sBox other = (*it).lock();
+                sObject other = (*it).lock();
                 if(other)
                 {
-                    if(other == box)
+                    if(other == object)
                     {
                         return;
                     }
@@ -59,27 +59,27 @@ namespace Kiwi
                 }
                 else
                 {
-                    it = m_boxes.erase(it);
+                    it = m_objects.erase(it);
                 }
             }
         }
     }
     
-    void Beacon::unbind(sBox box)
+    void Beacon::unbind(sObject object)
     {
-        if(box)
+        if(object)
         {
             lock_guard<mutex> guard(m_mutex);
-            for(auto it = m_boxes.begin(); it != m_boxes.end(); )
+            for(auto it = m_objects.begin(); it != m_objects.end(); )
             {
-                sBox other = (*it).lock();
-                if(other && other != box)
+                sObject other = (*it).lock();
+                if(other && other != object)
                 {
                     ++it;
                 }
                 else
                 {
-                    it = m_boxes.erase(it);
+                    it = m_objects.erase(it);
                 }
             }
         }
@@ -115,9 +115,9 @@ namespace Kiwi
         }
     }
     
-    sBeacon Beacon::create(sBox box, string const& name)
+    sBeacon Beacon::create(sObject object, string const& name)
     {
-        sInstance instance = box->getInstance();
+        sInstance instance = object->getInstance();
         if(instance)
         {
             return instance->createBeacon(name);

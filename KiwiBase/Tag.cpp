@@ -26,7 +26,7 @@
 
 namespace Kiwi
 {
-    unordered_map<string, sTag> Tag::m_tags;
+    map<string, sTag> Tag::m_tags;
     mutex Tag::m_mutex;
     
     const sTag Tag::List::arguments             = Tag::create("arguments");
@@ -35,8 +35,6 @@ namespace Kiwi
     const sTag Tag::List::bang                  = Tag::create("bang");
     const sTag Tag::List::bold                  = Tag::create("bold");
     const sTag Tag::List::bold_italic           = Tag::create("bold italic");
-    const sTag Tag::List::box                   = Tag::create("box");
-    const sTag Tag::List::boxes                 = Tag::create("boxes");
     
     const sTag Tag::List::center                = Tag::create("center");
     const sTag Tag::List::color                 = Tag::create("color");
@@ -54,6 +52,7 @@ namespace Kiwi
     const sTag Tag::List::fontname              = Tag::create("fontname");
     const sTag Tag::List::fontsize              = Tag::create("fontsize");
     
+    const sTag Tag::List::id                    = Tag::create("id");
     const sTag Tag::List::italic                = Tag::create("italic");
     
     const sTag Tag::List::left                  = Tag::create("left");
@@ -65,7 +64,12 @@ namespace Kiwi
     const sTag Tag::List::Message_Color         = Tag::create("Message Color");
     
     const sTag Tag::List::name                  = Tag::create("name");
+    const sTag Tag::List::ninlets               = Tag::create("ninlets");
     const sTag Tag::List::normal                = Tag::create("normal");
+    const sTag Tag::List::noutlets              = Tag::create("noutlets");
+    
+    const sTag Tag::List::object                = Tag::create("object");
+    const sTag Tag::List::objects               = Tag::create("objects");
     
     const sTag Tag::List::page                  = Tag::create("page");
     
@@ -75,6 +79,7 @@ namespace Kiwi
     const sTag Tag::List::sigcolor              = Tag::create("sigcolor");
     const sTag Tag::List::Signal_Color          = Tag::create("Signal Color");
     
+    const sTag Tag::List::text                  = Tag::create("text");
     const sTag Tag::List::to                    = Tag::create("to");
 }
 

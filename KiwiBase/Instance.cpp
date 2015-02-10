@@ -22,14 +22,16 @@
 */
 
 #include "Instance.h"
-#include "../KiwiBoxes/NewBox.h"
-#include "../KiwiBoxes/Arithmetic.h"
-#include "../KiwiBoxes/ArithmeticTilde.h"
+
 #include "../KiwiBoxes/Gui.h"
+/*
 #include "../KiwiBoxes/Wireless.h"
 #include "../KiwiBoxes/Time.h"
 #include "../KiwiBoxes/DspGenerator.h"
-
+#include "../KiwiBoxes/NewBox.h"
+#include "../KiwiBoxes/Arithmetic.h"
+#include "../KiwiBoxes/ArithmeticTilde.h"
+*/
 namespace Kiwi
 {
     bool libraries_loaded = false;
@@ -57,20 +59,18 @@ namespace Kiwi
     {
         if(!libraries_loaded)
         {
+            guiInit();
+            /*
 			standardBoxes();
             arithmetic();
-            guiInit();
             wireless();
 			timing();
             GeneratorTildeInit();
+             */
             libraries_loaded = true;
         }
         return make_shared<Instance>();
     }
-    
-    // ================================================================================ //
-    //                                      FACTORY                                     //
-    // ================================================================================ //
 
     sPage Instance::createPage(sDico dico)
     {
@@ -268,6 +268,55 @@ namespace Kiwi
         {
             lock_guard<mutex> guard(m_lists_mutex);
             m_lists.erase(listener);
+        }
+    }
+    
+    // ================================================================================ //
+    //                                      OBJECT FACTORY                              //
+    // ================================================================================ //
+    
+    map<sTag, sObject> Prototypes::m_objects;
+    mutex Prototypes::m_mutex;
+    
+    sObject Prototypes::get(sTag name)
+    {
+        lock_guard<mutex> guard(m_mutex);
+        auto it = m_objects.find(name);
+        if(it != m_objects.end())
+        {
+            return it->second;
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    
+    sObject Prototypes::create(sTag name, Initializer const& init)
+    {
+        sObject proto = Prototypes::get(name);
+        if(proto)
+        {
+            return proto->create(init);
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    
+    bool Prototypes::has(sTag name)
+    {
+        lock_guard<mutex> guard(m_mutex);
+        return m_objects.find(name) != m_objects.end();
+    }
+    
+    void Prototypes::getNames(vector<sTag>& names)
+    {
+        lock_guard<mutex> guard(m_mutex);
+        for(auto it = m_objects.begin(); it !=  m_objects.end(); ++it)
+        {
+            names.push_back(it->first);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Kiwi
     Page::~Page()
     {
         m_links.clear();
-        m_boxes.clear();
+        m_objects.clear();
         m_lists.clear();
     }
     
@@ -55,63 +55,182 @@ namespace Kiwi
                 {
                     pageDico = dico->get(Tag::List::page);
                     page->add(pageDico);
-                    page->Attr::Manager::read(pageDico);
                 }
             }
         }
         return page;
     }
     
-    void Page::add(sDico dico)
+    sObject Page::createObject(scDico dico)
     {
+        sObject object;
         if(dico)
         {
-            map<ulong, ulong> m_ids_mapper;
-            ElemVector boxes;
-            dico->get(Tag::List::boxes, boxes);
-            for(vector<sBox>::size_type i = 0; i < boxes.size(); i++)
+            sTag name = dico->get(Tag::List::name);
+            sTag text = dico->get(Tag::List::text);
+            ulong _id = dico->get(Tag::List::id);
+            if(!_id)
             {
-                sDico subdico = boxes[i];
-                if(subdico)
+                lock_guard<mutex> guard(m_mutex);
+                _id = m_objects.size() + 1;
+            }
+            ElemVector args;
+            dico->get(Tag::List::arguments, args);
+            object = Prototypes::create(name, Initializer(getInstance(), getShared(), _id, name->getName(), text->getName(), dico, args));
+            object->initialize();
+        }
+        return object;
+    }
+    
+    sLink Page::createLink(scDico dico)
+    {
+        sLink link;
+        if(dico)
+        {
+            ulong indexo, indexi, ido, idi;
+            ElemVector elements;
+            dico->get(Tag::List::from, elements);
+            if(elements.size() > 1 && elements[0].isNumber() && elements[1].isNumber())
+            {
+                ido     = elements[0];
+                indexo  = elements[1];
+            }
+            else
+            {
+                return nullptr;
+            }
+            
+            dico->get(Tag::List::to, elements);
+            if(elements.size() > 1 && elements[0].isNumber() && elements[1].isNumber())
+            {
+                idi     = elements[0];
+                indexi  = elements[1];
+            }
+            else
+            {
+                return nullptr;
+            }
+            
+            sObject from, to;
+            lock_guard<mutex> guard(m_mutex);
+            if(ido < m_objects.size() + 1 && idi <  m_objects.size() + 1 && ido != idi)
+            {
+                for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
                 {
-                    sBox box;
-                    subdico = subdico->get(Tag::List::box);
-                    if(subdico)
+                    if(m_objects[i]->getId() == ido)
                     {
+                        from = m_objects[i];
+                    }
+                    else if(m_objects[i]->getId() == idi)
+                    {
+                        to = m_objects[i];
+                    }
+                    else if(from.use_count() && to.use_count())
+                    {
+                        break;
+                    }
+                }
+            }
+            
+            if(from && to)
+            {
+                Object::sOutlet outlet  = from->getOutlet(indexo);
+                Object::sInlet inlet    = to->getInlet(indexi);
+                if(outlet && inlet)
+                {
+                    if(outlet->getType() & inlet->getType() || inlet->getType() & outlet->getType())
+                    {
+                        Object::Io::Type type = min(outlet->getType(), inlet->getType());
+                        if(type & Object::Io::Signal)
                         {
-                            int notworking;
-                            lock_guard<mutex> guard(m_mutex);
-                            ulong _id;
-                            for(_id = 1; _id <= m_boxes.size() + 1; _id++)
+                            Dsp::sProcess pfrom = dynamic_pointer_cast<Dsp::Process>(from);
+                            Dsp::sProcess pto   = dynamic_pointer_cast<Dsp::Process>(to);
+                            if(from && to)
                             {
-                                for(ulong j = 0; j < m_boxes.size(); j++)
+                                ulong poutlet = 0, pinlet = 0;
+                                for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
                                 {
-                                    if(m_boxes[j]->getId() == _id)
+                                    Object::sOutlet out = from->getOutlet(poutlet);
+                                    if(out)
                                     {
-                                        break;
+                                        if(out == outlet)
+                                        {
+                                            break;
+                                        }
+                                        else if(out->getType() & Object::Io::Signal)
+                                        {
+                                            poutlet++;
+                                        }
                                     }
                                 }
+                                if(poutlet >= pfrom->getNumberOfOutputs())
+                                {
+                                    return nullptr;
+                                }
+                                
+                                for(ulong i = 0; i < from->getNumberOfInlets(); i++)
+                                {
+                                    Object::sInlet in = from->getInlet(poutlet);
+                                    if(in)
+                                    {
+                                        if(in == inlet)
+                                        {
+                                            break;
+                                        }
+                                        else if(in->getType() & Object::Io::Signal)
+                                        {
+                                            pinlet++;
+                                        }
+                                    }
+                                }
+                                if(pinlet >= pfrom->getNumberOfInputs())
+                                {
+                                    return nullptr;
+                                }
+                                
+                                outlet->append(to, indexo);
+                                inlet->append(from, indexi);
+                                return make_shared<Link::DspLink>(shared_from_this(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
                             }
-                            subdico->set(Box::Tag_id, _id);
                         }
-                        
-                        box = Box::create(getShared(), subdico);
-                        if(box)
+                        else
                         {
-                            lock_guard<mutex> guard(m_mutex);
-                            m_boxes.push_back(box);
-                        }
-                        
-                        if(dico->has(Tag::List::links) && box && subdico->has(Box::Tag_id))
-                        {
-                            ulong _id = subdico->get(Box::Tag_id);
-                            if(box->getId() != _id)
-                            {
-                                m_ids_mapper[_id] = box->getId();
-                            }
+                            outlet->append(to, indexo);
+                            inlet->append(from, indexi);
+                            return make_shared<Link>(shared_from_this(), from, indexo, to, indexi, type);
                         }
                     }
-                    send(box, Notification::Added);
+                    else
+                    {
+                        return nullptr;
+                    }
+                }
+            }
+        }
+        
+        return link;
+    }
+    
+    void Page::add(scDico dico)
+    {
+        sDico rdico = Dico::create(dico);
+        if(rdico)
+        {
+            ElemVector objects;
+            dico->get(Tag::List::objects, objects);
+            for(vector<sObject>::size_type i = 0; i < objects.size(); i++)
+            {
+                sDico subdico = objects[i];
+                if(subdico)
+                {
+                    sObject object = createObject(subdico->get(Tag::List::object));
+                    if(object)
+                    {
+                        lock_guard<mutex> guard(m_mutex);
+                        m_objects.push_back(object);
+                    }
+                    
+                    send(object, Notification::Added);
                 }
             }
             
@@ -122,34 +241,11 @@ namespace Kiwi
                 sDico subdico = links[i];
                 if(subdico)
                 {
-                    sLink link;
-                    subdico = subdico->get(Tag::List::link);
-                    if(subdico)
+                    sLink link = createLink(subdico->get(Tag::List::link));
+                    if(link)
                     {
-                        ElemVector elem;
-                        subdico->get(Tag::List::from, elem);
-                        if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
-                        {
-                            if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
-                            {
-                                subdico->set(Tag::List::from, {m_ids_mapper[(ulong)elem[0]], elem[1]});
-                            }
-                        }
-                        subdico->get(Tag::List::to, elem);
-                        if(elem.size() == 2 && elem[0].isNumber() && elem[1].isNumber())
-                        {
-                            if(m_ids_mapper.find((ulong)elem[0]) != m_ids_mapper.end())
-                            {
-                                subdico->set(Tag::List::to, {m_ids_mapper[(ulong)elem[0]], elem[1]});
-                            }
-                        }
-                        
-                        link = Link::create(getShared(), subdico);
-                        if(link)
-                        {
-                            lock_guard<mutex> guard(m_mutex);
-                            m_links.push_back(link);
-                        }
+                        lock_guard<mutex> guard(m_mutex);
+                        m_links.push_back(link);
                     }
                     send(link, Notification::Added);
                 }
@@ -157,31 +253,31 @@ namespace Kiwi
         }
     }
     
-    void Page::remove(sBox box)
+    void Page::remove(sObject object)
     {
         vector<sLink> links;
-        if(box)
+        if(object)
         {
             lock_guard<mutex> guard(m_mutex);
-            auto it = find(m_boxes.begin(), m_boxes.end(), box);
-            if(it != m_boxes.end())
+            auto it = find(m_objects.begin(), m_objects.end(), object);
+            if(it != m_objects.end())
             {
-                auto li = find(m_links.begin(), m_links.end(), box);
+                auto li = find(m_links.begin(), m_links.end(), object);
                 while(li != m_links.end())
                 {
                     links.push_back((*li));
                     m_links.erase(li);
-                    li = find(m_links.begin(), m_links.end(), box);
+                    li = find(m_links.begin(), m_links.end(), object);
                 }
                 
-                m_boxes.erase(it);
+                m_objects.erase(it);
             }
         }
         for(vector<sLink>::size_type i = 0; i < links.size(); i++)
         {
             send(links[i], Notification::Removed);
         }
-        send(box, Notification::Removed);
+        send(object, Notification::Removed);
     }
     
     void Page::remove(sLink link)
@@ -198,75 +294,35 @@ namespace Kiwi
         send(link, Notification::Removed);
     }
     
-    sBox Page::replace(sBox oldbox, sDico dico)
+    sObject Page::replace(sObject oldobject, sDico dico)
     {
-        sBox newbox;
-        vector<sLink> oldlinks;
-        vector<sLink> newlinks;
-        if(oldbox && dico)
-        {
-            lock_guard<mutex> guard(m_mutex);
-            auto it = find(m_boxes.begin(), m_boxes.end(), oldbox);
-            if(it != m_boxes.end())
-            {
-                dico->set(Box::Tag_id, oldbox->getId());
-                newbox = Box::create(getShared(), dico);
-                if(newbox)
-                {
-                    (*it) = newbox;
-                    auto li = find(m_links.begin(), m_links.end(), oldbox);
-                    while(li != m_links.end())
-                    {
-                        int todo;
-                        oldlinks.push_back((*li));
-                        sDico dico = Dico::create();
-                        (*li) = Link::create(getShared(), dico);
-                        if((*li))
-                        {
-                            newlinks.push_back((*li));
-                        }
-                        li = find(m_links.begin(), m_links.end(), oldbox);
-                    }
-                }
-            }
-        }
-        for(vector<sLink>::size_type i = 0; i < oldlinks.size(); i++)
-        {
-            send(oldlinks[i], Notification::Removed);
-        }
-        send(oldbox, Notification::Removed);
-        send(newbox, Notification::Added);
-        for(vector<sLink>::size_type i = 0; i < newlinks.size(); i++)
-        {
-            send(newlinks[i], Notification::Added);
-        }
-        return newbox;
+        return nullptr;
     }
     
-    void Page::toFront(sBox box)
+    void Page::toFront(sObject object)
     {
-        if(box)
+        if(object)
         {
             lock_guard<mutex> guard(m_mutex);
-            auto it = find(m_boxes.begin(), m_boxes.end(), box);
-            if(it != m_boxes.end())
+            auto it = find(m_objects.begin(), m_objects.end(), object);
+            if(it != m_objects.end())
             {
-                m_boxes.erase(it);
-                m_boxes.push_back(box);
+                m_objects.erase(it);
+                m_objects.push_back(object);
             }
         }
     }
     
-    void Page::toBack(sBox box)
+    void Page::toBack(sObject object)
     {
-        if(box)
+        if(object)
         {
             lock_guard<mutex> guard(m_mutex);
-            auto it = find(m_boxes.begin(), m_boxes.end(), box);
-            if(it != m_boxes.end())
+            auto it = find(m_objects.begin(), m_objects.end(), object);
+            if(it != m_objects.end())
             {
-                m_boxes.erase(it);
-                m_boxes.insert(m_boxes.begin(), box);
+                m_objects.erase(it);
+                m_objects.insert(m_objects.begin(), object);
             }
         }
     }
@@ -278,22 +334,21 @@ namespace Kiwi
 			sDico subpage = Dico::create();
 			if(subpage)
 			{
-				ElemVector elements;
-				Attr::Manager::write(subpage);
+                ElemVector elements;
 				lock_guard<mutex> guard(m_mutex);
                 
-				for(vector<sBox>::size_type i = 0; i < m_boxes.size(); i++)
+				for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
 				{
-					sDico box = Dico::create();
-					sDico subbox = Dico::create();
-					if(box && subbox)
+					sDico object = Dico::create();
+					sDico subobject = Dico::create();
+					if(object && subobject)
 					{
-						m_boxes[i]->write(subbox);
-						box->set(Tag::List::box, subbox);
-						elements.push_back(box);
+						m_objects[i]->write(subobject);
+						object->set(Tag::List::object, subobject);
+						elements.push_back(object);
 					}
 				}
-				subpage->set(Tag::List::boxes, elements);
+				subpage->set(Tag::List::objects, elements);
 				
 				elements.clear();
 				
@@ -319,7 +374,7 @@ namespace Kiwi
         dspStop();
         m_dsp_context = Dsp::Context::create(samplerate, vectorsize);
 
-        for(auto it = m_boxes.begin(); it != m_boxes.end(); ++it)
+        for(auto it = m_objects.begin(); it != m_objects.end(); ++it)
         {
             Dsp::sProcess process = dynamic_pointer_cast<Dsp::Process>((*it));
             if(process)
@@ -341,9 +396,9 @@ namespace Kiwi
         {
             m_dsp_context->compile();
         }
-        catch(Dsp::sProcess box)
+        catch(Dsp::sProcess object)
         {
-            Console::error(dynamic_pointer_cast<Box>(box), "something appened with me... sniff !");
+            Console::error(dynamic_pointer_cast<Object>(object), "something appened with me... sniff !");
             throw shared_from_this();
         }
     }
@@ -375,9 +430,9 @@ namespace Kiwi
         }
     }
 
-    void Page::send(sBox box, Page::Notification type)
+    void Page::send(sObject object, Page::Notification type)
     {
-        if(box)
+        if(object)
         {
             lock_guard<mutex> guard(m_lists_mutex);
             for(auto it = m_lists.begin(); it != m_lists.end(); )
@@ -387,11 +442,11 @@ namespace Kiwi
                 {
                     if(type == Notification::Added)
                     {
-                        list->boxCreated(getShared(), box);
+                        list->objectCreated(getShared(), object);
                     }
                     else
                     {
-                        list->boxRemoved(getShared(), box);
+                        list->objectRemoved(getShared(), object);
                     }
                     
                     ++it;
@@ -431,29 +486,6 @@ namespace Kiwi
                 }
             }
         }
-    }
-    
-    bool Page::attributeChanged(sAttr attr)
-    {
-        if(attr)
-        {
-            lock_guard<mutex> guard(m_lists_mutex);
-            for(auto it = m_lists.begin(); it != m_lists.end(); )
-            {
-                sListener list = (*it).lock();
-                if(list)
-                {
-                    list->attributeChanged(getShared(), attr);
-                    ++it;
-                }
-                else
-                {
-                    it = m_lists.erase(it);
-                }
-            }
-            return true;
-        }
-        return false;
     }
 }
 

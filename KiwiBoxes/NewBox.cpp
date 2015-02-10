@@ -30,7 +30,7 @@ namespace Kiwi
     //                                     METRO                                        //
     // ================================================================================ //
     
-    NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Box(page, name)
+    NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Object(page, name)
     {
 		//m_textfield->setText(L"newbox test");
 		//textfield_setText()

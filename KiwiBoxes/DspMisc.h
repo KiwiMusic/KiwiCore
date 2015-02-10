@@ -30,14 +30,14 @@
 namespace Kiwi
 {
     /*
-    class SnapshotTilde : public Box, public Dsp::Process
+    class SnapshotTilde : public Object, public Dsp::Process
     {
     public:
         SnapshotTilde(sPage page);
         SnapshotTilde(sPage page, const double value);
         ~SnapshotTilde();
         bool receive(ulong index, ElemVector const& elements) override;
-        sBox allocate(sPage page, sDico dico) const override;
+        sObject allocate(sPage page, sDico dico) const override;
         ulong getNumberOfInputs() const noexcept override;
         ulong getNumberOfOutputs() const noexcept override;
         void prepare(Dsp::sNode node) const noexcept override;
@@ -47,7 +47,7 @@ namespace Kiwi
     
     inline void MiscTildeInit()
     {
-        Box::addPrototype(unique_ptr<Box>(new SnapshotTilde(sPage())));
+        Object::addPrototype(unique_ptr<Object>(new SnapshotTilde(sPage())));
     }*/
 }
 

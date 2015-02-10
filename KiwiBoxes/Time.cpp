@@ -30,7 +30,7 @@ namespace Kiwi
     //                                     METRO                                        //
     // ================================================================================ //
     
-    Metro::Metro(sPage page, ElemVector const& elements) : Box(page, "metro"),
+    Metro::Metro(sPage page, ElemVector const& elements) : Object(page, "metro"),
     m_active(false),
     m_clock(Clock::create())
     {
@@ -56,12 +56,13 @@ namespace Kiwi
     {
 		if(m_active)
         {
-            Box::send(0, {Tag::List::bang});
-			m_clock->delay(getShared(), m_interval);
+            Object::send(0, {Tag::List::bang});
+            int zaza;
+			//m_clock->delay(getShared(), m_interval);
         }
     }
     
-    bool Metro::receive(ulong index, ElemVector const& elements)
+    void Metro::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
@@ -74,8 +75,9 @@ namespace Kiwi
                         m_active = elements[0];
                         if(m_active)
                         {
-                            Box::send(0, {Tag::List::bang});
-                            m_clock->delay(getShared(), m_interval);
+                            Object::send(0, {Tag::List::bang});
+                            int zaza;
+                            //m_clock->delay(getShared(), m_interval);
                         }
                     }
 				}
@@ -83,9 +85,8 @@ namespace Kiwi
 				{
 					m_interval = max((double)elements[0], 1.);
 				}
-                return true;
 			}
         }
-        return false;
+        int error;
     }}
 

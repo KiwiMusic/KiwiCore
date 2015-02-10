@@ -29,19 +29,19 @@
 
 namespace Kiwi
 {
-    class SigTilde : public Box, public Dsp::Sig
+    class SigTilde : public Object, public Dsp::Sig
     {
     public:
         SigTilde(sPage page);
         SigTilde(sPage page, const double value);
         ~SigTilde();
-        bool receive(ulong index, ElemVector const& elements) override;
-        sBox allocate(sPage page, sDico dico) const override;
+        void receive(ulong index, ElemVector const& elements) override;
+        sObject allocate(sPage page, sDico dico) const override;
     };
     
     inline void GeneratorTildeInit()
     {
-        Box::addPrototype(unique_ptr<Box>(new SigTilde(sPage())));
+        Object::addPrototype(unique_ptr<Object>(new SigTilde(sPage())));
     }
 }
 

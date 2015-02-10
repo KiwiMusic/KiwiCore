@@ -22,7 +22,7 @@
 */
 
 #include "Element.h"
-#include "Box.h"
+#include "Object.h"
 #include "Dico.h"
 
 namespace Kiwi
@@ -43,11 +43,11 @@ namespace Kiwi
             case Element::TAG:
                 return toString((sTag)__val);
                 break;
-            case Element::BOX:
-                return toString(scBox((sBox)__val));
+            case Element::OBJECT:
+                return toString((scObject)__val);
                 break;
             default:
-                return toString((sDico)__val);
+                return toString((scDico)__val);
                 break;
         }
     }
@@ -83,8 +83,8 @@ namespace Kiwi
             case Element::TAG:
                 return "tag";
                 break;
-            case Element::BOX:
-                return "box";
+            case Element::OBJECT:
+                return "object";
                 break;
             case Element::DICO:
                 return "dico";

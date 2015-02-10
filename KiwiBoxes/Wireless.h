@@ -36,7 +36,7 @@ namespace Kiwi
 	//										PRINT                                       //
 	// ================================================================================ //
 	
-    class Print : public Box, public Gui::Mouser
+    class Print : public Object, public Gui::Mouser
 	{
 	private:
 		string m_name;
@@ -57,7 +57,7 @@ namespace Kiwi
     //                                      INT                                         //
     // ================================================================================ //
     
-    class Int : public Box, public Gui::Mouser
+    class Int : public Object, public Gui::Mouser
     {
     private:
         bool m_init;
@@ -75,7 +75,7 @@ namespace Kiwi
     //                                      SEND                                        //
     // ================================================================================ //
     
-    class Send : public Box
+    class Send : public Object
     {
     private:
         sTag    m_name;
@@ -93,7 +93,7 @@ namespace Kiwi
     //                                      RECEIVE                                     //
     // ================================================================================ //
     
-    class Receive : public Box
+    class Receive : public Object
     {
     private:
         sTag m_name;
@@ -110,13 +110,13 @@ namespace Kiwi
     //                                      VALUE                                       //
     // ================================================================================ //
     
-    class Value : public Box
+    class Value : public Object
     {
-        class ValueHolder : public Box
+        class ValueHolder : public Object
         {
             public:
             ElemVector  m_values;
-            ValueHolder(sPage page) : Box(nullptr, ""){};
+            ValueHolder(sPage page) : Object(nullptr, ""){};
             ~ValueHolder() {};
             Allocate(ValueHolder);
         };
@@ -135,13 +135,13 @@ namespace Kiwi
     
     inline void wireless()
     {
-		Box::addPrototype(unique_ptr<Box>(new Print(sPage(), {})));
-        Box::addPrototype(unique_ptr<Box>(new Int(sPage(), {})));
-        Box::addPrototype(unique_ptr<Box>(new Send(sPage(), nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Send(sPage(), nullptr)), "s");
-        Box::addPrototype(unique_ptr<Box>(new Receive(sPage(), nullptr)));
-        Box::addPrototype(unique_ptr<Box>(new Receive(sPage(), nullptr)), "r");
-        Box::addPrototype(unique_ptr<Box>(new Value(sPage(), nullptr)));
+		Object::addPrototype(unique_ptr<Object>(new Print(sPage(), {})));
+        Object::addPrototype(unique_ptr<Object>(new Int(sPage(), {})));
+        Object::addPrototype(unique_ptr<Object>(new Send(sPage(), nullptr)));
+        Object::addPrototype(unique_ptr<Object>(new Send(sPage(), nullptr)), "s");
+        Object::addPrototype(unique_ptr<Object>(new Receive(sPage(), nullptr)));
+        Object::addPrototype(unique_ptr<Object>(new Receive(sPage(), nullptr)), "r");
+        Object::addPrototype(unique_ptr<Object>(new Value(sPage(), nullptr)));
     }
 }
 

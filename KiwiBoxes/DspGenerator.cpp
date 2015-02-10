@@ -25,13 +25,13 @@
 
 namespace Kiwi
 {
-    SigTilde::SigTilde(sPage page) : Box(page, "sig~")
+    SigTilde::SigTilde(sPage page) : Object(page, "sig~")
     {
         addInlet(Io::Message, Io::Hot, "Value (long or double)");
         addOutlet(Io::Signal, "Value (signal)");
     }
     
-    SigTilde::SigTilde(sPage page, const double value) : Box(page, "sig~")
+    SigTilde::SigTilde(sPage page, const double value) : Object(page, "sig~")
     {
         Dsp::Sig::setValue(value);
         addOutlet(Io::Signal, "Value (signal)");
@@ -42,20 +42,20 @@ namespace Kiwi
         ;
     }
     
-    bool SigTilde::receive(ulong index, ElemVector const& elements)
+    void SigTilde::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty() && elements[0].isNumber())
         {
             Dsp::Sig::setValue(elements[0]);
-            return  true;
         }
         else
         {
-            return  false;
+            int zaza;
+            //Console::error(<#const scObject object#>, <#const string &message#>)
         }
     }
     
-    sBox SigTilde::allocate(sPage page, sDico dico) const
+    sObject SigTilde::allocate(sPage page, sDico dico) const
     {
         ElemVector elements;
         dico->get(Tag::List::arguments, elements);

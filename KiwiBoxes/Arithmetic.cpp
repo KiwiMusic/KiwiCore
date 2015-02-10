@@ -27,7 +27,7 @@
 namespace Kiwi
 {
     Arithmetic::Arithmetic(sPage page, string const& name, ElemVector const& elements, string const& input1, string const& input2,string const& output) :
-    Box(page, name)
+    Object(page, name)
     {
         m_first     = 0.;
         m_second    = 0.;
@@ -48,9 +48,8 @@ namespace Kiwi
         ;
     }
     
-    bool Arithmetic::receive(ulong index, ElemVector const& elements)
+    void Arithmetic::receive(ulong index, ElemVector const& elements)
     {
-		//Console::post(getShared(), "Receive " + toString(index) + " [" + toString(elements) + "]");
         if(!elements.empty())
         {
             if(elements.size() == 1)
@@ -74,7 +73,7 @@ namespace Kiwi
                     if(!index)
                     {
                         m_first = elements[0];
-                        Console::post(getShared(), "Send : " + toString({compute()}));
+                        //Console::post(getShared(), "Send : " + toString({compute()}));
                         send(0, {compute()});
                     }
                     else
@@ -82,10 +81,12 @@ namespace Kiwi
                         m_second = elements[0];
                     }
                 }
-                return true;
             }
         }
-        return false;
+        else
+        {
+            int zaza;
+        }
     }
     
     string Arithmetic::getExpression() const noexcept
@@ -101,7 +102,7 @@ namespace Kiwi
     }
     
     /*
-    Expression::Expression(sPage page, ElemVector const& elements) : Box(page, "expr")
+    Expression::Expression(sPage page, ElemVector const& elements) : Object(page, "expr")
     {
         ulong   max = 0;
         string word;
