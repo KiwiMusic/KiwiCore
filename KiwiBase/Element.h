@@ -67,7 +67,7 @@ namespace Kiwi
             long            m_long      = 0;
             double          m_double    = 0.;
             sTag            m_tag       = nullptr;
-            sObject         m_box       = nullptr;
+            sObject         m_object       = nullptr;
             sDico           m_dico      = nullptr;
         };
         
@@ -84,7 +84,7 @@ namespace Kiwi
                         m_val.m_tag.reset();
                         break;
                     case OBJECT:
-                        m_val.m_box.reset();
+                        m_val.m_object.reset();
                         break;
                     case DICO:
                         m_val.m_dico.reset();
@@ -193,7 +193,7 @@ namespace Kiwi
         Element(sObject object) noexcept
         {
             m_type = OBJECT;
-            m_val.m_box = object;
+            m_val.m_object = object;
         }
         
         //! Constructor with a dico.
@@ -230,7 +230,7 @@ namespace Kiwi
                     break;
                 case OBJECT:
                 {
-                    m_val.m_box = other.m_val.m_box;
+                    m_val.m_object = other.m_val.m_object;
                 }
                     break;
                 case DICO:
@@ -451,7 +451,7 @@ namespace Kiwi
          */
         inline operator scObject() const noexcept
         {
-            return m_val.m_box;
+            return m_val.m_object;
         }
         
         //! Cast the element to a object.
@@ -460,7 +460,7 @@ namespace Kiwi
          */
         inline operator sObject() noexcept
         {
-            return m_val.m_box;
+            return m_val.m_object;
         }
         
         //! Cast the element to a dico.
@@ -508,7 +508,7 @@ namespace Kiwi
                     break;
                 case OBJECT:
                 {
-                    m_val.m_box = other.m_val.m_box;
+                    m_val.m_object = other.m_val.m_object;
                 }
                     break;
                 case DICO:
@@ -638,7 +638,7 @@ namespace Kiwi
         inline Element& operator=(sObject object) noexcept
         {
             changeType(OBJECT);
-            m_val.m_box = object;
+            m_val.m_object = object;
             return *this;
         }
         
@@ -682,7 +682,7 @@ namespace Kiwi
                         break;
                     case OBJECT:
                     {
-                        return m_val.m_box == other.m_val.m_box;
+                        return m_val.m_object == other.m_val.m_object;
                     }
                         break;
                     default:
@@ -792,7 +792,7 @@ namespace Kiwi
          */
         inline bool operator==(sObject object) const noexcept
         {
-            return m_type == OBJECT && m_val.m_box == object;
+            return m_type == OBJECT && m_val.m_object == object;
         }
         
         //! Compare the element with a dico.

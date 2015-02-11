@@ -30,37 +30,35 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    BangBox::BangBox(Initializer const& init) : Object(init, "bang"),
+    BangObject::BangObject(Detail const& detail) : Object(detail, Tag::create("bang")),
     m_clock(Clock::create())
     {
         addInlet(Io::Message, Io::Hot, "Flash (anything)");
         addOutlet(Io::Message, "Output (bang)");
     }
     
-    BangBox::~BangBox()
+    BangObject::~BangObject()
     {
         ;
     }
     
-    void BangBox::tick()
+    void BangObject::tick()
     {
-        Console::post("bang tick");
         m_led = false;
         redraw();
     }
     
-    void BangBox::receive(ulong index, ElemVector const& elements)
+    void BangObject::receive(ulong index, ElemVector const& elements)
     {
         if(!elements.empty())
         {
-            Console::post("bang receive");
+            Console::post("bang receive " + toString(elements));
             bang();
         }
     }
     
-    void BangBox::bang()
+    void BangObject::bang()
     {
-        Console::post("bang dobang");
         Object::send(0, {Tag::List::bang});
         m_led = true;
         redraw();

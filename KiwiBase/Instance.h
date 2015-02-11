@@ -38,7 +38,7 @@ namespace Kiwi
     
     //! The instance manages pages.
     /**
-     The instance manages a set a top-level pages. You can use the listener to receive the notifications of the creation, the deletion of pages and the changes of the dsp state. All the methods should be threadsafe but you should, of course, call the dsp tick from one thread. The instance is also a beacon factory that can be used to bind and retrieve boxes with a specific name.
+     The instance manages a set a top-level pages. You can use the listener to receive the notifications of the creation, the deletion of pages and the changes of the dsp state. All the methods should be threadsafe but you should, of course, call the dsp tick from one thread. The instance is also a beacon factory that can be used to bind and retrieve objects with a specific name.
      @see Page
      @see Beacon
      */
@@ -76,7 +76,7 @@ namespace Kiwi
         ~Instance();
         
         //! The instance creation method.
-        /** The function allocates an instance and initialize the prototypes of boxes.
+        /** The function allocates an instance and initialize the prototypes of objects.
          @return The instance.
          */
         static sInstance create();
@@ -232,61 +232,62 @@ namespace Kiwi
     };
     
     // ================================================================================ //
-    //                                      OBJECT FACTORY                                 //
+    //                                      OBJECT FACTORY                              //
     // ================================================================================ //
     
-    class Prototypes
+    //! The factory
+    /** The factory is the kiwi's counterpart of Andy Warhol factory.
+     */
+    class Factory
     {
     private:
         
-        class ObjectCreator
+        class Creator
         {
         public:
-            virtual ~ObjectCreator(){};
-            virtual sObject create(Initializer const& init) = 0;
+            virtual ~Creator(){};
+            virtual sObject create(Detail const& init) = 0;
         };
         
         
-        template <class T> class ObjectCreatorType : public ObjectCreator
+        template <class T> class CreatorTyped : public Creator
         {
         public:
-            sObject create(Initializer const& init) override
+            sObject create(Detail const& init) override
             {
                 return make_shared<T>(init);
             }
         };
         
-        static map<sTag, shared_ptr<ObjectCreator>> m_creators;
+        static map<sTag, shared_ptr<Creator>> m_creators;
         static mutex m_mutex;
     public:
         
-        //! Object factory
-        /** This function adds a new prototype of a object. If the prototype already exists, the function doesn't do anything otherwise the object is added to the prototype list.
-         @param     object The prototype of the object.
+        //! Add an object to the factory.
+        /** This function adds a new object to the factory. If the name of the object already exists, the function doesn't do anything otherwise the object is added to the factory.
+         @name  The alias name of the object.
          */
-        template <class T> static void add(string const& name = "")
+        template <class T,
+        typename = typename enable_if<
+        is_base_of<Object, T>::value &&
+        is_base_of<Sketcher, T>::value &&
+        !is_abstract<T>::value &&
+        is_constructible<T, Detail const&>::value        
+        >::type>
+        static void add(sTag name = Tag::create(""))
         {
-            sObject object = make_shared<T>(Initializer());
+            sObject object = make_shared<T>(Detail());
             if(object)
             {
-                sTag tname;
-                if(name.empty())
-                {
-                    tname = object->getName();
-                }
-                else
-                {
-                    tname = Tag::create(name);
-                }
-                
+                const sTag rname = (name == Tag::create("")) ? object->getName() : name;
                 lock_guard<mutex> guard(m_mutex);
-                if(m_creators.find(tname) != m_creators.end())
+                if(m_creators.find(rname) != m_creators.end())
                 {
-                    Console::error("The object " + toString(object->getName()) + " already exist !");
+                    Console::error("The object " + toString(rname) + " already exist !");
                 }
                 else
                 {
-                    m_creators[tname] = make_shared<ObjectCreatorType<T>>();
+                    m_creators[rname] = make_shared<CreatorTyped<T>>();
                 }
             }
             else
@@ -295,21 +296,25 @@ namespace Kiwi
             }
         }
         
-        //! ...
-        /** ...
+        //! Create an object.
+        /** This function creates an object.
+         @param name The name of the object.
+         @param node The detail to initialize the object.
+         @return An object.
          */
-        static sObject create(sTag name, Initializer const& init);
+        static sObject create(sTag name, Detail const& detail);
         
-        //! ...
-        /** ...
+        //! Retrieves if an object exist.
+        /** This function retrieves if an object exist.
+         @return true if the object exist, otherwise false.
          */
         static bool has(sTag name);
         
-        //! Retrieves all loaded prototype names.
-        /** This function retrieves all loaded prototype names.
-         @param names A vector of Tag to be filled.
+        //! Retrieves all the names of the objects.
+        /** This function retrieves all the names of the object.
+         @return A vector of tags with the names.
          */
-        static void getNames(vector<sTag>& names);
+        static vector<sTag> names();
     };
 }
 

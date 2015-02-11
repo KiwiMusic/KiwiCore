@@ -73,7 +73,7 @@ namespace Kiwi
         //! The dico creation method.
         /** The function allocates a dico.
          */
-        static sDico evaluateForBox(string const& text);
+        static sDico evaluateForObject(string const& text);
         
         //! The dico creation method.
         /** The function allocates a dico.

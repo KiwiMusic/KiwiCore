@@ -33,8 +33,8 @@ namespace Kiwi
     
     Link::Link(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept :
     m_page(page),
-    m_box_from(from),
-    m_box_to(to),
+    m_object_from(from),
+    m_object_to(to),
     m_index_outlet(outlet),
     m_index_intlet(inlet),
     m_type(type)
@@ -44,8 +44,8 @@ namespace Kiwi
     
     Link::~Link()
     {
-        sObject     from    = getBoxFrom();
-        sObject     to      = getBoxTo();
+        sObject     from    = getObjectFrom();
+        sObject     to      = getObjectTo();
         if(from && to)
         {
             Object::sOutlet outlet  = from->getOutlet(m_index_outlet);
@@ -63,8 +63,8 @@ namespace Kiwi
     
     void Link::write(sDico dico) const noexcept
     {
-        sObject     from    = getBoxFrom();
-        sObject     to      = getBoxTo();
+        sObject     from    = getObjectFrom();
+        sObject     to      = getObjectTo();
         if(from && to)
         {
             dico->set(Tag::List::from, {from->getId(), getOutletIndex()});

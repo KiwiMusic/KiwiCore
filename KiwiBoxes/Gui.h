@@ -36,13 +36,13 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    class BangBox : public Object, public Gui::Bang, public Clock::Maker
+    class BangObject : public Object, public Gui::Bang, public Clock::Maker
     {
     private:
         sClock  m_clock;
     public:
-        BangBox(Initializer const& init);
-        ~BangBox();
+        BangObject(Detail const& detail);
+        ~BangObject();
         void receive(ulong index, ElemVector const& elements) override;
         void tick() override;
     protected:
@@ -55,7 +55,7 @@ namespace Kiwi
 	
     inline void guiInit()
     {
-        Prototypes::add<BangBox>();
+        Factory::add<BangObject>();
     }
 }
 

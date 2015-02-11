@@ -23,14 +23,14 @@
 
 #include "Instance.h"
 
-#include "../KiwiBoxes/Gui.h"
+#include "../KiwiObjectes/Gui.h"
 /*
-#include "../KiwiBoxes/Wireless.h"
-#include "../KiwiBoxes/Time.h"
-#include "../KiwiBoxes/DspGenerator.h"
-#include "../KiwiBoxes/NewBox.h"
-#include "../KiwiBoxes/Arithmetic.h"
-#include "../KiwiBoxes/ArithmeticTilde.h"
+#include "../KiwiObjectes/Wireless.h"
+#include "../KiwiObjectes/Time.h"
+#include "../KiwiObjectes/DspGenerator.h"
+#include "../KiwiObjectes/NewObject.h"
+#include "../KiwiObjectes/Arithmetic.h"
+#include "../KiwiObjectes/ArithmeticTilde.h"
 */
 namespace Kiwi
 {
@@ -61,7 +61,7 @@ namespace Kiwi
         {
             guiInit();
             /*
-			standardBoxes();
+			standardObjectes();
             arithmetic();
             wireless();
 			timing();
@@ -275,15 +275,20 @@ namespace Kiwi
     //                                      OBJECT FACTORY                              //
     // ================================================================================ //
     
-    map<sTag, shared_ptr<Prototypes::ObjectCreator>> Prototypes::m_creators;
-    mutex Prototypes::m_mutex;
+    map<sTag, shared_ptr<Factory::Creator>> Factory::m_creators;
+    mutex Factory::m_mutex;
     
-    sObject Prototypes::create(sTag name, Initializer const& init)
+    sObject Factory::create(sTag name, Detail const& detail)
     {
         auto it = m_creators.find(name);
         if(it != m_creators.end())
         {
-            return it->second->create(init);
+            sObject obj = it->second->create(detail);
+            if(obj)
+            {
+                obj->initialize();
+            }
+            return obj;
         }
         else
         {
@@ -291,19 +296,21 @@ namespace Kiwi
         }
     }
     
-    bool Prototypes::has(sTag name)
+    bool Factory::has(sTag name)
     {
         lock_guard<mutex> guard(m_mutex);
         return m_creators.find(name) != m_creators.end();
     }
     
-    void Prototypes::getNames(vector<sTag>& names)
+    vector<sTag> Factory::names()
     {
         lock_guard<mutex> guard(m_mutex);
+        vector<sTag> names;
         for(auto it = m_creators.begin(); it !=  m_creators.end(); ++it)
         {
             names.push_back(it->first);
         }
+        return names;
     }
 }
 

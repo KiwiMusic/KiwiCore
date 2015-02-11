@@ -28,7 +28,7 @@ int main(int argc, const char * argv[])
             page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
             page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
             page->add(Dico::evaluateForLink("1 0 2 0"));
-            page->add(Dico::evaluateForLink("3 0 2 0"));
+            page->add(Dico::evaluateForLink("2 0 3 0"));
             
             vector<sObject> objs;
             page->getObjects(objs);

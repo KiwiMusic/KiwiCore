@@ -72,8 +72,9 @@ namespace Kiwi
         void send(sObject object, Notification type);
         void send(sLink link, Notification type);
         
-        sObject createObject(scDico dico);
-        sLink   createLink(scDico dico);
+        //! @internal Object and link creation.
+        void createObject(scDico dico);
+        void createLink(scDico dico);
     public:
         
         //! Constructor.
@@ -176,14 +177,6 @@ namespace Kiwi
          @param link        The pointer to the link.
          */
         void remove(sLink link);
-        
-        //! Replace a object with another one.
-        /** The function instantiates a object with a dico that will replace an old object.
-         @param object        The object to replace.
-         @param dico       The dico that defines a object.
-         @return A pointer to the object.
-         */
-        sObject replace(sObject object, sDico dico);
         
         //! Bring a object to the front of the page.
         /** The function brings a object to the front of the page. The object will be setted as if it was the last object created and will be the last object of the vector of objects.

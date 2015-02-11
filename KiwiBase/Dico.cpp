@@ -69,7 +69,7 @@ namespace Kiwi
         return dico;
     }
     
-    sDico Dico::evaluateForBox(string const& text)
+    sDico Dico::evaluateForObject(string const& text)
     {
         sDico dico = make_shared<Dico>();
         if(dico)

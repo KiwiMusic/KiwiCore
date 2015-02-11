@@ -38,8 +38,8 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                sObject cbox = m_connections[i].object.lock();
-                if(cbox && object == cbox && m_connections[i].index == index)
+                sObject cobject = m_connections[i].object.lock();
+                if(cobject && object == cobject && m_connections[i].index == index)
                 {
                     return true;
                 }
@@ -55,8 +55,8 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                sObject cbox = m_connections[i].object.lock();
-                if(cbox && object == cbox && m_connections[i].index == index)
+                sObject cobject = m_connections[i].object.lock();
+                if(cobject && object == cobject && m_connections[i].index == index)
                 {
                     return false;
                 }
@@ -74,8 +74,8 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                sObject cbox = m_connections[i].object.lock();
-                if(cbox && object == cbox && m_connections[i].index == index)
+                sObject cobject = m_connections[i].object.lock();
+                if(cobject && object == cobject && m_connections[i].index == index)
                 {
                     m_connections.erase(m_connections.begin() + i);
                     return false;
@@ -137,12 +137,12 @@ namespace Kiwi
     //                                      OBJECT                                      //
     // ================================================================================ //
     
-    Object::Object(Initializer const& initiliazer, string const& name) :
-    m_instance(initiliazer.instance),
-    m_page(initiliazer.page),
-    m_name(Tag::create(name)),
-    m_text(initiliazer.text),
-    m_id(initiliazer.lid),
+    Object::Object(Detail const& detail, sTag name) :
+    m_instance(detail.instance),
+    m_page(detail.page),
+    m_name(name),
+    m_text(detail.text),
+    m_id(detail.lid),
     m_stack_count(0),
     m_presentation_position(Attr::create("presentation_position","Presentation Position",    "Appearance", Point(0., 0.))),
     m_presentation_size(Attr::create("presentation_size",        "Presentation Size",        "Appearance", Size(10., 10.))),

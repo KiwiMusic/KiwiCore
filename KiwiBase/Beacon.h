@@ -33,9 +33,9 @@ namespace Kiwi
     //                                      BEACON                                      //
     // ================================================================================ //
     
-    //! The beacon is an unique object that matchs to a "unique" string in the scope of a beacon factory and can be used to bind boxes.
+    //! The beacon is an unique object that matchs to a "unique" string in the scope of a beacon factory and can be used to bind objects.
     /**
-     The beacon are uniques in the scope of a beacon factory and matchs to a string. If you create a beacon with a string that already matchs to a beacon of the beacon factory, it will return this beacon otherwise it will create a new beacon. Thus, the beacons are very similar to the beacon except that it works in a limited scope and that the beacons can be used to bind (and unbind) boxes and retrieve them.
+     The beacon are uniques in the scope of a beacon factory and matchs to a string. If you create a beacon with a string that already matchs to a beacon of the beacon factory, it will return this beacon otherwise it will create a new beacon. Thus, the beacons are very similar to the beacon except that it works in a limited scope and that the beacons can be used to bind (and unbind) objects and retrieve them.
      @see Factory
      */
     class Beacon
@@ -65,9 +65,9 @@ namespace Kiwi
             return m_name;
         }
         
-        //! Retrieve the number of boxes in the binding list of the beacon.
-        /** The function retrieves the number of boxes in the binding list of the beacon.
-         @return The number of boxes binded to the beacon.
+        //! Retrieve the number of objects in the binding list of the beacon.
+        /** The function retrieves the number of objects in the binding list of the beacon.
+         @return The number of objects binded to the beacon.
          */
         inline ulong size() const noexcept
         {
@@ -77,10 +77,10 @@ namespace Kiwi
         
         //! Retrieve an object from the binding list of the beacon.
         /** The function retrieves an object from the binding list of the beacon at a defined position.
-         @param index   The position of the object in the binding list from 0 to the number of boxes in the binding list -1.
-         @return        The pointer of the binded boxes or NULL is the index is less than 0 or greater or equal to the number of boxes in the binding list.
+         @param index   The position of the object in the binding list from 0 to the number of objects in the binding list -1.
+         @return        The pointer of the binded objects or NULL is the index is less than 0 or greater or equal to the number of objects in the binding list.
          */
-        inline sObject getBox(const ulong index) const noexcept
+        inline sObject getObject(const ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             if(index < m_objects.size())
@@ -93,14 +93,14 @@ namespace Kiwi
             }
         }
         
-        //! Add an boxes in the binding list of the beacon.
+        //! Add an objects in the binding list of the beacon.
         /** The function adds an object in the binding list of the beacon. If the object is already in the binding list, the function doesn't do anything.
          @param object  The pointer of the object.
          @see        unbind()
          */
         void bind(sObject object);
         
-        //! Remove an boxes from the binding list of the beacon.
+        //! Remove an objects from the binding list of the beacon.
         /** The function removes an object from the binding list of the beacon. If the object isn't in the binding list, the function doesn't do anything.
          @param object  The pointer of the object.
          @see        bind()

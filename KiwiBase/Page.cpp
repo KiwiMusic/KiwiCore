@@ -62,7 +62,7 @@ namespace Kiwi
         return page;
     }
     
-    sObject Page::createObject(scDico dico)
+    void Page::createObject(scDico dico)
     {
         sObject object;
         if(dico)
@@ -72,13 +72,17 @@ namespace Kiwi
             ulong _id = dico->get(Tag::List::id);
             ElemVector args;
             dico->get(Tag::List::arguments, args);
-            object = Prototypes::create(name, Initializer(getInstance(), getShared(), _id, name->getName(), text->getName(), dico, args));
-            object->initialize();
+            sObject object = Factory::create(name, Detail(getInstance(), getShared(), _id, name, text->getName(), dico, args));
+            
+            if(object)
+            {
+                m_objects.push_back(object);
+            }
+            send(object, Notification::Added);
         }
-        return object;
     }
     
-    sLink Page::createLink(scDico dico)
+    void Page::createLink(scDico dico)
     {
         sLink link;
         if(dico)
@@ -93,7 +97,7 @@ namespace Kiwi
             }
             else
             {
-                return nullptr;
+                return;
             }
             
             dico->get(Tag::List::to, elements);
@@ -104,7 +108,7 @@ namespace Kiwi
             }
             else
             {
-                return nullptr;
+                return;
             }
             
             sObject from, to;
@@ -160,7 +164,7 @@ namespace Kiwi
                                 }
                                 if(poutlet >= pfrom->getNumberOfOutputs())
                                 {
-                                    return nullptr;
+                                    return;
                                 }
                                 
                                 for(ulong i = 0; i < from->getNumberOfInlets(); i++)
@@ -180,30 +184,30 @@ namespace Kiwi
                                 }
                                 if(pinlet >= pfrom->getNumberOfInputs())
                                 {
-                                    return nullptr;
+                                    return;
                                 }
                                 
                                 outlet->append(to, indexo);
                                 inlet->append(from, indexi);
-                                return make_shared<Link::DspLink>(shared_from_this(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
+                                link = make_shared<Link::DspLink>(shared_from_this(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
                             }
                         }
                         else
                         {
                             outlet->append(to, indexo);
                             inlet->append(from, indexi);
-                            return make_shared<Link>(shared_from_this(), from, indexo, to, indexi, type);
+                            link = make_shared<Link>(shared_from_this(), from, indexo, to, indexi, type);
                         }
-                    }
-                    else
-                    {
-                        return nullptr;
                     }
                 }
             }
         }
         
-        return link;
+        if(link)
+        {
+            m_links.push_back(link);
+        }
+        send(link, Notification::Added);
     }
     
     void Page::add(scDico dico)
@@ -221,7 +225,7 @@ namespace Kiwi
                 sDico objdico = objects[i];
                 if(objdico)
                 {
-                    const ulong r_id = (ulong)objdico->get(Tag::List::id);
+                    const ulong r_id = objdico->get(Tag::List::id);
                     const ulong n_id = m_free_ids.empty() ? m_objects.size() + 1 : m_free_ids[0];
                     if(!m_free_ids.empty())
                     {
@@ -242,12 +246,7 @@ namespace Kiwi
                             objdico->set(Tag::List::from, {n_id, elements[1]});
                         }
                     }
-                    sObject object = createObject(objdico);
-                    if(object)
-                    {
-                        m_objects.push_back(object);
-                    }
-                    send(object, Notification::Added);
+                    createObject(objdico);
                 }
             }
             
@@ -256,12 +255,7 @@ namespace Kiwi
                 sDico linkdico = links[i];
                 if(linkdico)
                 {
-                    sLink link = createLink(linkdico);
-                    if(link)
-                    {
-                        m_links.push_back(link);
-                    }
-                    send(link, Notification::Added);
+                    createLink(linkdico);
                 }
             }
         }
@@ -269,30 +263,29 @@ namespace Kiwi
     
     void Page::remove(sObject object)
     {
-        vector<sLink> links;
         if(object)
         {
             lock_guard<mutex> guard(m_mutex);
             auto it = find(m_objects.begin(), m_objects.end(), object);
             if(it != m_objects.end())
             {
-                auto li = find(m_links.begin(), m_links.end(), object);
-                while(li != m_links.end())
+                for(auto li = m_links.begin(); li != m_links.end();)
                 {
-                    links.push_back((*li));
-                    m_links.erase(li);
-                    li = find(m_links.begin(), m_links.end(), object);
+                    if((*li)->getObjectFrom() == object || (*li)->getObjectTo() == object)
+                    {
+                        li = m_links.erase(li);
+                        send((*li), Notification::Removed);
+                    }
+                    else
+                    {
+                        ++li;
+                    }
                 }
-                
                 m_objects.erase(it);
                 m_free_ids.push_back(object->getId());
+                send(object, Notification::Removed);
             }
         }
-        for(vector<sLink>::size_type i = 0; i < links.size(); i++)
-        {
-            send(links[i], Notification::Removed);
-        }
-        send(object, Notification::Removed);
     }
     
     void Page::remove(sLink link)
@@ -304,14 +297,9 @@ namespace Kiwi
             if(it != m_links.end())
             {
                 m_links.erase(it);
+                send(link, Notification::Removed);
             }
         }
-        send(link, Notification::Removed);
-    }
-    
-    sObject Page::replace(sObject oldobject, sDico dico)
-    {
-        return nullptr;
     }
     
     void Page::toFront(sObject object)

@@ -30,27 +30,25 @@
 
 // TODO
 // - See how to format the expression
-// - Object should deletes it owns links at deletion
-// - Links and Iolets behavior (resize ect..)
 namespace Kiwi
 {
-    struct Initializer
+    struct Detail
     {
         const sInstance     instance;
         const sPage         page;
         const ulong         lid;
-        const string        name;
+        const sTag          name;
         const string        text;
         const scDico        dico;
         const ElemVector    args;
         
-        Initializer() :
-        instance(nullptr), page(nullptr), lid(0), name(""), text(""), dico(nullptr), args({})
+        Detail() :
+        instance(nullptr), page(nullptr), lid(0), name(Tag::create("")), text(""), dico(nullptr), args({})
         {
             ;
         }
         
-        Initializer(sInstance _instance, sPage _page, const ulong _id, const string _name, const string _text, scDico _dico, ElemVector const& _args) :
+        Detail(sInstance _instance, sPage _page, const ulong _id, sTag _name, const string _text, scDico _dico, ElemVector const& _args) :
         instance(_instance), page(_page), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
         {
             ;
@@ -129,7 +127,7 @@ namespace Kiwi
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Object(Initializer const& initiliazer, string const& name);
+        Object(Detail const& detail, sTag name);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
@@ -507,7 +505,7 @@ namespace Kiwi
          @param index The index of the connection.
          @return The object of a connection.
          */
-        inline sObject getBox(const ulong index) const noexcept
+        inline sObject getObject(const ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             if(index < (ulong)m_connections.size())
