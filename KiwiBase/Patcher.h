@@ -33,11 +33,11 @@ namespace Kiwi
     //                                      PAGE                                        //
     // ================================================================================ //
     
-    //! The page manages objects and links.
+    //! The patcher manages objects and links.
     /**
-     The page is...
+     The patcher is...
      */
-    class Page : public enable_shared_from_this<Page>
+    class Patcher : public enable_shared_from_this<Patcher>
 	{
     public:
 		class Listener;
@@ -80,50 +80,50 @@ namespace Kiwi
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Page(sInstance instance);
+        Patcher(sInstance instance);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        ~Page();
+        ~Patcher();
         
-        //! The page creation method.
-        /** The function allocates a page and initialize the defaults objects.
-         @param instance The instance that will manage the page.
-         @param dico The dico that will initialize the page.
-         @return The page.
+        //! The patcher creation method.
+        /** The function allocates a patcher and initialize the defaults objects.
+         @param instance The instance that will manage the patcher.
+         @param dico The dico that will initialize the patcher.
+         @return The patcher.
          */
-        static sPage create(sInstance instance, sDico dico = nullptr);
+        static sPatcher create(sInstance instance, sDico dico = nullptr);
 		
-        //! Retrieve the instance that manages the page.
-        /** The function retrieves the instance that manages the page.
-         @return The instance that manages the page.
+        //! Retrieve the instance that manages the patcher.
+        /** The function retrieves the instance that manages the patcher.
+         @return The instance that manages the patcher.
          */
         inline sInstance getInstance() const noexcept
         {
             return m_instance.lock();
         }
             
-        //! Retrieve the shared pointer of the page.
-        /** The function retrieves the shared pointer of the page.
-         @return The shared pointer of the page.
+        //! Retrieve the shared pointer of the patcher.
+        /** The function retrieves the shared pointer of the patcher.
+         @return The shared pointer of the patcher.
          */
-        inline scPage getShared() const noexcept
+        inline scPatcher getShared() const noexcept
         {
-            return static_pointer_cast<const Page>(shared_from_this());
+            return static_pointer_cast<const Patcher>(shared_from_this());
         }
             
-        //! Retrieve the shared pointer of the page.
-        /** The function retrieves the shared pointer of the page.
-         @return The shared pointer of the page.
+        //! Retrieve the shared pointer of the patcher.
+        /** The function retrieves the shared pointer of the patcher.
+         @return The shared pointer of the patcher.
          */
-        inline sPage getShared() noexcept
+        inline sPatcher getShared() noexcept
         {
-            return static_pointer_cast<Page>(shared_from_this());
+            return static_pointer_cast<Patcher>(shared_from_this());
         }
 
         //! Get the objects.
-        /** The function retrieves the objects from the page.
+        /** The function retrieves the objects from the patcher.
          @param objects   A vector of elements.
          */
         void getObjects(vector<sObject>& objects) const
@@ -143,7 +143,7 @@ namespace Kiwi
         }
         
         //! Get the links.
-        /** The function retrieves the links from the page.
+        /** The function retrieves the links from the patcher.
          @param links   A vector of links.
          */
         void getLinks(vector<sLink>& links) const
@@ -161,37 +161,37 @@ namespace Kiwi
         }
         
         //! Append a dico.
-        /** The function reads a dico and add the objects and links to the page.
+        /** The function reads a dico and add the objects and links to the patcher.
          @param dico The dico.
          */
         void add(scDico dico);
         
         //! Free a object.
-        /** The function removes a object from the page.
+        /** The function removes a object from the patcher.
          @param object        The pointer to the object.
          */
         void remove(sObject object);
         
         //! Free a link.
-        /** The function removes a link from the page.
+        /** The function removes a link from the patcher.
          @param link        The pointer to the link.
          */
         void remove(sLink link);
         
-        //! Bring a object to the front of the page.
-        /** The function brings a object to the front of the page. The object will be setted as if it was the last object created and will be the last object of the vector of objects.
+        //! Bring a object to the front of the patcher.
+        /** The function brings a object to the front of the patcher. The object will be setted as if it was the last object created and will be the last object of the vector of objects.
          @param object        The pointer to the object.
          */
         void toFront(sObject object);
         
-        //! Bring a object to the back of the page.
-        /** The function brings a object to the back of the page. The object will be setted as if it was the first object created and will be the first object of the vector of objects.
+        //! Bring a object to the back of the patcher.
+        /** The function brings a object to the back of the patcher. The object will be setted as if it was the first object created and will be the first object of the vector of objects.
          @param object        The pointer to the object.
          */
         void toBack(sObject object);
         
-        //! Write the page in a dico.
-        /** The function writes the pagein a dico.
+        //! Write the patcher in a dico.
+        /** The function writes the patcherin a dico.
          @param dico The dico.
          */
         void write(sDico dico) const;
@@ -200,7 +200,7 @@ namespace Kiwi
         /** The function start the dsp chain.
          @param samplerate The sample rate.
          @param vectorsize The vector size of the signal.
-         @return true if the page can process signal.
+         @return true if the patcher can process signal.
          */
         void dspStart(const ulong samplerate, const ulong vectorsize);
         
@@ -235,19 +235,19 @@ namespace Kiwi
     //                                  PAGE LISTENER                                   //
     // ================================================================================ //
     
-    //! The page listener is an abstract class that facilitates the control of a page in an application.
+    //! The patcher listener is an abstract class that facilitates the control of a patcher in an application.
     /**
-     The page listener should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page listener owns a vector of object listeners and facilitates managements of objects like the creation, the deletion, the selection, etc.
-     @see Page, Page::Listener, Object::Listener
+     The patcher listener should be a shared pointer to be able to bind itself to a patcher. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The patcher listener owns a vector of object listeners and facilitates managements of objects like the creation, the deletion, the selection, etc.
+     @see Patcher, Patcher::Listener, Object::Listener
      */
-    class Page::Listener
+    class Patcher::Listener
     {
     public:
         
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          Please use the create method instead.
-         @param page The page to control.
+         @param patcher The patcher to control.
          */
         Listener() noexcept
         {
@@ -263,28 +263,28 @@ namespace Kiwi
         }
         
         //! Receive the notification that a object has been created.
-        /** The function is called by the page when a object has been created.
+        /** The function is called by the patcher when a object has been created.
          @param object     The object.
          */
-        virtual void objectCreated(sPage page, sObject object) = 0;
+        virtual void objectCreated(sPatcher patcher, sObject object) = 0;
         
         //! Receive the notification that a object has been removed.
-        /** The function is called by the page when a object has been removed.
+        /** The function is called by the patcher when a object has been removed.
          @param object     The object.
          */
-        virtual void objectRemoved(sPage page, sObject object) = 0;
+        virtual void objectRemoved(sPatcher patcher, sObject object) = 0;
         
         //! Receive the notification that a link has been created.
-        /** The function is called by the page when a link has been created.
+        /** The function is called by the patcher when a link has been created.
          @param link     The link.
          */
-        virtual void linkCreated(sPage page, sLink link) = 0;
+        virtual void linkCreated(sPatcher patcher, sLink link) = 0;
         
         //! Receive the notification that a link has been removed.
-        /** The function is called by the page when a link has been removed.
+        /** The function is called by the patcher when a link has been removed.
          @param link    The link.
          */
-        virtual void linkRemoved(sPage page, sLink link) = 0;
+        virtual void linkRemoved(sPatcher patcher, sLink link) = 0;
     };
 }
 

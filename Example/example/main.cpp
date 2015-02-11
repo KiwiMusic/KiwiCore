@@ -20,13 +20,13 @@ int main(int argc, const char * argv[])
     if(instance)
     {
         cout << "Instance created" << endl;
-        sPage page = instance->createPage(Dico::create());
+        sPatcher page = instance->createPatcher(Dico::create());
         if(page)
         {
             cout << "Page created" << endl;
-            page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
-            page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
-            page->add(Dico::evaluateForBox("bang 12 23 @size 48 56"));
+            page->add(Dico::evaluateForObject("bang 12 23 @size 48 56"));
+            page->add(Dico::evaluateForObject("bang 12 23 @size 48 56"));
+            page->add(Dico::evaluateForObject("bang 12 23 @size 48 56"));
             page->add(Dico::evaluateForLink("1 0 2 0"));
             page->add(Dico::evaluateForLink("2 0 3 0"));
             

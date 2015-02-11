@@ -21,7 +21,7 @@
  ==============================================================================
 */
 
-#include "Page.h"
+#include "Patcher.h"
 #include "Instance.h"
 
 namespace Kiwi
@@ -30,13 +30,13 @@ namespace Kiwi
     //                                      PAGE                                        //
     // ================================================================================ //
     
-    Page::Page(sInstance instance) :
+    Patcher::Patcher(sInstance instance) :
     m_instance(instance)
     {
         ;
     }
     
-    Page::~Page()
+    Patcher::~Patcher()
     {
         m_links.clear();
         m_objects.clear();
@@ -44,25 +44,25 @@ namespace Kiwi
         m_lists.clear();
     }
     
-    sPage Page::create(sInstance instance, sDico dico)
+    sPatcher Patcher::create(sInstance instance, sDico dico)
     {
-        sPage page = make_shared<Page>(instance);
-        if(page && dico)
+        sPatcher patcher = make_shared<Patcher>(instance);
+        if(patcher && dico)
         {
-            sDico pageDico = Dico::create();
-            if(pageDico)
+            sDico patcherDico = Dico::create();
+            if(patcherDico)
             {
-                if(dico->has(Tag::List::page))
+                if(dico->has(Tag::List::patcher))
                 {
-                    pageDico = dico->get(Tag::List::page);
-                    page->add(pageDico);
+                    patcherDico = dico->get(Tag::List::patcher);
+                    patcher->add(patcherDico);
                 }
             }
         }
-        return page;
+        return patcher;
     }
     
-    void Page::createObject(scDico dico)
+    void Patcher::createObject(scDico dico)
     {
         sObject object;
         if(dico)
@@ -82,7 +82,7 @@ namespace Kiwi
         }
     }
     
-    void Page::createLink(scDico dico)
+    void Patcher::createLink(scDico dico)
     {
         sLink link;
         if(dico)
@@ -210,7 +210,7 @@ namespace Kiwi
         send(link, Notification::Added);
     }
     
-    void Page::add(scDico dico)
+    void Patcher::add(scDico dico)
     {
         sDico rdico = Dico::create(dico);
         if(rdico)
@@ -261,7 +261,7 @@ namespace Kiwi
         }
     }
     
-    void Page::remove(sObject object)
+    void Patcher::remove(sObject object)
     {
         if(object)
         {
@@ -288,7 +288,7 @@ namespace Kiwi
         }
     }
     
-    void Page::remove(sLink link)
+    void Patcher::remove(sLink link)
     {
         if(link)
         {
@@ -302,7 +302,7 @@ namespace Kiwi
         }
     }
     
-    void Page::toFront(sObject object)
+    void Patcher::toFront(sObject object)
     {
         if(object)
         {
@@ -316,7 +316,7 @@ namespace Kiwi
         }
     }
     
-    void Page::toBack(sObject object)
+    void Patcher::toBack(sObject object)
     {
         if(object)
         {
@@ -330,12 +330,12 @@ namespace Kiwi
         }
     }
 	
-    void Page::write(sDico dico) const
+    void Patcher::write(sDico dico) const
     {
         if(dico)
         {
-			sDico subpage = Dico::create();
-			if(subpage)
+			sDico subpatcher = Dico::create();
+			if(subpatcher)
 			{
                 ElemVector elements;
 				lock_guard<mutex> guard(m_mutex);
@@ -349,7 +349,7 @@ namespace Kiwi
                         elements.push_back(object);
 					}
 				}
-				subpage->set(Tag::List::objects, elements);
+				subpatcher->set(Tag::List::objects, elements);
 				
 				elements.clear();
 				
@@ -362,13 +362,13 @@ namespace Kiwi
 						elements.push_back(link);
 					}
 				}
-				subpage->set(Tag::List::links, elements);
-				dico->set(Tag::List::page, subpage);
+				subpatcher->set(Tag::List::links, elements);
+				dico->set(Tag::List::patcher, subpatcher);
 			}
         }
     }
 	
-    void Page::dspStart(const ulong samplerate, const ulong vectorsize)
+    void Patcher::dspStart(const ulong samplerate, const ulong vectorsize)
     {
         dspStop();
         m_dsp_context = Dsp::Context::create(samplerate, vectorsize);
@@ -403,7 +403,7 @@ namespace Kiwi
         }
     }
     
-    void Page::dspStop()
+    void Patcher::dspStop()
     {
         if(m_dsp_context)
         {
@@ -412,7 +412,7 @@ namespace Kiwi
         }
     }
     
-    void Page::addListener(sListener list)
+    void Patcher::addListener(sListener list)
     {
         if(list)
         {
@@ -421,7 +421,7 @@ namespace Kiwi
         }
     }
     
-    void Page::removeListener(sListener list)
+    void Patcher::removeListener(sListener list)
     {
         if(list)
         {
@@ -430,7 +430,7 @@ namespace Kiwi
         }
     }
 
-    void Page::send(sObject object, Page::Notification type)
+    void Patcher::send(sObject object, Patcher::Notification type)
     {
         if(object)
         {
@@ -459,7 +459,7 @@ namespace Kiwi
         }
     }
     
-    void Page::send(sLink link, Page::Notification type)
+    void Patcher::send(sLink link, Patcher::Notification type)
     {
         if(link)
         {

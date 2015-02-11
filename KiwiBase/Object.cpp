@@ -22,7 +22,7 @@
 */
 
 #include "Object.h"
-#include "Page.h"
+#include "Patcher.h"
 #include "Instance.h"
 
 namespace Kiwi
@@ -139,7 +139,7 @@ namespace Kiwi
     
     Object::Object(Detail const& detail, sTag name) :
     m_instance(detail.instance),
-    m_page(detail.page),
+    m_patcher(detail.patcher),
     m_name(name),
     m_text(detail.text),
     m_id(detail.lid),

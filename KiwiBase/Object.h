@@ -35,7 +35,7 @@ namespace Kiwi
     struct Detail
     {
         const sInstance     instance;
-        const sPage         page;
+        const sPatcher         patcher;
         const ulong         lid;
         const sTag          name;
         const string        text;
@@ -43,13 +43,13 @@ namespace Kiwi
         const ElemVector    args;
         
         Detail() :
-        instance(nullptr), page(nullptr), lid(0), name(Tag::create("")), text(""), dico(nullptr), args({})
+        instance(nullptr), patcher(nullptr), lid(0), name(Tag::create("")), text(""), dico(nullptr), args({})
         {
             ;
         }
         
-        Detail(sInstance _instance, sPage _page, const ulong _id, sTag _name, const string _text, scDico _dico, ElemVector const& _args) :
-        instance(_instance), page(_page), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
+        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, scDico _dico, ElemVector const& _args) :
+        instance(_instance), patcher(_patcher), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
         {
             ;
         }
@@ -61,7 +61,7 @@ namespace Kiwi
     
     //! The object is a graphical object.
     /**
-     The object is a graphical class that aims to be instantiate in a page.
+     The object is a graphical class that aims to be instantiate in a patcher.
      */
     class Object : virtual public Sketcher
     {
@@ -106,7 +106,7 @@ namespace Kiwi
         };
         
         const wInstance			m_instance;
-        const wPage				m_page;
+        const wPatcher          m_patcher;
         const sTag				m_name;
         const string            m_text;
         const ulong             m_id;
@@ -156,22 +156,22 @@ namespace Kiwi
         
     public:
         
-        //! Retrieve the instance that manages the page of the object.
-        /** The function retrieves the instance that manages the page of the object.
-         @return The instance that manages the page of the object.
+        //! Retrieve the instance that manages the patcher of the object.
+        /** The function retrieves the instance that manages the patcher of the object.
+         @return The instance that manages the patcher of the object.
          */
         inline sInstance getInstance() const noexcept
         {
             return m_instance.lock();
         }
         
-        //! Retrieve the page that manages the object.
-        /** The function retrieves the page that manages the object.
-         @return The page that manages the object.
+        //! Retrieve the patcher that manages the object.
+        /** The function retrieves the patcher that manages the object.
+         @return The patcher that manages the object.
          */
-        inline sPage getPage() const noexcept
+        inline sPatcher getPatcher() const noexcept
         {
-            return m_page.lock();
+            return m_patcher.lock();
         }
         
         //! Retrieve the name of the object.
@@ -278,9 +278,9 @@ namespace Kiwi
          */
         void write(sDico dico) const;
         
-        //! Retrieves if the object should be hidden when the page is locked.
-        /** The function retrieves if the object should be hidden when the page is locked.
-         @return True if the object should be hidden when the page is locked, false otherwise.
+        //! Retrieves if the object should be hidden when the patcher is locked.
+        /** The function retrieves if the object should be hidden when the patcher is locked.
+         @return True if the object should be hidden when the patcher is locked, false otherwise.
          */
         inline bool isHiddenOnLock() const noexcept
         {
@@ -392,7 +392,7 @@ namespace Kiwi
     class Object::Iolet : public enable_shared_from_this<Iolet>
     {
     protected:
-        friend Page;
+        friend Patcher;
         friend Link;
         
         vector<Connection>  m_connections;

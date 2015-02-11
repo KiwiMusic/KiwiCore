@@ -34,12 +34,12 @@ namespace Kiwi
     
     //! The link is used to create a connection between objects.
     /**
-     The link is a combination of two sockets used to create the connection between objects in a page.
+     The link is a combination of two sockets used to create the connection between objects in a patcher.
      */
     class Link
     {
     private:
-        const wPage         m_page;
+        const wPatcher         m_patcher;
         const wObject       m_object_from;
         const wObject       m_object_to;
         const ulong         m_index_outlet;
@@ -50,20 +50,20 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Link(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept;
+        Link(const sPatcher patcher, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept;
         
         //! The destructor.
         /** You should never use this method.
          */
         virtual ~Link();
         
-        //! Retrieve the page of the link.
-        /** The function retrieves the page of the link.
-         @return The page of the link.
+        //! Retrieve the patcher of the link.
+        /** The function retrieves the patcher of the link.
+         @return The patcher of the link.
          */
-        inline sPage getPage() const noexcept
+        inline sPatcher getPatcher() const noexcept
         {
-            return m_page.lock();
+            return m_patcher.lock();
         }
         
         //! Retrieve the output object.
@@ -111,7 +111,7 @@ namespace Kiwi
             return m_type;
         }
         
-        //! Write the page in a dico.
+        //! Write the patcher in a dico.
         /** The function writes the link in a dico.
          @param dico The dico.
          */
@@ -123,8 +123,8 @@ namespace Kiwi
     class Link::DspLink : public Link, public Dsp::Connection
     {
     public:
-        DspLink(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
-        Link(page, from, outlet, to, inlet, type),
+        DspLink(const sPatcher patcher, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
+        Link(patcher, from, outlet, to, inlet, type),
         Dsp::Connection(pfrom, poutlet, pto, pinlet)
         {
             ;
