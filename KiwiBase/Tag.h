@@ -161,7 +161,7 @@ namespace Kiwi
         static const sTag object;
         static const sTag objects;
         
-        static const sTag page;
+        static const sTag patcher;
         
         static const sTag right;
         

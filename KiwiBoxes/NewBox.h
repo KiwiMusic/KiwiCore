@@ -31,23 +31,16 @@ namespace Kiwi
     // ================================================================================ //
     //                                    NEWBOX                                        //
     // ================================================================================ //
-    
-	class NewBox : public Box, public Gui::Mouser, public Gui::Writer
+	
+	/*
+	class NewBox : public Object, public Gui::Default
     {
     public:
-        
-        NewBox(sPage page, ElemVector const& elements = {}, string const& name = "newbox");
+        NewBox(Initializer const& init);
         ~NewBox();
-        bool receive(ulong index, ElemVector const& elements) override;
-        bool receive(Gui::Event::Mouse const& event) override;
-		bool receive(Gui::Event::Keyboard const& event) override;
-		bool receive(Gui::Event::Focus event) override;
-		void draw(Gui::Doodle& doodle) const override;
+        void receive(ulong index, ElemVector const& elements) override;
 		
-		bool textFilter(wstring& newtext) override;
-		void textChanged() override;
-		
-		sBox allocate(sPage page, sDico dico) const override;
+		sObject create(Initializer const& initiliazer) const override;
     };
 	
 	// ================================================================================ //
@@ -56,8 +49,9 @@ namespace Kiwi
 	
     inline void standardBoxes()
     {
-		Box::addPrototype(unique_ptr<Box>(new NewBox(sPage())));
+		Prototypes::add<NewBox>();
     }
+	*/
 }
 
 #endif

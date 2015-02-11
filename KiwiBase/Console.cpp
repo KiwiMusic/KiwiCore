@@ -82,13 +82,13 @@ namespace Kiwi
         cerr << toString(object->getText()) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
-        shared_ptr<const Kiwi::Page> page = nullptr;
+        shared_ptr<const Kiwi::Patcher> patcher = nullptr;
         if(object)
         {
             instance    = object->getInstance();
-            page        = object->getPage();
+            patcher        = object->getPatcher();
         }
-        shared_ptr<const Message> mess = make_shared<Message>(instance, page, object, Message::Post, message);
+        shared_ptr<const Message> mess = make_shared<Message>(instance, patcher, object, Message::Post, message);
         lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
@@ -134,13 +134,13 @@ namespace Kiwi
         cerr << "warning : " << toString(object) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
-        shared_ptr<const Kiwi::Page> page = nullptr;
+        shared_ptr<const Kiwi::Patcher> patcher = nullptr;
         if(object)
         {
             instance    = object->getInstance();
-            page        = object->getPage();
+            patcher        = object->getPatcher();
         }
-        shared_ptr<const Message> mess = make_shared<Message>(instance, page, object, Message::Warning, message);
+        shared_ptr<const Message> mess = make_shared<Message>(instance, patcher, object, Message::Warning, message);
         lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {
@@ -186,13 +186,13 @@ namespace Kiwi
         cerr << "error : " << toString(object) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
-        shared_ptr<const Kiwi::Page> page = nullptr;
+        shared_ptr<const Kiwi::Patcher> patcher = nullptr;
         if(object)
         {
             instance    = object->getInstance();
-            page        = object->getPage();
+            patcher        = object->getPatcher();
         }
-        shared_ptr<const Message> mess = make_shared<Message>(instance, page, object, Message::Error, message);
+        shared_ptr<const Message> mess = make_shared<Message>(instance, patcher, object, Message::Error, message);
         lock_guard<mutex> guard(m_mutex);
         for(auto it = m_listeners.begin(); it !=  m_listeners.end(); ++it)
         {

@@ -62,11 +62,11 @@ namespace Kiwi
     typedef shared_ptr<const Object>scObject;
     typedef weak_ptr<const Object>  wcObject;
     
-    class Page;
-    typedef shared_ptr<Page>        sPage;
-    typedef weak_ptr<Page>          wPage;
-    typedef shared_ptr<const Page>  scPage;
-    typedef weak_ptr<const Page>    wcPage;
+    class Patcher;
+    typedef shared_ptr<Patcher>        sPatcher;
+    typedef weak_ptr<Patcher>          wPatcher;
+    typedef shared_ptr<const Patcher>  scPatcher;
+    typedef weak_ptr<const Patcher>    wcPatcher;
     
     class Instance;
     typedef shared_ptr<Instance>        sInstance;
