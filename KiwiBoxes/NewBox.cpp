@@ -29,8 +29,9 @@ namespace Kiwi
     // ================================================================================ //
     //                                     METRO                                        //
     // ================================================================================ //
-    
-    NewBox::NewBox(sPage page, ElemVector const& elements, string const& name) : Object(page, name)
+	
+	/*
+    NewBox::NewBox(Initializer const& init) : Object(init, "newbox")
     {
 		//m_textfield->setText(L"newbox test");
 		//textfield_setText()
@@ -41,13 +42,11 @@ namespace Kiwi
         ;
     }
 	
-	sBox NewBox::allocate(sPage page, sDico dico) const
+	sObject NewBox::create(Initializer const& initiliazer) const
 	{
-		ElemVector elements;
-		dico->get(Tag::List::arguments, elements);
-		sBox box = make_shared<NewBox>(page, elements);
+		sObject obj = make_shared<NewBox>(initiliazer);
 		
-		Gui::sWriter writer = dynamic_pointer_cast<Gui::Writer>(box);
+		Gui::sWriter writer = dynamic_pointer_cast<Gui::Writer>(obj);
 		if(writer)
 		{
 			Gui::Writer::sTextField textfield = writer->getTextField();
@@ -57,9 +56,11 @@ namespace Kiwi
 			}
 		}
 		
-		return box;
+		return obj;
 	}
+	*/
 	
+	/*
     bool NewBox::receive(ulong index, ElemVector const& elements)
     {
         return false;
@@ -70,6 +71,7 @@ namespace Kiwi
 		setText(L"newbox newtext");
         return false;
 	}
+	
 	
 	bool NewBox::receive(Gui::Event::Keyboard const& event)
 	{
@@ -101,4 +103,5 @@ namespace Kiwi
 		d.setColor(getBorderColor());
 		d.drawRectangle(d.getBounds().reduced(borderSize*0.5), borderSize);
 	}
+	*/
 }

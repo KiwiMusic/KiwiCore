@@ -38,8 +38,8 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                sObject cbox = m_connections[i].object.lock();
-                if(cbox && object == cbox && m_connections[i].index == index)
+                sObject cobject = m_connections[i].object.lock();
+                if(cobject && object == cobject && m_connections[i].index == index)
                 {
                     return true;
                 }
@@ -55,8 +55,8 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                sObject cbox = m_connections[i].object.lock();
-                if(cbox && object == cbox && m_connections[i].index == index)
+                sObject cobject = m_connections[i].object.lock();
+                if(cobject && object == cobject && m_connections[i].index == index)
                 {
                     return false;
                 }
@@ -74,8 +74,8 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
             {
-                sObject cbox = m_connections[i].object.lock();
-                if(cbox && object == cbox && m_connections[i].index == index)
+                sObject cobject = m_connections[i].object.lock();
+                if(cobject && object == cobject && m_connections[i].index == index)
                 {
                     m_connections.erase(m_connections.begin() + i);
                     return false;

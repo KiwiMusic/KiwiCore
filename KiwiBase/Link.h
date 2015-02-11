@@ -32,16 +32,16 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    //! The link is used to create a connection between boxes.
+    //! The link is used to create a connection between objects.
     /**
-     The link is a combination of two sockets used to create the connection between boxes in a page.
+     The link is a combination of two sockets used to create the connection between objects in a page.
      */
     class Link
     {
     private:
         const wPage         m_page;
-        const wObject       m_box_from;
-        const wObject       m_box_to;
+        const wObject       m_object_from;
+        const wObject       m_object_to;
         const ulong         m_index_outlet;
         const ulong         m_index_intlet;
         const Object::Io::Type m_type;
@@ -70,18 +70,18 @@ namespace Kiwi
         /** The function retrieves the output object of the link.
          @return The output object.
          */
-        inline sObject getBoxFrom() const noexcept
+        inline sObject getObjectFrom() const noexcept
         {
-            return m_box_from.lock();
+            return m_object_from.lock();
         }
         
         //! Retrieve the input object.
         /** The function retrieves the input object of the link.
          @return The input object.
          */
-        inline sObject getBoxTo() const noexcept
+        inline sObject getObjectTo() const noexcept
         {
-            return m_box_to.lock();
+            return m_object_to.lock();
         }
         
         //! Retrieve the index of the outlet of the link.
@@ -135,7 +135,7 @@ namespace Kiwi
     {
         if(link && object)
         {
-            return link->getBoxFrom() == object || link->getBoxTo() == object;
+            return link->getObjectFrom() == object || link->getObjectTo() == object;
         }
         else
         {
@@ -147,7 +147,7 @@ namespace Kiwi
     {
         if(link && object)
         {
-            return link->getBoxFrom() == object || link->getBoxTo() == object;
+            return link->getObjectFrom() == object || link->getObjectTo() == object;
         }
         else
         {

@@ -353,9 +353,18 @@ namespace Kiwi
                 return Rectangle(m_presentation_position->getValue(), m_presentation_size->getValue());
             }
         }
-        
+		
+		//! Retrieve the "ignoreclick" attribute value of the object.
+		/** The function retrieves the "ignoreclick" attribute value of the object.
+		 @return The attribute value.
+		 */
+		inline bool getIgnoreClick() const noexcept
+		{
+			return m_ignoreclick->getValue();
+		}
+		
     protected:
-        
+		
         //! Send a vector of elements via an outlet.
         /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
          @param index The index of the outlet.
@@ -512,7 +521,7 @@ namespace Kiwi
          @param index The index of the connection.
          @return The object of a connection.
          */
-        inline sObject getBox(const ulong index) const noexcept
+        inline sObject getObject(const ulong index) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             if(index < (ulong)m_connections.size())
