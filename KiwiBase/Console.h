@@ -31,7 +31,7 @@
 namespace Kiwi
 {
     class Object;
-    class Page;
+    class Patcher;
     class Instance;
     
     // ================================================================================ //
@@ -187,13 +187,13 @@ namespace Kiwi
             const string        content;
             const Kind          kind;
             const wcObject      object;
-            const wcPage        page;
+            const wcPatcher        page;
             const wcInstance    instance;
             
             //! The constructor.
             /** The constructor initialize the members.
              */
-            Message(scInstance instance, scPage page, scObject object, Kind kind, string const& content) noexcept :
+            Message(scInstance instance, scPatcher page, scObject object, Kind kind, string const& content) noexcept :
             content(content), kind(kind), object(object), page(page), instance(instance)
             {
                 ;

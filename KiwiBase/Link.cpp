@@ -23,7 +23,7 @@
 
 #include "Link.h"
 #include "Object.h"
-#include "Page.h"
+#include "Patcher.h"
 
 namespace Kiwi
 {
@@ -31,7 +31,7 @@ namespace Kiwi
     //                                      LINK                                        //
     // ================================================================================ //
     
-    Link::Link(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept :
+    Link::Link(const sPatcher page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept :
     m_page(page),
     m_object_from(from),
     m_object_to(to),

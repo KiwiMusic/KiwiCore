@@ -23,7 +23,7 @@
 
 #include "Dico.h"
 #include "Object.h"
-#include "Page.h"
+#include "Patcher.h"
 
 namespace Kiwi
 {    

@@ -37,7 +37,7 @@ namespace Kiwi
     /**
      The page is...
      */
-    class Page : public enable_shared_from_this<Page>
+    class Patcher : public enable_shared_from_this<Patcher>
 	{
     public:
 		class Listener;
@@ -79,12 +79,12 @@ namespace Kiwi
         //! Constructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        Page(sInstance instance);
+        Patcher(sInstance instance);
         
         //! Destructor.
         /** You should never call this method except if you really know what you're doing.
          */
-        ~Page();
+        ~Patcher();
         
         //! The page creation method.
         /** The function allocates a page and initialize the defaults objects.
@@ -92,7 +92,7 @@ namespace Kiwi
          @param dico The dico that will initialize the page.
          @return The page.
          */
-        static sPage create(sInstance instance, sDico dico = nullptr);
+        static sPatcher create(sInstance instance, sDico dico = nullptr);
 		
         //! Retrieve the instance that manages the page.
         /** The function retrieves the instance that manages the page.
@@ -107,18 +107,18 @@ namespace Kiwi
         /** The function retrieves the shared pointer of the page.
          @return The shared pointer of the page.
          */
-        inline scPage getShared() const noexcept
+        inline scPatcher getShared() const noexcept
         {
-            return static_pointer_cast<const Page>(shared_from_this());
+            return static_pointer_cast<const Patcher>(shared_from_this());
         }
             
         //! Retrieve the shared pointer of the page.
         /** The function retrieves the shared pointer of the page.
          @return The shared pointer of the page.
          */
-        inline sPage getShared() noexcept
+        inline sPatcher getShared() noexcept
         {
-            return static_pointer_cast<Page>(shared_from_this());
+            return static_pointer_cast<Patcher>(shared_from_this());
         }
 
         //! Get the objects.
@@ -245,9 +245,9 @@ namespace Kiwi
     //! The page listener is an abstract class that facilitates the control of a page in an application.
     /**
      The page listener should be a shared pointer to be able to bind itself to a page. Thus, like in all the kiwi classes, you should use another creation method and call the bind function in it. The page listener owns a vector of object listeners and facilitates managements of objects like the creation, the deletion, the selection, etc.
-     @see Page, Page::Listener, Object::Listener
+     @see Patcher, Patcher::Listener, Object::Listener
      */
-    class Page::Listener
+    class Patcher::Listener
     {
     public:
         
@@ -273,25 +273,25 @@ namespace Kiwi
         /** The function is called by the page when a object has been created.
          @param object     The object.
          */
-        virtual void objectCreated(sPage page, sObject object) = 0;
+        virtual void objectCreated(sPatcher page, sObject object) = 0;
         
         //! Receive the notification that a object has been removed.
         /** The function is called by the page when a object has been removed.
          @param object     The object.
          */
-        virtual void objectRemoved(sPage page, sObject object) = 0;
+        virtual void objectRemoved(sPatcher page, sObject object) = 0;
         
         //! Receive the notification that a link has been created.
         /** The function is called by the page when a link has been created.
          @param link     The link.
          */
-        virtual void linkCreated(sPage page, sLink link) = 0;
+        virtual void linkCreated(sPatcher page, sLink link) = 0;
         
         //! Receive the notification that a link has been removed.
         /** The function is called by the page when a link has been removed.
          @param link    The link.
          */
-        virtual void linkRemoved(sPage page, sLink link) = 0;
+        virtual void linkRemoved(sPatcher page, sLink link) = 0;
     };
 }
 

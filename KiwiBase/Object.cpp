@@ -22,7 +22,7 @@
 */
 
 #include "Object.h"
-#include "Page.h"
+#include "Patcher.h"
 #include "Instance.h"
 
 namespace Kiwi

@@ -72,9 +72,9 @@ namespace Kiwi
         return make_shared<Instance>();
     }
 
-    sPage Instance::createPage(sDico dico)
+    sPatcher Instance::createPatcher(sDico dico)
     {
-        sPage page = Page::create(shared_from_this(), dico);
+        sPatcher page = Patcher::create(shared_from_this(), dico);
         if(page)
         {
             m_pages_mutex.lock();
@@ -91,7 +91,7 @@ namespace Kiwi
                     m_dsp_pages.push_back(page);
                     m_dsp_mutex.unlock();
                 }
-                catch(sPage)
+                catch(sPatcher)
                 {
                     ;
                 }
@@ -117,7 +117,7 @@ namespace Kiwi
         return page;
     }
     
-    void Instance::removePage(sPage page)
+    void Instance::removePatcher(sPatcher page)
     {
         m_pages_mutex.lock();
         if(m_pages.find(page) != m_pages.end())
@@ -160,7 +160,7 @@ namespace Kiwi
         }
     }
     
-    void Instance::getPages(vector<sPage>& pages)
+    void Instance::getPatchers(vector<sPatcher>& pages)
     {
         lock_guard<mutex> guard(m_pages_mutex);
         pages.assign(m_pages.begin(), m_pages.end());
@@ -184,7 +184,7 @@ namespace Kiwi
             {
                 (*it)->dspStart(m_sample_rate, m_vector_size);
             }
-            catch (sPage)
+            catch (sPatcher)
             {
                 ;
             }
@@ -225,7 +225,7 @@ namespace Kiwi
         if(m_dsp_running)
         {
             m_dsp_mutex.lock();
-            for(vector<sPage>::size_type i = 0; i < m_dsp_pages.size(); i++)
+            for(vector<sPatcher>::size_type i = 0; i < m_dsp_pages.size(); i++)
             {
                 m_dsp_pages[i]->dspStop();
             }

@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_INSTANCE__
 #define __DEF_KIWI_INSTANCE__
 
-#include "Page.h"
+#include "Patcher.h"
 
 // TODO :
 // - See how to set the input and output vector for DSP.
@@ -39,7 +39,7 @@ namespace Kiwi
     //! The instance manages pages.
     /**
      The instance manages a set a top-level pages. You can use the listener to receive the notifications of the creation, the deletion of pages and the changes of the dsp state. All the methods should be threadsafe but you should, of course, call the dsp tick from one thread. The instance is also a beacon factory that can be used to bind and retrieve boxes with a specific name.
-     @see Page
+     @see Patcher
      @see Beacon
      */
     class Instance : public Beacon::Factory, public enable_shared_from_this<Instance>
@@ -52,13 +52,13 @@ namespace Kiwi
         typedef weak_ptr<const Listener>    wcListener;
         
     private:
-        vector<sPage>           m_dsp_pages;
+        vector<sPatcher>           m_dsp_pages;
         mutable mutex           m_dsp_mutex;
         atomic_bool             m_dsp_running;
         atomic_ulong            m_sample_rate;
         atomic_ulong            m_vector_size;
         
-        set<sPage>              m_pages;
+        set<sPatcher>              m_pages;
         mutex                   m_pages_mutex;
         set<wListener,
         owner_less<wListener>>  m_lists;
@@ -85,23 +85,23 @@ namespace Kiwi
         /** The function creates a page with a dico or creates an empty one if the dico is empty.
          @param dico The dico that defines of the page.
          @return The page.
-         @see removePage, getPages
+         @see removePatcher, getPatchers
          */
-        sPage createPage(sDico dico = nullptr);
+        sPatcher createPatcher(sDico dico = nullptr);
         
         //! Close a page.
         /** The function closes page.
          @param page The page.
-         @see createPage, getPages
+         @see createPatcher, getPatchers
          */
-        void removePage(sPage page);
+        void removePatcher(sPatcher page);
         
         //! Retreive all the pages of the instance.
         /** The function retreives all the pages of the instance.
          @param pages A vector that will be filled with the pages.
-         @see createPage, removePage
+         @see createPatcher, removePatcher
          */
-        void getPages(vector<sPage>& pages);
+        void getPatchers(vector<sPatcher>& pages);
         
         //! Start the dsp.
         /** The function start the dsp chain of all the pages.
@@ -118,7 +118,7 @@ namespace Kiwi
         inline void dspTick() const noexcept
         {
             m_dsp_mutex.lock();
-            for(vector<sPage>::size_type i = 0; i < m_dsp_pages.size(); i++)
+            for(vector<sPatcher>::size_type i = 0; i < m_dsp_pages.size(); i++)
             {
                 m_dsp_pages[i]->dspTick();
             }
@@ -209,14 +209,14 @@ namespace Kiwi
          @param instance    The instance.
          @param page        The page.
          */
-        virtual void pageCreated(sInstance instance, sPage page) = 0;
+        virtual void pageCreated(sInstance instance, sPatcher page) = 0;
         
         //! Receive the notification that a page has been closed.
         /** The function is called by the instance when a page has been closed.
          @param instance    The instance.
          @param page        The page.
          */
-        virtual void pageRemoved(sInstance instance, sPage page) = 0;
+        virtual void pageRemoved(sInstance instance, sPatcher page) = 0;
         
         //! Receive the notification that the dsp has been started.
         /** The function is called by the instance when the dsp has been started.

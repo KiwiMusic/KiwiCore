@@ -82,11 +82,11 @@ namespace Kiwi
         cerr << toString(object->getText()) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
-        shared_ptr<const Kiwi::Page> page = nullptr;
+        shared_ptr<const Kiwi::Patcher> page = nullptr;
         if(object)
         {
             instance    = object->getInstance();
-            page        = object->getPage();
+            page        = object->getPatcher();
         }
         shared_ptr<const Message> mess = make_shared<Message>(instance, page, object, Message::Post, message);
         lock_guard<mutex> guard(m_mutex);
@@ -134,11 +134,11 @@ namespace Kiwi
         cerr << "warning : " << toString(object) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
-        shared_ptr<const Kiwi::Page> page = nullptr;
+        shared_ptr<const Kiwi::Patcher> page = nullptr;
         if(object)
         {
             instance    = object->getInstance();
-            page        = object->getPage();
+            page        = object->getPatcher();
         }
         shared_ptr<const Message> mess = make_shared<Message>(instance, page, object, Message::Warning, message);
         lock_guard<mutex> guard(m_mutex);
@@ -186,11 +186,11 @@ namespace Kiwi
         cerr << "error : " << toString(object) << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
-        shared_ptr<const Kiwi::Page> page = nullptr;
+        shared_ptr<const Kiwi::Patcher> page = nullptr;
         if(object)
         {
             instance    = object->getInstance();
-            page        = object->getPage();
+            page        = object->getPatcher();
         }
         shared_ptr<const Message> mess = make_shared<Message>(instance, page, object, Message::Error, message);
         lock_guard<mutex> guard(m_mutex);

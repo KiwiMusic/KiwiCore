@@ -39,7 +39,7 @@ namespace Kiwi
     class Link
     {
     private:
-        const wPage         m_page;
+        const wPatcher         m_page;
         const wObject       m_object_from;
         const wObject       m_object_to;
         const ulong         m_index_outlet;
@@ -50,7 +50,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method.
          */
-        Link(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept;
+        Link(const sPatcher page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type) noexcept;
         
         //! The destructor.
         /** You should never use this method.
@@ -61,7 +61,7 @@ namespace Kiwi
         /** The function retrieves the page of the link.
          @return The page of the link.
          */
-        inline sPage getPage() const noexcept
+        inline sPatcher getPatcher() const noexcept
         {
             return m_page.lock();
         }
@@ -123,7 +123,7 @@ namespace Kiwi
     class Link::DspLink : public Link, public Dsp::Connection
     {
     public:
-        DspLink(const sPage page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
+        DspLink(const sPatcher page, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
         Link(page, from, outlet, to, inlet, type),
         Dsp::Connection(pfrom, poutlet, pto, pinlet)
         {
