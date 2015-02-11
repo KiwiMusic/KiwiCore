@@ -46,20 +46,20 @@ namespace Kiwi
     
     sPatcher Patcher::create(sInstance instance, sDico dico)
     {
-        sPatcher page = make_shared<Patcher>(instance);
-        if(page && dico)
+        sPatcher patcher = make_shared<Patcher>(instance);
+        if(patcher && dico)
         {
-            sDico pageDico = Dico::create();
-            if(pageDico)
+            sDico patcherDico = Dico::create();
+            if(patcherDico)
             {
-                if(dico->has(Tag::List::page))
+                if(dico->has(Tag::List::patcher))
                 {
-                    pageDico = dico->get(Tag::List::page);
-                    page->add(pageDico);
+                    patcherDico = dico->get(Tag::List::patcher);
+                    patcher->add(patcherDico);
                 }
             }
         }
-        return page;
+        return patcher;
     }
     
     sObject Patcher::createObject(scDico dico)
@@ -346,8 +346,8 @@ namespace Kiwi
     {
         if(dico)
         {
-			sDico subpage = Dico::create();
-			if(subpage)
+			sDico subpatcher = Dico::create();
+			if(subpatcher)
 			{
                 ElemVector elements;
 				lock_guard<mutex> guard(m_mutex);
@@ -361,7 +361,7 @@ namespace Kiwi
                         elements.push_back(object);
 					}
 				}
-				subpage->set(Tag::List::objects, elements);
+				subpatcher->set(Tag::List::objects, elements);
 				
 				elements.clear();
 				
@@ -374,8 +374,8 @@ namespace Kiwi
 						elements.push_back(link);
 					}
 				}
-				subpage->set(Tag::List::links, elements);
-				dico->set(Tag::List::page, subpage);
+				subpatcher->set(Tag::List::links, elements);
+				dico->set(Tag::List::patcher, subpatcher);
 			}
         }
     }

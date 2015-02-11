@@ -187,14 +187,14 @@ namespace Kiwi
             const string        content;
             const Kind          kind;
             const wcObject      object;
-            const wcPatcher        page;
+            const wcPatcher        patcher;
             const wcInstance    instance;
             
             //! The constructor.
             /** The constructor initialize the members.
              */
-            Message(scInstance instance, scPatcher page, scObject object, Kind kind, string const& content) noexcept :
-            content(content), kind(kind), object(object), page(page), instance(instance)
+            Message(scInstance instance, scPatcher patcher, scObject object, Kind kind, string const& content) noexcept :
+            content(content), kind(kind), object(object), patcher(patcher), instance(instance)
             {
                 ;
             }

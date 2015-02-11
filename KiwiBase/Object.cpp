@@ -139,7 +139,7 @@ namespace Kiwi
     
     Object::Object(Initializer const& initiliazer, string const& name) :
     m_instance(initiliazer.instance),
-    m_page(initiliazer.page),
+    m_patcher(initiliazer.patcher),
     m_name(Tag::create(name)),
     m_text(initiliazer.text),
     m_id(initiliazer.lid),

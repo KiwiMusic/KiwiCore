@@ -50,9 +50,9 @@ namespace Kiwi
     
     Instance::~Instance()
     {
-        m_pages.clear();
+        m_patchers.clear();
         m_lists.clear();
-        m_dsp_pages.clear();
+        m_dsp_patchers.clear();
     }
     
     sInstance Instance::create()
@@ -74,21 +74,21 @@ namespace Kiwi
 
     sPatcher Instance::createPatcher(sDico dico)
     {
-        sPatcher page = Patcher::create(shared_from_this(), dico);
-        if(page)
+        sPatcher patcher = Patcher::create(shared_from_this(), dico);
+        if(patcher)
         {
-            m_pages_mutex.lock();
-            m_pages.insert(page);
-            m_pages_mutex.unlock();
+            m_patchers_mutex.lock();
+            m_patchers.insert(patcher);
+            m_patchers_mutex.unlock();
             
             if(m_dsp_running)
             {
                 try
                 {
                     int todo;
-                    page->dspStart(m_sample_rate, m_vector_size);
+                    patcher->dspStart(m_sample_rate, m_vector_size);
                     m_dsp_mutex.lock();
-                    m_dsp_pages.push_back(page);
+                    m_dsp_patchers.push_back(patcher);
                     m_dsp_mutex.unlock();
                 }
                 catch(sPatcher)
@@ -108,34 +108,34 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->pageCreated(shared_from_this(), page);
+                    listener->patcherCreated(shared_from_this(), patcher);
                     ++it;
                 }
             }
             m_lists_mutex.unlock();
         }
-        return page;
+        return patcher;
     }
     
-    void Instance::removePatcher(sPatcher page)
+    void Instance::removePatcher(sPatcher patcher)
     {
-        m_pages_mutex.lock();
-        if(m_pages.find(page) != m_pages.end())
+        m_patchers_mutex.lock();
+        if(m_patchers.find(patcher) != m_patchers.end())
         {
-            if(m_dsp_running && page->isDspRunning())
+            if(m_dsp_running && patcher->isDspRunning())
             {
                 m_dsp_mutex.lock();
-                page->dspStop();
-                auto it  = find(m_dsp_pages.begin(), m_dsp_pages.end(), page);
-                if(it != m_dsp_pages.end())
+                patcher->dspStop();
+                auto it  = find(m_dsp_patchers.begin(), m_dsp_patchers.end(), patcher);
+                if(it != m_dsp_patchers.end())
                 {
-                    m_dsp_pages.erase(it);
+                    m_dsp_patchers.erase(it);
                 }
                 m_dsp_mutex.unlock();
             }
             
-            m_pages.erase(page);
-            m_pages_mutex.unlock();
+            m_patchers.erase(patcher);
+            m_patchers_mutex.unlock();
             
             m_lists_mutex.lock();
             auto it = m_lists.begin();
@@ -148,7 +148,7 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->pageRemoved(shared_from_this(), page);
+                    listener->patcherRemoved(shared_from_this(), patcher);
                     ++it;
                 }
             }
@@ -156,14 +156,14 @@ namespace Kiwi
         }
         else
         {
-            m_pages_mutex.unlock();
+            m_patchers_mutex.unlock();
         }
     }
     
-    void Instance::getPatchers(vector<sPatcher>& pages)
+    void Instance::getPatchers(vector<sPatcher>& patchers)
     {
-        lock_guard<mutex> guard(m_pages_mutex);
-        pages.assign(m_pages.begin(), m_pages.end());
+        lock_guard<mutex> guard(m_patchers_mutex);
+        patchers.assign(m_patchers.begin(), m_patchers.end());
     }
     
     void Instance::dspStart(ulong samplerate, ulong vectorsize)
@@ -176,8 +176,8 @@ namespace Kiwi
         m_vector_size   = vectorsize;
         
         m_dsp_mutex.lock();
-        m_pages_mutex.lock();
-        for(auto it = m_pages.begin(); it != m_pages.end(); ++it)
+        m_patchers_mutex.lock();
+        for(auto it = m_patchers.begin(); it != m_patchers.end(); ++it)
         {
             int todo;
             try
@@ -188,11 +188,11 @@ namespace Kiwi
             {
                 ;
             }
-            m_dsp_pages.push_back((*it));
+            m_dsp_patchers.push_back((*it));
         }
-        m_pages_mutex.unlock();
+        m_patchers_mutex.unlock();
         
-        if(!m_dsp_pages.empty())
+        if(!m_dsp_patchers.empty())
         {
             m_dsp_running   = true;
             m_dsp_mutex.unlock();
@@ -225,11 +225,11 @@ namespace Kiwi
         if(m_dsp_running)
         {
             m_dsp_mutex.lock();
-            for(vector<sPatcher>::size_type i = 0; i < m_dsp_pages.size(); i++)
+            for(vector<sPatcher>::size_type i = 0; i < m_dsp_patchers.size(); i++)
             {
-                m_dsp_pages[i]->dspStop();
+                m_dsp_patchers[i]->dspStop();
             }
-            m_dsp_pages.clear();
+            m_dsp_patchers.clear();
             m_dsp_mutex.unlock();
             
             m_dsp_running = false;

@@ -28,7 +28,7 @@
 
 // TODO :
 // - See how to set the input and output vector for DSP.
-// - Exception (load page and dsp)
+// - Exception (load patcher and dsp)
 // - Add the attributes (read and write)
 namespace Kiwi
 {
@@ -36,9 +36,9 @@ namespace Kiwi
     //                                      INSTANCE                                    //
     // ================================================================================ //
     
-    //! The instance manages pages.
+    //! The instance manages patchers.
     /**
-     The instance manages a set a top-level pages. You can use the listener to receive the notifications of the creation, the deletion of pages and the changes of the dsp state. All the methods should be threadsafe but you should, of course, call the dsp tick from one thread. The instance is also a beacon factory that can be used to bind and retrieve boxes with a specific name.
+     The instance manages a set a top-level patchers. You can use the listener to receive the notifications of the creation, the deletion of patchers and the changes of the dsp state. All the methods should be threadsafe but you should, of course, call the dsp tick from one thread. The instance is also a beacon factory that can be used to bind and retrieve boxes with a specific name.
      @see Patcher
      @see Beacon
      */
@@ -52,14 +52,14 @@ namespace Kiwi
         typedef weak_ptr<const Listener>    wcListener;
         
     private:
-        vector<sPatcher>           m_dsp_pages;
+        vector<sPatcher>           m_dsp_patchers;
         mutable mutex           m_dsp_mutex;
         atomic_bool             m_dsp_running;
         atomic_ulong            m_sample_rate;
         atomic_ulong            m_vector_size;
         
-        set<sPatcher>              m_pages;
-        mutex                   m_pages_mutex;
+        set<sPatcher>              m_patchers;
+        mutex                   m_patchers_mutex;
         set<wListener,
         owner_less<wListener>>  m_lists;
         mutable mutex           m_lists_mutex;
@@ -81,30 +81,30 @@ namespace Kiwi
          */
         static sInstance create();
         
-        //! Create a page.
-        /** The function creates a page with a dico or creates an empty one if the dico is empty.
-         @param dico The dico that defines of the page.
-         @return The page.
+        //! Create a patcher.
+        /** The function creates a patcher with a dico or creates an empty one if the dico is empty.
+         @param dico The dico that defines of the patcher.
+         @return The patcher.
          @see removePatcher, getPatchers
          */
         sPatcher createPatcher(sDico dico = nullptr);
         
-        //! Close a page.
-        /** The function closes page.
-         @param page The page.
+        //! Close a patcher.
+        /** The function closes patcher.
+         @param patcher The patcher.
          @see createPatcher, getPatchers
          */
-        void removePatcher(sPatcher page);
+        void removePatcher(sPatcher patcher);
         
-        //! Retreive all the pages of the instance.
-        /** The function retreives all the pages of the instance.
-         @param pages A vector that will be filled with the pages.
+        //! Retreive all the patchers of the instance.
+        /** The function retreives all the patchers of the instance.
+         @param patchers A vector that will be filled with the patchers.
          @see createPatcher, removePatcher
          */
-        void getPatchers(vector<sPatcher>& pages);
+        void getPatchers(vector<sPatcher>& patchers);
         
         //! Start the dsp.
-        /** The function start the dsp chain of all the pages.
+        /** The function start the dsp chain of all the patchers.
          @param samplerate The sample rate.
          @param vectorsize The vector size of the signal.
          @see getVectorSize, getSampleRate, dspTick, dspStop
@@ -112,21 +112,21 @@ namespace Kiwi
         void dspStart(ulong samplerate, ulong vectorsize);
         
         //! Perform a tick on the dsp.
-        /** The function calls once the dsp chain of all the pages.
+        /** The function calls once the dsp chain of all the patchers.
          @see getVectorSize, getSampleRate, dspStart, dspStop
          */
         inline void dspTick() const noexcept
         {
             m_dsp_mutex.lock();
-            for(vector<sPatcher>::size_type i = 0; i < m_dsp_pages.size(); i++)
+            for(vector<sPatcher>::size_type i = 0; i < m_dsp_patchers.size(); i++)
             {
-                m_dsp_pages[i]->dspTick();
+                m_dsp_patchers[i]->dspTick();
             }
             m_dsp_mutex.unlock();
         }
         
         //! Stop the dsp.
-        /** The function stop the dsp chain of all the pages.
+        /** The function stop the dsp chain of all the patchers.
          @see getVectorSize, getSampleRate, dspStart, dspTick
          */
         void dspStop();
@@ -182,7 +182,7 @@ namespace Kiwi
     // ================================================================================ //
     
     //! The instance listener is a virtual class that can bind itself to an instance and be notified of several changes.
-    /** The instance listener is a very light class with methods that receive the notifications of the creation and deletion of pages and from dsp changes. An instance listener must create a shared pointer to be binded to an instance.
+    /** The instance listener is a very light class with methods that receive the notifications of the creation and deletion of patchers and from dsp changes. An instance listener must create a shared pointer to be binded to an instance.
      @see Instance
      */
     class Instance::Listener
@@ -204,19 +204,19 @@ namespace Kiwi
             ;
         }
         
-        //! Receive the notification that a page has been created.
-        /** The function is called by the instance when a page has been created.
+        //! Receive the notification that a patcher has been created.
+        /** The function is called by the instance when a patcher has been created.
          @param instance    The instance.
-         @param page        The page.
+         @param patcher        The patcher.
          */
-        virtual void pageCreated(sInstance instance, sPatcher page) = 0;
+        virtual void patcherCreated(sInstance instance, sPatcher patcher) = 0;
         
-        //! Receive the notification that a page has been closed.
-        /** The function is called by the instance when a page has been closed.
+        //! Receive the notification that a patcher has been closed.
+        /** The function is called by the instance when a patcher has been closed.
          @param instance    The instance.
-         @param page        The page.
+         @param patcher        The patcher.
          */
-        virtual void pageRemoved(sInstance instance, sPatcher page) = 0;
+        virtual void patcherRemoved(sInstance instance, sPatcher patcher) = 0;
         
         //! Receive the notification that the dsp has been started.
         /** The function is called by the instance when the dsp has been started.

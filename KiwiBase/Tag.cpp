@@ -71,7 +71,7 @@ namespace Kiwi
     const sTag Tag::List::object                = Tag::create("object");
     const sTag Tag::List::objects               = Tag::create("objects");
     
-    const sTag Tag::List::page                  = Tag::create("page");
+    const sTag Tag::List::patcher                  = Tag::create("patcher");
     
     const sTag Tag::List::right                 = Tag::create("right");
     
