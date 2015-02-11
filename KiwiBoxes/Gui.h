@@ -43,7 +43,7 @@ namespace Kiwi
     public:
         BangObject(Detail const& detail);
         ~BangObject();
-        void receive(ulong index, ElemVector const& elements) override;
+        void receive(ulong index, vector<Atom> const& atoms) override;
         void tick() override;
     protected:
         void bang() override;

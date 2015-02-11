@@ -79,7 +79,7 @@ namespace Kiwi
     void Console::post(scObject object, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << toString(object->getText()) << " : " << message << endl;
+        cerr << object->getText() << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
         shared_ptr<const Kiwi::Patcher> patcher = nullptr;

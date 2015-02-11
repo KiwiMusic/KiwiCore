@@ -124,7 +124,7 @@ namespace Kiwi
 
         //! Get the objects.
         /** The function retrieves the objects from the patcher.
-         @param objects   A vector of elements.
+         @param objects   A vector of atoms.
          */
         void getObjects(vector<sObject>& objects) const
         {

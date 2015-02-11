@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_CLOCK__
 #define __DEF_KIWI_CLOCK__
 
-#include "Element.h"
+#include "Atom.h"
 
 namespace Kiwi
 {
@@ -53,7 +53,7 @@ namespace Kiwi
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void tick_elements(wClock clock, ulong ms, wMaker maker, ElemVector const& elements);
+        static void tick_atoms(wClock clock, ulong ms, wMaker maker, vector<Atom> const& atoms);
         
     public:
         //! The constructor.
@@ -91,10 +91,10 @@ namespace Kiwi
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
          @param  maker      The maker that will be used.
-         @param  elements   The elements that will be send to the function.
+         @param  atoms   The atoms that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sMaker maker, ElemVector const& elements, const ulong ms);
+        void delay(sMaker maker, vector<Atom> const& atoms, const ulong ms);
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
@@ -106,10 +106,10 @@ namespace Kiwi
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
          @param  object        The object that will be used.
-         @param  elements   The elements that will be send to the function.
+         @param  atoms   The atoms that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(sObject object, ElemVector const& elements, const ulong ms);
+        void delay(sObject object, vector<Atom> const& atoms, const ulong ms);
         
         // ================================================================================ //
         //                                      MAKER                                       //
@@ -144,9 +144,9 @@ namespace Kiwi
             
             //! The tick function that must be override.
             /** The tick function is called by a clock after a delay.
-             @param  elements   The elements that sent by the clock.
+             @param  atoms   The atoms that sent by the clock.
              */
-            virtual void tick(ElemVector const& elements)
+            virtual void tick(vector<Atom> const& atoms)
             {
                 ;
             }

@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_DICO__
 #define __DEF_KIWI_DICO__
 
-#include "Element.h"
+#include "Tag.h"
 
 // - Have to recheck all and threadsafe
 namespace Kiwi
@@ -33,14 +33,14 @@ namespace Kiwi
     //                                      DICO                                        //
     // ================================================================================ //
     
-    //! The dico is an associative container that manages elements with keys like in the JSON format.
+    //! The dico is an associative container that manages atoms with keys like in the JSON format.
     /**
-     The dico is just a container that allows to manages elements with tags. The dico can be used to parse JSON files.
+     The dico is just a container that allows to manages atoms with tags. The dico can be used to parse JSON files.
      */
     class Dico : public Atom::Quark, public enable_shared_from_this<Dico>
     {        
     private:
-        map<sTag, ElemVector> m_entries;
+        map<sTag, vector<Atom>> m_entries;
         
     public:
         
@@ -87,9 +87,9 @@ namespace Kiwi
         
         //! Retrieve the keys of the entries from a dico.
         /** The function retrieves the keys of the entries from a dico.
-         @param elements The vector of elements that will owns the key of the entries.
+         @param atoms The vector of atoms that will owns the key of the entries.
          */
-        void keys(ElemVector& elements) const noexcept;
+        void keys(vector<Atom>& atoms) const noexcept;
         
         //! Clear the entry of a dico.
         /** The function clears the entry of a dico.
@@ -109,7 +109,7 @@ namespace Kiwi
          @param key The name of the entry.
          @return    The type of the entry.
          */
-        Element::Type type(sTag key) const noexcept;
+        size_t type(sTag key) const noexcept;
         
         //! Check if an entry is of type long.
         /** The function checks if an entry is of type long.
@@ -118,7 +118,7 @@ namespace Kiwi
          */
         inline bool isLong(sTag key) const noexcept
         {
-            return type(key) == Element::LONG;
+            return type(key) == Atom::LONG;
         }
         
         //! Check if an entry is of type double.
@@ -128,7 +128,7 @@ namespace Kiwi
          */
         inline bool isDouble(sTag key) const noexcept
         {
-            return type(key) == Element::DOUBLE;
+            return type(key) == Atom::DOUBLE;
         }
         
         //! Check if an entry is of type tag.
@@ -138,7 +138,7 @@ namespace Kiwi
          */
         inline bool isTag(sTag key) const noexcept
         {
-            return type(key) == Element::TAG;
+            return type(key) == Atom::TAG;
         }
         
         //! Check if an entry is of type object.
@@ -148,7 +148,7 @@ namespace Kiwi
          */
         inline bool isObject(sTag key) const noexcept
         {
-            return type(key) == Element::OBJECT;
+            return type(key) == Atom::OBJECT;
         }
         
         //! Check if an entry is of type object.
@@ -158,67 +158,67 @@ namespace Kiwi
          */
         inline bool isDico(sTag key) const noexcept
         {
-            return type(key) == Element::DICO;
+            return type(key) == Atom::DICO;
         }
         
-        //! Check if an entry is of type elements.
-        /** The function checks if an entry is of type elements.
+        //! Check if an entry is of type atoms.
+        /** The function checks if an entry is of type atoms.
          @param key The name of the entry.
-         @return    True if the entry is elements.
+         @return    True if the entry is atoms.
          */
-        inline bool isElements(sTag key) const noexcept
+        inline bool isAtoms(sTag key) const noexcept
         {
-            return type(key) == Element::VECTOR;
+            return type(key) == Atom::VECTOR;
         }
         
-        //! Retrieve the element from a dico.
-        /** The function retrieves the element from a dico.
+        //! Retrieve the atom from a dico.
+        /** The function retrieves the atom from a dico.
          @param key The name of the entry.
-         @return    The element from a dico.
+         @return    The atom from a dico.
          */
-        const Element get(sTag key) const noexcept;
+        const Atom get(sTag key) const noexcept;
         
-        //! Retrieve the element from a dico.
-        /** The function retrieves the element from a dico.
+        //! Retrieve the atom from a dico.
+        /** The function retrieves the atom from a dico.
          @param key The name of the entry.
-         @return    The element from a dico.
+         @return    The atom from a dico.
          */
-        Element get(sTag key) noexcept;
+        Atom get(sTag key) noexcept;
         
-        //! Retrieve the elements from a dico.
-        /** The function retrieves the elements from a dico.
+        //! Retrieve the atoms from a dico.
+        /** The function retrieves the atoms from a dico.
          @param key The name of the entry.
-         @param elements The elements from a dico or empty element list if the type isn't a vector of elements.
+         @param atoms The atoms from a dico or empty atom list if the type isn't a vector of atoms.
          */
-        void get(sTag key, ElemVector& elements) const noexcept;
+        void get(sTag key, vector<Atom>& atoms) const noexcept;
         
-        //! Add a new entry with an elements.
-        /** The function adds a new entry or replace an old entry with an elements.
+        //! Add a new entry with an atoms.
+        /** The function adds a new entry or replace an old entry with an atoms.
          @param key The name of the entry.
-         @param element The element.
+         @param atom The atom.
          */
-        void set(sTag key, Element const& element) noexcept;
+        void set(sTag key, Atom const& atom) noexcept;
         
-        //! Add a new entry with a vector of elements.
-        /** The function adds a new entry or replace an old entry with a vector of elements.
+        //! Add a new entry with a vector of atoms.
+        /** The function adds a new entry or replace an old entry with a vector of atoms.
          @param key The name of the entry.
-         @param elements The vector of elements.
+         @param atoms The vector of atoms.
          */
-        void set(sTag key, ElemVector const& elements) noexcept;
+        void set(sTag key, vector<Atom> const& atoms) noexcept;
         
-        //! Append an element to an entry.
-        /** The function adds a new entry with an element or append an element to an old entry.
+        //! Append an atom to an entry.
+        /** The function adds a new entry with an atom or append an atom to an old entry.
          @param key The name of the entry.
-         @param element The element.
+         @param atom The atom.
          */
-        void append(sTag key, Element const& element) noexcept;
+        void append(sTag key, Atom const& atom) noexcept;
     
-        //! Append a vector of elements to an entry.
-        /** The function adds a new entry with a vector of elements or append a vector of elements to an old entry.
+        //! Append a vector of atoms to an entry.
+        /** The function adds a new entry with a vector of atoms or append a vector of atoms to an old entry.
          @param key The name of the entry.
-         @param elements The vector of elements.
+         @param atoms The vector of atoms.
          */
-        void append(sTag key, ElemVector const& elements) noexcept;
+        void append(sTag key, vector<Atom> const& atoms) noexcept;
         
         //! Read a text file to fill the dico.
         /** The function reads a text file to fill the dico.
@@ -249,23 +249,23 @@ namespace Kiwi
          */
         static string jsonEscape(string const& text);
         
-        //! Write an element in a string with the json format .
-        /** This function writes an element in a string with the json format .
-         @param     element The element.
+        //! Write an atom in a string with the json format .
+        /** This function writes an atom in a string with the json format .
+         @param     atom The atom.
          @param     text The string.
          @param     line The indetation.
          @return    The unescaped string.
          */
-        static void toJson(Element const& element, string& text, string indetation = "");
+        static void toJson(Atom const& atom, string& text, string indetation = "");
         
-        //! Write elements in a string with the json format .
-        /** This function writes elements in a string with the json format .
-         @param     elements The elements.
+        //! Write atoms in a string with the json format .
+        /** This function writes atoms in a string with the json format .
+         @param     atoms The atoms.
          @param     text The string.
          @param     line The indetation.
          @return    The unescaped string.
          */
-        static void toJson(ElemVector const& elements, string& text, string indetation = "");
+        static void toJson(vector<Atom> const& atoms, string& text, string indetation = "");
         
         //! Write a dico in a string with the json format .
         /** This function writes dico in a string with the json format .
@@ -283,21 +283,21 @@ namespace Kiwi
          */
         static string jsonUnescape(string const& text, size_t& pos);
         
-        //! Get the element type of a string.
-        /** This function gets the element type of a string.
+        //! Get the atom type of a string.
+        /** This function gets the atom type of a string.
          @param     text The string.
          @param     pos The position in the string.
          @return    The type of the string.
          */
-        static Element::Type getType(string const& text, string::size_type pos);
+        static size_t getType(string const& text, string::size_type pos);
         
-        //! Get a vector of elements from a string in the json format .
-        /** This function gets a vector of elements from a string in the json format .
-         @param     elements The vector of elements.
+        //! Get a vector of atoms from a string in the json format .
+        /** This function gets a vector of atoms from a string in the json format .
+         @param     atoms The vector of atoms.
          @param     text The string.
          @param     pos The position in the string.
          */
-        static void fromJson(ElemVector& elements, string const& text, string::size_type& pos);
+        static void fromJson(vector<Atom>& atoms, string const& text, string::size_type& pos);
         
         //! Get a dico from a string in the json format .
         /** This function gets dico from a string in the json format .

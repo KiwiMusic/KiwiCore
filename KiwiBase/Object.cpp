@@ -96,7 +96,7 @@ namespace Kiwi
         ;
     }
     
-    void Object::Outlet::send(ElemVector const& elements) const noexcept
+    void Object::Outlet::send(vector<Atom> const& atoms) const noexcept
     {
         lock_guard<mutex> guard(m_mutex);
         for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
@@ -107,11 +107,11 @@ namespace Kiwi
             {
                 if(++receiver->m_stack_count < 256)
                 {
-                    receiver->receive(inlet, elements);
+                    receiver->receive(inlet, atoms);
                 }
                 else if(receiver->m_stack_count  == 256)
                 {
-                    receiver->receive(inlet, elements);
+                    receiver->receive(inlet, atoms);
                 }
                 else
                 {
@@ -179,12 +179,12 @@ namespace Kiwi
         }
     }
     
-    void Object::send(ulong index, ElemVector const& elements) const noexcept
+    void Object::send(ulong index, vector<Atom> const& atoms) const noexcept
     {
         m_mutex.lock();
         if(index < m_outlets.size())
         {
-            m_outlets[(vector<sOutlet>::size_type)index]->send(elements);
+            m_outlets[(vector<sOutlet>::size_type)index]->send(atoms);
         }
         m_mutex.unlock();
     }

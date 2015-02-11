@@ -27,7 +27,7 @@
 
 namespace Kiwi
 {
-    void Clock::tick_elements(wClock clock, ulong ms, wMaker maker, ElemVector const& elements)
+    void Clock::tick_atoms(wClock clock, ulong ms, wMaker maker, vector<Atom> const& atoms)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -44,7 +44,7 @@ namespace Kiwi
                 sMaker nmaker = maker.lock();
                 if(!nclock->m_used && nmaker)
                 {
-                    nmaker->tick(elements);
+                    nmaker->tick(atoms);
                 }
             }
         }
@@ -79,9 +79,9 @@ namespace Kiwi
     }
     
 
-    void Clock::delay(sMaker maker, ElemVector const& elements, const ulong ms)
+    void Clock::delay(sMaker maker, vector<Atom> const& atoms, const ulong ms)
     {
-        thread(tick_elements, shared_from_this(), ms, maker, elements).detach();
+        thread(tick_atoms, shared_from_this(), ms, maker, atoms).detach();
     }
     
     
@@ -94,12 +94,12 @@ namespace Kiwi
         }
     }
     
-    void Clock::delay(sObject object, ElemVector const& elements, const ulong ms)
+    void Clock::delay(sObject object, vector<Atom> const& atoms, const ulong ms)
     {
         sMaker maker = dynamic_pointer_cast<Clock::Maker>(object);
         if(maker)
         {
-            thread(tick_elements, shared_from_this(), ms, maker, elements).detach();
+            thread(tick_atoms, shared_from_this(), ms, maker, atoms).detach();
         }
     }
 }

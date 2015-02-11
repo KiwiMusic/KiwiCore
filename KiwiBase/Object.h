@@ -40,7 +40,7 @@ namespace Kiwi
         const sTag          name;
         const string        text;
         const scDico        dico;
-        const ElemVector    args;
+        const vector<Atom>    args;
         
         Detail() :
         instance(nullptr), patcher(nullptr), lid(0), name(Tag::create("")), text(""), dico(nullptr), args({})
@@ -48,7 +48,7 @@ namespace Kiwi
             ;
         }
         
-        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, scDico _dico, ElemVector const& _args) :
+        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, scDico _dico, vector<Atom> const& _args) :
         instance(_instance), patcher(_patcher), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
         {
             ;
@@ -268,9 +268,9 @@ namespace Kiwi
         
         //! The receive method that should be override.
         /** The function shoulds perform some stuff.
-         @param elements    A list of elements to pass.
+         @param atoms    A list of atoms to pass.
          */
-        virtual void receive(ulong index, ElemVector const& elements) = 0;
+        virtual void receive(ulong index, vector<Atom> const& atoms) = 0;
         
         //! Write the object in a dico.
         /** The function writes the object in a dico.
@@ -349,12 +349,12 @@ namespace Kiwi
         
     protected:
         
-        //! Send a vector of elements via an outlet.
-        /** The function sends a vector of elements via an outlet and dispatches it to all the connected inlets.
+        //! Send a vector of atoms via an outlet.
+        /** The function sends a vector of atoms via an outlet and dispatches it to all the connected inlets.
          @param index The index of the outlet.
-         @param elements A list of elements to pass.
+         @param atoms A list of atoms to pass.
          */
-        void    send(ulong index, ElemVector const& elements) const noexcept;
+        void    send(ulong index, vector<Atom> const& atoms) const noexcept;
         
         //! Add a new inlet to the object.
         /** The function adds a new inlet to the object.
@@ -583,11 +583,11 @@ namespace Kiwi
          */
         ~Outlet();
         
-        //! Send a vector of elements to the connected inlets.
-        /** The function sends of elements to the connected inlets.
-         @param elements The vector of elements.
+        //! Send a vector of atoms to the connected inlets.
+        /** The function sends of atoms to the connected inlets.
+         @param atoms The vector of atoms.
          */
-        void send(ElemVector const& elements) const noexcept;
+        void send(vector<Atom> const& atoms) const noexcept;
     };
     
     inline string toString(scObject object)

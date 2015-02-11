@@ -24,9 +24,7 @@
 #ifndef __DEF_KIWI_TAG__
 #define __DEF_KIWI_TAG__
 
-#include "Defs.h"
 #include "Atom.h"
-#include "Console.h"
 
 namespace Kiwi
 {

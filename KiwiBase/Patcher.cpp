@@ -70,7 +70,7 @@ namespace Kiwi
             sTag name = dico->get(Tag::List::name);
             sTag text = dico->get(Tag::List::text);
             ulong _id = dico->get(Tag::List::id);
-            ElemVector args;
+            vector<Atom> args;
             dico->get(Tag::List::arguments, args);
             sObject object = Factory::create(name, Detail(getInstance(), getShared(), _id, name, text->getName(), dico, args));
             
@@ -88,23 +88,23 @@ namespace Kiwi
         if(dico)
         {
             ulong indexo, indexi, ido, idi;
-            ElemVector elements;
-            dico->get(Tag::List::from, elements);
-            if(elements.size() > 1 && elements[0].isNumber() && elements[1].isNumber())
+            vector<Atom> atoms;
+            dico->get(Tag::List::from, atoms);
+            if(atoms.size() > 1 && atoms[0].isNumber() && atoms[1].isNumber())
             {
-                ido     = elements[0];
-                indexo  = elements[1];
+                ido     = atoms[0];
+                indexo  = atoms[1];
             }
             else
             {
                 return;
             }
             
-            dico->get(Tag::List::to, elements);
-            if(elements.size() > 1 && elements[0].isNumber() && elements[1].isNumber())
+            dico->get(Tag::List::to, atoms);
+            if(atoms.size() > 1 && atoms[0].isNumber() && atoms[1].isNumber())
             {
-                idi     = elements[0];
-                indexi  = elements[1];
+                idi     = atoms[0];
+                indexi  = atoms[1];
             }
             else
             {
@@ -215,7 +215,7 @@ namespace Kiwi
         sDico rdico = Dico::create(dico);
         if(rdico)
         {
-            ElemVector objects, links;
+            vector<Atom> objects, links;
             rdico->get(Tag::List::links, links);
             rdico->get(Tag::List::objects, objects);
             
@@ -232,18 +232,18 @@ namespace Kiwi
                         m_free_ids.erase(m_free_ids.begin());
                     }
                     objdico->set(Tag::List::id, n_id);
-                    ElemVector elements;
+                    vector<Atom> atoms;
                     for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                     {
-                        objdico->get(Tag::List::from, elements);
-                        if(elements.size() > 1 && r_id == (ulong)elements[0])
+                        objdico->get(Tag::List::from, atoms);
+                        if(atoms.size() > 1 && r_id == (ulong)atoms[0])
                         {
-                            objdico->set(Tag::List::from, {n_id, elements[1]});
+                            objdico->set(Tag::List::from, {n_id, atoms[1]});
                         }
-                        objdico->get(Tag::List::to, elements);
-                        if(elements.size() > 1 && r_id == (ulong)elements[0])
+                        objdico->get(Tag::List::to, atoms);
+                        if(atoms.size() > 1 && r_id == (ulong)atoms[0])
                         {
-                            objdico->set(Tag::List::from, {n_id, elements[1]});
+                            objdico->set(Tag::List::from, {n_id, atoms[1]});
                         }
                     }
                     createObject(objdico);
@@ -337,7 +337,7 @@ namespace Kiwi
 			sDico subpatcher = Dico::create();
 			if(subpatcher)
 			{
-                ElemVector elements;
+                vector<Atom> atoms;
 				lock_guard<mutex> guard(m_mutex);
                 
 				for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
@@ -346,12 +346,12 @@ namespace Kiwi
 					if(object)
 					{
 						m_objects[i]->write(object);
-                        elements.push_back(object);
+                        atoms.push_back(object);
 					}
 				}
-				subpatcher->set(Tag::List::objects, elements);
+				subpatcher->set(Tag::List::objects, atoms);
 				
-				elements.clear();
+				atoms.clear();
 				
 				for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
 				{
@@ -359,10 +359,10 @@ namespace Kiwi
 					if(link)
 					{
 						m_links[i]->write(link);
-						elements.push_back(link);
+						atoms.push_back(link);
 					}
 				}
-				subpatcher->set(Tag::List::links, elements);
+				subpatcher->set(Tag::List::links, atoms);
 				dico->set(Tag::List::patcher, subpatcher);
 			}
         }

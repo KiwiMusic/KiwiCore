@@ -15,6 +15,7 @@ using namespace Kiwi;
 
 int main(int argc, const char * argv[])
 {
+    /*
     vector<Atom> vec;
     vec.push_back(1);
     vec.push_back(2.2);
@@ -45,7 +46,7 @@ int main(int argc, const char * argv[])
     }
     
     return 0;
-    
+    */
     sObject nat;
     sInstance instance = Instance::create();
     if(instance)
@@ -69,7 +70,7 @@ int main(int argc, const char * argv[])
                 cout << "coun : " << objs[i].use_count() << endl;
                 cout << "name : " << toString(objs[i]->getName()) << endl;
                 cout << "size : " << objs[i]->getSize().width() << " "<< objs[i]->getSize().height() << endl;
-                objs[i]->receive(0, {Tag::List::bang});
+                objs[i]->receive(0, {Tag::List::bang, "zaza", 12.4, 4, objs[i], "stevie"});
                 vector<sAttr> attrs;
                 objs[i]->getAttrs(attrs);
                 for(int i = 0; i < attrs.size(); i++)

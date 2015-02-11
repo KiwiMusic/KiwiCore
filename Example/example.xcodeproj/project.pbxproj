@@ -25,7 +25,6 @@
 		8F41B4DA1A7E3C890067E122 /* Clock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4701A7E3C890067E122 /* Clock.cpp */; };
 		8F41B4DB1A7E3C890067E122 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4721A7E3C890067E122 /* Console.cpp */; };
 		8F41B4DC1A7E3C890067E122 /* Dico.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4761A7E3C890067E122 /* Dico.cpp */; };
-		8F41B4DD1A7E3C890067E122 /* Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4781A7E3C890067E122 /* Element.cpp */; };
 		8F41B4DE1A7E3C890067E122 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B47A1A7E3C890067E122 /* Instance.cpp */; };
 		8F41B4DF1A7E3C890067E122 /* Link.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B47C1A7E3C890067E122 /* Link.cpp */; };
 		8F41B4E01A7E3C890067E122 /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B47E1A7E3C890067E122 /* Object.cpp */; };
@@ -99,8 +98,6 @@
 		8F41B4751A7E3C890067E122 /* Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Defs.h; sourceTree = "<group>"; };
 		8F41B4761A7E3C890067E122 /* Dico.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dico.cpp; sourceTree = "<group>"; };
 		8F41B4771A7E3C890067E122 /* Dico.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dico.h; sourceTree = "<group>"; };
-		8F41B4781A7E3C890067E122 /* Element.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Element.cpp; sourceTree = "<group>"; };
-		8F41B4791A7E3C890067E122 /* Element.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Element.h; sourceTree = "<group>"; };
 		8F41B47A1A7E3C890067E122 /* Instance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Instance.cpp; sourceTree = "<group>"; };
 		8F41B47B1A7E3C890067E122 /* Instance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Instance.h; sourceTree = "<group>"; };
 		8F41B47C1A7E3C890067E122 /* Link.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Link.cpp; sourceTree = "<group>"; };
@@ -206,8 +203,6 @@
 				8F41B4751A7E3C890067E122 /* Defs.h */,
 				8F67F6171A8B40A700DB2C2D /* Atom.cpp */,
 				8F67F6181A8B40A800DB2C2D /* Atom.h */,
-				8F41B4781A7E3C890067E122 /* Element.cpp */,
-				8F41B4791A7E3C890067E122 /* Element.h */,
 				8F41B4821A7E3C890067E122 /* Tag.cpp */,
 				8F41B4831A7E3C890067E122 /* Tag.h */,
 				8F41B46E1A7E3C890067E122 /* Beacon.cpp */,
@@ -374,7 +369,6 @@
 				8F41B4F01A7E3C890067E122 /* Generator.cpp in Sources */,
 				8F41B4EF1A7E3C890067E122 /* Filter.cpp in Sources */,
 				8F41B4DE1A7E3C890067E122 /* Instance.cpp in Sources */,
-				8F41B4DD1A7E3C890067E122 /* Element.cpp in Sources */,
 				8F41B4F51A7E3C890067E122 /* Signal.cpp in Sources */,
 				8F41B4E21A7E3C890067E122 /* Tag.cpp in Sources */,
 				8F41B4651A7E3C640067E122 /* main.cpp in Sources */,

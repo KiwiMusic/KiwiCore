@@ -51,19 +51,20 @@ namespace Kiwi
             friend Atom;
         public:
             
-            static const size_t Nothing;
-            static const size_t Long;
-            static const size_t Double;
-            static const size_t Tag;
-            static const size_t Object;
-            static const size_t Dico;
-            
             virtual ~Quark() noexcept
             {
                 ;
             }
             
         private:
+            
+            static const size_t NothingCode;
+            static const size_t LongCode;
+            static const size_t DoubleCode;
+            static const size_t TagCode;
+            static const size_t ObjectCode;
+            static const size_t DicoCode;
+            
             inline size_t getType() const noexcept
             {
                 return typeid(*this).hash_code();
@@ -71,17 +72,17 @@ namespace Kiwi
             
             inline bool isNothing() const noexcept
             {
-                return getType() == Nothing;
+                return getType() == NothingCode;
             }
             
             inline bool isLong() const noexcept
             {
-                return getType() == Long;
+                return getType() == LongCode;
             }
             
             inline bool isDouble() const noexcept
             {
-                return getType() == Double;
+                return getType() == DoubleCode;
             }
             
             inline bool isNumber() const noexcept
@@ -91,17 +92,17 @@ namespace Kiwi
             
             inline bool isTag() const noexcept
             {
-                return getType() == Tag;
+                return getType() == TagCode;
             }
             
             inline bool isDico() const noexcept
             {
-                return getType() == Dico;
+                return getType() == DicoCode;
             }
             
             inline bool isObject() const noexcept
             {
-                return getType() == Object;
+                return getType() == ObjectCode;
             }
             
             long getLong() const noexcept;
@@ -143,6 +144,17 @@ namespace Kiwi
         shared_ptr<Quark> m_quark;
         
     public:
+        
+        enum Type
+        {
+            NOTHING   = 0,
+            LONG      = 1,
+            DOUBLE    = 2,
+            TAG       = 3,
+            OBJECT    = 4,
+            DICO      = 5,
+            VECTOR    = 6
+        };
         // ================================================================================ //
         //                                      ATOM                                        //
         // ================================================================================ //
@@ -229,9 +241,29 @@ namespace Kiwi
         /** The function retrieves the type of the atom.
          @return The type of the atom as a type.
          */
-        inline size_t getType() const noexcept
+        inline Type getType() const noexcept
         {
-            return m_quark->getType();
+            const size_t type = m_quark->getType();
+            if(type == Quark::LongCode)
+            {
+                return LONG;
+            }
+            else if(type == Quark::DoubleCode)
+            {
+                return DOUBLE;
+            }
+            else if(type == Quark::TagCode)
+            {
+                return TAG;
+            }
+            else if(type == Quark::DicoCode)
+            {
+                return DICO;
+            }
+            else
+            {
+                return OBJECT;
+            }
         }
         
         //! Check if the atom is of type long.
@@ -489,12 +521,12 @@ namespace Kiwi
         //! Compare the atom with another.
         /** The function compares the atom with another.
          @param other The other atom.
-         @return true if the elements hold the same value otherwise false.
+         @return true if the atoms hold the same value otherwise false.
          */
         inline bool operator==(Atom const& other) const noexcept
         {
-            size_t type = getType();
-            if(type == Atom::Quark::Long || type == Atom::Quark::Double)
+            size_t type = m_quark->getType();
+            if(type == Atom::Quark::LongCode || type == Atom::Quark::DoubleCode)
             {
                 return other == m_quark->getDouble();
             }
@@ -644,7 +676,7 @@ namespace Kiwi
         //! Compare the atom with another.
         /** The function compares the atom with another.
          @param other The other atom.
-         @return true if the elements differ otherwise false.
+         @return true if the atoms differ otherwise false.
          */
         inline bool operator!=(const Atom& other) const noexcept
         {
@@ -751,6 +783,9 @@ namespace Kiwi
             return !(*this == dico);
         }
     };
+    
+    string toString(Atom const& __val);
+    string toString(vector<Atom> const& __val);
 }
 
 

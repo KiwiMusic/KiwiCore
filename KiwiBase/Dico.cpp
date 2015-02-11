@@ -61,7 +61,7 @@ namespace Kiwi
         if(dico)
         {
             size_t pos = 0;
-            if(getType(text, pos) == Element::DICO)
+            if(getType(text, pos) == Atom::DICO)
             {
                 fromJson(dico, text, pos);
             }
@@ -80,7 +80,7 @@ namespace Kiwi
                 bool mode = false;
                 string word;
                 string key = "name";
-                ElemVector elements;
+                vector<Atom> atoms;
                 istringstream iss(text);
                 while(iss >> word)
                 {
@@ -88,8 +88,8 @@ namespace Kiwi
                     {
                         if(word[0] == '@')
                         {
-                            object->set(Tag::create(key), elements);
-                            elements.clear();
+                            object->set(Tag::create(key), atoms);
+                            atoms.clear();
                             key = word.c_str()+1;
                         }
                         else
@@ -98,16 +98,16 @@ namespace Kiwi
                             {
                                 if(word.find('.') != string::npos)
                                 {
-                                    elements.push_back(atof(word.c_str()));
+                                    atoms.push_back(atof(word.c_str()));
                                 }
                                 else
                                 {
-                                    elements.push_back(atol(word.c_str()));
+                                    atoms.push_back(atol(word.c_str()));
                                 }
                             }
                             else
                             {
-                                elements.push_back(Tag::create(word));
+                                atoms.push_back(Tag::create(word));
                             }
                         }
                     }
@@ -120,9 +120,9 @@ namespace Kiwi
                 }
                 if(mode)
                 {
-                    object->set(Tag::create(key), elements);
+                    object->set(Tag::create(key), atoms);
                     object->set(Tag::List::text, Tag::create(text));
-                    dico->set(Tag::List::objects, ElemVector({object}));
+                    dico->set(Tag::List::objects, vector<Atom>({object}));
                     return dico;
                 }
                 
@@ -139,31 +139,31 @@ namespace Kiwi
             sDico link = Dico::create();
             if(link)
             {
-                ElemVector from, to;
+                vector<Atom> from, to;
                 size_t pos = text.find_first_not_of(' ', 0);
-                Element::Type type = getType(text, pos);
-                if(type == Element::LONG || type == Element::DOUBLE)
+                size_t type = getType(text, pos);
+                if(type == Atom::LONG || type == Atom::DOUBLE)
                 {
                     from.push_back(stol(text.c_str()+pos));
                     pos = text.find(' ', pos);
                     pos = text.find_first_not_of(' ', pos);
                     type = getType(text, pos);
                 }
-                if(type == Element::LONG || type == Element::DOUBLE)
+                if(type == Atom::LONG || type == Atom::DOUBLE)
                 {
                     from.push_back(stol(text.c_str()+pos));
                     pos = text.find(' ', pos);
                     pos = text.find_first_not_of(' ', pos);
                     type = getType(text, pos);
                 }
-                if(type == Element::LONG || type == Element::DOUBLE)
+                if(type == Atom::LONG || type == Atom::DOUBLE)
                 {
                     to.push_back(stol(text.c_str()+pos));
                     pos = text.find(' ', pos);
                     pos = text.find_first_not_of(' ', pos);
                     type = getType(text, pos);
                 }
-                if(type == Element::LONG || type == Element::DOUBLE)
+                if(type == Atom::LONG || type == Atom::DOUBLE)
                 {
                     to.push_back(stol(text.c_str()+pos));
                 }
@@ -171,7 +171,7 @@ namespace Kiwi
                 {
                     link->set(Tag::List::from, from);
                     link->set(Tag::List::to, to);
-                    dico->set(Tag::List::links, ElemVector({link}));
+                    dico->set(Tag::List::links, vector<Atom>({link}));
                     return dico;
                 }
                 
@@ -190,12 +190,12 @@ namespace Kiwi
         m_entries.erase(key);
     }
     
-    void Dico::keys(ElemVector& elements) const noexcept
+    void Dico::keys(vector<Atom>& atoms) const noexcept
     {
-        elements.clear();
+        atoms.clear();
         for(auto it = m_entries.begin(); it != m_entries.end(); ++it)
         {
-            elements.push_back(it->first);
+            atoms.push_back(it->first);
         }
     }
     
@@ -204,25 +204,25 @@ namespace Kiwi
         return m_entries.find(key) != m_entries.end();
     }
     
-    Element::Type Dico::type(sTag key) const noexcept
+    size_t Dico::type(sTag key) const noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
             if(it->second.size() == 1)
             {
-                return it->second[0].type();
+                return it->second[0].getType();
             }
             else
             {
-                return Element::VECTOR;
+                return Atom::VECTOR;
             }
         }
         else
-            return Element::NOTHING;
+            return Atom::NOTHING;
     }
     
-    const Element Dico::get(sTag key) const noexcept
+    const Atom Dico::get(sTag key) const noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
@@ -235,7 +235,7 @@ namespace Kiwi
         return 0;
     }
     
-    Element Dico::get(sTag key) noexcept
+    Atom Dico::get(sTag key) noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
@@ -248,59 +248,59 @@ namespace Kiwi
         return 0;
     }
     
-    void Dico::get(sTag key, ElemVector& elements) const noexcept
+    void Dico::get(sTag key, vector<Atom>& atoms) const noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
-            elements = it->second;
+            atoms = it->second;
         }
         else
         {
-            elements.clear();
+            atoms.clear();
         }
     }
     
-    void Dico::set(sTag key, Element const& element) noexcept
+    void Dico::set(sTag key, Atom const& atom) noexcept
     {
-        m_entries[key] = {element};
+        m_entries[key] = {atom};
     }
     
-    void Dico::set(sTag key, ElemVector const& elements) noexcept
+    void Dico::set(sTag key, vector<Atom> const& atoms) noexcept
     {
-        if(elements.size() == 0)
+        if(atoms.size() == 0)
             return;
-        m_entries[key] = elements;
+        m_entries[key] = atoms;
     }
 
-    void Dico::append(sTag key, Element const& element) noexcept
+    void Dico::append(sTag key, Atom const& atom) noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
-            it->second.push_back(element);
+            it->second.push_back(atom);
         else
-            set(key, element);
+            set(key, atom);
     }
     
-    void Dico::append(sTag key, ElemVector const& elements) noexcept
+    void Dico::append(sTag key, vector<Atom> const& atoms) noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
         {
-            for(ElemVector::size_type i = 0; i < elements.size(); i++)
+            for(vector<Atom>::size_type i = 0; i < atoms.size(); i++)
             {
-                it->second.push_back(elements[i]);
+                it->second.push_back(atoms[i]);
             }
         }
         else
-            set(key, elements);
+            set(key, atoms);
     }
     /*
     void Dico::read(string const& text)
     {
         clear();
         size_t pos = 0;
-        if(getType(text, pos) == Element::DICO)
+        if(getType(text, pos) == Atom::DICO)
         {
             size_t pos = 0;
             fromJson(shared_from_this(), text, pos);
@@ -403,37 +403,37 @@ namespace Kiwi
         return "\"" + ss.str() + "\"";
     }
     
-    void Dico::toJson(Element const& element, string& text, string line)
+    void Dico::toJson(Atom const& atom, string& text, string line)
     {
-        switch(element.type())
+        switch(atom.getType())
         {
-            case Element::LONG:
-                text.append(to_string((long)element));
+            case Atom::LONG:
+                text.append(to_string((long)atom));
                 break;
-            case Element::DOUBLE:
-                text.append(to_string((double)element));
+            case Atom::DOUBLE:
+                text.append(to_string((double)atom));
                 break;
-            case Element::TAG:
+            case Atom::TAG:
             {
-                sTag tag = (sTag)element;
+                sTag tag = (sTag)atom;
                 if(tag)
                     text.append(jsonEscape(toString(tag)));
                 else
                     text.append("null");
                 break;
             }
-            case Element::OBJECT:
+            case Atom::OBJECT:
             {
-                scObject obj = element;
+                scObject obj = atom;
                 if(obj)
                     text.append(toString(obj->getName()));
                 else
                     text.append("null");
                 break;
             }
-            case Element::DICO:
+            case Atom::DICO:
             {
-                scDico dico = element;
+                scDico dico = atom;
                 if(dico)
                     toJson(dico, text, line + "    ");
                 else
@@ -446,35 +446,35 @@ namespace Kiwi
         }
     }
     
-    void Dico::toJson(ElemVector const& elements, string& text, string line)
+    void Dico::toJson(vector<Atom> const& atoms, string& text, string line)
     {
-        if(elements.size() == 1)
+        if(atoms.size() == 1)
         {
-            toJson(elements[0], text, line);
+            toJson(atoms[0], text, line);
         }
-        else if(elements.size())
+        else if(atoms.size())
         {
             text.append("[ ");
-            for(size_t i = 0; i < elements.size() - 1; i++)
+            for(size_t i = 0; i < atoms.size() - 1; i++)
             {
-                toJson(elements[i], text, line);
+                toJson(atoms[i], text, line);
                 text.append(", ");
             }
-            toJson(elements[elements.size() - 1], text, line);
+            toJson(atoms[atoms.size() - 1], text, line);
             text.append(" ]");
         }
     }
     
     void Dico::toJson(scDico dico, string& text, string line)
     {
-        ElemVector _keys;
+        vector<Atom> _keys;
         dico->keys(_keys);
         if(_keys.size())
         {
             text.append("{\n");
             for(size_t i = 0; i < _keys.size() - 1; i++)
             {
-                ElemVector _values;
+                vector<Atom> _values;
                 dico->get(_keys[i], _values);
                 if(_values.size())
                 {
@@ -486,7 +486,7 @@ namespace Kiwi
                 text.append(",\n");
             }
             
-            ElemVector _values;
+            vector<Atom> _values;
             dico->get(_keys[_keys.size() - 1], _values);
             if(_values.size())
             {
@@ -538,38 +538,38 @@ namespace Kiwi
         return ss.str();
     }
     
-    Element::Type Dico::getType(string const& text, string::size_type pos)
+    size_t Dico::getType(string const& text, string::size_type pos)
     {
         if(isdigit(text[pos]))
         {
             pos = text.find_first_not_of("-0123456789", pos);
             if(text[pos] == '.')
-                return Element::DOUBLE;
+                return Atom::DOUBLE;
             else
-                return Element::LONG;
+                return Atom::LONG;
         }
         else if(text[pos] == '"')
         {
-            return Element::TAG;
+            return Atom::TAG;
         }
         else if(text[pos] == '{')
         {
-            return Element::DICO;
+            return Atom::DICO;
         }
         else if(text[pos] == '[')
         {
-            return Element::VECTOR;
+            return Atom::VECTOR;
         }
         else
         {
-            return Element::NOTHING;
+            return Atom::NOTHING;
         }
     }
     
-    bool getNextPosition(string const& text, string::size_type& pos, Element::Type type)
+    bool getNextPosition(string const& text, string::size_type& pos, size_t type)
     {
         char end = '}';
-        if(type == Element::VECTOR)
+        if(type == Atom::VECTOR)
         {
             end = ']';
         }
@@ -592,68 +592,68 @@ namespace Kiwi
         }
     }
     
-    void Dico::fromJson(ElemVector& elements, string const& text, string::size_type& pos)
+    void Dico::fromJson(vector<Atom>& atoms, string const& text, string::size_type& pos)
     {
         pos = text.find_first_not_of(' ', pos);
         switch(getType(text, pos))
         {
-            case Element::LONG:
+            case Atom::LONG:
             {
-                elements.push_back(stol(text.c_str()+pos));
+                atoms.push_back(stol(text.c_str()+pos));
                 pos = text.find_first_not_of("-0123456789", pos);
             }
                 break;
-            case Element::DOUBLE:
+            case Atom::DOUBLE:
             {
-                elements.push_back(stod(text.c_str()+pos));
+                atoms.push_back(stod(text.c_str()+pos));
                 pos = text.find_first_not_of("-0123456789.", pos);
             }
                 break;
-            case Element::TAG:
+            case Atom::TAG:
             {
-                elements.push_back(Tag::create(jsonUnescape(text, pos)));
+                atoms.push_back(Tag::create(jsonUnescape(text, pos)));
             }
                 break;
-            case Element::DICO:
+            case Atom::DICO:
             {
                 sDico dico = Dico::create();
                 if(dico)
                 {
                     fromJson(dico, text, pos);
-                    elements.push_back(dico);
+                    atoms.push_back(dico);
                 }
             }
                 break;
-            case Element::VECTOR:
+            case Atom::VECTOR:
             {
-                while(getNextPosition(text, pos, Element::VECTOR))
+                while(getNextPosition(text, pos, Atom::VECTOR))
                 {
                     switch(getType(text, pos))
                     {
-                        case Element::LONG:
+                        case Atom::LONG:
                         {
-                            elements.push_back(stol(text.c_str()+pos));
+                            atoms.push_back(stol(text.c_str()+pos));
                             pos = text.find_first_not_of("-0123456789", pos);
                         }
                             break;
-                        case Element::DOUBLE:
+                        case Atom::DOUBLE:
                         {
-                            elements.push_back(stod(text.c_str()+pos));
+                            atoms.push_back(stod(text.c_str()+pos));
                             pos = text.find_first_not_of("-0123456789.", pos);
                         }
                             break;
-                        case Element::TAG:
+                        case Atom::TAG:
                         {
-                            elements.push_back(Tag::create(jsonUnescape(text, pos)));
+                            atoms.push_back(Tag::create(jsonUnescape(text, pos)));
                         }
                             break;
-                        case Element::DICO:
+                        case Atom::DICO:
                         {
                             sDico dico = Dico::create();
                             if(dico)
                             {
                                 fromJson(dico, text, pos);
-                                elements.push_back(dico);
+                                atoms.push_back(dico);
                             }
                         }
                             break;
@@ -672,9 +672,9 @@ namespace Kiwi
     void Dico::fromJson(sDico dico, string const& text, string::size_type& pos)
     {
         pos = text.find('{', pos);
-        while(getNextPosition(text, pos, Element::DICO))
+        while(getNextPosition(text, pos, Atom::DICO))
         {
-            if(getType(text, pos) == Element::TAG)
+            if(getType(text, pos) == Atom::TAG)
             {
                 sTag key = Tag::create(jsonUnescape(text, pos));
                 if(pos != string::npos)
@@ -682,7 +682,7 @@ namespace Kiwi
                     pos = text.find(':', pos);
                     if(pos != string::npos)
                     {
-                        ElemVector values;
+                        vector<Atom> values;
                         fromJson(values, text, ++pos);
                         dico->set(key, values);
                     }

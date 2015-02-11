@@ -48,11 +48,11 @@ namespace Kiwi
         redraw();
     }
     
-    void BangObject::receive(ulong index, ElemVector const& elements)
+    void BangObject::receive(ulong index, vector<Atom> const& atoms)
     {
-        if(!elements.empty())
+        if(!atoms.empty())
         {
-            Console::post("bang receive " + toString(elements));
+            Console::post("bang receive " + toString(atoms));
             bang();
         }
     }

@@ -28,21 +28,21 @@
 
 namespace Kiwi
 {
-    const size_t Atom::Quark::Nothing  = typeid(Kiwi::Atom).hash_code();
-    const size_t Atom::Quark::Long     = typeid(Kiwi::Atom::Long).hash_code();
-    const size_t Atom::Quark::Double   = typeid(Kiwi::Atom::Double).hash_code();
-    const size_t Atom::Quark::Tag      = typeid(Kiwi::Tag).hash_code();
-    const size_t Atom::Quark::Object   = typeid(Kiwi::Object).hash_code();
-    const size_t Atom::Quark::Dico     = typeid(Kiwi::Dico).hash_code();
+    const size_t Atom::Quark::NothingCode  = typeid(Kiwi::Atom).hash_code();
+    const size_t Atom::Quark::LongCode     = typeid(Kiwi::Atom::Long).hash_code();
+    const size_t Atom::Quark::DoubleCode   = typeid(Kiwi::Atom::Double).hash_code();
+    const size_t Atom::Quark::TagCode      = typeid(Kiwi::Tag).hash_code();
+    const size_t Atom::Quark::ObjectCode   = typeid(Kiwi::Object).hash_code();
+    const size_t Atom::Quark::DicoCode     = typeid(Kiwi::Dico).hash_code();
     
     long Atom::Quark::getLong() const noexcept
     {
-        size_t type = getType();
-        if(type == Atom::Quark::Long)
+        const size_t type = getType();
+        if(type == Atom::Quark::LongCode)
         {
             return (reinterpret_cast<const Kiwi::Atom::Long*>(this))->val;
         }
-        else if(type == Atom::Quark::Double)
+        else if(type == Atom::Quark::DoubleCode)
         {
             return (reinterpret_cast<const Kiwi::Atom::Double*>(this))->val;
         }
@@ -54,12 +54,12 @@ namespace Kiwi
     
     double Atom::Quark::getDouble() const noexcept
     {
-        size_t type = getType();
-        if(type == Atom::Quark::Double)
+        const size_t type = getType();
+        if(type == Atom::Quark::DoubleCode)
         {
             return (reinterpret_cast<const Kiwi::Atom::Double*>(this))->val;
         }
-        else if(type == Atom::Quark::Long)
+        else if(type == Atom::Quark::LongCode)
         {
             return (reinterpret_cast<const Kiwi::Atom::Long*>(this))->val;
         }
@@ -233,6 +233,46 @@ namespace Kiwi
     bool Atom::operator==(scDico dico) const noexcept
     {
         return m_quark == dico;
+    }
+    
+    string toString(Atom const& __val)
+    {
+        switch(__val.getType())
+        {
+            case Atom::LONG:
+                return toString((long)__val);
+                break;
+            case Atom::DOUBLE:
+                return toString((double)__val);
+                break;
+            case Atom::TAG:
+                return toString((sTag)__val);
+                break;
+            case Atom::OBJECT:
+                return toString((scObject)__val);
+                break;
+            case Atom::DICO:
+                return toString((scDico)__val);
+                break;
+            default:
+                return "";
+                break;
+        }
+    }
+    
+    string toString(vector<Atom> const& __val)
+    {
+        if(!__val.empty())
+        {
+            string desc("[");
+            for(size_t i = 0; i < __val.size() - 1; i++)
+            {
+                desc += toString(__val[i]) + ", ";
+            }
+            desc += toString(__val[__val.size() - 1]);
+            return desc + "]";
+        }
+        return "";
     }
 }
 
