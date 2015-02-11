@@ -25,7 +25,7 @@
 #include "Tag.h"
 
 namespace Kiwi
-{
+{    
     map<string, sTag> Tag::m_tags;
     mutex Tag::m_mutex;
     

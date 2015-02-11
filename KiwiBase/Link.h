@@ -39,12 +39,12 @@ namespace Kiwi
     class Link
     {
     private:
-        const wPatcher         m_patcher;
-        const wObject       m_object_from;
-        const wObject       m_object_to;
-        const ulong         m_index_outlet;
-        const ulong         m_index_intlet;
-        const Object::Io::Type m_type;
+        const wPatcher          m_patcher;
+        const wObject           m_object_from;
+        const wObject           m_object_to;
+        const ulong             m_index_outlet;
+        const ulong             m_index_intlet;
+        const Object::Io::Type  m_type;
     public:
         
         //! The constructor.

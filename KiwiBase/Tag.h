@@ -25,6 +25,7 @@
 #define __DEF_KIWI_TAG__
 
 #include "Defs.h"
+#include "Atom.h"
 #include "Console.h"
 
 namespace Kiwi
@@ -38,7 +39,7 @@ namespace Kiwi
      The tag are uniques and matchs to a string. If you create a tag with a string that already matchs to a tag, the creation function will return this tag, otherwise it will create a new tag.
      @see TagFactory
      */
-    class Tag
+    class Tag : public Atom::Quark
     {
     private:
         const string m_name;
@@ -68,7 +69,7 @@ namespace Kiwi
         {
             return m_name;
         }
-        
+    
     private:
         
         static map<string, sTag> m_tags;

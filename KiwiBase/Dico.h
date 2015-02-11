@@ -37,7 +37,7 @@ namespace Kiwi
     /**
      The dico is just a container that allows to manages elements with tags. The dico can be used to parse JSON files.
      */
-    class Dico : public enable_shared_from_this<Dico>
+    class Dico : public Atom::Quark, public enable_shared_from_this<Dico>
     {        
     private:
         map<sTag, ElemVector> m_entries;

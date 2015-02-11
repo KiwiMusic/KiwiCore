@@ -15,6 +15,37 @@ using namespace Kiwi;
 
 int main(int argc, const char * argv[])
 {
+    vector<Atom> vec;
+    vec.push_back(1);
+    vec.push_back(2.2);
+    vec.push_back(Tag::create("zaza"));
+    vec.push_back(Dico::evaluateForObject("bang 12 14 @size 56 73"));
+    
+    cout << "vec size is : " << vec.size() << endl;
+    for(vector<Atom>::size_type i = 0; i < vec.size(); i++)
+    {
+        cout << "vec["<< i <<"] is number : " << toString(vec[i].isNumber()) << endl;
+        cout << "vec["<< i <<"] is long : " << toString(vec[i].isLong()) << endl;
+        cout << "vec["<< i <<"] is double : " << toString(vec[i].isDouble()) << endl;
+        cout << "vec["<< i <<"] is tag : " << toString(vec[i].isTag()) << endl;
+        cout << "vec["<< i <<"] is object : " << toString(vec[i].isObject()) << endl;
+        cout << "vec["<< i <<"] is dico : " << toString(vec[i].isDico()) << endl;
+        
+        if(vec[i].isLong())
+            cout << "vec["<< i <<"] in long : " << toString((long)vec[i]) << endl;
+        else if(vec[i].isDouble())
+            cout << "vec["<< i <<"] in double : " << toString((double)vec[i]) << endl;
+        else if(vec[i].isTag())
+            cout << "vec["<< i <<"] in tag : " << toString((sTag)vec[i]) << endl;
+        else if(vec[i].isObject())
+            cout << "vec["<< i <<"] in object : " << toString((scObject)vec[i]) << endl;
+        else if(vec[i].isDico())
+            cout << "vec["<< i <<"] in dico : " << toString((scDico)vec[i]) << endl;
+        cout << endl;
+    }
+    
+    return 0;
+    
     sObject nat;
     sInstance instance = Instance::create();
     if(instance)

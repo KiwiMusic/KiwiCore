@@ -42,6 +42,7 @@
 		8F41B4F31A7E3C890067E122 /* Process.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4AF1A7E3C890067E122 /* Process.cpp */; };
 		8F41B4F51A7E3C890067E122 /* Signal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4B21A7E3C890067E122 /* Signal.cpp */; };
 		8F41B50C1A7E3C990067E122 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F41B50B1A7E3C990067E122 /* Accelerate.framework */; };
+		8F67F6191A8B40A800DB2C2D /* Atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F67F6171A8B40A700DB2C2D /* Atom.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -134,6 +135,8 @@
 		8F41B4B31A7E3C890067E122 /* Signal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Signal.h; sourceTree = "<group>"; };
 		8F41B50B1A7E3C990067E122 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		8F67F6131A8933DE00DB2C2D /* GuiTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiTools.h; sourceTree = "<group>"; };
+		8F67F6171A8B40A700DB2C2D /* Atom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Atom.cpp; sourceTree = "<group>"; };
+		8F67F6181A8B40A800DB2C2D /* Atom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Atom.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,6 +204,8 @@
 			children = (
 				8F41B4741A7E3C890067E122 /* Core.h */,
 				8F41B4751A7E3C890067E122 /* Defs.h */,
+				8F67F6171A8B40A700DB2C2D /* Atom.cpp */,
+				8F67F6181A8B40A800DB2C2D /* Atom.h */,
 				8F41B4781A7E3C890067E122 /* Element.cpp */,
 				8F41B4791A7E3C890067E122 /* Element.h */,
 				8F41B4821A7E3C890067E122 /* Tag.cpp */,
@@ -377,6 +382,7 @@
 				8F21B46E1A8238BD00670F15 /* Font.cpp in Sources */,
 				8F41B4E11A7E3C890067E122 /* Patcher.cpp in Sources */,
 				8F41B4D91A7E3C890067E122 /* Beacon.cpp in Sources */,
+				8F67F6191A8B40A800DB2C2D /* Atom.cpp in Sources */,
 				8F41B4EB1A7E3C890067E122 /* Connection.cpp in Sources */,
 				8F41B4ED1A7E3C890067E122 /* Error.cpp in Sources */,
 				8F41B4EC1A7E3C890067E122 /* Context.cpp in Sources */,

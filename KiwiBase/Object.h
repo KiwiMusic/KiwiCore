@@ -35,7 +35,7 @@ namespace Kiwi
     struct Detail
     {
         const sInstance     instance;
-        const sPatcher         patcher;
+        const sPatcher      patcher;
         const ulong         lid;
         const sTag          name;
         const string        text;
@@ -63,7 +63,7 @@ namespace Kiwi
     /**
      The object is a graphical class that aims to be instantiate in a patcher.
      */
-    class Object : virtual public Sketcher
+    class Object : virtual public Sketcher, public Atom::Quark
     {
     public:
         
