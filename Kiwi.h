@@ -25,7 +25,7 @@
 #define __DEF_KIWI_LIB__
 
 #include "KiwiBase/Core.h"
-#include "KiwiObjectes/Gui.h"
+#include "KiwiBoxes/Gui.h"
 #include "KiwiView/View.h"
 
 #endif

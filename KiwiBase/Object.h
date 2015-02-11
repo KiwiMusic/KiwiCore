@@ -295,7 +295,16 @@ namespace Kiwi
         {
             return m_presentation->getValue();
         }
-        
+		
+		//! Retrieve the "ignoreclick" attribute value of the object.
+		/** The function retrieves the "ignoreclick" attribute value of the object.
+		 @return The "ignoreclick" attribute value of the object.
+		 */
+		inline bool getIgnoreClick() const noexcept
+		{
+			return m_ignoreclick->getValue();
+		}
+		
         //! Retrieve the position of the object.
         /** The function retrieves the position of the object.
          @param presentation The presentation state.
