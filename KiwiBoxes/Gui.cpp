@@ -53,16 +53,16 @@ namespace Kiwi
         if(!atoms.empty())
         {
             Console::post("bang receive " + toString(atoms));
-            bang();
+            Object::send(0, {Tag::List::bang});
+            m_led = true;
+            redraw();
+            m_clock->delay(getShared(), 150);
         }
     }
     
     void Bang::bang()
     {
         Object::send(0, {Tag::List::bang});
-        m_led = true;
-        redraw();
-        m_clock->delay(getShared(), 150);
     }
 }
 
