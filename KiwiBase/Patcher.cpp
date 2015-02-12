@@ -36,11 +36,9 @@ namespace Kiwi
 	m_color_locked_background(Attr::create("locked_bgcolor", "Locked Background Color", "Appearance", Color(0.88, 0.89, 0.88, 1.))),
 	m_gridsize(Attr::create("gridsize", "Grid Size", "Editing", (long)20))
     {
-		/*
-		addAttr(m_color_editing_background);
+		addAttr(m_color_unlocked_background);
 		addAttr(m_color_locked_background);
 		addAttr(m_gridsize);
-		*/
     }
 	
     Patcher::~Patcher()
@@ -196,14 +194,14 @@ namespace Kiwi
                                 
                                 outlet->append(to, indexo);
                                 inlet->append(from, indexi);
-                                link = make_shared<Link::DspLink>(shared_from_this(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
+                                link = make_shared<Link::DspLink>(getShared(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
                             }
                         }
                         else
                         {
                             outlet->append(to, indexo);
                             inlet->append(from, indexi);
-                            link = make_shared<Link>(shared_from_this(), from, indexo, to, indexi, type);
+                            link = make_shared<Link>(getShared(), from, indexo, to, indexi, type);
                         }
                     }
                 }
