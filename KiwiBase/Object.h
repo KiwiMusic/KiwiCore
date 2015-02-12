@@ -310,16 +310,9 @@ namespace Kiwi
          @param presentation The presentation state.
          @return The position of the object.
          */
-        inline Point getPosition(const bool presentation = false) const noexcept
+        inline Point getPresentationPosition() const noexcept
         {
-            if(!presentation)
-            {
-                return m_position->getValue();
-            }
-            else
-            {
-                return m_presentation_position->getValue();
-            }
+			return m_presentation_position->getValue();
         }
         
         //! Retrieve the size of the object.
@@ -327,16 +320,9 @@ namespace Kiwi
          @param presentation The presentation state.
          @return The size of the object.
          */
-        inline Size getSize(const bool presentation = false) const noexcept
+        inline Size getPresentationSize() const noexcept
         {
-            if(!presentation)
-            {
-                return m_size->getValue();
-            }
-            else
-            {
-                return m_presentation_size->getValue();
-            }
+			return m_presentation_size->getValue();
         }
         
         //! Retrieve the bounds of the object.
@@ -344,16 +330,9 @@ namespace Kiwi
          @param presentation The presentation state.
          @return The bounds of the object.
          */
-        inline Rectangle getBounds(const bool presentation = false) const noexcept
+        inline Rectangle getPresentationBounds() const noexcept
         {
-            if(!presentation)
-            {
-                return Rectangle(m_position->getValue(), m_size->getValue());
-            }
-            else
-            {
-                return Rectangle(m_presentation_position->getValue(), m_presentation_size->getValue());
-            }
+			return Rectangle(m_presentation_position->getValue(), m_presentation_size->getValue());
         }
         
     protected:
