@@ -222,7 +222,7 @@ namespace Kiwi
             return Atom::NOTHING;
     }
     
-    const Atom Dico::get(sTag key) const noexcept
+    Atom Dico::get(sTag key) const noexcept
     {
         auto it = m_entries.find(key);
         if(it != m_entries.end())
@@ -233,20 +233,7 @@ namespace Kiwi
             }
         }
         return 0;
-    }
-    
-    Atom Dico::get(sTag key) noexcept
-    {
-        auto it = m_entries.find(key);
-        if(it != m_entries.end())
-        {
-            if(it->second.size())
-            {
-                return  it->second[0];
-            }
-        }
-        return 0;
-    }
+    }    
     
     void Dico::get(sTag key, vector<Atom>& atoms) const noexcept
     {

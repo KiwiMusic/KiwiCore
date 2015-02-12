@@ -119,9 +119,9 @@ namespace Kiwi
     protected:
         const sAttrPoint        m_presentation_position;
         const sAttrSize         m_presentation_size;
-        const sAttrBool         m_hidden;
-        const sAttrBool         m_presentation;
-        const sAttrBool         m_ignoreclick;
+        const sAttrBool        m_hidden;
+        const sAttrBool        m_presentation;
+        const sAttrBool        m_ignoreclick;
     public:
         
         //! Constructor.
