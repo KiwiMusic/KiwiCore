@@ -65,6 +65,11 @@ namespace Kiwi
         set<wListener,
         owner_less<wListener>>      m_lists;
         mutable mutex               m_lists_mutex;
+			
+		// Patcher attributes :
+		const sAttrColor			m_color_unlocked_background;
+		const sAttrColor			m_color_locked_background;
+		const sAttrLong				m_gridsize;
         
     private:
         

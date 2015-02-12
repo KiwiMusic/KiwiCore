@@ -31,11 +31,18 @@ namespace Kiwi
     // ================================================================================ //
     
     Patcher::Patcher(sInstance instance) :
-    m_instance(instance)
+    m_instance(instance),
+	m_color_unlocked_background(Attr::create("unlocked_bgcolor","Unlocked Background Color", "Appearance", Color(0.88, 0.89, 0.88, 1.))),
+	m_color_locked_background(Attr::create("locked_bgcolor", "Locked Background Color", "Appearance", Color(0.88, 0.89, 0.88, 1.))),
+	m_gridsize(Attr::create("gridsize", "Grid Size", "Editing", (long)20))
     {
-        ;
+		/*
+		addAttr(m_color_editing_background);
+		addAttr(m_color_locked_background);
+		addAttr(m_gridsize);
+		*/
     }
-    
+	
     Patcher::~Patcher()
     {
         m_links.clear();
