@@ -70,7 +70,7 @@ int main(int argc, const char * argv[])
             {
                 cout << "coun : " << objs[i].use_count() << endl;
                 cout << "name : " << toString(objs[i]->getName()) << endl;
-                cout << "size : " << objs[i]->getSize().width() << " "<< objs[i]->getSize().height() << endl;
+                cout << "size : " << objs[i]->getSize().width() << " " << objs[i]->getSize().height() << " " << objs[i]->getSize().ratio() <<  endl;
                 cout << "posi : " << objs[i]->getPosition().x() << " "<< objs[i]->getPosition().y() << endl;
                 objs[i]->receive(0, {Tag::List::bang, "zaza", 12.000, 4, objs[i], "stevie"});
                 vector<sAttr> attrs;
@@ -88,6 +88,12 @@ int main(int argc, const char * argv[])
                         sAttrPoint point = attrs[i]->getShared<PointValue>();
                         Kiwi::Point pt = point->getValue();
                         point->setValue(Kiwi::Point(128., 19.));
+                        pt = point->getValue();
+                        cout << "new pos "<< pt.x() << " " << pt.y() << endl;
+                    }
+                    if(attrs[i]->isType<SizeValue>())
+                    {
+                        sAttrSize point = attrs[i]->getShared<SizeValue>();
                     }
                     if(attrs[i]->isType<BoolValue>())
                     {
