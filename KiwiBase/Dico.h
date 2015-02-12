@@ -176,14 +176,7 @@ namespace Kiwi
          @param key The name of the entry.
          @return    The atom from a dico.
          */
-        const Atom get(sTag key) const noexcept;
-        
-        //! Retrieve the atom from a dico.
-        /** The function retrieves the atom from a dico.
-         @param key The name of the entry.
-         @return    The atom from a dico.
-         */
-        Atom get(sTag key) noexcept;
+        Atom get(sTag key) const noexcept;
         
         //! Retrieve the atoms from a dico.
         /** The function retrieves the atoms from a dico.
@@ -191,6 +184,18 @@ namespace Kiwi
          @param atoms The atoms from a dico or empty atom list if the type isn't a vector of atoms.
          */
         void get(sTag key, vector<Atom>& atoms) const noexcept;
+        
+        //! Retrieve the atoms from a dico.
+        /** The function retrieves the atoms from a dico.
+         @param key The name of the entry.
+         @return    The atom from a dico.
+         */
+        inline string getAsString(sTag key) const noexcept
+        {
+            vector<Atom> atoms;
+            get(key, atoms);
+            return toString(atoms);
+        }
         
         //! Add a new entry with an atoms.
         /** The function adds a new entry or replace an old entry with an atoms.
