@@ -47,6 +47,7 @@ int main(int argc, const char * argv[])
     
     return 0;
     */
+    
     sObject nat;
     sInstance instance = Instance::create();
     if(instance)
@@ -56,9 +57,9 @@ int main(int argc, const char * argv[])
         if(page)
         {
             cout << "Page created" << endl;
-            page->add(Dico::evaluateForObject("bang 12 23 @size 48 56"));
-            page->add(Dico::evaluateForObject("bang 12 23 @size 48 56"));
-            page->add(Dico::evaluateForObject("bang 12 23 @size 48 56"));
+            page->add(Dico::evaluateForObject("bang 12 23 @position 10 10 @size 48 56"));
+            page->add(Dico::evaluateForObject("bang 12 23 @position 10 10 @size 48 56"));
+            page->add(Dico::evaluateForObject("bang 12 23 @position 10 10 @size 48 56"));
             page->add(Dico::evaluateForLink("1 0 2 0"));
             page->add(Dico::evaluateForLink("2 0 3 0"));
             
@@ -70,15 +71,29 @@ int main(int argc, const char * argv[])
                 cout << "coun : " << objs[i].use_count() << endl;
                 cout << "name : " << toString(objs[i]->getName()) << endl;
                 cout << "size : " << objs[i]->getSize().width() << " "<< objs[i]->getSize().height() << endl;
-                objs[i]->receive(0, {Tag::List::bang, "zaza", 12.4, 4, objs[i], "stevie"});
+                cout << "posi : " << objs[i]->getPosition().x() << " "<< objs[i]->getPosition().y() << endl;
+                objs[i]->receive(0, {Tag::List::bang, "zaza", 12.000, 4, objs[i], "stevie"});
                 vector<sAttr> attrs;
                 objs[i]->getAttrs(attrs);
                 for(int i = 0; i < attrs.size(); i++)
                 {
-                    if(attrs[i]->isType<Color>())
+                    if(attrs[i]->isType<ColorAttr>())
                     {
-                        sAttrColor color = attrs[i]->getShared<Color>();
+                        sAttrColor color = attrs[i]->getShared<ColorAttr>();
+                        Color col = color->getValue();
                         color->setValue(Color(0.1, 0.2, 0.3, 0.4));
+                    }
+                    if(attrs[i]->isType<PointAttr>())
+                    {
+                        sAttrPoint point = attrs[i]->getShared<PointAttr>();
+                        Kiwi::Point pt = point->getValue();
+                        point->setValue(Kiwi::Point(128., 19.));
+                    }
+                    if(attrs[i]->isType<BoolAttr>())
+                    {
+                        sAttrBool point = attrs[i]->getShared<BoolAttr>();
+                        bool pt = point->getValue();
+                        point->setValue(!pt);
                     }
                 }
             }
