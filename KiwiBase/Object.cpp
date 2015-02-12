@@ -144,11 +144,11 @@ namespace Kiwi
     m_text(detail.text),
     m_id(detail.lid),
     m_stack_count(0),
-    m_presentation_position(Attr::create("presentation_position","Presentation Position", "Appearance", PointAttr(0., 0.))),
-    m_presentation_size(Attr::create("presentation_size",        "Presentation Size",     "Appearance", SizeAttr(10., 10.))),
-    m_hidden(Attr::create("hidden",                              "Hide on Lock",          "Appearance", BoolAttr(false))),
-    m_presentation(Attr::create("presentation",                  "Include in presentation","Appearance", BoolAttr(false))),
-    m_ignoreclick(Attr::create("ignoreclick",                    "Ignore Click",           "Behavior",   BoolAttr(false)))
+    m_presentation_position(Attr::create("presentation_position","Presentation Position", "Appearance", PointValue(0., 0.))),
+    m_presentation_size(Attr::create("presentation_size",        "Presentation Size",     "Appearance", SizeValue(10., 10.))),
+    m_hidden(Attr::create("hidden",                              "Hide on Lock",          "Appearance", BoolValue(false))),
+    m_presentation(Attr::create("presentation",                  "Include in presentation","Appearance", BoolValue(false))),
+    m_ignoreclick(Attr::create("ignoreclick",                    "Ignore Click",           "Behavior",   BoolValue(false)))
     {
         addAttr(m_presentation_position);
         addAttr(m_presentation_size);

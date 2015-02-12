@@ -77,21 +77,21 @@ int main(int argc, const char * argv[])
                 objs[i]->getAttrs(attrs);
                 for(int i = 0; i < attrs.size(); i++)
                 {
-                    if(attrs[i]->isType<ColorAttr>())
+                    if(attrs[i]->isType<ColorValue>())
                     {
-                        sAttrColor color = attrs[i]->getShared<ColorAttr>();
+                        sAttrColor color = attrs[i]->getShared<ColorValue>();
                         Color col = color->getValue();
                         color->setValue(Color(0.1, 0.2, 0.3, 0.4));
                     }
-                    if(attrs[i]->isType<PointAttr>())
+                    if(attrs[i]->isType<PointValue>())
                     {
-                        sAttrPoint point = attrs[i]->getShared<PointAttr>();
+                        sAttrPoint point = attrs[i]->getShared<PointValue>();
                         Kiwi::Point pt = point->getValue();
                         point->setValue(Kiwi::Point(128., 19.));
                     }
-                    if(attrs[i]->isType<BoolAttr>())
+                    if(attrs[i]->isType<BoolValue>())
                     {
-                        sAttrBool point = attrs[i]->getShared<BoolAttr>();
+                        sAttrBool point = attrs[i]->getShared<BoolValue>();
                         bool pt = point->getValue();
                         point->setValue(!pt);
                     }
