@@ -40,7 +40,7 @@ namespace Kiwi
         const sTag          name;
         const string        text;
         const scDico        dico;
-        const vector<Atom>    args;
+        const vector<Atom>  args;
         
         Detail() :
         instance(nullptr), patcher(nullptr), lid(0), name(Tag::create("")), text(""), dico(nullptr), args({})

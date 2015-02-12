@@ -170,7 +170,7 @@ namespace Kiwi
         dico->set(Tag::List::text, getText());
         dico->set(Tag::List::id, getId());
         dico->set(Tag::List::ninlets, getNumberOfInlets());
-        dico->set(Tag::List::ninlets, getNumberOfOutlets());
+        dico->set(Tag::List::noutlets, getNumberOfOutlets());
         vector<sAttr> attrs;
         getAttrs(attrs);
         for(vector<sAttr>::size_type i = 0; i < attrs.size(); i++)

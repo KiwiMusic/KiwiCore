@@ -30,25 +30,25 @@ namespace Kiwi
     //                                      BANG                                        //
     // ================================================================================ //
     
-    BangObject::BangObject(Detail const& detail) : Object(detail, Tag::create("bang")),
+    Bang::Bang(Detail const& detail) : Object(detail, Tag::create("bang")),
     m_clock(Clock::create())
     {
         addInlet(Io::Message, Io::Hot, "Flash (anything)");
         addOutlet(Io::Message, "Output (bang)");
     }
     
-    BangObject::~BangObject()
+    Bang::~Bang()
     {
         ;
     }
     
-    void BangObject::tick()
+    void Bang::tick()
     {
         m_led = false;
         redraw();
     }
     
-    void BangObject::receive(ulong index, vector<Atom> const& atoms)
+    void Bang::receive(ulong index, vector<Atom> const& atoms)
     {
         if(!atoms.empty())
         {
@@ -57,7 +57,7 @@ namespace Kiwi
         }
     }
     
-    void BangObject::bang()
+    void Bang::bang()
     {
         Object::send(0, {Tag::List::bang});
         m_led = true;

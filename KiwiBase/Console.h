@@ -187,7 +187,7 @@ namespace Kiwi
             const string        content;
             const Kind          kind;
             const wcObject      object;
-            const wcPatcher        patcher;
+            const wcPatcher     patcher;
             const wcInstance    instance;
             
             //! The constructor.
