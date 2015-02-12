@@ -165,13 +165,13 @@ namespace Kiwi
         Atom() noexcept;
         
         //! Constructor with a boolean value.
-        /** The function allocates the atom with a long value created with aboolean value.
+        /** The function allocates the atom with a long value created with a boolean value.
          @param value The value.
          */
         Atom(const bool value) noexcept;
         
         //! Constructor with an int value.
-        /** The function allocates the atom with a long value created with aint value.
+        /** The function allocates the atom with a long value created with an int value.
          @param value The value.
          */
         Atom(const int value) noexcept;
@@ -189,7 +189,7 @@ namespace Kiwi
         Atom(const ulong value) noexcept;
         
         //! Constructor with a float value.
-        /** The function allocates the atom with a double value created with afloat value.
+        /** The function allocates the atom with a double value created with a float value.
          @param value The value.
          */
         Atom(const float value) noexcept;
@@ -217,8 +217,8 @@ namespace Kiwi
          */
         Atom(sTag tag) noexcept;
         
-        //! Constructor with a object.
-        /** The function allocates the atom with a object.
+        //! Constructor with an object.
+        /** The function allocates the atom with an object.
          */
         Atom(sObject object) noexcept;
         
