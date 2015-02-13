@@ -149,8 +149,8 @@ namespace Kiwi
                         Object::Io::Type type = min(outlet->getType(), inlet->getType());
                         if(type & Object::Io::Signal)
                         {
-                            Dsp::sProcess pfrom = dynamic_pointer_cast<Dsp::Process>(from);
-                            Dsp::sProcess pto   = dynamic_pointer_cast<Dsp::Process>(to);
+                            sDspNode pfrom = dynamic_pointer_cast<DspNode>(from);
+                            sDspNode pto   = dynamic_pointer_cast<DspNode>(to);
                             if(from && to)
                             {
                                 ulong poutlet = 0, pinlet = 0;
@@ -196,7 +196,7 @@ namespace Kiwi
                                 
                                 outlet->append(to, indexo);
                                 inlet->append(from, indexi);
-                                link = make_shared<Link::DspLink>(getShared(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
+                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
                             }
                         }
                         else
@@ -378,12 +378,12 @@ namespace Kiwi
     void Patcher::dspStart(const ulong samplerate, const ulong vectorsize)
     {
         dspStop();
-        m_dsp_context = Dsp::Context::create(samplerate, vectorsize);
+        m_dsp_context = make_shared<DspContext>();
         
         lock_guard<mutex> guard(m_mutex);
         for(auto it = m_objects.begin(); it != m_objects.end(); ++it)
         {
-            Dsp::sProcess process = dynamic_pointer_cast<Dsp::Process>((*it));
+            sDspNode process = dynamic_pointer_cast<DspNode>((*it));
             if(process)
             {
                 m_dsp_context->add(process);
@@ -392,18 +392,18 @@ namespace Kiwi
 
         for(auto it = m_links.begin(); it != m_links.end(); ++it)
         {
-            Dsp::sConnection connection = dynamic_pointer_cast<Dsp::Connection>((*it));
-            if(connection)
+            sDspLink link = dynamic_pointer_cast<DspLink>((*it));
+            if(link)
             {
-                m_dsp_context->add(connection);
+                m_dsp_context->add(link);
             } 
         }
         
         try
         {
-            m_dsp_context->compile();
+            m_dsp_context->compile(samplerate, vectorsize);
         }
-        catch(Dsp::sProcess object)
+        catch(sDspNode object)
         {
             Console::error(dynamic_pointer_cast<Object>(object), "something appened with me... sniff !");
             throw shared_from_this();

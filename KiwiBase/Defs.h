@@ -30,7 +30,6 @@
 namespace Kiwi
 {
     using namespace Gui;
-    using namespace Dsp;
     
     class Clock;
     typedef shared_ptr<Clock>       sClock;

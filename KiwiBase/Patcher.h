@@ -57,7 +57,7 @@ namespace Kiwi
 			
     private:
         const wInstance             m_instance;
-        Dsp::sContext               m_dsp_context;
+        sDspContext                 m_dsp_context;
         vector<sObject>             m_objects;
         vector<sLink>               m_links;
         vector<ulong>               m_free_ids;

@@ -117,15 +117,15 @@ namespace Kiwi
          */
         void write(sDico dico) const noexcept;
         
-        class DspLink;
+        class SignalLink;
     };
 
-    class Link::DspLink : public Link, public Dsp::Connection
+    class Link::SignalLink : public Link, public DspLink
     {
     public:
-        DspLink(const sPatcher patcher, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, Dsp::sProcess pfrom, const ulong poutlet, Dsp::sProcess pto, const ulong pinlet) :
+        SignalLink(const sPatcher patcher, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, sDspNode pfrom, const ulong poutlet, sDspNode pto, const ulong pinlet) :
         Link(patcher, from, outlet, to, inlet, type),
-        Dsp::Connection(pfrom, poutlet, pto, pinlet)
+        DspLink(pfrom, poutlet, pto, pinlet)
         {
             ;
         }
