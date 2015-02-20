@@ -54,6 +54,7 @@ namespace Kiwi
         sPatcher patcher = make_shared<Patcher>(instance);
         if(patcher && dico)
         {
+            instance->DspContext::add(patcher);
 			patcher->initialize();
 			
             sDico patcherDico = Dico::create();
