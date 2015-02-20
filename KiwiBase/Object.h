@@ -71,9 +71,9 @@ namespace Kiwi
         {
             enum Type
             {
-                Message = 0 | 1<<1,
-                Signal  = 0 | 1<<2,
-                Both    = 0 | Message | Signal
+                Message = 0,
+                Signal  = 1,
+                Both    = 2
             };
             
             enum Polarity : bool

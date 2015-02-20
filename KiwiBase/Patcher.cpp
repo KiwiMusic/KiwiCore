@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      PAGE                                        //
     // ================================================================================ //
     
-    Patcher::Patcher(sInstance instance) :
+    Patcher::Patcher(sInstance instance) : DspChain(instance),
     m_instance(instance),
 	m_color_unlocked_background(Attr::create("unlocked_bgcolor","Unlocked Background Color", "Appearance", ColorValue(0.88, 0.89, 0.88, 1.))),
 	m_color_locked_background(Attr::create("locked_bgcolor", "Locked Background Color", "Appearance", ColorValue(0.88, 0.89, 0.88, 1.))),
@@ -54,6 +54,7 @@ namespace Kiwi
         sPatcher patcher = make_shared<Patcher>(instance);
         if(patcher && dico)
         {
+            instance->DspContext::add(patcher);
 			patcher->initialize();
 			
             sDico patcherDico = Dico::create();
@@ -74,6 +75,7 @@ namespace Kiwi
         sObject object;
         if(dico)
         {
+            int toclean;
             sTag name = dico->get(Tag::List::name);
             sTag text = dico->get(Tag::List::text);
             ulong _id = dico->get(Tag::List::id);
@@ -83,6 +85,11 @@ namespace Kiwi
             
             if(object)
             {
+                sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
+                if(dspnode)
+                {
+                    DspChain::add(dspnode);
+                }
                 m_objects.push_back(object);
             }
             send(object, Notification::Added);
@@ -144,67 +151,72 @@ namespace Kiwi
                 Object::sInlet inlet    = to->getInlet(indexi);
                 if(outlet && inlet)
                 {
-                    if(outlet->getType() & inlet->getType() || inlet->getType() & outlet->getType())
+                    if(outlet->getType() >= Object::Io::Signal && inlet->getType() >= Object::Io::Signal)
                     {
-                        Object::Io::Type type = min(outlet->getType(), inlet->getType());
-                        if(type & Object::Io::Signal)
+                        sDspNode pfrom = dynamic_pointer_cast<DspNode>(from);
+                        sDspNode pto   = dynamic_pointer_cast<DspNode>(to);
+                        if(from && to)
                         {
-                            sDspNode pfrom = dynamic_pointer_cast<DspNode>(from);
-                            sDspNode pto   = dynamic_pointer_cast<DspNode>(to);
-                            if(from && to)
+                            ulong poutlet = 0, pinlet = 0;
+                            for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
                             {
-                                ulong poutlet = 0, pinlet = 0;
-                                for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
+                                Object::sOutlet out = from->getOutlet(poutlet);
+                                if(out)
                                 {
-                                    Object::sOutlet out = from->getOutlet(poutlet);
-                                    if(out)
+                                    if(out == outlet)
                                     {
-                                        if(out == outlet)
-                                        {
-                                            break;
-                                        }
-                                        else if(out->getType() & Object::Io::Signal)
-                                        {
-                                            poutlet++;
-                                        }
+                                        break;
+                                    }
+                                    else if(out->getType() & Object::Io::Signal)
+                                    {
+                                        poutlet++;
                                     }
                                 }
-                                if(poutlet >= pfrom->getNumberOfOutputs())
-                                {
-                                    return;
-                                }
-                                
-                                for(ulong i = 0; i < from->getNumberOfInlets(); i++)
-                                {
-                                    Object::sInlet in = from->getInlet(poutlet);
-                                    if(in)
-                                    {
-                                        if(in == inlet)
-                                        {
-                                            break;
-                                        }
-                                        else if(in->getType() & Object::Io::Signal)
-                                        {
-                                            pinlet++;
-                                        }
-                                    }
-                                }
-                                if(pinlet >= pfrom->getNumberOfInputs())
-                                {
-                                    return;
-                                }
-                                
-                                outlet->append(to, indexo);
-                                inlet->append(from, indexi);
-                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
                             }
-                        }
-                        else
-                        {
+                            if(poutlet >= pfrom->getNumberOfOutputs())
+                            {
+                                return;
+                            }
+                            
+                            for(ulong i = 0; i < to->getNumberOfInlets(); i++)
+                            {
+                                Object::sInlet in = to->getInlet(pinlet);
+                                if(in)
+                                {
+                                    if(in == inlet)
+                                    {
+                                        break;
+                                    }
+                                    else if(in->getType() & Object::Io::Signal)
+                                    {
+                                        pinlet++;
+                                    }
+                                }
+                            }
+                            if(pinlet >= pto->getNumberOfInputs())
+                            {
+                                return;
+                            }
+                            
                             outlet->append(to, indexo);
                             inlet->append(from, indexi);
-                            link = make_shared<Link>(getShared(), from, indexo, to, indexi, type);
+                            if(outlet->getType() == Object::Io::Both && inlet->getType() == Object::Io::Both)
+                            {
+                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Both, pfrom, poutlet, pto, pinlet);
+                            }
+                            else
+                            {
+                                cout << "Connect "<< indexo << " " << indexo << " " << poutlet << " " << pinlet << " " << endl;
+                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Signal, pfrom, poutlet, pto, pinlet);
+                            }
                         }
+                    }
+                    else if(outlet->getType() == inlet->getType() || inlet->getType() == Object::Io::Both || outlet->getType() == Object::Io::Both)
+                    {
+                        
+                        outlet->append(to, indexo);
+                        inlet->append(from, indexi);
+                        link = make_shared<Link>(getShared(), from, indexo, to, indexi, Object::Io::Message);
                     }
                 }
             }
@@ -212,6 +224,11 @@ namespace Kiwi
         
         if(link)
         {
+            sDspLink dsplink = dynamic_pointer_cast<DspLink>(link);
+            if(dsplink)
+            {
+                DspChain::add(dsplink);
+            }
             m_links.push_back(link);
         }
         send(link, Notification::Added);
@@ -280,6 +297,11 @@ namespace Kiwi
                 {
                     if((*li)->getObjectFrom() == object || (*li)->getObjectTo() == object)
                     {
+                        sDspLink dsplink = dynamic_pointer_cast<DspLink>((*li));
+                        if(dsplink)
+                        {
+                            DspChain::remove(dsplink);
+                        }
                         li = m_links.erase(li);
                         send((*li), Notification::Removed);
                     }
@@ -287,6 +309,11 @@ namespace Kiwi
                     {
                         ++li;
                     }
+                }
+                sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
+                if(dspnode)
+                {
+                    DspChain::remove(dspnode);
                 }
                 m_objects.erase(it);
                 m_free_ids.push_back(object->getId());
@@ -303,6 +330,11 @@ namespace Kiwi
             auto it = find(m_links.begin(), m_links.end(), link);
             if(it != m_links.end())
             {
+                sDspLink dsplink = dynamic_pointer_cast<DspLink>(link);
+                if(dsplink)
+                {
+                    DspChain::remove(dsplink);
+                }
                 m_links.erase(it);
                 send(link, Notification::Removed);
             }
@@ -372,50 +404,6 @@ namespace Kiwi
 				subpatcher->set(Tag::List::links, atoms);
 				dico->set(Tag::List::patcher, subpatcher);
 			}
-        }
-    }
-	
-    void Patcher::dspStart(const ulong samplerate, const ulong vectorsize)
-    {
-        dspStop();
-        m_dsp_context = make_shared<DspContext>();
-        
-        lock_guard<mutex> guard(m_mutex);
-        for(auto it = m_objects.begin(); it != m_objects.end(); ++it)
-        {
-            sDspNode process = dynamic_pointer_cast<DspNode>((*it));
-            if(process)
-            {
-                m_dsp_context->add(process);
-            }
-        }
-
-        for(auto it = m_links.begin(); it != m_links.end(); ++it)
-        {
-            sDspLink link = dynamic_pointer_cast<DspLink>((*it));
-            if(link)
-            {
-                m_dsp_context->add(link);
-            } 
-        }
-        
-        try
-        {
-            m_dsp_context->compile(samplerate, vectorsize);
-        }
-        catch(sDspNode object)
-        {
-            Console::error(dynamic_pointer_cast<Object>(object), "something appened with me... sniff !");
-            throw shared_from_this();
-        }
-    }
-    
-    void Patcher::dspStop()
-    {
-        if(m_dsp_context)
-        {
-            m_dsp_context->stop();
-            m_dsp_context.reset();
         }
     }
     

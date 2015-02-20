@@ -76,6 +76,13 @@ namespace Kiwi
             dico->clear(Tag::List::to);
         }
     }
+    
+    Link::SignalLink::SignalLink(const sPatcher patcher, const sObject from, const ulong outlet, const sObject to, const ulong inlet, const Object::Io::Type type, sDspNode pfrom, const ulong poutlet, sDspNode pto, const ulong pinlet) :
+    Link(patcher, from, outlet, to, inlet, type),
+    DspLink(patcher, pfrom, poutlet, pto, pinlet)
+    {
+        ;
+    }
 }
 
 
