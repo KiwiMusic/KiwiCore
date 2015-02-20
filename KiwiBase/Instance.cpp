@@ -24,11 +24,11 @@
 #include "Instance.h"
 
 #include "../KiwiBoxes/Gui.h"
+#include "../KiwiBoxes/NewBox.h"
 /*
 #include "../KiwiObjectes/Wireless.h"
 #include "../KiwiObjectes/Time.h"
 #include "../KiwiObjectes/DspGenerator.h"
-#include "../KiwiObjectes/NewObject.h"
 #include "../KiwiObjectes/Arithmetic.h"
 #include "../KiwiObjectes/ArithmeticTilde.h"
 */
@@ -60,8 +60,8 @@ namespace Kiwi
         if(!libraries_loaded)
         {
             guiInit();
+			standardBoxesInit();
             /*
-			standardObjectes();
             arithmetic();
             wireless();
 			timing();

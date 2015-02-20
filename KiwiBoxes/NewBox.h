@@ -32,26 +32,25 @@ namespace Kiwi
     //                                    NEWBOX                                        //
     // ================================================================================ //
 	
-	/*
 	class NewBox : public Object, public Gui::Default
     {
     public:
-        NewBox(Initializer const& init);
+        NewBox(Detail const& detail);
         ~NewBox();
-        void receive(ulong index, ElemVector const& elements) override;
 		
-		sObject create(Initializer const& initiliazer) const override;
+        void receive(ulong index, vector<Atom> const& atoms) override;
+		
+		void doubleClick() override {};
     };
 	
 	// ================================================================================ //
 	//                                 STANDARD BOXES                                   //
 	// ================================================================================ //
 	
-    inline void standardBoxes()
+    inline void standardBoxesInit()
     {
-		Prototypes::add<NewBox>();
+		Factory::add<NewBox>();
     }
-	*/
 }
 
 #endif
