@@ -22,7 +22,7 @@
 */
 
 #include "Instance.h"
-#include "../KiwiObjects/Objects.h"
+//#include "../KiwiObjects/Objects.h"
 #include "../KiwiBoxes/Gui.h"
 #include "../KiwiBoxes/NewBox.h"
 /*
@@ -56,7 +56,7 @@ namespace Kiwi
     {
         if(!libraries_loaded)
         {
-            ObjectsInitialize();
+            //ObjectsInitialize();
             guiInit();
 			standardBoxesInit();
             /*
