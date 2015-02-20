@@ -74,6 +74,7 @@ namespace Kiwi
         sObject object;
         if(dico)
         {
+            int toclean;
             sTag name = dico->get(Tag::List::name);
             sTag text = dico->get(Tag::List::text);
             ulong _id = dico->get(Tag::List::id);
@@ -83,6 +84,11 @@ namespace Kiwi
             
             if(object)
             {
+                sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
+                if(dspnode)
+                {
+                    DspChain::add(dspnode);
+                }
                 m_objects.push_back(object);
             }
             send(object, Notification::Added);
@@ -212,6 +218,11 @@ namespace Kiwi
         
         if(link)
         {
+            sDspLink dsplink = dynamic_pointer_cast<DspLink>(link);
+            if(dsplink)
+            {
+                DspChain::add(dsplink);
+            }
             m_links.push_back(link);
         }
         send(link, Notification::Added);
@@ -280,6 +291,11 @@ namespace Kiwi
                 {
                     if((*li)->getObjectFrom() == object || (*li)->getObjectTo() == object)
                     {
+                        sDspLink dsplink = dynamic_pointer_cast<DspLink>((*li));
+                        if(dsplink)
+                        {
+                            DspChain::remove(dsplink);
+                        }
                         li = m_links.erase(li);
                         send((*li), Notification::Removed);
                     }
@@ -287,6 +303,11 @@ namespace Kiwi
                     {
                         ++li;
                     }
+                }
+                sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
+                if(dspnode)
+                {
+                    DspChain::remove(dspnode);
                 }
                 m_objects.erase(it);
                 m_free_ids.push_back(object->getId());
@@ -303,6 +324,11 @@ namespace Kiwi
             auto it = find(m_links.begin(), m_links.end(), link);
             if(it != m_links.end())
             {
+                sDspLink dsplink = dynamic_pointer_cast<DspLink>(link);
+                if(dsplink)
+                {
+                    DspChain::remove(dsplink);
+                }
                 m_links.erase(it);
                 send(link, Notification::Removed);
             }
