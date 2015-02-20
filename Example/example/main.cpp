@@ -49,7 +49,7 @@ int main(int argc, const char * argv[])
     */
     
     sObject nat;
-    sInstance instance = Instance::create();
+    sInstance instance = Instance::create(nullptr);
     if(instance)
     {
         cout << "Instance created" << endl;

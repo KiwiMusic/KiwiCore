@@ -40,10 +40,8 @@ namespace Kiwi
     //                                      INSTANCE                                    //
     // ================================================================================ //
     
-    Instance::Instance() noexcept :
-    m_dsp_running(false),
-    m_sample_rate(0),
-    m_vector_size(0)
+    Instance::Instance(sDspDeviceManager device) noexcept :
+    DspContext(device)
     {
 		;
     }
@@ -52,10 +50,9 @@ namespace Kiwi
     {
         m_patchers.clear();
         m_lists.clear();
-        m_dsp_patchers.clear();
     }
     
-    sInstance Instance::create()
+    sInstance Instance::create(sDspDeviceManager device)
     {
         if(!libraries_loaded)
         {
@@ -69,33 +66,18 @@ namespace Kiwi
              */
             libraries_loaded = true;
         }
-        return make_shared<Instance>();
+        return make_shared<Instance>(device);
     }
 
     sPatcher Instance::createPatcher(sDico dico)
     {
-        sPatcher patcher = Patcher::create(shared_from_this(), dico);
+        sPatcher patcher = Patcher::create(getShared(), dico);
         if(patcher)
         {
             m_patchers_mutex.lock();
             m_patchers.insert(patcher);
             m_patchers_mutex.unlock();
-            
-            if(m_dsp_running)
-            {
-                try
-                {
-                    int todo;
-                    patcher->dspStart(m_sample_rate, m_vector_size);
-                    m_dsp_mutex.lock();
-                    m_dsp_patchers.push_back(patcher);
-                    m_dsp_mutex.unlock();
-                }
-                catch(sPatcher)
-                {
-                    ;
-                }
-            }
+            DspContext::add(patcher);
             
             m_lists_mutex.lock();
             auto it = m_lists.begin();
@@ -108,7 +90,7 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->patcherCreated(shared_from_this(), patcher);
+                    listener->patcherCreated(getShared(), patcher);
                     ++it;
                 }
             }
@@ -122,17 +104,7 @@ namespace Kiwi
         m_patchers_mutex.lock();
         if(m_patchers.find(patcher) != m_patchers.end())
         {
-            if(m_dsp_running && patcher->isDspRunning())
-            {
-                m_dsp_mutex.lock();
-                patcher->dspStop();
-                auto it  = find(m_dsp_patchers.begin(), m_dsp_patchers.end(), patcher);
-                if(it != m_dsp_patchers.end())
-                {
-                    m_dsp_patchers.erase(it);
-                }
-                m_dsp_mutex.unlock();
-            }
+            DspContext::remove(patcher);
             
             m_patchers.erase(patcher);
             m_patchers_mutex.unlock();
@@ -148,7 +120,7 @@ namespace Kiwi
                 else
                 {
                     Instance::sListener listener = (*it).lock();
-                    listener->patcherRemoved(shared_from_this(), patcher);
+                    listener->patcherRemoved(getShared(), patcher);
                     ++it;
                 }
             }
@@ -165,93 +137,6 @@ namespace Kiwi
         lock_guard<mutex> guard(m_patchers_mutex);
         patchers.assign(m_patchers.begin(), m_patchers.end());
     }
-    
-    void Instance::dspStart(ulong samplerate, ulong vectorsize)
-    {
-        if(m_dsp_running)
-        {
-            dspStop();
-        }
-        m_sample_rate   = samplerate;
-        m_vector_size   = vectorsize;
-        
-        m_dsp_mutex.lock();
-        m_patchers_mutex.lock();
-        for(auto it = m_patchers.begin(); it != m_patchers.end(); ++it)
-        {
-            int todo;
-            try
-            {
-                (*it)->dspStart(m_sample_rate, m_vector_size);
-            }
-            catch (sPatcher)
-            {
-                ;
-            }
-            m_dsp_patchers.push_back((*it));
-        }
-        m_patchers_mutex.unlock();
-        
-        if(!m_dsp_patchers.empty())
-        {
-            m_dsp_running   = true;
-            m_dsp_mutex.unlock();
-            
-            m_lists_mutex.lock();
-            auto it = m_lists.begin();
-            while(it != m_lists.end())
-            {
-                if((*it).expired())
-                {
-                    it = m_lists.erase(it);
-                }
-                else
-                {
-                    Instance::sListener listener = (*it).lock();
-                    listener->dspStarted(shared_from_this());
-                    ++it;
-                }
-            }
-            m_lists_mutex.unlock();
-        }
-        else
-        {
-            m_dsp_mutex.unlock();
-        }
-    }
-    
-    void Instance::dspStop()
-    {
-        if(m_dsp_running)
-        {
-            m_dsp_mutex.lock();
-            for(vector<sPatcher>::size_type i = 0; i < m_dsp_patchers.size(); i++)
-            {
-                m_dsp_patchers[i]->dspStop();
-            }
-            m_dsp_patchers.clear();
-            m_dsp_mutex.unlock();
-            
-            m_dsp_running = false;
-            
-            m_lists_mutex.lock();
-            auto it = m_lists.begin();
-            while(it != m_lists.end())
-            {
-                if((*it).expired())
-                {
-                    it = m_lists.erase(it);
-                }
-                else
-                {
-                    Instance::sListener listener = (*it).lock();
-                    listener->dspStopped(shared_from_this());
-                    ++it;
-                }
-            }
-            m_lists_mutex.unlock();
-        }
-    }    
     
     void Instance::addListener(sListener listener)
     {

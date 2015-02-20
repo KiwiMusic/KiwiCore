@@ -37,7 +37,7 @@ namespace Kiwi
     /**
      The patcher is...
      */
-	class Patcher : virtual public Attr::Manager
+	class Patcher : virtual public Attr::Manager, public DspChain
 	{
     public:
 		class Listener;
@@ -57,7 +57,6 @@ namespace Kiwi
 			
     private:
         const wInstance             m_instance;
-        sDspContext                 m_dsp_context;
         vector<sObject>             m_objects;
         vector<sLink>               m_links;
         vector<ulong>               m_free_ids;
@@ -115,7 +114,7 @@ namespace Kiwi
          */
         inline scPatcher getShared() const noexcept
         {
-            return dynamic_pointer_cast<const Patcher>(shared_from_this());
+            return dynamic_pointer_cast<const Patcher>(DspChain::shared_from_this());
         }
             
         //! Retrieve the shared pointer of the patcher.
@@ -124,7 +123,7 @@ namespace Kiwi
          */
         inline sPatcher getShared() noexcept
         {
-            return dynamic_pointer_cast<Patcher>(shared_from_this());
+            return dynamic_pointer_cast<Patcher>(DspChain::shared_from_this());
         }
 
         //! Get the objects.
@@ -156,15 +155,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             links = m_links;
         }
-
-        //! Check if the dsp is running.
-        /** The function checks if the dsp is running
-         */
-        inline bool isDspRunning() const noexcept
-        {
-            return (bool)m_dsp_context.use_count();
-        }
-        
+            
         //! Append a dico.
         /** The function reads a dico and add the objects and links to the patcher.
          @param dico The dico.
@@ -200,27 +191,6 @@ namespace Kiwi
          @param dico The dico.
          */
         void write(sDico dico) const;
-        
-        //! Start the dsp.
-        /** The function start the dsp chain.
-         @param samplerate The sample rate.
-         @param vectorsize The vector size of the signal.
-         @return true if the patcher can process signal.
-         */
-        void dspStart(const ulong samplerate, const ulong vectorsize);
-        
-        //! Perform a tick on the dsp.
-        /** The function calls once the dsp chain. You should never call this method if the dsp hasn't been started before.
-         */
-        inline void dspTick() const noexcept
-        {
-            m_dsp_context->tick();
-        }
-        
-        //! Stop the dsp.
-        /** The function stop the dsp chain.
-         */
-        void dspStop();
 		
 		//! Add a listener to the object.
 		/** The function adds a listener to the object.

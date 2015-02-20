@@ -30,7 +30,7 @@ namespace Kiwi
     //                                      PAGE                                        //
     // ================================================================================ //
     
-    Patcher::Patcher(sInstance instance) :
+    Patcher::Patcher(sInstance instance) : DspChain(instance),
     m_instance(instance),
 	m_color_unlocked_background(Attr::create("unlocked_bgcolor","Unlocked Background Color", "Appearance", ColorValue(0.88, 0.89, 0.88, 1.))),
 	m_color_locked_background(Attr::create("locked_bgcolor", "Locked Background Color", "Appearance", ColorValue(0.88, 0.89, 0.88, 1.))),
@@ -372,50 +372,6 @@ namespace Kiwi
 				subpatcher->set(Tag::List::links, atoms);
 				dico->set(Tag::List::patcher, subpatcher);
 			}
-        }
-    }
-	
-    void Patcher::dspStart(const ulong samplerate, const ulong vectorsize)
-    {
-        dspStop();
-        m_dsp_context = make_shared<DspContext>();
-        
-        lock_guard<mutex> guard(m_mutex);
-        for(auto it = m_objects.begin(); it != m_objects.end(); ++it)
-        {
-            sDspNode process = dynamic_pointer_cast<DspNode>((*it));
-            if(process)
-            {
-                m_dsp_context->add(process);
-            }
-        }
-
-        for(auto it = m_links.begin(); it != m_links.end(); ++it)
-        {
-            sDspLink link = dynamic_pointer_cast<DspLink>((*it));
-            if(link)
-            {
-                m_dsp_context->add(link);
-            } 
-        }
-        
-        try
-        {
-            m_dsp_context->compile(samplerate, vectorsize);
-        }
-        catch(sDspNode object)
-        {
-            Console::error(dynamic_pointer_cast<Object>(object), "something appened with me... sniff !");
-            throw shared_from_this();
-        }
-    }
-    
-    void Patcher::dspStop()
-    {
-        if(m_dsp_context)
-        {
-            m_dsp_context->stop();
-            m_dsp_context.reset();
         }
     }
     

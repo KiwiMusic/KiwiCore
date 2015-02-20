@@ -42,7 +42,7 @@ namespace Kiwi
      @see Patcher
      @see Beacon
      */
-    class Instance : public Beacon::Factory, public enable_shared_from_this<Instance>
+    class Instance : public Beacon::Factory, public DspContext
     {
     public:
         class Listener;
@@ -52,13 +52,7 @@ namespace Kiwi
         typedef weak_ptr<const Listener>    wcListener;
         
     private:
-        vector<sPatcher>           m_dsp_patchers;
-        mutable mutex           m_dsp_mutex;
-        atomic_bool             m_dsp_running;
-        atomic_ulong            m_sample_rate;
-        atomic_ulong            m_vector_size;
-        
-        set<sPatcher>              m_patchers;
+        set<sPatcher>           m_patchers;
         mutex                   m_patchers_mutex;
         set<wListener,
         owner_less<wListener>>  m_lists;
@@ -68,18 +62,37 @@ namespace Kiwi
         
         //! The constructor.
         /** You should never use this method, please use the create method instead.
-		 @see create
+		 @param device The device manager.
          */
-        Instance() noexcept;
+        Instance(sDspDeviceManager device) noexcept;
         
         //! The destructor.
         ~Instance();
         
         //! The instance creation method.
         /** The function allocates an instance and initialize the prototypes of objects.
+         @param device The device manager.
          @return The instance.
          */
-        static sInstance create();
+        static sInstance create(sDspDeviceManager device);
+        
+        //! Retrieve the shared pointer of the instance.
+        /** The function retrieves the shared pointer of the instance.
+         @return The shared pointer of the instance.
+         */
+        inline scInstance getShared() const noexcept
+        {
+            return dynamic_pointer_cast<const Instance>(DspContext::shared_from_this());
+        }
+        
+        //! Retrieve the shared pointer of the instance.
+        /** The function retrieves the shared instance of the instance.
+         @return The shared pointer of the patcher.
+         */
+        inline sInstance getShared() noexcept
+        {
+            return dynamic_pointer_cast<Instance>(DspContext::shared_from_this());
+        }
         
         //! Create a patcher.
         /** The function creates a patcher with a dico or creates an empty one if the dico is empty.
@@ -102,63 +115,6 @@ namespace Kiwi
          @see createPatcher, removePatcher
          */
         void getPatchers(vector<sPatcher>& patchers);
-        
-        //! Start the dsp.
-        /** The function start the dsp chain of all the patchers.
-         @param samplerate The sample rate.
-         @param vectorsize The vector size of the signal.
-         @see getVectorSize, getSampleRate, dspTick, dspStop
-         */
-        void dspStart(ulong samplerate, ulong vectorsize);
-        
-        //! Perform a tick on the dsp.
-        /** The function calls once the dsp chain of all the patchers.
-         @see getVectorSize, getSampleRate, dspStart, dspStop
-         */
-        inline void dspTick() const noexcept
-        {
-            m_dsp_mutex.lock();
-            for(vector<sPatcher>::size_type i = 0; i < m_dsp_patchers.size(); i++)
-            {
-                m_dsp_patchers[i]->dspTick();
-            }
-            m_dsp_mutex.unlock();
-        }
-        
-        //! Stop the dsp.
-        /** The function stop the dsp chain of all the patchers.
-         @see getVectorSize, getSampleRate, dspStart, dspTick
-         */
-        void dspStop();
-        
-        //! Check if the dsp is running.
-        /** The function checks if the dsp is running
-         @return true if the dsp can be ticked otherwise false.
-         */
-        inline bool isDspRunning() const noexcept
-        {
-            return m_dsp_running;
-        }
-        
-        //! Retrieve the current sample rate.
-        /** The function retrieve the current or the last sample rate used for dsp.
-         @return the sample rate.
-         @see getVectorSize, dspStart
-         */
-        inline ulong getSampleRate() const noexcept
-        {
-            return m_sample_rate;
-        }
-        
-        //! Retrieve the current vector size of the signal.
-        /** The function retrieve the current or the last vector size of the signal.
-         @return the vector size of the signal.
-         @see getSampleRate, dspStart
-         */
-        inline ulong getVectorSize() const noexcept
-        {
-            return m_vector_size;
-        }
         
         //! Add an instance listener in the binding list of the instance.
         /** The function adds an instance listener in the binding list of the instance. 
