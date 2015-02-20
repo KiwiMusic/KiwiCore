@@ -22,6 +22,8 @@
 		8F19E7601A97301A003CE222 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F19E75F1A97301A003CE222 /* CoreAudioKit.framework */; };
 		8F19E7621A973037003CE222 /* libportaudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F19E7611A973037003CE222 /* libportaudio.a */; };
 		8F19E7691A973070003CE222 /* DspPortAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E7661A973070003CE222 /* DspPortAudio.cpp */; };
+		8F19E7701A97350A003CE222 /* ObjectsDspGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E76D1A97350A003CE222 /* ObjectsDspGenerator.cpp */; };
+		8F19E7751A97380C003CE222 /* ObjectsDspIo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E7731A97380C003CE222 /* ObjectsDspIo.cpp */; };
 		8F21B4711A8238BD00670F15 /* Classic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F21B45A1A8238BD00670F15 /* Classic.cpp */; };
 		8F41B4651A7E3C640067E122 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4641A7E3C640067E122 /* main.cpp */; };
 		8F41B4D91A7E3C890067E122 /* Beacon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B46E1A7E3C890067E122 /* Beacon.cpp */; };
@@ -93,6 +95,12 @@
 		8F19E7611A973037003CE222 /* libportaudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libportaudio.a; path = ../KiwiDsp/ThirdParty/PortAudio/lib/.libs/libportaudio.a; sourceTree = "<group>"; };
 		8F19E7661A973070003CE222 /* DspPortAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DspPortAudio.cpp; sourceTree = "<group>"; };
 		8F19E7671A973070003CE222 /* DspPortAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DspPortAudio.h; sourceTree = "<group>"; };
+		8F19E76B1A97350A003CE222 /* Objects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Objects.h; sourceTree = "<group>"; };
+		8F19E76D1A97350A003CE222 /* ObjectsDspGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectsDspGenerator.cpp; sourceTree = "<group>"; };
+		8F19E76E1A97350A003CE222 /* ObjectsDspGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectsDspGenerator.h; sourceTree = "<group>"; };
+		8F19E7721A97380C003CE222 /* ObjectsDsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectsDsp.h; sourceTree = "<group>"; };
+		8F19E7731A97380C003CE222 /* ObjectsDspIo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectsDspIo.cpp; sourceTree = "<group>"; };
+		8F19E7741A97380C003CE222 /* ObjectsDspIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectsDspIo.h; sourceTree = "<group>"; };
 		8F21B4561A8238BD00670F15 /* Gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gui.h; sourceTree = "<group>"; };
 		8F21B45A1A8238BD00670F15 /* Classic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Classic.cpp; sourceTree = "<group>"; };
 		8F21B45B1A8238BD00670F15 /* Classic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Classic.h; sourceTree = "<group>"; };
@@ -233,6 +241,28 @@
 			path = ../KiwiDsp/Implementation;
 			sourceTree = "<group>";
 		};
+		8F19E76A1A97350A003CE222 /* KiwiObjects */ = {
+			isa = PBXGroup;
+			children = (
+				8F19E76B1A97350A003CE222 /* Objects.h */,
+				8F19E76C1A97350A003CE222 /* ObjectsDsp */,
+			);
+			name = KiwiObjects;
+			path = ../KiwiObjects;
+			sourceTree = "<group>";
+		};
+		8F19E76C1A97350A003CE222 /* ObjectsDsp */ = {
+			isa = PBXGroup;
+			children = (
+				8F19E7721A97380C003CE222 /* ObjectsDsp.h */,
+				8F19E7731A97380C003CE222 /* ObjectsDspIo.cpp */,
+				8F19E7741A97380C003CE222 /* ObjectsDspIo.h */,
+				8F19E76D1A97350A003CE222 /* ObjectsDspGenerator.cpp */,
+				8F19E76E1A97350A003CE222 /* ObjectsDspGenerator.h */,
+			);
+			path = ObjectsDsp;
+			sourceTree = "<group>";
+		};
 		8F21B4591A8238BD00670F15 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
@@ -284,6 +314,7 @@
 				8F19E7381A97270B003CE222 /* KiwiDsp */,
 				8F41B4B41A7E3C890067E122 /* KiwiGui */,
 				8F41B46D1A7E3C890067E122 /* KiwiBase */,
+				8F19E76A1A97350A003CE222 /* KiwiObjects */,
 				8F41B4851A7E3C890067E122 /* KiwiBoxes */,
 			);
 			name = Sources;
@@ -465,6 +496,7 @@
 				8F41B4E11A7E3C890067E122 /* Patcher.cpp in Sources */,
 				8F41B4D91A7E3C890067E122 /* Beacon.cpp in Sources */,
 				8F67F6191A8B40A800DB2C2D /* Atom.cpp in Sources */,
+				8F19E7751A97380C003CE222 /* ObjectsDspIo.cpp in Sources */,
 				8FFC255F1A8CB75700B49898 /* Font.cpp in Sources */,
 				8FFC25791A8CB9DB00B49898 /* Writer.cpp in Sources */,
 				8FFC25641A8CB75700B49898 /* TextLayout.cpp in Sources */,
@@ -477,6 +509,7 @@
 				8FFC25441A8BCC8200B49898 /* Major.cpp in Sources */,
 				8F41B4DB1A7E3C890067E122 /* Console.cpp in Sources */,
 				8FFC256B1A8CB7CE00B49898 /* Default.cpp in Sources */,
+				8F19E7701A97350A003CE222 /* ObjectsDspGenerator.cpp in Sources */,
 				8F41B4DC1A7E3C890067E122 /* Dico.cpp in Sources */,
 				8F41B4E71A7E3C890067E122 /* Gui.cpp in Sources */,
 				8F19E7551A972724003CE222 /* DspIo.cpp in Sources */,

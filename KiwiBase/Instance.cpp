@@ -22,7 +22,7 @@
 */
 
 #include "Instance.h"
-
+#include "../KiwiObjects/Objects.h"
 #include "../KiwiBoxes/Gui.h"
 /*
 #include "../KiwiObjectes/Wireless.h"
@@ -56,6 +56,7 @@ namespace Kiwi
     {
         if(!libraries_loaded)
         {
+            ObjectsInitialize();
             guiInit();
             /*
 			standardObjectes();
@@ -188,6 +189,7 @@ namespace Kiwi
         }
         else
         {
+            Console::error("The factory doesn't know the object " + toString(name));
             return nullptr;
         }
     }

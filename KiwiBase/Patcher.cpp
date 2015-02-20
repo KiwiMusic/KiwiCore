@@ -151,67 +151,72 @@ namespace Kiwi
                 Object::sInlet inlet    = to->getInlet(indexi);
                 if(outlet && inlet)
                 {
-                    if(outlet->getType() & inlet->getType() || inlet->getType() & outlet->getType())
+                    if(outlet->getType() >= Object::Io::Signal && inlet->getType() >= Object::Io::Signal)
                     {
-                        Object::Io::Type type = min(outlet->getType(), inlet->getType());
-                        if(type & Object::Io::Signal)
+                        sDspNode pfrom = dynamic_pointer_cast<DspNode>(from);
+                        sDspNode pto   = dynamic_pointer_cast<DspNode>(to);
+                        if(from && to)
                         {
-                            sDspNode pfrom = dynamic_pointer_cast<DspNode>(from);
-                            sDspNode pto   = dynamic_pointer_cast<DspNode>(to);
-                            if(from && to)
+                            ulong poutlet = 0, pinlet = 0;
+                            for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
                             {
-                                ulong poutlet = 0, pinlet = 0;
-                                for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
+                                Object::sOutlet out = from->getOutlet(poutlet);
+                                if(out)
                                 {
-                                    Object::sOutlet out = from->getOutlet(poutlet);
-                                    if(out)
+                                    if(out == outlet)
                                     {
-                                        if(out == outlet)
-                                        {
-                                            break;
-                                        }
-                                        else if(out->getType() & Object::Io::Signal)
-                                        {
-                                            poutlet++;
-                                        }
+                                        break;
+                                    }
+                                    else if(out->getType() & Object::Io::Signal)
+                                    {
+                                        poutlet++;
                                     }
                                 }
-                                if(poutlet >= pfrom->getNumberOfOutputs())
-                                {
-                                    return;
-                                }
-                                
-                                for(ulong i = 0; i < from->getNumberOfInlets(); i++)
-                                {
-                                    Object::sInlet in = from->getInlet(poutlet);
-                                    if(in)
-                                    {
-                                        if(in == inlet)
-                                        {
-                                            break;
-                                        }
-                                        else if(in->getType() & Object::Io::Signal)
-                                        {
-                                            pinlet++;
-                                        }
-                                    }
-                                }
-                                if(pinlet >= pfrom->getNumberOfInputs())
-                                {
-                                    return;
-                                }
-                                
-                                outlet->append(to, indexo);
-                                inlet->append(from, indexi);
-                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, type, pfrom, poutlet, pto, pinlet);
                             }
-                        }
-                        else
-                        {
+                            if(poutlet >= pfrom->getNumberOfOutputs())
+                            {
+                                return;
+                            }
+                            
+                            for(ulong i = 0; i < to->getNumberOfInlets(); i++)
+                            {
+                                Object::sInlet in = to->getInlet(pinlet);
+                                if(in)
+                                {
+                                    if(in == inlet)
+                                    {
+                                        break;
+                                    }
+                                    else if(in->getType() & Object::Io::Signal)
+                                    {
+                                        pinlet++;
+                                    }
+                                }
+                            }
+                            if(pinlet >= pto->getNumberOfInputs())
+                            {
+                                return;
+                            }
+                            
                             outlet->append(to, indexo);
                             inlet->append(from, indexi);
-                            link = make_shared<Link>(getShared(), from, indexo, to, indexi, type);
+                            if(outlet->getType() == Object::Io::Both && inlet->getType() == Object::Io::Both)
+                            {
+                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Both, pfrom, poutlet, pto, pinlet);
+                            }
+                            else
+                            {
+                                cout << "Connect "<< indexo << " " << indexo << " " << poutlet << " " << pinlet << " " << endl;
+                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Signal, pfrom, poutlet, pto, pinlet);
+                            }
                         }
+                    }
+                    else if(outlet->getType() == inlet->getType() || inlet->getType() == Object::Io::Both || outlet->getType() == Object::Io::Both)
+                    {
+                        
+                        outlet->append(to, indexo);
+                        inlet->append(from, indexi);
+                        link = make_shared<Link>(getShared(), from, indexo, to, indexi, Object::Io::Message);
                     }
                 }
             }
