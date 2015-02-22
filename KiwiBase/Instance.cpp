@@ -22,16 +22,8 @@
 */
 
 #include "Instance.h"
-//#include "../KiwiObjects/Objects.h"
-#include "../KiwiBoxes/Gui.h"
-#include "../KiwiBoxes/NewBox.h"
-/*
-#include "../KiwiObjectes/Wireless.h"
-#include "../KiwiObjectes/Time.h"
-#include "../KiwiObjectes/DspGenerator.h"
-#include "../KiwiObjectes/Arithmetic.h"
-#include "../KiwiObjectes/ArithmeticTilde.h"
-*/
+#include "../KiwiObjects/Objects.h"
+
 namespace Kiwi
 {
     bool libraries_loaded = false;
@@ -56,15 +48,7 @@ namespace Kiwi
     {
         if(!libraries_loaded)
         {
-            //ObjectsInitialize();
-            guiInit();
-			standardBoxesInit();
-            /*
-            arithmetic();
-            wireless();
-			timing();
-            GeneratorTildeInit();
-             */
+            ObjectsInitialize();
             libraries_loaded = true;
         }
         return make_shared<Instance>(device);
