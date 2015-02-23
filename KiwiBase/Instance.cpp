@@ -57,7 +57,6 @@ namespace Kiwi
         if(!libraries_loaded)
         {
             ObjectsInitialize();
-            guiInit();
             /*
 			standardObjectes();
             arithmetic();

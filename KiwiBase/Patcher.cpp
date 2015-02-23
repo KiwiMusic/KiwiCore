@@ -206,7 +206,6 @@ namespace Kiwi
                             }
                             else
                             {
-                                cout << "Connect "<< indexo << " " << indexo << " " << poutlet << " " << pinlet << " " << endl;
                                 link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Signal, pfrom, poutlet, pto, pinlet);
                             }
                         }
@@ -481,6 +480,51 @@ namespace Kiwi
                 }
             }
         }
+    }
+    
+    void Patcher::create(vector<Atom> const& inputs, vector<Atom> outputs)
+    {
+        if(!inputs.empty())
+        {
+            if(inputs[0].getType() == Atom::TAG)
+            {
+                if(inputs[0] == Tag::List::object)
+                {
+                    createObject(Dico::create());
+                }
+                else if(inputs[0] == Tag::List::link)
+                {
+                    createLink(Dico::create());
+                }
+                else
+                {
+                    Console::error("Creation command accepts only \"object\" or \"link\" argument.");
+                }
+            }
+            else
+            {
+                Console::error("Creation command needs a tag as first argument.");
+            }
+        }
+        else
+        {
+            Console::error("Creation command is empty.");
+        }
+    }
+    
+    void Patcher::remove(vector<Atom> const& inputs)
+    {
+        
+    }
+    
+    void Patcher::get(vector<Atom> const& inputs, vector<Atom> outputs) const
+    {
+        
+    }
+    
+    void Patcher::set(vector<Atom> const& inputs)
+    {
+        
     }
 }
 

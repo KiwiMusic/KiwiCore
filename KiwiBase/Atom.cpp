@@ -235,6 +235,18 @@ namespace Kiwi
         return m_quark == dico;
     }
     
+    vector<Atom>& Atom::evaluate(string const& _text)
+    {
+        string word;
+        istringstream iss(_text);
+        vector<Atom> atoms;
+        while(iss >> word)
+        {
+            ;
+        }
+        return atoms;
+    }
+    
     string toString(Atom const& __val)
     {
         switch(__val.getType())

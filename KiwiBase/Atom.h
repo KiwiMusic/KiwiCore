@@ -782,6 +782,8 @@ namespace Kiwi
         {
             return !(*this == dico);
         }
+        
+        static vector<Atom>& evaluate(string const& _text);
     };
     
     string toString(Atom const& __val);

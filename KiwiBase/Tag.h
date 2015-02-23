@@ -128,6 +128,7 @@ namespace Kiwi
         static const sTag center;
         static const sTag color;
         static const sTag Color;
+        static const sTag command;
         
         static const sTag focus;
         static const sTag Font;
@@ -153,6 +154,8 @@ namespace Kiwi
         static const sTag Message_Color;
         
         static const sTag name;
+        static const sTag newlink;
+        static const sTag newobject;
         static const sTag ninlets;
         static const sTag normal;
         static const sTag noutlets;
@@ -162,6 +165,8 @@ namespace Kiwi
         
         static const sTag patcher;
         
+        static const sTag removelink;
+        static const sTag removeobject;
         static const sTag right;
         
         static const sTag set;

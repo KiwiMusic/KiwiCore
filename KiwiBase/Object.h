@@ -117,8 +117,8 @@ namespace Kiwi
         mutable mutex			m_mutex;
         
     protected:
-        const sAttrPoint        m_presentation_position;
-        const sAttrSize         m_presentation_size;
+        const sAttrPoint       m_presentation_position;
+        const sAttrSize        m_presentation_size;
         const sAttrBool        m_hidden;
         const sAttrBool        m_presentation;
         const sAttrBool        m_ignoreclick;

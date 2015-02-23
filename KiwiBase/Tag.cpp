@@ -39,6 +39,7 @@ namespace Kiwi
     const sTag Tag::List::center                = Tag::create("center");
     const sTag Tag::List::color                 = Tag::create("color");
     const sTag Tag::List::Color                 = Tag::create("Color");
+    const sTag Tag::List::command               = Tag::create("command");
     
     const sTag Tag::List::from                  = Tag::create("from");
     const sTag Tag::List::focus                 = Tag::create("focus");
@@ -64,6 +65,8 @@ namespace Kiwi
     const sTag Tag::List::Message_Color         = Tag::create("Message Color");
     
     const sTag Tag::List::name                  = Tag::create("name");
+    const sTag Tag::List::newlink               = Tag::create("newlink");
+    const sTag Tag::List::newobject             = Tag::create("newobject");
     const sTag Tag::List::ninlets               = Tag::create("ninlets");
     const sTag Tag::List::normal                = Tag::create("normal");
     const sTag Tag::List::noutlets              = Tag::create("noutlets");
@@ -71,8 +74,10 @@ namespace Kiwi
     const sTag Tag::List::object                = Tag::create("object");
     const sTag Tag::List::objects               = Tag::create("objects");
     
-    const sTag Tag::List::patcher                  = Tag::create("patcher");
+    const sTag Tag::List::patcher               = Tag::create("patcher");
     
+    const sTag Tag::List::removelink            = Tag::create("removelink");
+    const sTag Tag::List::removeobject          = Tag::create("removeobject");
     const sTag Tag::List::right                 = Tag::create("right");
     
     const sTag Tag::List::set                   = Tag::create("set");
