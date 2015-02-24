@@ -29,8 +29,6 @@
 
 namespace Kiwi
 {
-    using namespace Gui;
-    
     class Clock;
     typedef shared_ptr<Clock>       sClock;
     typedef weak_ptr<Clock>         wClock;
@@ -72,7 +70,6 @@ namespace Kiwi
     typedef weak_ptr<Instance>          wInstance;
     typedef shared_ptr<const Instance>  scInstance;
     typedef weak_ptr<const Instance>    wcInstance;
-    
 };
 
 #endif
