@@ -42,6 +42,8 @@ namespace Kiwi
     private:
         map<sTag, vector<Atom>> m_entries;
         
+        static void evaluateObject(sDico dico, string const& text);
+        static void evaluateLink(sDico dico, string const& text);
     public:
         
         //! Constructor.
@@ -79,6 +81,11 @@ namespace Kiwi
         /** The function allocates a dico.
          */
         static sDico evaluateForLink(string const& text);
+        
+        //! The dico creation method.
+        /** The function allocates a dico.
+         */
+        static sDico evaluateForPatcher(string& text);
         
         //! Clear the dico.
         /** The function clears the dico.

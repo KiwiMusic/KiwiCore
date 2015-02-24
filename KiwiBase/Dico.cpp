@@ -69,6 +69,146 @@ namespace Kiwi
         return dico;
     }
     
+    void Dico::evaluateObject(sDico dico, string const& text)
+    {
+        if(dico)
+        {
+            sDico object = Dico::create();
+            if(object)
+            {
+                bool mode = false;
+                string word;
+                string key = string("name");
+                istringstream iss;
+                vector<Atom> atoms;
+                while(iss >> word)
+                {
+                    if(mode)
+                    {
+                        if(word[0] == '@')
+                        {
+                            object->set(Tag::create(key), atoms);
+                            atoms.clear();
+                            key = word.c_str()+1;
+                        }
+                        else
+                        {
+                            if(isdigit(word[0]))
+                            {
+                                if(word.find('.') != string::npos)
+                                {
+                                    atoms.push_back(atof(word.c_str()));
+                                }
+                                else
+                                {
+                                    atoms.push_back(atol(word.c_str()));
+                                }
+                            }
+                            else
+                            {
+                                atoms.push_back(Tag::create(word));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        object->set(Tag::create(key), Tag::create(word));
+                        key = "arguments";
+                        mode = true;
+                    }
+                }
+                if(mode)
+                {
+                    object->set(Tag::create(key), atoms);
+                    object->set(Tag::List::text, Tag::create(text));
+                    dico->set(Tag::List::objects, vector<Atom>({object}));
+                }
+            }
+        }
+    }
+    
+    void Dico::evaluateLink(sDico dico, string const& text)
+    {
+        if(dico)
+        {
+            sDico link = Dico::create();
+            if(link)
+            {
+                vector<Atom> from, to;
+                size_t pos = text.find_first_not_of(' ', 0);
+                size_t type = getType(text, pos);
+                if(type == Atom::LONG || type == Atom::DOUBLE)
+                {
+                    from.push_back(stol(text.c_str()+pos));
+                    pos = text.find(' ', pos);
+                    pos = text.find_first_not_of(' ', pos);
+                    type = getType(text, pos);
+                }
+                if(type == Atom::LONG || type == Atom::DOUBLE)
+                {
+                    from.push_back(stol(text.c_str()+pos));
+                    pos = text.find(' ', pos);
+                    pos = text.find_first_not_of(' ', pos);
+                    type = getType(text, pos);
+                }
+                if(type == Atom::LONG || type == Atom::DOUBLE)
+                {
+                    to.push_back(stol(text.c_str()+pos));
+                    pos = text.find(' ', pos);
+                    pos = text.find_first_not_of(' ', pos);
+                    type = getType(text, pos);
+                }
+                if(type == Atom::LONG || type == Atom::DOUBLE)
+                {
+                    to.push_back(stol(text.c_str()+pos));
+                }
+                if(from.size() == 2 && to.size() == 2)
+                {
+                    link->set(Tag::List::from, from);
+                    link->set(Tag::List::to, to);
+                    dico->set(Tag::List::links, vector<Atom>({link}));
+                }
+                
+            }
+        }
+    }
+    
+    sDico Dico::evaluateForPatcher(string& text)
+    {
+        sDico dico = make_shared<Dico>();
+        if(dico)
+        {
+            string word;
+            istringstream iss(text);
+            while(iss >> word)
+            {
+                sTag command = Tag::create(word);
+                if(command)
+                {
+                    text.erase(text.begin(), text.begin()+word.size());
+                    if(command == Tag::List::newobject)
+                    {
+                        evaluateObject(dico, text);
+                    }
+                    else if(command == Tag::List::newlink)
+                    {
+                        evaluateLink(dico, text);
+                    }
+                    else if(command == Tag::List::removeobject)
+                    {
+                        evaluateObject(dico, text);
+                    }
+                    else if(command == Tag::List::removelink)
+                    {
+                        evaluateLink(dico, text);
+                    }
+                    dico->set(Tag::List::command, command);
+                }
+            }
+        }
+        return dico;
+    }
+    
     sDico Dico::evaluateForObject(string const& text)
     {
         sDico dico = make_shared<Dico>();
@@ -125,7 +265,6 @@ namespace Kiwi
                     dico->set(Tag::List::objects, vector<Atom>({object}));
                     return dico;
                 }
-                
             }
         }
         return nullptr;

@@ -48,7 +48,7 @@ namespace Kiwi
         /** Flags describing the type of the notification
          @see Controler
          */
-		enum Notification : bool
+		enum Notification //: bool
         {
             Added        = false,
             Removed      = true
@@ -113,7 +113,7 @@ namespace Kiwi
          */
         inline scPatcher getShared() const noexcept
         {
-            return dynamic_pointer_cast<const Patcher>(DspChain::shared_from_this());
+            return static_pointer_cast<const Patcher>(DspChain::shared_from_this());
         }
             
         //! Retrieve the shared pointer of the patcher.
@@ -122,39 +122,55 @@ namespace Kiwi
          */
         inline sPatcher getShared() noexcept
         {
-            return dynamic_pointer_cast<Patcher>(DspChain::shared_from_this());
+            return static_pointer_cast<Patcher>(DspChain::shared_from_this());
         }
 
         //! Get the objects.
         /** The function retrieves the objects from the patcher.
          @param objects   A vector of atoms.
          */
-        void getObjects(vector<sObject>& objects) const
+        void getObjects(vector<sObject>& objects) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             objects = m_objects;
-        }
-        
-        //! Get the number of objects.
-        /** The function retrieves the number of objects.
-         @return The number of objects.
-         */
-        ulong getNumberOfObjects() const noexcept
-        {
-            lock_guard<mutex> guard(m_mutex);
-            return m_objects.size();
         }
         
         //! Get the links.
         /** The function retrieves the links from the patcher.
          @param links   A vector of links.
          */
-        void getLinks(vector<sLink>& links) const
+        void getLinks(vector<sLink>& links) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             links = m_links;
         }
-            
+        
+        //! Creation method of the patcher.
+        /** The function evaluates the inputs for the creation and returns the result in the outputs.
+         @param inputs The vector of atoms to evaluate.
+         @param outputs The vector of atoms to return the creation.
+         */
+        void create(vector<Atom> const& inputs, vector<Atom> outputs);
+        
+        //! Remove method of the patcher.
+        /** The function evaluates the inputs for the deletion.
+         @param inputs The vector of atoms to evaluate.
+         */
+        void remove(vector<Atom> const& inputs);
+        
+        //! Get method of the patcher.
+        /** The function evaluates the inputs for the getting and returns the result in the outputs.
+         @param inputs The vector of atoms to evaluate.
+         @param outputs The vector of atoms to return the getting.
+         */
+        void get(vector<Atom> const& inputs, vector<Atom> outputs) const;
+        
+        //! Set method of the patcher.
+        /** The function evaluates the inputs for the setting.
+         @param inputs The vector of atoms to evaluate.
+         */
+        void set(vector<Atom> const& inputs);
+        
         //! Append a dico.
         /** The function reads a dico and add the objects and links to the patcher.
          @param dico The dico.

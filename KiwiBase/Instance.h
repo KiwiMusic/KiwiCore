@@ -61,12 +61,14 @@ namespace Kiwi
     public:
         
         //! The constructor.
-        /** You should never use this method, please use the create method instead.
+        /** You should never use this method.
 		 @param device The device manager.
          */
         Instance(sDspDeviceManager device) noexcept;
         
         //! The destructor.
+        /** You should never use this method.
+         */
         ~Instance();
         
         //! The instance creation method.
@@ -82,7 +84,7 @@ namespace Kiwi
          */
         inline scInstance getShared() const noexcept
         {
-            return dynamic_pointer_cast<const Instance>(DspContext::shared_from_this());
+            return static_pointer_cast<const Instance>(DspContext::shared_from_this());
         }
         
         //! Retrieve the shared pointer of the instance.
@@ -91,7 +93,7 @@ namespace Kiwi
          */
         inline sInstance getShared() noexcept
         {
-            return dynamic_pointer_cast<Instance>(DspContext::shared_from_this());
+            return static_pointer_cast<Instance>(DspContext::shared_from_this());
         }
         
         //! Create a patcher.
