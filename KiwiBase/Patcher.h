@@ -21,10 +21,9 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_PAGE__
-#define __DEF_KIWI_PAGE__
+#ifndef __DEF_KIWI_PATCHER__
+#define __DEF_KIWI_PATCHER__
 
-#include "Object.h"
 #include "Link.h"
 
 namespace Kiwi
