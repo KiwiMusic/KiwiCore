@@ -62,7 +62,7 @@ namespace Kiwi
     /**
      The object is a graphical class that aims to be instantiate in a patcher.
      */
-    class Object : virtual public Sketcher
+    class Object : virtual public Beacon::Castaway, virtual public Sketcher
     {
     public:
         

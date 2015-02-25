@@ -70,42 +70,27 @@ namespace Kiwi
     void Patcher::createObject(Dico const& dico)
     {
         sObject object;
-        sTag name, text;
-        Vector args;
-        ulong _id;
-        int toclean;
-        auto it = dico.find(Tag::List::name);
-        if(it != dico.end())
+        if(dico.count(Tag::List::name) &&
+           dico.count(Tag::List::text) &&
+           dico.count(Tag::List::id) &&
+           dico.count(Tag::List::arguments))
         {
-            name = it->second;
-        }
-        it = dico.find(Tag::List::text);
-        if(it != dico.end())
-        {
-            text = it->second;
-        }
-        it = dico.find(Tag::List::id);
-        if(it != dico.end())
-        {
-            _id = it->second;
-        }
-        it = dico.find(Tag::List::arguments);
-        if(it != dico.end())
-        {
-            args = it->second;
-        }
-        object = Factory::create(name, Detail(getInstance(), getShared(), _id, name, text->getName(), dico, args));
-        
-        if(object)
-        {
-            sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
-            if(dspnode)
+            sTag name = dico.at(Tag::List::name);
+            sTag text = dico.at(Tag::List::text);
+            ulong _id = dico.at(Tag::List::id);
+            Vector args=dico.at(Tag::List::arguments);
+            object = Factory::create(name, Detail(getInstance(), getShared(), _id, name, text->getName(), dico, args));
+            if(object)
             {
-                DspChain::add(dspnode);
+                sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
+                if(dspnode)
+                {
+                    DspChain::add(dspnode);
+                }
+                m_objects.push_back(object);
             }
-            m_objects.push_back(object);
+            send(object, Notification::Added);
         }
-        send(object, Notification::Added);
     }
     
     void Patcher::createLink(Dico const& dico)

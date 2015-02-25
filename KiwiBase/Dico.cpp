@@ -22,801 +22,194 @@
 */
 
 #include "Dico.h"
-#include "Object.h"
-#include "Patcher.h"
-#include "Console.h"
+#include "Atom.h"
 
 namespace Kiwi
 {    
     // ================================================================================ //
     //                                      DICO                                        //
     // ================================================================================ //
-    Dico::Dico() noexcept
+    Dico::Dico()
     {
         ;
     }
     
-    Dico::~Dico()
+    Dico::Dico(const Dico& other) :
+    m_map(other.m_map)
+    {
+        
+    }
+    
+    Dico::Dico(iterator first, iterator last) :
+    m_map(first, last)
+    {
+        
+    }
+    
+    Dico::Dico(Dico&& other) :
+    m_map(move(other.m_map))
+    {
+        
+    }
+    
+    Dico::Dico(initializer_list<value_type> il) :
+    m_map(il)
+    {
+        
+    }
+    
+    Dico::~Dico() noexcept
     {
         clear();
-    }
-    
-    sDico Dico::create()
-    {
-        return make_shared<Dico>();
-    }
-    
-    sDico Dico::create(scDico dico)
-    {
-        sDico ndico = make_shared<Dico>();
-        if(ndico && dico)
-        {
-            ndico->m_entries = dico->m_entries;
-        }
-        return ndico;
-    }
-    
-    sDico Dico::evaluateForJson(string const& text)
-    {
-        sDico dico = make_shared<Dico>();
-        if(dico)
-        {
-            size_t pos = 0;
-            if(getType(text, pos) == Atom::DICO)
-            {
-                fromJson(dico, text, pos);
-            }
-        }
-        return dico;
-    }
-    
-    void Dico::evaluateObject(sDico dico, string const& text)
-    {
-        if(dico)
-        {
-            sDico object = Dico::create();
-            if(object)
-            {
-                bool mode = false;
-                string word;
-                string key = string("name");
-                istringstream iss;
-                vector<Atom> atoms;
-                while(iss >> word)
-                {
-                    if(mode)
-                    {
-                        if(word[0] == '@')
-                        {
-                            object->set(Tag::create(key), atoms);
-                            atoms.clear();
-                            key = word.c_str()+1;
-                        }
-                        else
-                        {
-                            if(isdigit(word[0]))
-                            {
-                                if(word.find('.') != string::npos)
-                                {
-                                    atoms.push_back(atof(word.c_str()));
-                                }
-                                else
-                                {
-                                    atoms.push_back(atol(word.c_str()));
-                                }
-                            }
-                            else
-                            {
-                                atoms.push_back(Tag::create(word));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        object->set(Tag::create(key), Tag::create(word));
-                        key = "arguments";
-                        mode = true;
-                    }
-                }
-                if(mode)
-                {
-                    object->set(Tag::create(key), atoms);
-                    object->set(Tag::List::text, Tag::create(text));
-                    dico->set(Tag::List::objects, vector<Atom>({object}));
-                }
-            }
-        }
-    }
-    
-    void Dico::evaluateLink(sDico dico, string const& text)
-    {
-        if(dico)
-        {
-            sDico link = Dico::create();
-            if(link)
-            {
-                vector<Atom> from, to;
-                size_t pos = text.find_first_not_of(' ', 0);
-                size_t type = getType(text, pos);
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    from.push_back(stol(text.c_str()+pos));
-                    pos = text.find(' ', pos);
-                    pos = text.find_first_not_of(' ', pos);
-                    type = getType(text, pos);
-                }
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    from.push_back(stol(text.c_str()+pos));
-                    pos = text.find(' ', pos);
-                    pos = text.find_first_not_of(' ', pos);
-                    type = getType(text, pos);
-                }
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    to.push_back(stol(text.c_str()+pos));
-                    pos = text.find(' ', pos);
-                    pos = text.find_first_not_of(' ', pos);
-                    type = getType(text, pos);
-                }
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    to.push_back(stol(text.c_str()+pos));
-                }
-                if(from.size() == 2 && to.size() == 2)
-                {
-                    link->set(Tag::List::from, from);
-                    link->set(Tag::List::to, to);
-                    dico->set(Tag::List::links, vector<Atom>({link}));
-                }
-                
-            }
-        }
-    }
-    
-    sDico Dico::evaluateForPatcher(string& text)
-    {
-        sDico dico = make_shared<Dico>();
-        if(dico)
-        {
-            string word;
-            istringstream iss(text);
-            while(iss >> word)
-            {
-                sTag command = Tag::create(word);
-                if(command)
-                {
-                    text.erase(text.begin(), text.begin()+word.size());
-                    if(command == Tag::List::newobject)
-                    {
-                        evaluateObject(dico, text);
-                    }
-                    else if(command == Tag::List::newlink)
-                    {
-                        evaluateLink(dico, text);
-                    }
-                    else if(command == Tag::List::removeobject)
-                    {
-                        evaluateObject(dico, text);
-                    }
-                    else if(command == Tag::List::removelink)
-                    {
-                        evaluateLink(dico, text);
-                    }
-                    dico->set(Tag::List::command, command);
-                }
-            }
-        }
-        return dico;
-    }
-    
-    sDico Dico::evaluateForObject(string const& text)
-    {
-        sDico dico = make_shared<Dico>();
-        if(dico)
-        {
-            sDico object = Dico::create();
-            if(object)
-            {
-                bool mode = false;
-                string word;
-                string key = "name";
-                vector<Atom> atoms;
-                istringstream iss(text);
-                while(iss >> word)
-                {
-                    if(mode)
-                    {
-                        if(word[0] == '@')
-                        {
-                            object->set(Tag::create(key), atoms);
-                            atoms.clear();
-                            key = word.c_str()+1;
-                        }
-                        else
-                        {
-                            if(isdigit(word[0]))
-                            {
-                                if(word.find('.') != string::npos)
-                                {
-                                    atoms.push_back(atof(word.c_str()));
-                                }
-                                else
-                                {
-                                    atoms.push_back(atol(word.c_str()));
-                                }
-                            }
-                            else
-                            {
-                                atoms.push_back(Tag::create(word));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        object->set(Tag::create(key), Tag::create(word));
-                        key = "arguments";
-                        mode = true;
-                    }
-                }
-                if(mode)
-                {
-                    object->set(Tag::create(key), atoms);
-                    object->set(Tag::List::text, Tag::create(text));
-                    dico->set(Tag::List::objects, vector<Atom>({object}));
-                    return dico;
-                }
-            }
-        }
-        return nullptr;
-    }
-    
-    sDico Dico::evaluateForLink(string const& text)
-    {
-        sDico dico = make_shared<Dico>();
-        if(dico)
-        {
-            sDico link = Dico::create();
-            if(link)
-            {
-                vector<Atom> from, to;
-                size_t pos = text.find_first_not_of(' ', 0);
-                size_t type = getType(text, pos);
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    from.push_back(stol(text.c_str()+pos));
-                    pos = text.find(' ', pos);
-                    pos = text.find_first_not_of(' ', pos);
-                    type = getType(text, pos);
-                }
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    from.push_back(stol(text.c_str()+pos));
-                    pos = text.find(' ', pos);
-                    pos = text.find_first_not_of(' ', pos);
-                    type = getType(text, pos);
-                }
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    to.push_back(stol(text.c_str()+pos));
-                    pos = text.find(' ', pos);
-                    pos = text.find_first_not_of(' ', pos);
-                    type = getType(text, pos);
-                }
-                if(type == Atom::LONG || type == Atom::DOUBLE)
-                {
-                    to.push_back(stol(text.c_str()+pos));
-                }
-                if(from.size() == 2 && to.size() == 2)
-                {
-                    link->set(Tag::List::from, from);
-                    link->set(Tag::List::to, to);
-                    dico->set(Tag::List::links, vector<Atom>({link}));
-                    return dico;
-                }
-                
-            }
-        }
-        return nullptr;
     }
     
     void Dico::clear() noexcept
     {
-        m_entries.clear();
+        m_map.clear();
     }
     
-    void Dico::clear(sTag key) noexcept
+    Dico::iterator Dico::begin() noexcept
     {
-        m_entries.erase(key);
+        return m_map.begin();
     }
     
-    void Dico::keys(vector<Atom>& atoms) const noexcept
+    Dico::const_iterator Dico::begin() const noexcept
     {
-        atoms.clear();
-        for(auto it = m_entries.begin(); it != m_entries.end(); ++it)
-        {
-            atoms.push_back(it->first);
-        }
+        return m_map.begin();
     }
     
-    bool Dico::has(sTag key) const noexcept
+    Dico::const_iterator Dico::cbegin() const noexcept
     {
-        return m_entries.find(key) != m_entries.end();
+        return m_map.cbegin();
     }
     
-    size_t Dico::type(sTag key) const noexcept
+    Dico::reverse_iterator Dico::rbegin() noexcept
     {
-        auto it = m_entries.find(key);
-        if(it != m_entries.end())
-        {
-            if(it->second.size() == 1)
-            {
-                return it->second[0].getType();
-            }
-            else
-            {
-                return Atom::VECTOR;
-            }
-        }
-        else
-        {
-            return Atom::UNDEFINED;
-        }
-    }
-    
-    Atom Dico::get(sTag key) const noexcept
-    {
-        auto it = m_entries.find(key);
-        if(it != m_entries.end())
-        {
-            if(it->second.size())
-            {
-                return  it->second[0];
-            }
-        }
-        return Atom();
-    }    
-    
-    void Dico::get(sTag key, vector<Atom>& atoms) const noexcept
-    {
-        auto it = m_entries.find(key);
-        if(it != m_entries.end())
-        {
-            atoms = it->second;
-        }
-        else
-        {
-            atoms.clear();
-        }
-    }
-    
-    void Dico::set(sTag key, Atom const& atom) noexcept
-    {
-        m_entries[key] = {atom};
-    }
-    
-    void Dico::set(sTag key, vector<Atom> const& atoms) noexcept
-    {
-        if(atoms.size() == 0)
-            return;
-        m_entries[key] = atoms;
+        return m_map.rbegin();
     }
 
-    void Dico::append(sTag key, Atom const& atom) noexcept
+    Dico::const_reverse_iterator Dico::crbegin() const noexcept
     {
-        auto it = m_entries.find(key);
-        if(it != m_entries.end())
-            it->second.push_back(atom);
-        else
-            set(key, atom);
-    }
-    
-    void Dico::append(sTag key, vector<Atom> const& atoms) noexcept
-    {
-        auto it = m_entries.find(key);
-        if(it != m_entries.end())
-        {
-            for(vector<Atom>::size_type i = 0; i < atoms.size(); i++)
-            {
-                it->second.push_back(atoms[i]);
-            }
-        }
-        else
-            set(key, atoms);
-    }
-    /*
-    void Dico::read(string const& text)
-    {
-        clear();
-        size_t pos = 0;
-        if(getType(text, pos) == Atom::DICO)
-        {
-            size_t pos = 0;
-            fromJson(shared_from_this(), text, pos);
-        }
-    }
-    */
-    void Dico::read(string const& filename, string const& directoryname)
-    {
-        clear();
-        ifstream file;
-        if(!directoryname.empty() && !filename.empty())
-        {
-#ifdef _WINDOWS
-            file.open(directoryname + "\\" + filename);
-#else
-            file.open(directoryname + "/" + filename, ios_base::in);
-#endif
-        }
-        else if(filename.size())
-        {
-#ifdef _WINDOWS
-            file.open(filename);
-#else
-            file.open(filename, ios_base::in);
-#endif
-        }
-        
-        if(file.is_open())
-        {
-            clear();
-            string text;
-            string line;
-            while (getline(file, line))
-            {
-                text += line + "\n";
-            }
-            string::size_type pos = 0;
-            fromJson(shared_from_this(), text, pos);
-        }
-        
-        file.close();
+        return m_map.crbegin();
     }
 
-    void Dico::write(string& text) const
+    Dico::iterator Dico::end() noexcept
     {
-        text.clear();
-        toJson(shared_from_this(), text);
-    }
-    
-    void Dico::write(string const& filename, string const& directoryname) const
-    {
-        ofstream file;
-        if(directoryname.size() && filename.size())
-        {
-#ifdef _WINDOWS
-            file.open(directoryname + "\\" + filename);
-#else
-            file.open(directoryname + "/" + filename, ios_base::out);
-#endif
-        }
-        else if(filename.size())
-        {
-#ifdef _WINDOWS
-            file.open(filename);
-#else
-            file.open(filename, ios_base::out);
-#endif
-        }
-        
-        if(file.is_open())
-        {
-            file.clear();
-            string text;
-            toJson(shared_from_this(), text);
-            file << text;
-            
-        }
-        
-        file.close();
-    }
-    
-    string Dico::jsonEscape(string const& text)
-    {
-        ostringstream ss;
-        for(auto iter = text.cbegin(); iter != text.cend(); iter++)
-        {
-            switch (*iter)
-            {
-                case '\\': ss << "\\\\"; break;
-                case '"': ss << "\\\""; break;
-                case '/': ss << "\\/"; break;
-                case '\b': ss << "\\b"; break;
-                case '\f': ss << "\\f"; break;
-                case '\n': ss << "\\n"; break;
-                case '\r': ss << "\\r"; break;
-                case '\t': ss << "\\t"; break;
-                default: ss << *iter; break;
-            }
-        }
-        return "\"" + ss.str() + "\"";
-    }
-    
-    void Dico::toJson(Atom const& atom, string& text, string line)
-    {
-        switch(atom.getType())
-        {
-            case Atom::LONG:
-                text.append(to_string((long)atom));
-                break;
-            case Atom::DOUBLE:
-                text.append(to_string((double)atom));
-                break;
-            case Atom::TAG:
-            {
-                sTag tag = (sTag)atom;
-                if(tag)
-                    text.append(jsonEscape(toString(tag)));
-                else
-                    text.append("null");
-                break;
-            }
-            case Atom::OBJECT:
-            {
-                scObject obj = sObject(atom);
-                if(obj)
-                    text.append(toString(obj->getName()));
-                else
-                    text.append("null");
-                break;
-            }
-            case Atom::DICO:
-            {
-                scDico dico = sDico(atom);
-                if(dico)
-                    toJson(dico, text, line + "    ");
-                else
-                    text.append("null");
-                break;
-            }
-            default:
-                text.append("null");
-                break;
-        }
-    }
-    
-    void Dico::toJson(vector<Atom> const& atoms, string& text, string line)
-    {
-        if(atoms.size() == 1)
-        {
-            toJson(atoms[0], text, line);
-        }
-        else if(atoms.size())
-        {
-            text.append("[ ");
-            for(size_t i = 0; i < atoms.size() - 1; i++)
-            {
-                toJson(atoms[i], text, line);
-                text.append(", ");
-            }
-            toJson(atoms[atoms.size() - 1], text, line);
-            text.append(" ]");
-        }
-    }
-    
-    void Dico::toJson(scDico dico, string& text, string line)
-    {
-        vector<Atom> _keys;
-        dico->keys(_keys);
-        if(_keys.size())
-        {
-            text.append("{\n");
-            for(size_t i = 0; i < _keys.size() - 1; i++)
-            {
-                vector<Atom> _values;
-                dico->get(_keys[i], _values);
-                if(_values.size())
-                {
-                    text.append(line + "    ");
-                    toJson(_keys[i], text, line);
-                    text.append(" : ");
-                    toJson(_values, text, line);
-                }
-                text.append(",\n");
-            }
-            
-            vector<Atom> _values;
-            dico->get(_keys[_keys.size() - 1], _values);
-            if(_values.size())
-            {
-                text.append(line + "    ");
-                toJson(_keys[_keys.size() - 1], text, line);
-                text.append(" : ");
-                toJson(_values, text, line);
-            }
-            text.append("\n");
-            
-            text.append(line + "}");
-        }
-    }
-    
-    string Dico::jsonUnescape(string const& text, string::size_type& pos)
-    {
-        bool state = false;
-        ostringstream ss;
-        pos++;
-        for(auto iter = text.cbegin()+(long)pos; iter != text.cend(); iter++)
-        {
-            ++pos;
-            if(state)
-            {
-                switch(*iter)
-                {
-                    case '"': ss << '\"'; break;
-                    case '/': ss << '/'; break;
-                    case 'b': ss << '\b'; break;
-                    case 'f': ss << '\f'; break;
-                    case 'n': ss << '\n'; break;
-                    case 'r': ss << '\r'; break;
-                    case 't': ss << '\t'; break;
-                    case '\\': ss << '\\'; break;
-                    default: ss << *iter; break;
-                }
-                state = false;
-            }
-            else
-            {
-                switch(*iter)
-                {
-                    case '"': return ss.str();
-                    case '\\': state = true; break;
-                    default: ss << *iter; break;
-                }
-            }
-        }
-        return ss.str();
-    }
-    
-    size_t Dico::getType(string const& text, string::size_type pos)
-    {
-        if(isdigit(text[pos]))
-        {
-            pos = text.find_first_not_of("-0123456789", pos);
-            if(text[pos] == '.')
-                return Atom::DOUBLE;
-            else
-                return Atom::LONG;
-        }
-        else if(text[pos] == '"')
-        {
-            return Atom::TAG;
-        }
-        else if(text[pos] == '{')
-        {
-            return Atom::DICO;
-        }
-        else if(text[pos] == '[')
-        {
-            return Atom::VECTOR;
-        }
-        else
-        {
-            return Atom::UNDEFINED;
-        }
-    }
-    
-    bool getNextPosition(string const& text, string::size_type& pos, size_t type)
-    {
-        char end = '}';
-        if(type == Atom::VECTOR)
-        {
-            end = ']';
-        }
-        
-        if(pos == string::npos)
-        {
-            return false;
-        }
-        else
-        {
-            pos = text.find_first_not_of(' ', pos+1);
-            if(pos == string::npos || text[pos] == end)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-    }
-    
-    void Dico::fromJson(vector<Atom>& atoms, string const& text, string::size_type& pos)
-    {
-        pos = text.find_first_not_of(' ', pos);
-        switch(getType(text, pos))
-        {
-            case Atom::LONG:
-            {
-                atoms.push_back(stol(text.c_str()+pos));
-                pos = text.find_first_not_of("-0123456789", pos);
-            }
-                break;
-            case Atom::DOUBLE:
-            {
-                atoms.push_back(stod(text.c_str()+pos));
-                pos = text.find_first_not_of("-0123456789.", pos);
-            }
-                break;
-            case Atom::TAG:
-            {
-                atoms.push_back(Tag::create(jsonUnescape(text, pos)));
-            }
-                break;
-            case Atom::DICO:
-            {
-                sDico dico = Dico::create();
-                if(dico)
-                {
-                    fromJson(dico, text, pos);
-                    atoms.push_back(dico);
-                }
-            }
-                break;
-            case Atom::VECTOR:
-            {
-                while(getNextPosition(text, pos, Atom::VECTOR))
-                {
-                    switch(getType(text, pos))
-                    {
-                        case Atom::LONG:
-                        {
-                            atoms.push_back(stol(text.c_str()+pos));
-                            pos = text.find_first_not_of("-0123456789", pos);
-                        }
-                            break;
-                        case Atom::DOUBLE:
-                        {
-                            atoms.push_back(stod(text.c_str()+pos));
-                            pos = text.find_first_not_of("-0123456789.", pos);
-                        }
-                            break;
-                        case Atom::TAG:
-                        {
-                            atoms.push_back(Tag::create(jsonUnescape(text, pos)));
-                        }
-                            break;
-                        case Atom::DICO:
-                        {
-                            sDico dico = Dico::create();
-                            if(dico)
-                            {
-                                fromJson(dico, text, pos);
-                                atoms.push_back(dico);
-                            }
-                        }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-                break;
-            default:
-                pos = text.find_first_not_of(' ', ++pos);
-                break;
-        }
+        return m_map.end();
     }
 
-    void Dico::fromJson(sDico dico, string const& text, string::size_type& pos)
+    Dico::const_iterator Dico::end() const noexcept
     {
-        pos = text.find('{', pos);
-        while(getNextPosition(text, pos, Atom::DICO))
+        return m_map.end();
+    }
+
+    Dico::const_iterator Dico::cend() const noexcept
+    {
+        return m_map.cend();
+    }
+
+    Dico::reverse_iterator Dico::rend() noexcept
+    {
+        return m_map.rend();
+    }
+
+    Dico::const_reverse_iterator Dico::crend() const noexcept
+    {
+        return m_map.crend();
+    }
+
+    bool Dico::has(const sTag& key) const noexcept
+    {
+        return (bool)m_map.count(key);
+    }
+
+    bool Dico::empty() const noexcept
+    {
+        return m_map.empty();
+    }
+    
+    Dico::size_type Dico::max() const noexcept
+    {
+        return m_map.max_size();
+    }
+    
+    Dico::size_type Dico::size() const noexcept
+    {
+        return m_map.size();
+    }
+
+    Dico::iterator Dico::erase(const_iterator position)
+    {
+        return m_map.erase(position);
+    }
+
+    bool Dico::erase(const sTag& key)
+    {
+        return (bool)m_map.erase(key);
+    }
+
+    Dico::iterator Dico::erase(const_iterator first, const_iterator last)
+    {
+        return m_map.erase(first, last);
+    }
+
+    Dico::iterator Dico::find(const sTag& key)
+    {
+        return m_map.find(key);
+    }
+
+    Dico::const_iterator Dico::find(const sTag& key) const
+    {
+        return m_map.find(key);
+    }
+    
+    pair<Dico::iterator,bool> Dico::insert(const value_type& val)
+    {
+        return m_map.insert(val);
+    }
+    
+    void Dico::insert(iterator first, iterator last)
+    {
+        m_map.insert(first, last);
+    }
+    
+    void Dico::insert(initializer_list<value_type> il)
+    {
+        m_map.insert(il);
+    }
+    
+    Atom& Dico::operator[](const sTag& key)
+    {
+        return m_map[key];
+    }
+    
+    Atom& Dico::operator[](sTag&& key)
+    {
+        return m_map[key];
+    }
+    
+    Atom const& Dico::operator[](const sTag& key) const
+    {
+        try
         {
-            if(getType(text, pos) == Atom::TAG)
-            {
-                sTag key = Tag::create(jsonUnescape(text, pos));
-                if(pos != string::npos)
-                {
-                    pos = text.find(':', pos);
-                    if(pos != string::npos)
-                    {
-                        vector<Atom> values;
-                        fromJson(values, text, ++pos);
-                        dico->set(key, values);
-                    }
-                }
-            }
+            return m_map.at(key);
+        }
+        catch(exception e)
+        {
+            throw e;
+        }
+        
+    }
+    
+    Atom const& Dico::operator[](sTag&& key) const
+    {
+        try
+        {
+            return m_map.at(key);
+        }
+        catch(exception e)
+        {
+            throw e;
         }
     }
 }

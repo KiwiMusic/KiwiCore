@@ -24,288 +24,223 @@
 #ifndef __DEF_KIWI_DICO__
 #define __DEF_KIWI_DICO__
 
-#include "Tag.h"
+#include "Defs.h"
 
-// - Have to recheck all and threadsafe
 namespace Kiwi
 {
     // ================================================================================ //
     //                                      DICO                                        //
     // ================================================================================ //
     
-    //! The dico is an associative container that manages atoms with keys like in the JSON format.
+    //! The dico is an associative container that manages atoms with keys.
     /**
-     The dico is just a container that allows to manages atoms with tags. The dico can be used to parse JSON files.
+     The dico is ...
      */
-    class Dico : public Atom::Quark, public enable_shared_from_this<Dico>
-    {        
+    class Dico
+    {
+    public:
+        typedef map<sTag, Atom>::iterator iterator;
+        typedef map<sTag, Atom>::const_iterator const_iterator;
+        typedef map<sTag, Atom>::reverse_iterator reverse_iterator;
+        typedef map<sTag, Atom>::const_reverse_iterator const_reverse_iterator;
+        typedef map<sTag, Atom>::value_type value_type;
+        typedef map<sTag, Atom>::size_type size_type;
     private:
-        map<sTag, vector<Atom>> m_entries;
-        
-        static void evaluateObject(sDico dico, string const& text);
-        static void evaluateLink(sDico dico, string const& text);
+        map<sTag, Atom> m_map;
     public:
         
-        //! Constructor.
-        /** Create a new dictionary.
+        //! Empty constructor.
+        /** Create a new empty dico.
          */
-        Dico() noexcept;
+        Dico();
+        
+        //! Copy constructor.
+        /** Create a copy of a dico.
+         @param other A dico to copy.
+         */
+        Dico(const Dico& other);
+        
+        //! Range constructor.
+        /** Create a dictionary with the elements between first an last.
+         @param first The iterator to the first element to copy.
+         @param last The iterator to the last element to copy.
+         */
+        Dico(iterator first, iterator last);
+        
+        //! Move constructor.
+        /** Create a dictionary from by acquiring the elements from the other dico.
+         @param other A dico to copy.
+         */
+        Dico(Dico&& other);
+        
+        //! List constructor.
+        /** Create a dictionary from an initializer list.
+         @param il The initializer list.
+         */
+        Dico(initializer_list<value_type> il);
         
         //! Destructor.
         /** Free the dictionary.
          */
-        ~Dico();
-        
-        //! The dico creation method.
-        /** The function allocates a dico.
-         */
-        static sDico create();
-        
-        //! The dico creation method.
-        /** The function allocates a dico.
-         @param dico another dico.
-         */
-        static sDico create(scDico dico);
-        
-        //! The dico creation method.
-        /** The function allocates a dico.
-         */
-        static sDico evaluateForJson(string const& text);
-        
-        //! The dico creation method.
-        /** The function allocates a dico.
-         */
-        static sDico evaluateForObject(string const& text);
-        
-        //! The dico creation method.
-        /** The function allocates a dico.
-         */
-        static sDico evaluateForLink(string const& text);
-        
-        //! The dico creation method.
-        /** The function allocates a dico.
-         */
-        static sDico evaluateForPatcher(string& text);
+        ~Dico() noexcept;
         
         //! Clear the dico.
         /** The function clears the dico.
          */
         void clear() noexcept;
         
-        //! Retrieve the keys of the entries from a dico.
-        /** The function retrieves the keys of the entries from a dico.
-         @param atoms The vector of atoms that will owns the key of the entries.
+        //! Return an iterator referring to the first element.
+        /** The function returns an iterator referring to the first element.
+         @return The iterator referring to the first element.
          */
-        void keys(vector<Atom>& atoms) const noexcept;
+        iterator begin() noexcept;
         
-        //! Clear the entry of a dico.
-        /** The function clears the entry of a dico.
-         @param key The name of the entry.
+        //! Return an iterator referring to the first element.
+        /** The function returns an iterator referring to the first element.
+         @return The iterator referring to the first element.
          */
-        void clear(sTag key) noexcept;
+        const_iterator begin() const noexcept;
         
-        //! Check if an entry exists.
-        /** This function checks if an entry exists.
-         @param key The name of the entry.
-         @return True if the entry exists otherwise it returns false.
+        //! Return a constant iterator referring to the first element.
+        /** The function returns a constant iterator referring to the first element but it cannot be used to modify the contents.
+         @return The constant iterator referring to the first element.
          */
-        bool has(sTag key) const noexcept;
+        const_iterator cbegin() const noexcept;
         
-        //! Retrieve the type of an entry.
-        /** The function retrieves the type of an entry.
-         @param key The name of the entry.
-         @return    The type of the entry.
+        //! Return an reverse iterator referring to the last element.
+        /** The function returns an reverse iterator referring to the last element.
+         @return The reverse iterator referring to the last element.
          */
-        size_t type(sTag key) const noexcept;
+        reverse_iterator rbegin() noexcept;
         
-        //! Check if an entry is of type long.
-        /** The function checks if an entry is of type long.
-         @param key The name of the entry.
-         @return    True if the entry is a long.
+        //! Return an constant reverse iterator referring to the last element.
+        /** The function returns an constant reverse iterator referring to the last element.
+         @return The constant reverse iterator referring to the last element.
          */
-        inline bool isLong(sTag key) const noexcept
-        {
-            return type(key) == Atom::LONG;
-        }
+        const_reverse_iterator crbegin() const noexcept;
         
-        //! Check if an entry is of type double.
-        /** The function checks if an entry is of type double.
-         @param key The name of the entry.
-         @return    True if the entry is a double.
+        //! Return an iterator referring to the last element.
+        /** The function returns an iterator referring to the last element.
+         @return The iterator referring to the last element.
          */
-        inline bool isDouble(sTag key) const noexcept
-        {
-            return type(key) == Atom::DOUBLE;
-        }
+        iterator end() noexcept;
         
-        //! Check if an entry is of type tag.
-        /** The function checks if an entry is of type tag.
-         @param key The name of the entry.
-         @return    True if the entry is a tag.
+        //! Return an iterator referring to the last element.
+        /** The function returns an iterator referring to the last element.
+         @return The iterator referring to the last element.
          */
-        inline bool isTag(sTag key) const noexcept
-        {
-            return type(key) == Atom::TAG;
-        }
+        const_iterator end() const noexcept;
         
-        //! Check if an entry is of type atoms.
-        /** The function checks if an entry is of type atoms.
-         @param key The name of the entry.
-         @return    True if the entry is atoms.
+        //! Return a constant iterator referring to the last element.
+        /** The function returns a constant iterator referring to the last element but it cannot be used to modify the contents.
+         @return The constant iterator referring to the last element.
          */
-        inline bool isAtoms(sTag key) const noexcept
-        {
-            return type(key) == Atom::VECTOR;
-        }
+        const_iterator cend() const noexcept;
         
-        //! Retrieve the atom from a dico.
-        /** The function retrieves the atom from a dico.
-         @param key The name of the entry.
-         @return    The atom from a dico.
+        //! Return an reverse iterator referring to the first element.
+        /** The function returns an reverse iterator referring to the first element.
+         @return The reverse iterator referring to the first element.
          */
-        Atom get(sTag key) const noexcept;
+        reverse_iterator rend() noexcept;
         
-        //! Retrieve the atoms from a dico.
-        /** The function retrieves the atoms from a dico.
-         @param key The name of the entry.
-         @param atoms The atoms from a dico or empty atom list if the type isn't a vector of atoms.
+        //! Return an constant reverse iterator referring to the first element.
+        /** The function returns an constant reverse iterator referring to the first element.
+         @return The constant reverse iterator referring to the first element.
          */
-        void get(sTag key, vector<Atom>& atoms) const noexcept;
+        const_reverse_iterator crend() const noexcept;
         
-        //! Retrieve the atoms from a dico.
-        /** The function retrieves the atoms from a dico.
-         @param key The name of the entry.
-         @return    The atom from a dico.
+        //! Search the container for a specific key.
+        /** The function searches the container for a specific key.
+         @param key The key to search.
+         @return true if the key is found, otherwise false.
          */
-        inline string getAsString(sTag key) const noexcept
-        {
-            vector<Atom> atoms;
-            get(key, atoms);
-            return toString(atoms);
-        }
+        bool has(const sTag& key) const noexcept;
         
-        //! Add a new entry with an atoms.
-        /** The function adds a new entry or replace an old entry with an atoms.
-         @param key The name of the entry.
-         @param atom The atom.
+        //! Return whether the dico is empty.
+        /** The function returns whether the dico is empty.
+         @return true if the dico is empty, otherwise false.
          */
-        void set(sTag key, Atom const& atom) noexcept;
+        bool empty() const noexcept;
         
-        //! Add a new entry with a vector of atoms.
-        /** The function adds a new entry or replace an old entry with a vector of atoms.
-         @param key The name of the entry.
-         @param atoms The vector of atoms.
+        //! Return the maximum number of elements that the dico can hold.
+        /** The function returns the maximum number of elements that the dico can hold.
+         @return The maximum number of elements that the dico can hold.
          */
-        void set(sTag key, vector<Atom> const& atoms) noexcept;
+        size_type max() const noexcept;
         
-        //! Append an atom to an entry.
-        /** The function adds a new entry with an atom or append an atom to an old entry.
-         @param key The name of the entry.
-         @param atom The atom.
+        //! Return the number of elements in the dico.
+        /** The function returns the number of elements in the dico.
+         @return The number of elements in the dico.
          */
-        void append(sTag key, Atom const& atom) noexcept;
-    
-        //! Append a vector of atoms to an entry.
-        /** The function adds a new entry with a vector of atoms or append a vector of atoms to an old entry.
-         @param key The name of the entry.
-         @param atoms The vector of atoms.
-         */
-        void append(sTag key, vector<Atom> const& atoms) noexcept;
+        size_type size() const noexcept;
         
-        //! Read a text file to fill the dico.
-        /** The function reads a text file to fill the dico.
-         @param filename        The name of the file.
-         @param directoryname   The name of the directory.
+        //! Remove from the dico a single element.
+        /** The function removes from the dico a single element.
+         @param position The iterator pointing to a single element to be removed.
+         @return An iterator to the element that follows the last element removed.
          */
-        void read(string const& filename, string const& directoryname);
+        iterator erase(const_iterator position);
         
-        //! Write the dico in a text file.
-        /** The function writes the dico in a text file.
-         @param file The name of the file.
-         @param directory The name of the directory.
+        //! Remove from the dico a single element.
+        /** The function removes from the dico a single element.
+         @param key The key of the single element to be removed.
+         @return true if the element has been removed, othewise false.
          */
-        void write(string const& filename, string const& directoryname) const;
+        bool erase(const sTag& key);
         
-        //! Write the dico in a string.
-        /** The function writes the dico in a string.
-         @param text The string.
+        //! Remove from the dico a range of elements.
+        /** The function removes from the dico a range of elements.
+         @param first The iterator to the first element to remove.
+         @param last The iterator to the last element to remove.
+         @return An iterator to the element that follows the last element removed.
          */
-        void write(string& text) const;
-    
-    private:
+        iterator erase(const_iterator first, const_iterator last);
         
-        //! Escape a string for json.
-        /** This function escapes a string for json.
-         @param     text The string.
-         @return    The escaped string.
+        //! Search for a specific key and returns an iterator to it.
+        /** The function searches for a specific key and returns an iterator to it.
+         @param key The key to search.
+         @return The iterator of the key if the key has been found, otherwise the end iterator.
          */
-        static string jsonEscape(string const& text);
+        iterator find(const sTag& key);
         
-        //! Write an atom in a string with the json format .
-        /** This function writes an atom in a string with the json format .
-         @param     atom The atom.
-         @param     text The string.
-         @param     line The indetation.
-         @return    The unescaped string.
+        //! Search for a specific key and returns an iterator to it.
+        /** The function searches for a specific key and returns an iterator to it.
+         @param key The key to search.
+         @return The iterator of the key if the key has been found, otherwise the end iterator.
          */
-        static void toJson(Atom const& atom, string& text, string indetation = "");
+        const_iterator find(const sTag& key) const;
         
-        //! Write atoms in a string with the json format .
-        /** This function writes atoms in a string with the json format .
-         @param     atoms The atoms.
-         @param     text The string.
-         @param     line The indetation.
-         @return    The unescaped string.
+        //! Insert a new element.
+        /** The function inserts a new elements. The insertion operation checks if the dico has a already the key equivalent to the element, and if so, the element is not inserted.
+         @param value The element to insert.
+         @return A pair with an iterator to this existing element and a boolean with true if the element has been inserted, otherwise false.
          */
-        static void toJson(vector<Atom> const& atoms, string& text, string indetation = "");
+        pair<iterator,bool> insert(const value_type& value);
         
-        //! Write a dico in a string with the json format .
-        /** This function writes dico in a string with the json format .
-         @param     dico The dico.
-         @param     text The string.
-         @param     line The indetation.
-         @return    The unescaped string.
+        //! Insert a range of elements.
+        /** The function inserts a range of elements. The insertion operation checks if the dico has a already the key equivalent to the elements, and if not, the element is inserted.
+         @param first The iterator to the first element to insert.
+         @param last The iterator to the last element to insert.
          */
-        static void toJson(scDico dico, string& text, string indetation = "");
+        void insert(iterator first, iterator last);
         
-        //! Unescape a json string.
-        /** This function unescapes a json string.
-         @param     text The string.
-         @return    The unescaped string.
+        //! Insert a range of elements with an initializer list.
+        /** The function insertsa range of elements with an initializer list. The insertion operation checks the dico has a already the key equivalent to the element, and if so, the element is not inserted.
+         @param il The initializer list.
          */
-        static string jsonUnescape(string const& text, size_t& pos);
+        void insert(initializer_list<value_type> il);
         
-        //! Get the atom type of a string.
-        /** This function gets the atom type of a string.
-         @param     text The string.
-         @param     pos The position in the string.
-         @return    The type of the string.
-         */
-        static size_t getType(string const& text, string::size_type pos);
+        Atom& operator[](const sTag& k);
+        Atom& operator[](sTag&& k);
         
-        //! Get a vector of atoms from a string in the json format .
-        /** This function gets a vector of atoms from a string in the json format .
-         @param     atoms The vector of atoms.
-         @param     text The string.
-         @param     pos The position in the string.
-         */
-        static void fromJson(vector<Atom>& atoms, string const& text, string::size_type& pos);
+        Atom const& operator[](const sTag& k) const;
+        Atom const& operator[](sTag&& k) const;
         
-        //! Get a dico from a string in the json format .
-        /** This function gets dico from a string in the json format .
-         @param     dico The dico.
-         @param     text The string.
-         @param     pos The position in the string.
-         */
-        static void fromJson(sDico dico, string const& text, string::size_type& pos);
+        Dico& operator=(const Dico& x);
+        Dico& operator=(Dico&& x);
+        Dico& operator=(initializer_list<value_type> il);
+        void swap(Dico& other);
     };
-    
-    inline string toString(const scDico dico)
-    {
-        string text;
-        dico->write(text);
-        return text;
-    }
 }
 
 

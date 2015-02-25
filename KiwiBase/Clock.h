@@ -59,7 +59,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        Clock() : m_used(0)
+        Clock() : m_used(0ul)
         {
             ;
         }

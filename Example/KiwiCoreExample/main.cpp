@@ -55,8 +55,8 @@ int main(int argc, const char * argv[])
                 cout << e.what() << endl;
             }
             
-            map<sTag, Atom> args;
-            sPatcher page = instance->createPatcher(args);
+            Dico dico;
+            sPatcher page = instance->createPatcher(dico);
             if(page)
             {
                 try

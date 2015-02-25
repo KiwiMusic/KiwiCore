@@ -23,8 +23,6 @@
 
 
 #include "Beacon.h"
-#include "Instance.h"
-#include "Console.h"
 
 namespace Kiwi
 {
@@ -39,20 +37,20 @@ namespace Kiwi
     
     Beacon::~Beacon() noexcept
     {
-        m_objects.clear();
+        m_castaways.clear();
     }
     
-    void Beacon::bind(sObject object)
+    void Beacon::bind(sCastaway castaway)
     {
-        if(object)
+        if(castaway)
         {
             lock_guard<mutex> guard(m_mutex);
-            for(auto it = m_objects.begin(); it != m_objects.end(); )
+            for(auto it = m_castaways.begin(); it != m_castaways.end(); )
             {
-                sObject other = (*it).lock();
+                sCastaway other = (*it).lock();
                 if(other)
                 {
-                    if(other == object)
+                    if(other == castaway)
                     {
                         return;
                     }
@@ -60,27 +58,27 @@ namespace Kiwi
                 }
                 else
                 {
-                    it = m_objects.erase(it);
+                    it = m_castaways.erase(it);
                 }
             }
         }
     }
     
-    void Beacon::unbind(sObject object)
+    void Beacon::unbind(sCastaway castaway)
     {
-        if(object)
+        if(castaway)
         {
             lock_guard<mutex> guard(m_mutex);
-            for(auto it = m_objects.begin(); it != m_objects.end(); )
+            for(auto it = m_castaways.begin(); it != m_castaways.end(); )
             {
-                sObject other = (*it).lock();
-                if(other && other != object)
+                sCastaway other = (*it).lock();
+                if(other && other != castaway)
                 {
                     ++it;
                 }
                 else
                 {
-                    it = m_objects.erase(it);
+                    it = m_castaways.erase(it);
                 }
             }
         }
@@ -90,12 +88,12 @@ namespace Kiwi
     //                                  BEACON FACTORY                                  //
     // ================================================================================ //
     
-    Beacon::Factory::Factory()
+    Beacon::Factory::Factory() noexcept
     {
         
     }
     
-    Beacon::Factory::~Factory()
+    Beacon::Factory::~Factory() noexcept
     {
         m_beacons.clear();
     }
@@ -117,19 +115,6 @@ namespace Kiwi
             }
             return beacon;
         }
-    }
-    
-    sBeacon Beacon::create(scObject object, string const& name)
-    {
-        if(object)
-        {
-            sInstance instance = object->getInstance();
-            if(instance)
-            {
-                return instance->createBeacon(name);
-            }
-        }
-        return nullptr;
     }
 }
 
