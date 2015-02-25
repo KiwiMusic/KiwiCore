@@ -164,7 +164,7 @@ namespace Kiwi
         m_inlets.clear();
     }
     
-    void Object::write(map<sTag, Atom>& dico) const
+    void Object::write(Dico& dico) const
     {
         this->save(dico);
         dico[Tag::List::name]       = getName();

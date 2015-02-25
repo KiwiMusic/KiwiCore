@@ -84,11 +84,11 @@ namespace Kiwi
     
     sPatcher Instance::createPatcher()
     {
-        map<sTag, Atom> dico;
+        Dico dico;
         return createPatcher(dico);
     }
 
-    sPatcher Instance::createPatcher(map<sTag, Atom>& dico)
+    sPatcher Instance::createPatcher(Dico& dico)
     {
         sPatcher patcher = Patcher::create(getShared(), dico);
         if(patcher)

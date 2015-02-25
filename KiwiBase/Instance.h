@@ -120,7 +120,7 @@ namespace Kiwi
          @return The patcher.
          @see removePatcher, getPatchers
          */
-        sPatcher createPatcher(map<sTag, Atom>& dico);
+        sPatcher createPatcher(Dico& dico);
         
         //! Close a patcher.
         /** The function closes patcher.

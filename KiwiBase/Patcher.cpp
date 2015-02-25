@@ -50,7 +50,7 @@ namespace Kiwi
         m_lists.clear();
     }
     
-    sPatcher Patcher::create(sInstance instance, map<sTag, Atom>& dico)
+    sPatcher Patcher::create(sInstance instance, Dico& dico)
     {
         sPatcher patcher = make_shared<Patcher>(instance);
         if(patcher)
@@ -67,7 +67,7 @@ namespace Kiwi
         return patcher;
     }
     
-    void Patcher::createObject(map<sTag, Atom> const& dico)
+    void Patcher::createObject(Dico const& dico)
     {
         sObject object;
         sTag name, text;
@@ -108,131 +108,135 @@ namespace Kiwi
         send(object, Notification::Added);
     }
     
-    void Patcher::createLink(map<sTag, Atom> const& dico)
+    void Patcher::createLink(Dico const& dico)
     {
         sLink link;
-        if(1)
+        ulong indexo, indexi, ido, idi;
+        vector<Atom> atoms;
+        auto it = dico.find(Tag::List::from);
+        if(it != dico.end())
         {
-            /*
-            ulong indexo, indexi, ido, idi;
-            vector<Atom> atoms;
-            dico->get(Tag::List::from, atoms);
-            if(atoms.size() > 1 && atoms[0].isNumber() && atoms[1].isNumber())
+            atoms = it->second;
+        }
+        if(atoms.size() > 1 && atoms[0].isNumber() && atoms[1].isNumber())
+        {
+            ido     = atoms[0];
+            indexo  = atoms[1];
+        }
+        else
+        {
+            return;
+        }
+        
+        atoms.clear();
+        it = dico.find(Tag::List::to);
+        if(it != dico.end())
+        {
+            atoms = it->second;
+        }
+        if(atoms.size() > 1 && atoms[0].isNumber() && atoms[1].isNumber())
+        {
+            idi     = atoms[0];
+            indexi  = atoms[1];
+        }
+        else
+        {
+            return;
+        }
+        
+        sObject from, to;
+        if(ido < m_objects.size() + 1 && idi <  m_objects.size() + 1 && ido != idi)
+        {
+            for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
             {
-                ido     = atoms[0];
-                indexo  = atoms[1];
-            }
-            else
-            {
-                return;
-            }
-            
-            dico->get(Tag::List::to, atoms);
-            if(atoms.size() > 1 && atoms[0].isNumber() && atoms[1].isNumber())
-            {
-                idi     = atoms[0];
-                indexi  = atoms[1];
-            }
-            else
-            {
-                return;
-            }
-            
-            sObject from, to;
-            if(ido < m_objects.size() + 1 && idi <  m_objects.size() + 1 && ido != idi)
-            {
-                for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
+                if(m_objects[i]->getId() == ido)
                 {
-                    if(m_objects[i]->getId() == ido)
-                    {
-                        from = m_objects[i];
-                    }
-                    else if(m_objects[i]->getId() == idi)
-                    {
-                        to = m_objects[i];
-                    }
-                    else if(from.use_count() && to.use_count())
-                    {
-                        break;
-                    }
+                    from = m_objects[i];
+                }
+                else if(m_objects[i]->getId() == idi)
+                {
+                    to = m_objects[i];
+                }
+                else if(from.use_count() && to.use_count())
+                {
+                    break;
                 }
             }
-            
-            if(from && to)
+        }
+        
+        if(from && to)
+        {
+            Object::sOutlet outlet  = from->getOutlet(indexo);
+            Object::sInlet inlet    = to->getInlet(indexi);
+            if(outlet && inlet)
             {
-                Object::sOutlet outlet  = from->getOutlet(indexo);
-                Object::sInlet inlet    = to->getInlet(indexi);
-                if(outlet && inlet)
+                if(outlet->getType() >= Object::Io::Signal && inlet->getType() >= Object::Io::Signal)
                 {
-                    if(outlet->getType() >= Object::Io::Signal && inlet->getType() >= Object::Io::Signal)
+                    sDspNode pfrom = dynamic_pointer_cast<DspNode>(from);
+                    sDspNode pto   = dynamic_pointer_cast<DspNode>(to);
+                    if(from && to)
                     {
-                        sDspNode pfrom = dynamic_pointer_cast<DspNode>(from);
-                        sDspNode pto   = dynamic_pointer_cast<DspNode>(to);
-                        if(from && to)
+                        ulong poutlet = 0, pinlet = 0;
+                        for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
                         {
-                            ulong poutlet = 0, pinlet = 0;
-                            for(ulong i = 0; i < from->getNumberOfOutlets(); i++)
+                            Object::sOutlet out = from->getOutlet(poutlet);
+                            if(out)
                             {
-                                Object::sOutlet out = from->getOutlet(poutlet);
-                                if(out)
+                                if(out == outlet)
                                 {
-                                    if(out == outlet)
-                                    {
-                                        break;
-                                    }
-                                    else if(out->getType() & Object::Io::Signal)
-                                    {
-                                        poutlet++;
-                                    }
+                                    break;
                                 }
-                            }
-                            if(poutlet >= pfrom->getNumberOfOutputs())
-                            {
-                                return;
-                            }
-                            
-                            for(ulong i = 0; i < to->getNumberOfInlets(); i++)
-                            {
-                                Object::sInlet in = to->getInlet(pinlet);
-                                if(in)
+                                else if(out->getType() & Object::Io::Signal)
                                 {
-                                    if(in == inlet)
-                                    {
-                                        break;
-                                    }
-                                    else if(in->getType() & Object::Io::Signal)
-                                    {
-                                        pinlet++;
-                                    }
+                                    poutlet++;
                                 }
-                            }
-                            if(pinlet >= pto->getNumberOfInputs())
-                            {
-                                return;
-                            }
-                            
-                            outlet->append(to, indexo);
-                            inlet->append(from, indexi);
-                            if(outlet->getType() == Object::Io::Both && inlet->getType() == Object::Io::Both)
-                            {
-                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Both, pfrom, poutlet, pto, pinlet);
-                            }
-                            else
-                            {
-                                link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Signal, pfrom, poutlet, pto, pinlet);
                             }
                         }
-                    }
-                    else if(outlet->getType() == inlet->getType() || inlet->getType() == Object::Io::Both || outlet->getType() == Object::Io::Both)
-                    {
+                        if(poutlet >= pfrom->getNumberOfOutputs())
+                        {
+                            return;
+                        }
+                        
+                        for(ulong i = 0; i < to->getNumberOfInlets(); i++)
+                        {
+                            Object::sInlet in = to->getInlet(pinlet);
+                            if(in)
+                            {
+                                if(in == inlet)
+                                {
+                                    break;
+                                }
+                                else if(in->getType() & Object::Io::Signal)
+                                {
+                                    pinlet++;
+                                }
+                            }
+                        }
+                        if(pinlet >= pto->getNumberOfInputs())
+                        {
+                            return;
+                        }
                         
                         outlet->append(to, indexo);
                         inlet->append(from, indexi);
-                        link = make_shared<Link>(getShared(), from, indexo, to, indexi, Object::Io::Message);
+                        if(outlet->getType() == Object::Io::Both && inlet->getType() == Object::Io::Both)
+                        {
+                            link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Both, pfrom, poutlet, pto, pinlet);
+                        }
+                        else
+                        {
+                            link = make_shared<Link::SignalLink>(getShared(), from, indexo, to, indexi, Object::Io::Signal, pfrom, poutlet, pto, pinlet);
+                        }
                     }
                 }
+                else if(outlet->getType() == inlet->getType() || inlet->getType() == Object::Io::Both || outlet->getType() == Object::Io::Both)
+                {
+                    
+                    outlet->append(to, indexo);
+                    inlet->append(from, indexi);
+                    link = make_shared<Link>(getShared(), from, indexo, to, indexi, Object::Io::Message);
+                }
             }
-             */
         }
         
         if(link)
@@ -247,57 +251,61 @@ namespace Kiwi
         send(link, Notification::Added);
     }
     
-    void Patcher::add(map<sTag, Atom> const& dico)
+    void Patcher::add(Dico const& dico)
     {
-        /*
-        map<sTag, Atom>& rdico = Dico::create(dico);
-        if(rdico)
+        Dico rdico = dico;
+        vector<Atom> objects, links;
+        auto it = dico.find(Tag::List::objects);
+        if(it != dico.end())
         {
-            vector<Atom> objects, links;
-            rdico->get(Tag::List::links, links);
-            rdico->get(Tag::List::objects, objects);
-            
-            lock_guard<mutex> guard(m_mutex);
-            for(vector<sObject>::size_type i = 0; i < objects.size(); i++)
+            objects = it->second;
+        }
+        it = dico.find(Tag::List::links);
+        if(it != dico.end())
+        {
+            links = it->second;
+        }
+
+        lock_guard<mutex> guard(m_mutex);
+        for(vector<sObject>::size_type i = 0; i < objects.size(); i++)
+        {
+            Dico objdico(objects[i]);
+            if(!objdico.empty())
             {
-                map<sTag, Atom>& objdico = objects[i];
-                if(objdico)
+                const ulong r_id = objdico[Tag::List::id];
+                const ulong n_id = m_free_ids.empty() ? m_objects.size() + 1 : m_free_ids[0];
+                if(!m_free_ids.empty())
                 {
-                    const ulong r_id = objdico->get(Tag::List::id);
-                    const ulong n_id = m_free_ids.empty() ? m_objects.size() + 1 : m_free_ids[0];
-                    if(!m_free_ids.empty())
-                    {
-                        m_free_ids.erase(m_free_ids.begin());
-                    }
-                    objdico->set(Tag::List::id, (long)n_id);
-                    vector<Atom> atoms;
-                    for(vector<sLink>::size_type i = 0; i < links.size(); i++)
-                    {
-                        objdico->get(Tag::List::from, atoms);
-                        if(atoms.size() > 1 && r_id == (ulong)atoms[0])
-                        {
-                            objdico->set(Tag::List::from, {(long)n_id, atoms[1]});
-                        }
-                        objdico->get(Tag::List::to, atoms);
-                        if(atoms.size() > 1 && r_id == (ulong)atoms[0])
-                        {
-                            objdico->set(Tag::List::from, {(long)n_id, atoms[1]});
-                        }
-                    }
-                    createObject(objdico);
+                    m_free_ids.erase(m_free_ids.begin());
                 }
-            }
+                objdico[Tag::List::id] = (long)n_id;
+                vector<Atom> atoms;
+                for(vector<sLink>::size_type i = 0; i < links.size(); i++)
+                {
+                    atoms = objdico[Tag::List::from];
+                    if(atoms.size() > 1 && r_id == (ulong)atoms[0])
+                    {
+                        objdico[Tag::List::from] = {(long)n_id, atoms[1]};
+                    }
             
-            for(vector<sLink>::size_type i = 0; i < links.size(); i++)
-            {
-                map<sTag, Atom>& linkdico = links[i];
-                if(linkdico)
-                {
-                    createLink(linkdico);
+                    atoms = objdico[Tag::List::to];
+                    if(atoms.size() > 1 && r_id == (ulong)atoms[0])
+                    {
+                        objdico[Tag::List::to] = {(long)n_id, atoms[1]};
+                    }
                 }
+                createObject(objdico);
             }
         }
-         */
+        
+        for(vector<sLink>::size_type i = 0; i < links.size(); i++)
+        {
+            Dico linkdico(links[i]);
+            if(!linkdico.empty())
+            {
+                createLink(linkdico);
+            }
+        }
     }
     
     void Patcher::remove(sObject object)
@@ -384,12 +392,12 @@ namespace Kiwi
         }
     }
 	
-    void Patcher::write(map<sTag, Atom>& dico) const
+    void Patcher::write(Dico& dico) const
     {
         if(1)
         {
             /*
-			map<sTag, Atom>& subpatcher = Dico::create();
+			Dico& subpatcher = Dico::create();
 			if(subpatcher)
 			{
                 vector<Atom> atoms;
@@ -397,7 +405,7 @@ namespace Kiwi
                 
 				for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
 				{
-					map<sTag, Atom>& object = Dico::create();
+					Dico& object = Dico::create();
 					if(object)
 					{
 						m_objects[i]->write(object);
@@ -410,7 +418,7 @@ namespace Kiwi
 				
 				for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
 				{
-                    map<sTag, Atom>& link = Dico::create();
+                    Dico& link = Dico::create();
 					if(link)
 					{
 						m_links[i]->write(link);

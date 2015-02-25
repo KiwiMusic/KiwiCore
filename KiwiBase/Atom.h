@@ -118,7 +118,7 @@ namespace Kiwi
             
             vector<Atom> getVector() const noexcept;
             
-            map<sTag, Atom> getMap() const noexcept;
+            Dico getMap() const noexcept;
         };
         
         // ================================================================================ //
@@ -129,12 +129,12 @@ namespace Kiwi
         /**
          ...
          */
-        class Bool : public Quark
+        class QuarkBool : public Quark
         {
         public:
             const bool val;
             
-            Bool(bool const& _val) noexcept : val(_val)
+            QuarkBool(bool const& _val) noexcept : val(_val)
             {
                 ;
             }
@@ -157,11 +157,11 @@ namespace Kiwi
         /**
          ...
          */
-        class Long : public Quark
+        class QuarkLong : public Quark
         {
         public:
             const long val;
-            Long(long const& _val) noexcept : val(_val){;}
+            QuarkLong(long const& _val) noexcept : val(_val){;}
             
             //! Retrieve the type of the quark.
             /** The function retrieves the type of the quark.
@@ -181,11 +181,11 @@ namespace Kiwi
         /**
          ...
          */
-        class Double : public Quark
+        class QuarkDouble : public Quark
         {
         public:
             const double val;
-            Double(double const& _val) noexcept : val(_val){;}
+            QuarkDouble(double const& _val) noexcept : val(_val){;}
             
             //! Retrieve the type of the quark.
             /** The function retrieves the type of the quark.
@@ -229,27 +229,27 @@ namespace Kiwi
         /**
          ...
          */
-        class Vector : public Quark
+        class QuarkVector : public Quark
         {
         public:
             vector<Atom> val;
             
-            Vector(vector<Atom> const& _val) noexcept : val(_val)
+            QuarkVector(vector<Atom> const& _val) noexcept : val(_val)
             {
                 ;
             }
             
-            Vector(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept : val(first, last)
+            QuarkVector(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept : val(first, last)
             {
                 ;
             }
             
-            Vector(vector<Atom>&& atoms) noexcept : val(atoms)
+            QuarkVector(vector<Atom>&& atoms) noexcept : val(atoms)
             {
                 ;
             }
             
-            Vector(initializer_list<Atom> il) noexcept : val(il)
+            QuarkVector(initializer_list<Atom> il) noexcept : val(il)
             {
                 ;
             }
@@ -272,27 +272,27 @@ namespace Kiwi
         /**
          ...
          */
-        class Map : public Quark
+        class QuarkMap : public Quark
         {
         public:
-            const map<sTag, Atom> val;
+            const Dico val;
             
-            Map(map<sTag, Atom> const& _val) noexcept : val(_val)
+            QuarkMap(Dico const& _val) noexcept : val(_val)
             {
                 ;
             }
             
-            Map(map<sTag, Atom>::iterator first, map<sTag, Atom>::iterator last) noexcept : val(first, last)
+            QuarkMap(Dico::iterator first, Dico::iterator last) noexcept : val(first, last)
             {
                 ;
             }
             
-            Map(map<sTag, Atom>&& atoms) noexcept : val(atoms)
+            QuarkMap(Dico&& atoms) noexcept : val(atoms)
             {
                 ;
             }
             
-            Map(initializer_list<pair<const sTag, Atom>> il) noexcept : val(il)
+            QuarkMap(initializer_list<pair<const sTag, Atom>> il) noexcept : val(il)
             {
                 ;
             }
@@ -307,7 +307,7 @@ namespace Kiwi
             }
         };
         
-        Quark m_quark;
+        Quark* m_quark;
         
     public:
         
@@ -395,17 +395,17 @@ namespace Kiwi
         //! Constructor with a map of atoms.
         /** The function allocates the atom with a vector of atoms.
          */
-        Atom(map<sTag, Atom> const& atoms) noexcept;
+        Atom(Dico const& atoms) noexcept;
         
         //! Constructor with a map of atoms.
         /** The function allocates the atom with a vector of atoms.
          */
-        Atom(map<sTag, Atom>::iterator first, map<sTag, Atom>::iterator last) noexcept;
+        Atom(Dico::iterator first, Dico::iterator last) noexcept;
         
         //! Constructor with a map of atoms.
         /** The function allocates the atom with a vector of atoms.
          */
-        Atom(map<sTag, Atom>&& atoms) noexcept;
+        Atom(Dico&& atoms) noexcept;
         
         //! Constructor with a map of atoms.
         /** The function allocates the atom with a vector of atoms.
@@ -423,7 +423,7 @@ namespace Kiwi
          */
         inline Type getType() const noexcept
         {
-            return m_quark.getType();
+            return m_quark->getType();
         }
         
         //! Check if the atom is undefined.
@@ -432,7 +432,7 @@ namespace Kiwi
          */
         inline bool isUndefined() const noexcept
         {
-            return m_quark.isLong();
+            return m_quark->isLong();
         }
         
         //! Check if the atom is of type bool.
@@ -441,7 +441,7 @@ namespace Kiwi
          */
         inline bool isBool() const noexcept
         {
-            return m_quark.isLong();
+            return m_quark->isLong();
         }
         
         //! Check if the atom is of type long.
@@ -450,7 +450,7 @@ namespace Kiwi
          */
         inline bool isLong() const noexcept
         {
-            return m_quark.isLong();
+            return m_quark->isLong();
         }
         
         //! Check if the atom is of type double.
@@ -459,7 +459,7 @@ namespace Kiwi
          */
         inline bool isDouble() const noexcept
         {
-            return m_quark.isDouble();
+            return m_quark->isDouble();
         }
         
         //! Checks if the atom is of type long or double.
@@ -468,7 +468,7 @@ namespace Kiwi
          */
         inline bool isNumber() const noexcept
         {
-            return m_quark.isNumber();
+            return m_quark->isNumber();
         }
         
         //! Check if the atom is of type tag.
@@ -477,7 +477,7 @@ namespace Kiwi
          */
         inline bool isTag() const noexcept
         {
-            return m_quark.isTag();
+            return m_quark->isTag();
         }
         
         //! Check if the atom is of type vector.
@@ -486,7 +486,7 @@ namespace Kiwi
          */
         inline bool isVector() const noexcept
         {
-            return m_quark.isVector();
+            return m_quark->isVector();
         }
         
         //! Check if the atom is of type map.
@@ -495,7 +495,7 @@ namespace Kiwi
          */
         inline bool isMap() const noexcept
         {
-            return m_quark.isMap();
+            return m_quark->isMap();
         }
         
         //! Cast the atom to a boolean.
@@ -504,7 +504,7 @@ namespace Kiwi
          */
         inline operator bool() const noexcept
         {
-            return m_quark.getBool();
+            return m_quark->getBool();
         }
         
         //! Cast the atom to an int.
@@ -513,7 +513,7 @@ namespace Kiwi
          */
         inline operator int() const noexcept
         {
-            return (int)m_quark.getLong();
+            return (int)m_quark->getLong();
         }
         
         //! Cast the atom to a long.
@@ -522,7 +522,7 @@ namespace Kiwi
          */
         inline operator long() const noexcept
         {
-            return m_quark.getLong();
+            return m_quark->getLong();
         }
         
         //! Cast the atom to a long.
@@ -531,7 +531,7 @@ namespace Kiwi
          */
         inline operator ulong() const noexcept
         {
-            return (ulong)m_quark.getLong();
+            return (ulong)m_quark->getLong();
         }
         
         //! Cast the atom to a float.
@@ -540,7 +540,7 @@ namespace Kiwi
          */
         inline operator float() const noexcept
         {
-            return (float)m_quark.getDouble();
+            return (float)m_quark->getDouble();
         }
         
         //! Cast the atom to a double.
@@ -549,7 +549,7 @@ namespace Kiwi
          */
         inline operator double() const noexcept
         {
-            return m_quark.getDouble();
+            return m_quark->getDouble();
         }
         
         //! Cast the atom to a tag.
@@ -558,7 +558,7 @@ namespace Kiwi
          */
         inline operator sTag() const noexcept
         {
-            return m_quark.getTag();
+            return m_quark->getTag();
         }
         
         //! Cast the atom to a vector of atoms.
@@ -567,16 +567,16 @@ namespace Kiwi
          */
         inline operator vector<Atom>() const noexcept
         {
-            return m_quark.getVector();
+            return m_quark->getVector();
         }
         
         //! Cast the atom to a map of atoms.
         /** The function casts the atom to a map of atoms.
          @return A map of atoms.
          */
-        inline operator map<sTag, Atom>() const noexcept
+        inline operator Dico() const noexcept
         {
-            return m_quark.getMap();
+            return m_quark->getMap();
         }
         
         //! Set up the atom with another atom.
@@ -597,7 +597,7 @@ namespace Kiwi
          */
         inline Atom& operator=(const bool value) noexcept
         {
-            m_quark = Bool(value);
+            m_quark = new QuarkBool(value);
             return *this;
         }
         
@@ -608,7 +608,7 @@ namespace Kiwi
          */
         inline Atom& operator=(const int value) noexcept
         {
-            m_quark = Long((long)value);
+            m_quark = new QuarkLong((long)value);
             return *this;
         }
         
@@ -619,7 +619,7 @@ namespace Kiwi
          */
         inline Atom& operator=(const long value) noexcept
         {
-            m_quark = Long(value);
+            m_quark = new QuarkLong(value);
             return *this;
         }
         
@@ -630,7 +630,7 @@ namespace Kiwi
          */
         inline Atom& operator=(const float value) noexcept
         {
-            m_quark = Double((float)value);
+            m_quark = new QuarkDouble((float)value);
             return *this;
         }
         
@@ -641,7 +641,7 @@ namespace Kiwi
          */
         inline Atom& operator=(const double value) noexcept
         {
-            m_quark = Double(value);
+            m_quark = new QuarkDouble(value);
             return *this;
         }
         
@@ -652,7 +652,7 @@ namespace Kiwi
          */
         inline Atom& operator=(char const* tag) noexcept
         {
-            m_quark = QuarkTag(Tag::create(tag));
+            m_quark = new QuarkTag(Tag::create(tag));
             return *this;
         }
         
@@ -663,7 +663,7 @@ namespace Kiwi
          */
         inline Atom& operator=(string const& tag) noexcept
         {
-            m_quark = QuarkTag(Tag::create(tag));
+            m_quark = new QuarkTag(Tag::create(tag));
             return *this;
         }
         
@@ -674,7 +674,7 @@ namespace Kiwi
          */
         inline Atom& operator=(sTag tag) noexcept
         {
-            m_quark = QuarkTag(tag);
+            m_quark = new QuarkTag(tag);
             return *this;
         }
         
@@ -685,7 +685,7 @@ namespace Kiwi
          */
         inline Atom& operator=(vector<Atom> const& atoms) noexcept
         {
-            m_quark = Vector(atoms);
+            m_quark = new QuarkVector(atoms);
             return *this;
         }
         
@@ -696,7 +696,7 @@ namespace Kiwi
          */
         inline Atom& operator=(vector<Atom>&& atoms) noexcept
         {
-            m_quark = Vector(atoms);
+            m_quark = new QuarkVector(atoms);
             return *this;
         }
         
@@ -707,7 +707,7 @@ namespace Kiwi
          */
         inline Atom& operator=(initializer_list<Atom> il) noexcept
         {
-            m_quark = Vector(il);
+            m_quark = new QuarkVector(il);
             return *this;
         }
         
@@ -716,9 +716,9 @@ namespace Kiwi
          @param atoms   The vector of atoms.
          @return An atom.
          */
-        inline Atom& operator=(map<sTag, Atom> const& atoms) noexcept
+        inline Atom& operator=(Dico const& atoms) noexcept
         {
-            m_quark = Map(atoms);
+            m_quark = new QuarkMap(atoms);
             return *this;
         }
         
@@ -727,9 +727,9 @@ namespace Kiwi
          @param atoms   The vector of atoms.
          @return An atom.
          */
-        inline Atom& operator=(map<sTag, Atom>&& atoms) noexcept
+        inline Atom& operator=(Dico&& atoms) noexcept
         {
-            m_quark = Map(atoms);
+            m_quark = new QuarkMap(atoms);
             return *this;
         }
         
@@ -740,7 +740,7 @@ namespace Kiwi
          */
         inline Atom& operator=(initializer_list<pair<const sTag, Atom>> il) noexcept
         {
-            m_quark = Map(il);
+            m_quark = new QuarkMap(il);
             return *this;
         }
         
@@ -764,7 +764,7 @@ namespace Kiwi
         {
             if(isNumber())
             {
-                return m_quark.getDouble() == (double)value;
+                return m_quark->getDouble() == (double)value;
             }
             else
             {
@@ -781,7 +781,7 @@ namespace Kiwi
         {
             if(isNumber())
             {
-                return m_quark.getDouble() == (double)value;
+                return m_quark->getDouble() == (double)value;
             }
             else
             {
@@ -798,7 +798,7 @@ namespace Kiwi
         {
             if(isNumber())
             {
-                return m_quark.getDouble() == value;
+                return m_quark->getDouble() == value;
             }
             else
             {

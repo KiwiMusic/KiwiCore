@@ -29,12 +29,15 @@
 
 namespace Kiwi
 {
+    
     class Clock;
     typedef shared_ptr<Clock>           sClock;
     typedef weak_ptr<Clock>             wClock;
     
+    class Atom;
     class Tag;
     typedef shared_ptr<const Tag>       sTag;
+    typedef map<sTag, Atom>             Dico;
     
     class Beacon;
     typedef shared_ptr<Beacon>          sBeacon;

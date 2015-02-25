@@ -62,7 +62,7 @@ namespace Kiwi
         }
     }
     
-    void Link::write(map<sTag, Atom>& dico) const noexcept
+    void Link::write(Dico& dico) const noexcept
     {
         sObject     from    = getObjectFrom();
         sObject     to      = getObjectTo();

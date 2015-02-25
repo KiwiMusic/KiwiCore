@@ -41,15 +41,15 @@ namespace Kiwi
         const size_t type = getType();
         if(type == BOOLEAN)
         {
-            return (reinterpret_cast<const Kiwi::Atom::Bool*>(this))->val;
+            return (reinterpret_cast<const QuarkBool*>(this))->val;
         }
         else if(type == LONG)
         {
-            return bool((reinterpret_cast<const Kiwi::Atom::Long*>(this))->val);
+            return bool((reinterpret_cast<const QuarkLong*>(this))->val);
         }
         else if(type == DOUBLE)
         {
-            return bool((reinterpret_cast<const Kiwi::Atom::Double*>(this))->val);
+            return bool((reinterpret_cast<const QuarkDouble*>(this))->val);
         }
         else
         {
@@ -62,15 +62,15 @@ namespace Kiwi
         const size_t type = getType();
         if(type == LONG)
         {
-            return (reinterpret_cast<const Kiwi::Atom::Long*>(this))->val;
+            return (reinterpret_cast<const QuarkLong*>(this))->val;
         }
         else if(type == DOUBLE)
         {
-            return long((reinterpret_cast<const Kiwi::Atom::Double*>(this))->val);
+            return long((reinterpret_cast<const QuarkDouble*>(this))->val);
         }
         else if(type == DOUBLE)
         {
-            return long((reinterpret_cast<const Kiwi::Atom::Bool*>(this))->val);
+            return long((reinterpret_cast<const QuarkBool*>(this))->val);
         }
         else
         {
@@ -83,15 +83,15 @@ namespace Kiwi
         const size_t type = getType();
         if(type == DOUBLE)
         {
-            return (reinterpret_cast<const Kiwi::Atom::Double*>(this))->val;
+            return (reinterpret_cast<const QuarkDouble*>(this))->val;
         }
         else if(type == LONG)
         {
-            return double((reinterpret_cast<const Kiwi::Atom::Long*>(this))->val);
+            return double((reinterpret_cast<const QuarkLong*>(this))->val);
         }
         else if(type == DOUBLE)
         {
-            return double((reinterpret_cast<const Kiwi::Atom::Bool*>(this))->val);
+            return double((reinterpret_cast<const QuarkBool*>(this))->val);
         }
         else
         {
@@ -115,7 +115,7 @@ namespace Kiwi
     {
         if(getType() == VECTOR)
         {
-            return (reinterpret_cast<const Kiwi::Atom::Vector*>(this))->val;
+            return (reinterpret_cast<const QuarkVector*>(this))->val;
         }
         else
         {
@@ -124,15 +124,15 @@ namespace Kiwi
         }
     }
     
-    map<sTag, Atom> Atom::Quark::getMap() const noexcept
+    Dico Atom::Quark::getMap() const noexcept
     {
         if(getType() == MAP)
         {
-            return (reinterpret_cast<const Kiwi::Atom::Map*>(this))->val;
+            return (reinterpret_cast<const QuarkMap*>(this))->val;
         }
         else
         {
-            return map<sTag, Atom>();
+            return Dico();
         }
     }
     
@@ -142,7 +142,7 @@ namespace Kiwi
     
     Atom::Atom() noexcept
     {
-        m_quark = Quark();
+        m_quark = new Quark();
     }
     
     Atom::Atom(Atom::Atom const& other) noexcept
@@ -152,87 +152,87 @@ namespace Kiwi
     
     Atom::Atom(const bool value) noexcept
     {
-        m_quark = Bool(value);
+        m_quark = new QuarkBool(value);
     }
     
     Atom::Atom(const int value) noexcept
     {
-         m_quark = Long((long)value);
+         m_quark = new QuarkLong((long)value);
     }
     
     Atom::Atom(const long value) noexcept
     {
-        m_quark = Long(value);
+        m_quark = new QuarkLong(value);
     }
     
     Atom::Atom(const float value) noexcept
     {
-        m_quark = Double((double)value);
+        m_quark = new QuarkDouble((double)value);
     }
     
     Atom::Atom(const double value) noexcept
     {
-        m_quark = Double(value);
+        m_quark = new QuarkDouble(value);
     }
     
     Atom::Atom(const char* tag) noexcept
     {
-        m_quark = QuarkTag(Tag::create(tag));
+        m_quark = new QuarkTag(Tag::create(tag));
     }
     
     Atom::Atom(string const& tag) noexcept
     {
-        m_quark = QuarkTag(Tag::create(tag));
+        m_quark = new QuarkTag(Tag::create(tag));
     }
     
     Atom::Atom(sTag tag) noexcept
     {
-        m_quark = QuarkTag(tag);
+        m_quark = new QuarkTag(tag);
     }
     
     Atom::Atom(vector<Atom> const& atoms) noexcept
     {
-        m_quark = Vector(atoms);
+        m_quark = new QuarkVector(atoms);
     }
     
     Atom::Atom(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept
     {
-        m_quark = Vector(first, last);
+        m_quark = new QuarkVector(first, last);
     }
         
     Atom::Atom(vector<Atom>&& atoms) noexcept
     {
-        m_quark = Vector(atoms);
+        m_quark = new QuarkVector(atoms);
     }
     
     Atom::Atom(initializer_list<Atom> il) noexcept
     {
-        m_quark = Vector(il);
+        m_quark = new QuarkVector(il);
     }
     
-    Atom::Atom(map<sTag, Atom> const& atoms) noexcept
+    Atom::Atom(Dico const& atoms) noexcept
     {
-        m_quark = Map(atoms);
+        m_quark = new QuarkMap(atoms);
     }
     
-    Atom::Atom(map<sTag, Atom>::iterator first, map<sTag, Atom>::iterator last) noexcept
+    Atom::Atom(Dico::iterator first, Dico::iterator last) noexcept
     {
-        m_quark = Map(first, last);
+        m_quark = new QuarkMap(first, last);
     }
     
-    Atom::Atom(map<sTag, Atom>&& atoms) noexcept
+    Atom::Atom(Dico&& atoms) noexcept
     {
-        m_quark = Map(atoms);
+        m_quark = new QuarkMap(atoms);
     }
     
     Atom::Atom(initializer_list<pair<const sTag, Atom>> il) noexcept
     {
-        m_quark = Map(il);
+        m_quark = new QuarkMap(il);
     }
     
     Atom::~Atom() noexcept
     {
-        ;
+        delete m_quark;
     }
     
     Atom Atom::evaluate(string const& _text)

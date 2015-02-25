@@ -38,7 +38,7 @@ namespace Kiwi
         const ulong             lid;
         const sTag              name;
         const string            text;
-        const map<sTag, Atom>   dico;
+        const Dico   dico;
         const vector<Atom>      args;
         
         Detail() :
@@ -47,7 +47,7 @@ namespace Kiwi
             ;
         }
         
-        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, map<sTag, Atom> const& _dico, vector<Atom> const& _args) :
+        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, Dico const& _dico, vector<Atom> const& _args) :
         instance(_instance), patcher(_patcher), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
         {
             ;
@@ -275,7 +275,7 @@ namespace Kiwi
         /** The function writes the object in a dico.
          @param dico The dico.
          */
-        void write(map<sTag, Atom>& dico) const;
+        void write(Dico& dico) const;
         
         //! Retrieves if the object should be hidden when the patcher is locked.
         /** The function retrieves if the object should be hidden when the patcher is locked.
@@ -363,13 +363,13 @@ namespace Kiwi
         /** The function writes the object in a dico.
          @param dico The dico.
          */
-		virtual void save(map<sTag, Atom>& dico) const {};
+		virtual void save(Dico& dico) const {};
 		
         //! The read method that should be override.
         /** The function reads a dico to initalize the objecte.
          @param dico The dico.
          */
-		virtual void load(map<sTag, Atom> const& dico) {};
+		virtual void load(Dico const& dico) {};
     };
     
     //! The outlet owns a set of links.
