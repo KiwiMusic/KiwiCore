@@ -48,7 +48,7 @@ namespace Kiwi
          */
         Tag(string const& name) noexcept : m_name(name)
         {
-            cout << "zézé" << endl;
+            ;
         }
         
         //! The constructor.
@@ -56,7 +56,7 @@ namespace Kiwi
          */
         Tag(string const&& name) noexcept : m_name(name)
         {
-            cout << "zozo" << endl;
+            ;
         }
         
         //! The destructor.
