@@ -4,9 +4,6 @@
 [submodule "KiwiGui"]
 	path = KiwiGui
 	url = https://pierreguillot@github.com/KiwiMusic/KiwiGui.git
-[submodule "KiwiView"]
-	path = KiwiView
-	url = https://pierreguillot@github.com/KiwiMusic/KiwiView.git
 [submodule "KiwiObjects"]
 	path = KiwiObjects
 	url = https://pierreguillot@github.com/KiwiMusic/KiwiObjects.git
