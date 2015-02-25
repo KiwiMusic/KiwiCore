@@ -175,17 +175,17 @@ namespace Kiwi
         }
     }
     
-    void Instance::create(vector<Atom> const& inputs, vector<Atom> outputs)
+    void Instance::create(Vector const& inputs, Vector outputs)
     {
         
     }
     
-    void Instance::remove(vector<Atom> const& inputs)
+    void Instance::remove(Vector const& inputs)
     {
         
     }
     
-    void Instance::get(vector<Atom> const& inputs, vector<Atom> outputs) const
+    void Instance::get(Vector const& inputs, Vector outputs) const
     {
         if(!inputs.empty())
         {
@@ -213,7 +213,7 @@ namespace Kiwi
         }
     }
     
-    void Instance::set(vector<Atom> const& inputs)
+    void Instance::set(Vector const& inputs)
     {
         if(!inputs.empty())
         {

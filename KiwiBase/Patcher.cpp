@@ -71,7 +71,7 @@ namespace Kiwi
     {
         sObject object;
         sTag name, text;
-        vector<Atom> args;
+        Vector args;
         ulong _id;
         int toclean;
         auto it = dico.find(Tag::List::name);
@@ -112,7 +112,7 @@ namespace Kiwi
     {
         sLink link;
         ulong indexo, indexi, ido, idi;
-        vector<Atom> atoms;
+        Vector atoms;
         auto it = dico.find(Tag::List::from);
         if(it != dico.end())
         {
@@ -254,7 +254,7 @@ namespace Kiwi
     void Patcher::add(Dico const& dico)
     {
         Dico rdico = dico;
-        vector<Atom> objects, links;
+        Vector objects, links;
         auto it = dico.find(Tag::List::objects);
         if(it != dico.end())
         {
@@ -279,7 +279,7 @@ namespace Kiwi
                     m_free_ids.erase(m_free_ids.begin());
                 }
                 objdico[Tag::List::id] = (long)n_id;
-                vector<Atom> atoms;
+                Vector atoms;
                 for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                 {
                     atoms = objdico[Tag::List::from];
@@ -400,7 +400,7 @@ namespace Kiwi
 			Dico& subpatcher = Dico::create();
 			if(subpatcher)
 			{
-                vector<Atom> atoms;
+                Vector atoms;
 				lock_guard<mutex> guard(m_mutex);
                 
 				for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
@@ -507,7 +507,7 @@ namespace Kiwi
         }
     }
     
-    void Patcher::create(vector<Atom> const& inputs, vector<Atom> outputs)
+    void Patcher::create(Vector const& inputs, Vector outputs)
     {
         if(!inputs.empty())
         {
@@ -538,17 +538,17 @@ namespace Kiwi
         }
     }
     
-    void Patcher::remove(vector<Atom> const& inputs)
+    void Patcher::remove(Vector const& inputs)
     {
         
     }
     
-    void Patcher::get(vector<Atom> const& inputs, vector<Atom> outputs) const
+    void Patcher::get(Vector const& inputs, Vector outputs) const
     {
         
     }
     
-    void Patcher::set(vector<Atom> const& inputs)
+    void Patcher::set(Vector const& inputs)
     {
         
     }

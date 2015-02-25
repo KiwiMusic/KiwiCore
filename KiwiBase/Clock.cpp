@@ -28,7 +28,7 @@
 
 namespace Kiwi
 {
-    void Clock::tick_atoms(wClock clock, ulong ms, wMaker maker, vector<Atom> const& atoms)
+    void Clock::clock_tick(wClock clock, ulong ms)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -42,16 +42,15 @@ namespace Kiwi
             if(nclock)
             {
                 nclock->m_used--;
-                sMaker nmaker = maker.lock();
-                if(!nclock->m_used && nmaker)
+                if(!nclock->m_used)
                 {
-                    nmaker->tick(atoms);
+                    nclock->tick();
                 }
             }
         }
     }
     
-    void Clock::tick(wClock clock, ulong ms, wMaker maker)
+    void Clock::clock_tick_atoms(wClock clock, ulong ms, Vector const& atoms)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -65,43 +64,23 @@ namespace Kiwi
             if(nclock)
             {
                 nclock->m_used--;
-                sMaker nmaker = maker.lock();
-                if(!nclock->m_used && nmaker)
+                if(!nclock->m_used)
                 {
-                    nmaker->tick();
+                    nclock->tick(atoms);
                 }
             }
         }
     }
     
-    void Clock::delay(sMaker maker, const ulong ms)
+    void Clock::delay(const ulong ms)
     {
-        thread(tick, shared_from_this(), ms, maker).detach();
+        thread(clock_tick, shared_from_this(), ms).detach();
     }
     
 
-    void Clock::delay(sMaker maker, vector<Atom> const& atoms, const ulong ms)
+    void Clock::delay(Vector const& atoms, const ulong ms)
     {
-        thread(tick_atoms, shared_from_this(), ms, maker, atoms).detach();
-    }
-    
-    
-    void Clock::delay(sObject object, const ulong ms)
-    {
-        sMaker maker = dynamic_pointer_cast<Clock::Maker>(object);
-        if(maker)
-        {
-            thread(tick, shared_from_this(), ms, maker).detach();
-        }
-    }
-    
-    void Clock::delay(sObject object, vector<Atom> const& atoms, const ulong ms)
-    {
-        sMaker maker = dynamic_pointer_cast<Clock::Maker>(object);
-        if(maker)
-        {
-            thread(tick_atoms, shared_from_this(), ms, maker, atoms).detach();
-        }
+        thread(clock_tick_atoms, shared_from_this(), ms, atoms).detach();
     }
 }
 

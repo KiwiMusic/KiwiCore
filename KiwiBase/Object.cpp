@@ -97,7 +97,7 @@ namespace Kiwi
         ;
     }
     
-    void Object::Outlet::send(vector<Atom> const& atoms) const noexcept
+    void Object::Outlet::send(Vector const& atoms) const noexcept
     {
         lock_guard<mutex> guard(m_mutex);
         for(vector<Connection>::size_type i = 0; i < m_connections.size(); i++)
@@ -182,7 +182,7 @@ namespace Kiwi
         }
     }
     
-    void Object::send(ulong index, vector<Atom> const& atoms) const noexcept
+    void Object::send(ulong index, Vector const& atoms) const noexcept
     {
         m_mutex.lock();
         if(index < m_outlets.size())

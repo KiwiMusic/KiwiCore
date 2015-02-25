@@ -59,7 +59,7 @@ namespace Kiwi
     bool Console::receive(string const& message)
     {
         sInstance instance;
-        vector<Atom> args;//(Atom::createVector(message));
+        Vector args;//(Atom::createVector(message));
         if(!args.empty())
         {
             
@@ -113,7 +113,7 @@ namespace Kiwi
             }
             else if(command == "set")
             {
-                vector<Atom> inputs;
+                Vector inputs;
                 instance->set(inputs);
             }
             else if(command == "get")

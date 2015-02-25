@@ -111,7 +111,7 @@ namespace Kiwi
         }
     }
     
-    vector<Atom> Atom::Quark::getVector() const noexcept
+    Vector Atom::Quark::getVector() const noexcept
     {
         if(getType() == VECTOR)
         {
@@ -119,16 +119,16 @@ namespace Kiwi
         }
         else
         {
-            vector<Atom>* zaza= new vector<Atom>(0);
+            Vector* zaza= new Vector(0);
             return *zaza;
         }
     }
     
-    Dico Atom::Quark::getMap() const noexcept
+    Dico Atom::Quark::getDico() const noexcept
     {
-        if(getType() == MAP)
+        if(getType() == DICO)
         {
-            return (reinterpret_cast<const QuarkMap*>(this))->val;
+            return (reinterpret_cast<const QuarkDico*>(this))->val;
         }
         else
         {
@@ -190,17 +190,17 @@ namespace Kiwi
         m_quark = new QuarkTag(tag);
     }
     
-    Atom::Atom(vector<Atom> const& atoms) noexcept
+    Atom::Atom(Vector const& atoms) noexcept
     {
         m_quark = new QuarkVector(atoms);
     }
     
-    Atom::Atom(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept
+    Atom::Atom(Vector::iterator first, Vector::iterator last) noexcept
     {
         m_quark = new QuarkVector(first, last);
     }
         
-    Atom::Atom(vector<Atom>&& atoms) noexcept
+    Atom::Atom(Vector&& atoms) noexcept
     {
         m_quark = new QuarkVector(atoms);
     }
@@ -212,22 +212,22 @@ namespace Kiwi
     
     Atom::Atom(Dico const& atoms) noexcept
     {
-        m_quark = new QuarkMap(atoms);
+        m_quark = new QuarkDico(atoms);
     }
     
     Atom::Atom(Dico::iterator first, Dico::iterator last) noexcept
     {
-        m_quark = new QuarkMap(first, last);
+        m_quark = new QuarkDico(first, last);
     }
     
     Atom::Atom(Dico&& atoms) noexcept
     {
-        m_quark = new QuarkMap(atoms);
+        m_quark = new QuarkDico(atoms);
     }
     
     Atom::Atom(initializer_list<pair<const sTag, Atom>> il) noexcept
     {
-        m_quark = new QuarkMap(il);
+        m_quark = new QuarkDico(il);
     }
     
     Atom::~Atom() noexcept
@@ -237,7 +237,7 @@ namespace Kiwi
     
     Atom Atom::evaluate(string const& _text)
     {
-        vector<Atom> atoms;
+        Vector atoms;
         string word;
         istringstream iss(_text);
         while(iss >> word)

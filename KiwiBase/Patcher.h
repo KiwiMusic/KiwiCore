@@ -150,26 +150,26 @@ namespace Kiwi
          @param inputs The vector of atoms to evaluate.
          @param outputs The vector of atoms to return the creation.
          */
-        void create(vector<Atom> const& inputs, vector<Atom> outputs);
+        void create(Vector const& inputs, Vector outputs);
         
         //! Remove method of the patcher.
         /** The function evaluates the inputs for the deletion.
          @param inputs The vector of atoms to evaluate.
          */
-        void remove(vector<Atom> const& inputs);
+        void remove(Vector const& inputs);
         
         //! Get method of the patcher.
         /** The function evaluates the inputs for the getting and returns the result in the outputs.
          @param inputs The vector of atoms to evaluate.
          @param outputs The vector of atoms to return the getting.
          */
-        void get(vector<Atom> const& inputs, vector<Atom> outputs) const;
+        void get(Vector const& inputs, Vector outputs) const;
         
         //! Set method of the patcher.
         /** The function evaluates the inputs for the setting.
          @param inputs The vector of atoms to evaluate.
          */
-        void set(vector<Atom> const& inputs);
+        void set(Vector const& inputs);
         
         //! Append a dico.
         /** The function reads a dico and add the objects and links to the patcher.

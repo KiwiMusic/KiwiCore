@@ -39,7 +39,7 @@ namespace Kiwi
         const sTag              name;
         const string            text;
         const Dico   dico;
-        const vector<Atom>      args;
+        const Vector      args;
         
         Detail() :
         instance(nullptr), patcher(nullptr), lid(0), name(Tag::create("")), text(""), dico(), args({})
@@ -47,7 +47,7 @@ namespace Kiwi
             ;
         }
         
-        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, Dico const& _dico, vector<Atom> const& _args) :
+        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, Dico const& _dico, Vector const& _args) :
         instance(_instance), patcher(_patcher), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
         {
             ;
@@ -269,7 +269,7 @@ namespace Kiwi
         /** The function shoulds perform some stuff.
          @param atoms    A list of atoms to pass.
          */
-        virtual void receive(ulong index, vector<Atom> const& atoms) = 0;
+        virtual void receive(ulong index, Vector const& atoms) = 0;
         
         //! Write the object in a map.
         /** The function writes the object in a dico.
@@ -341,7 +341,7 @@ namespace Kiwi
          @param index The index of the outlet.
          @param atoms A list of atoms to pass.
          */
-        void    send(ulong index, vector<Atom> const& atoms) const noexcept;
+        void    send(ulong index, Vector const& atoms) const noexcept;
         
         //! Add a new inlet to the object.
         /** The function adds a new inlet to the object.
@@ -574,7 +574,7 @@ namespace Kiwi
         /** The function sends of atoms to the connected inlets.
          @param atoms The vector of atoms.
          */
-        void send(vector<Atom> const& atoms) const noexcept;
+        void send(Vector const& atoms) const noexcept;
     };
 }
 

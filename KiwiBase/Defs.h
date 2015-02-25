@@ -37,6 +37,7 @@ namespace Kiwi
     class Atom;
     class Tag;
     typedef shared_ptr<const Tag>       sTag;
+    typedef vector<Atom>                Vector;
     typedef map<sTag, Atom>             Dico;
     
     class Beacon;

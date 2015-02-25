@@ -47,8 +47,8 @@ namespace Kiwi
             LONG      = 2,
             DOUBLE    = 3,
             TAG       = 4,
-            MAP       = 5,
-            VECTOR    = 6
+            VECTOR    = 5,
+            DICO      = 6
         };
         
     private:
@@ -98,9 +98,9 @@ namespace Kiwi
                 return getType() == TAG;
             }
             
-            inline bool isMap() const noexcept
+            inline bool isDico() const noexcept
             {
-                return getType() == MAP;
+                return getType() == DICO;
             }
             
             inline bool isVector() const noexcept
@@ -116,9 +116,9 @@ namespace Kiwi
             
             sTag getTag() const noexcept;
             
-            vector<Atom> getVector() const noexcept;
+            Vector getVector() const noexcept;
             
-            Dico getMap() const noexcept;
+            Dico getDico() const noexcept;
         };
         
         // ================================================================================ //
@@ -232,19 +232,19 @@ namespace Kiwi
         class QuarkVector : public Quark
         {
         public:
-            vector<Atom> val;
+            Vector val;
             
-            QuarkVector(vector<Atom> const& _val) noexcept : val(_val)
+            QuarkVector(Vector const& _val) noexcept : val(_val)
             {
                 ;
             }
             
-            QuarkVector(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept : val(first, last)
+            QuarkVector(Vector::iterator first, Vector::iterator last) noexcept : val(first, last)
             {
                 ;
             }
             
-            QuarkVector(vector<Atom>&& atoms) noexcept : val(atoms)
+            QuarkVector(Vector&& atoms) noexcept : val(atoms)
             {
                 ;
             }
@@ -265,34 +265,34 @@ namespace Kiwi
         };
         
         // ================================================================================ //
-        //                                     ATOM MAP                                     //
+        //                                     ATOM DICO                                     //
         // ================================================================================ //
         
         //! The map
         /**
          ...
          */
-        class QuarkMap : public Quark
+        class QuarkDico : public Quark
         {
         public:
             const Dico val;
             
-            QuarkMap(Dico const& _val) noexcept : val(_val)
+            QuarkDico(Dico const& _val) noexcept : val(_val)
             {
                 ;
             }
             
-            QuarkMap(Dico::iterator first, Dico::iterator last) noexcept : val(first, last)
+            QuarkDico(Dico::iterator first, Dico::iterator last) noexcept : val(first, last)
             {
                 ;
             }
             
-            QuarkMap(Dico&& atoms) noexcept : val(atoms)
+            QuarkDico(Dico&& atoms) noexcept : val(atoms)
             {
                 ;
             }
             
-            QuarkMap(initializer_list<pair<const sTag, Atom>> il) noexcept : val(il)
+            QuarkDico(initializer_list<pair<const sTag, Atom>> il) noexcept : val(il)
             {
                 ;
             }
@@ -303,7 +303,7 @@ namespace Kiwi
              */
             inline Type getType() const noexcept override
             {
-                return MAP;
+                return DICO;
             }
         };
         
@@ -375,17 +375,17 @@ namespace Kiwi
         //! Constructor with a vector of atoms.
         /** The function allocates the atom with a vector of atoms.
          */
-        Atom(vector<Atom> const& atoms) noexcept;
+        Atom(Vector const& atoms) noexcept;
         
         //! Constructor with a vector of atoms.
         /** The function allocates the atom with a vector of atoms.
          */
-        Atom(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept;
+        Atom(Vector::iterator first, Vector::iterator last) noexcept;
         
         //! Constructor with a vector of atoms.
         /** The function allocates the atom with a vector of atoms.
          */
-        Atom(vector<Atom>&& atoms) noexcept;
+        Atom(Vector&& atoms) noexcept;
         
         //! Constructor with a vector of atoms.
         /** The function allocates the atom with a vector of atoms.
@@ -493,9 +493,9 @@ namespace Kiwi
         /** The function checks if the atom is of type map.
          @return    true if the atom is a map.
          */
-        inline bool isMap() const noexcept
+        inline bool isDico() const noexcept
         {
-            return m_quark->isMap();
+            return m_quark->isDico();
         }
         
         //! Cast the atom to a boolean.
@@ -565,7 +565,7 @@ namespace Kiwi
         /** The function casts the atom to a vector of atoms.
          @return A vector of atoms.
          */
-        inline operator vector<Atom>() const noexcept
+        inline operator Vector() const noexcept
         {
             return m_quark->getVector();
         }
@@ -576,7 +576,7 @@ namespace Kiwi
          */
         inline operator Dico() const noexcept
         {
-            return m_quark->getMap();
+            return m_quark->getDico();
         }
         
         //! Set up the atom with another atom.
@@ -683,7 +683,7 @@ namespace Kiwi
          @param atoms   The vector of atoms.
          @return An atom.
          */
-        inline Atom& operator=(vector<Atom> const& atoms) noexcept
+        inline Atom& operator=(Vector const& atoms) noexcept
         {
             m_quark = new QuarkVector(atoms);
             return *this;
@@ -694,7 +694,7 @@ namespace Kiwi
          @param atoms   The vector of atoms.
          @return An atom.
          */
-        inline Atom& operator=(vector<Atom>&& atoms) noexcept
+        inline Atom& operator=(Vector&& atoms) noexcept
         {
             m_quark = new QuarkVector(atoms);
             return *this;
@@ -718,7 +718,7 @@ namespace Kiwi
          */
         inline Atom& operator=(Dico const& atoms) noexcept
         {
-            m_quark = new QuarkMap(atoms);
+            m_quark = new QuarkDico(atoms);
             return *this;
         }
         
@@ -729,7 +729,7 @@ namespace Kiwi
          */
         inline Atom& operator=(Dico&& atoms) noexcept
         {
-            m_quark = new QuarkMap(atoms);
+            m_quark = new QuarkDico(atoms);
             return *this;
         }
         
@@ -740,7 +740,7 @@ namespace Kiwi
          */
         inline Atom& operator=(initializer_list<pair<const sTag, Atom>> il) noexcept
         {
-            m_quark = new QuarkMap(il);
+            m_quark = new QuarkDico(il);
             return *this;
         }
         

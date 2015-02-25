@@ -141,26 +141,26 @@ namespace Kiwi
          @param inputs The vector of atoms to evaluate.
          @param outputs The vector of atoms to return the creation.
          */
-        void create(vector<Atom> const& inputs, vector<Atom> outputs);
+        void create(Vector const& inputs, Vector outputs);
         
         //! Remove method of the instance.
         /** The function evaluates the inputs for the deletion.
          @param inputs The vector of atoms to evaluate.
          */
-        void remove(vector<Atom> const& inputs);
+        void remove(Vector const& inputs);
         
         //! Get method of the instance.
         /** The function evaluates the inputs for the getting and returns the result in the outputs.
          @param inputs The vector of atoms to evaluate.
          @param outputs The vector of atoms to return the getting.
          */
-        void get(vector<Atom> const& inputs, vector<Atom> outputs) const;
+        void get(Vector const& inputs, Vector outputs) const;
         
         //! Set method of the instance.
         /** The function evaluates the inputs for the setting.
          @param inputs The vector of atoms to evaluate.
          */
-        void set(vector<Atom> const& inputs);
+        void set(Vector const& inputs);
         
         //! Add an instance listener in the binding list of the instance.
         /** The function adds an instance listener in the binding list of the instance. 
