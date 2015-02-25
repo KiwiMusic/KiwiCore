@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_CORE_ATOM__
 #define __DEF_KIWI_CORE_ATOM__
 
-#include "Defs.h"
+#include "Tag.h"
 
 namespace Kiwi
 {
@@ -39,78 +39,116 @@ namespace Kiwi
     class Atom
     {
     public:
-        class Quark;
-        typedef shared_ptr<Quark>       sQuark;
-        typedef shared_ptr<const Quark> scQuark;
+        
+        enum Type
+        {
+            UNDEFINED = 0,
+            BOOLEAN   = 1,
+            LONG      = 2,
+            DOUBLE    = 3,
+            TAG       = 4,
+            MAP       = 5,
+            VECTOR    = 6
+        };
+        
+    private:
         // ================================================================================ //
         //                                      QUARK                                       //
         // ================================================================================ //
         
         class Quark
         {
-            friend Atom;
         public:
+            Quark() noexcept;
             
-            virtual ~Quark() noexcept
+            virtual ~Quark() noexcept;
+            
+            virtual inline Type getType() const noexcept
             {
-                ;
+                return UNDEFINED;
             }
             
-        private:
-            
-            static const size_t NothingCode;
-            static const size_t LongCode;
-            static const size_t DoubleCode;
-            static const size_t TagCode;
-            static const size_t ObjectCode;
-            static const size_t DicoCode;
-            
-            inline size_t getType() const noexcept
+            inline bool isUndefined() const noexcept
             {
-                return typeid(*this).hash_code();
+                return getType() == UNDEFINED;
             }
             
-            inline bool isNothing() const noexcept
+            inline bool isBool() const noexcept
             {
-                return getType() == NothingCode;
+                return getType() == BOOLEAN;
             }
             
             inline bool isLong() const noexcept
             {
-                return getType() == LongCode;
+                return getType() == LONG;
             }
             
             inline bool isDouble() const noexcept
             {
-                return getType() == DoubleCode;
+                return getType() == DOUBLE;
             }
             
             inline bool isNumber() const noexcept
             {
-                return isLong() || isDouble();
+                return isLong() || isDouble() || isBool();
             }
             
             inline bool isTag() const noexcept
             {
-                return getType() == TagCode;
+                return getType() == TAG;
             }
             
-            inline bool isDico() const noexcept
+            inline bool isMap() const noexcept
             {
-                return getType() == DicoCode;
+                return getType() == MAP;
             }
             
-            inline bool isObject() const noexcept
+            inline bool isVector() const noexcept
             {
-                return getType() == ObjectCode;
+                return getType() == VECTOR;
             }
+            
+            bool getBool() const noexcept;
             
             long getLong() const noexcept;
             
             double getDouble() const noexcept;
+            
+            sTag getTag() const noexcept;
+            
+            vector<Atom> getVector() const noexcept;
+            
+            map<sTag, Atom> getMap() const noexcept;
         };
         
-    private:
+        // ================================================================================ //
+        //                                     ATOM BOOL                                    //
+        // ================================================================================ //
+        
+        //! The bool
+        /**
+         ...
+         */
+        class Bool : public Quark
+        {
+        public:
+            const bool val;
+            
+            Bool(bool const& _val) noexcept : val(_val)
+            {
+                ;
+            }
+            
+            //! Retrieve the type of the quark.
+            /** The function retrieves the type of the quark.
+             @return The type of the quark;
+             */
+            inline Type getType() const noexcept override
+            {
+                return BOOLEAN;
+            }
+        };
+        
         // ================================================================================ //
         //                                     ATOM LONG                                    //
         // ================================================================================ //
@@ -124,6 +162,15 @@ namespace Kiwi
         public:
             const long val;
             Long(long const& _val) noexcept : val(_val){;}
+            
+            //! Retrieve the type of the quark.
+            /** The function retrieves the type of the quark.
+             @return The type of the quark;
+             */
+            inline Type getType() const noexcept override
+            {
+                return LONG;
+            }
         };
         
         // ================================================================================ //
@@ -139,30 +186,144 @@ namespace Kiwi
         public:
             const double val;
             Double(double const& _val) noexcept : val(_val){;}
+            
+            //! Retrieve the type of the quark.
+            /** The function retrieves the type of the quark.
+             @return The type of the quark;
+             */
+            inline Type getType() const noexcept override
+            {
+                return DOUBLE;
+            }
         };
         
-        shared_ptr<Quark> m_quark;
+        // ================================================================================ //
+        //                                     ATOM TAG                                     //
+        // ================================================================================ //
+        
+        //! The tag
+        /**
+         ...
+         */
+        class QuarkTag : public Quark
+        {
+        public:
+            const sTag val;
+            QuarkTag(sTag _val) noexcept : val(_val){;}
+            
+            //! Retrieve the type of the quark.
+            /** The function retrieves the type of the quark.
+             @return The type of the quark;
+             */
+            inline Type getType() const noexcept override
+            {
+                return TAG;
+            }
+        };
+        
+        // ================================================================================ //
+        //                                     ATOM VECTOR                                  //
+        // ================================================================================ //
+        
+        //! The vector
+        /**
+         ...
+         */
+        class Vector : public Quark
+        {
+        public:
+            vector<Atom> val;
+            
+            Vector(vector<Atom> const& _val) noexcept : val(_val)
+            {
+                ;
+            }
+            
+            Vector(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept : val(first, last)
+            {
+                ;
+            }
+            
+            Vector(vector<Atom>&& atoms) noexcept : val(atoms)
+            {
+                ;
+            }
+            
+            Vector(initializer_list<Atom> il) noexcept : val(il)
+            {
+                ;
+            }
+            
+            //! Retrieve the type of the quark.
+            /** The function retrieves the type of the quark.
+             @return The type of the quark;
+             */
+            inline Type getType() const noexcept override
+            {
+                return VECTOR;
+            }
+        };
+        
+        // ================================================================================ //
+        //                                     ATOM MAP                                     //
+        // ================================================================================ //
+        
+        //! The map
+        /**
+         ...
+         */
+        class Map : public Quark
+        {
+        public:
+            const map<sTag, Atom> val;
+            
+            Map(map<sTag, Atom> const& _val) noexcept : val(_val)
+            {
+                ;
+            }
+            
+            Map(map<sTag, Atom>::iterator first, map<sTag, Atom>::iterator last) noexcept : val(first, last)
+            {
+                ;
+            }
+            
+            Map(map<sTag, Atom>&& atoms) noexcept : val(atoms)
+            {
+                ;
+            }
+            
+            Map(initializer_list<pair<const sTag, Atom>> il) noexcept : val(il)
+            {
+                ;
+            }
+            
+            //! Retrieve the type of the quark.
+            /** The function retrieves the type of the quark.
+             @return The type of the quark;
+             */
+            inline Type getType() const noexcept override
+            {
+                return MAP;
+            }
+        };
+        
+        Quark m_quark;
         
     public:
         
-        enum Type
-        {
-            NOTHING   = 0,
-            LONG      = 1,
-            DOUBLE    = 2,
-            TAG       = 3,
-            OBJECT    = 4,
-            DICO      = 5,
-            VECTOR    = 6
-        };
         // ================================================================================ //
         //                                      ATOM                                        //
         // ================================================================================ //
         
         //! Constructor.
-        /** The function allocates the atom with a zero long value.
+        /** The function allocates an undefined atom.
          */
         Atom() noexcept;
+        
+        //! Constructor with another atom.
+        /** The function allocates the atom with an atom.
+         */
+        Atom(Atom const& other) noexcept;
         
         //! Constructor with a boolean value.
         /** The function allocates the atom with a long value created with a boolean value.
@@ -170,8 +331,8 @@ namespace Kiwi
          */
         Atom(const bool value) noexcept;
         
-        //! Constructor with an int value.
-        /** The function allocates the atom with a long value created with an int value.
+        //! Constructor with a long value.
+        /** The function allocates the atom with a long value.
          @param value The value.
          */
         Atom(const int value) noexcept;
@@ -182,14 +343,8 @@ namespace Kiwi
          */
         Atom(const long value) noexcept;
         
-        //! Constructor with a long value.
-        /** The function allocates the atom with a long value.
-         @param value The value.
-         */
-        Atom(const ulong value) noexcept;
-        
-        //! Constructor with a float value.
-        /** The function allocates the atom with a double value created with a float value.
+        //! Constructor with a double value.
+        /** The function allocates the atom with a double value.
          @param value The value.
          */
         Atom(const float value) noexcept;
@@ -217,20 +372,45 @@ namespace Kiwi
          */
         Atom(sTag tag) noexcept;
         
-        //! Constructor with an object.
-        /** The function allocates the atom with an object.
+        //! Constructor with a vector of atoms.
+        /** The function allocates the atom with a vector of atoms.
          */
-        Atom(sObject object) noexcept;
+        Atom(vector<Atom> const& atoms) noexcept;
         
-        //! Constructor with a dico.
-        /** The function allocates the atom with a dico.
+        //! Constructor with a vector of atoms.
+        /** The function allocates the atom with a vector of atoms.
          */
-        Atom(sDico dico) noexcept;
+        Atom(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept;
         
-        //! Constructor with another atom.
-        /** The function allocates the atom with an atom.
+        //! Constructor with a vector of atoms.
+        /** The function allocates the atom with a vector of atoms.
          */
-        Atom(Atom const& other) noexcept;
+        Atom(vector<Atom>&& atoms) noexcept;
+        
+        //! Constructor with a vector of atoms.
+        /** The function allocates the atom with a vector of atoms.
+         */
+        Atom(initializer_list<Atom> il) noexcept;
+        
+        //! Constructor with a map of atoms.
+        /** The function allocates the atom with a vector of atoms.
+         */
+        Atom(map<sTag, Atom> const& atoms) noexcept;
+        
+        //! Constructor with a map of atoms.
+        /** The function allocates the atom with a vector of atoms.
+         */
+        Atom(map<sTag, Atom>::iterator first, map<sTag, Atom>::iterator last) noexcept;
+        
+        //! Constructor with a map of atoms.
+        /** The function allocates the atom with a vector of atoms.
+         */
+        Atom(map<sTag, Atom>&& atoms) noexcept;
+        
+        //! Constructor with a map of atoms.
+        /** The function allocates the atom with a vector of atoms.
+         */
+        Atom(initializer_list<pair<const sTag, Atom>> il) noexcept;
         
         //! Destructor.
         /** Doesn't perform anything.
@@ -243,47 +423,43 @@ namespace Kiwi
          */
         inline Type getType() const noexcept
         {
-            const size_t type = m_quark->getType();
-            if(type == Quark::LongCode)
-            {
-                return LONG;
-            }
-            else if(type == Quark::DoubleCode)
-            {
-                return DOUBLE;
-            }
-            else if(type == Quark::TagCode)
-            {
-                return TAG;
-            }
-            else if(type == Quark::DicoCode)
-            {
-                return DICO;
-            }
-            else
-            {
-                return OBJECT;
-            }
+            return m_quark.getType();
+        }
+        
+        //! Check if the atom is undefined.
+        /** The function checks if the atom is undefined.
+         @return    true if the atom is undefined.
+         */
+        inline bool isUndefined() const noexcept
+        {
+            return m_quark.isLong();
+        }
+        
+        //! Check if the atom is of type bool.
+        /** The function checks if the atom is of type bool.
+         @return    true if the atom is a bool.
+         */
+        inline bool isBool() const noexcept
+        {
+            return m_quark.isLong();
         }
         
         //! Check if the atom is of type long.
         /** The function checks if the atom is of type long.
          @return    true if the atom is a long.
-         @see isDouble, isNumber
          */
         inline bool isLong() const noexcept
         {
-            return m_quark->isLong();
+            return m_quark.isLong();
         }
         
         //! Check if the atom is of type double.
         /** The function checks if the atom is of type double.
          @return    true if the atom is a double.
-         @see isLong, isNumber
          */
         inline bool isDouble() const noexcept
         {
-            return m_quark->isDouble();
+            return m_quark.isDouble();
         }
         
         //! Checks if the atom is of type long or double.
@@ -292,7 +468,7 @@ namespace Kiwi
          */
         inline bool isNumber() const noexcept
         {
-            return m_quark->isNumber();
+            return m_quark.isNumber();
         }
         
         //! Check if the atom is of type tag.
@@ -301,25 +477,25 @@ namespace Kiwi
          */
         inline bool isTag() const noexcept
         {
-            return m_quark->isTag();
+            return m_quark.isTag();
         }
         
-        //! Check if the atom is of type object.
-        /** The function checks if the atom is of type object.
-         @return    true if the atom is a object.
+        //! Check if the atom is of type vector.
+        /** The function checks if the atom is of type vector.
+         @return    true if the atom is a vector.
          */
-        inline bool isObject() const noexcept
+        inline bool isVector() const noexcept
         {
-            return m_quark->isObject();
+            return m_quark.isVector();
         }
         
-        //! Check if the atom is of type dico.
-        /** The function checks if the atom is of type dico.
-         @return    true if the atom is a dico.
+        //! Check if the atom is of type map.
+        /** The function checks if the atom is of type map.
+         @return    true if the atom is a map.
          */
-        inline bool isDico() const noexcept
+        inline bool isMap() const noexcept
         {
-            return m_quark->isDico();
+            return m_quark.isMap();
         }
         
         //! Cast the atom to a boolean.
@@ -328,7 +504,7 @@ namespace Kiwi
          */
         inline operator bool() const noexcept
         {
-            return (bool)m_quark->getLong();
+            return m_quark.getBool();
         }
         
         //! Cast the atom to an int.
@@ -337,7 +513,7 @@ namespace Kiwi
          */
         inline operator int() const noexcept
         {
-            return (int)m_quark->getLong();
+            return (int)m_quark.getLong();
         }
         
         //! Cast the atom to a long.
@@ -346,7 +522,7 @@ namespace Kiwi
          */
         inline operator long() const noexcept
         {
-            return m_quark->getLong();
+            return m_quark.getLong();
         }
         
         //! Cast the atom to a long.
@@ -355,7 +531,7 @@ namespace Kiwi
          */
         inline operator ulong() const noexcept
         {
-            return (ulong)m_quark->getLong();
+            return (ulong)m_quark.getLong();
         }
         
         //! Cast the atom to a float.
@@ -364,7 +540,7 @@ namespace Kiwi
          */
         inline operator float() const noexcept
         {
-            return (float)m_quark->getDouble();
+            return (float)m_quark.getDouble();
         }
         
         //! Cast the atom to a double.
@@ -373,38 +549,35 @@ namespace Kiwi
          */
         inline operator double() const noexcept
         {
-            return m_quark->getDouble();
+            return m_quark.getDouble();
         }
         
         //! Cast the atom to a tag.
         /** The function casts the atom to a tag.
          @return A tag if the atom is a tag otherwise a nullptr.
          */
-        operator sTag() const noexcept;
+        inline operator sTag() const noexcept
+        {
+            return m_quark.getTag();
+        }
         
-        //! Cast the atom to a object.
-        /** The function casts the atom to a object.
-         @return An object if the atom is a object otherwise a nullptr.
+        //! Cast the atom to a vector of atoms.
+        /** The function casts the atom to a vector of atoms.
+         @return A vector of atoms.
          */
-        operator scObject() const noexcept;
+        inline operator vector<Atom>() const noexcept
+        {
+            return m_quark.getVector();
+        }
         
-        //! Cast the atom to a object.
-        /** The function casts the atom to a object.
-         @return An object if the atom is a object otherwise a nullptr.
+        //! Cast the atom to a map of atoms.
+        /** The function casts the atom to a map of atoms.
+         @return A map of atoms.
          */
-        operator sObject() noexcept;
-        
-        //! Cast the atom to a dico.
-        /** The function casts the atom to a dico.
-         @return An dico if the atom is a dico otherwise a nullptr.
-         */
-        operator scDico() const noexcept;
-        
-        //! Cast the atom to a dico.
-        /** The function casts the atom to a dico.
-         @return An dico if the atom is a dico otherwise a nullptr.
-         */
-        operator sDico() noexcept;
+        inline operator map<sTag, Atom>() const noexcept
+        {
+            return m_quark.getMap();
+        }
         
         //! Set up the atom with another atom.
         /** The function sets up the atom with another atom.
@@ -424,18 +597,18 @@ namespace Kiwi
          */
         inline Atom& operator=(const bool value) noexcept
         {
-            m_quark = make_shared<Long>((long)value);
+            m_quark = Bool(value);
             return *this;
         }
         
-        //! Set up the atom with a int value.
-        /** The function sets up the atom with a long value created with aint value.
-         @param value   The int value.
+        //! Set up the atom with a long value.
+        /** The function sets up the atom with a long value.
+         @param value   The long value.
          @return An atom.
          */
         inline Atom& operator=(const int value) noexcept
         {
-            m_quark = make_shared<Long>((long)value);
+            m_quark = Long((long)value);
             return *this;
         }
         
@@ -446,29 +619,18 @@ namespace Kiwi
          */
         inline Atom& operator=(const long value) noexcept
         {
-            m_quark = make_shared<Long>(value);
+            m_quark = Long(value);
             return *this;
         }
         
-        //! Set up the atom with a ulong value.
-        /** The function sets up the atom with a ulong value.
-         @param value   The ulong value.
-         @return An atom.
-         */
-        inline Atom& operator=(const ulong value) noexcept
-        {
-            m_quark = make_shared<Long>((long)value);
-            return *this;
-        }
-        
-        //! Set up the atom with a float value.
-        /** The function sets up the atom with a double value created with afloat value.
-         @param value   The float value.
+        //! Set up the atom with a double value.
+        /** The function sets up the atom with a double value.
+         @param value   The double value.
          @return An atom.
          */
         inline Atom& operator=(const float value) noexcept
         {
-            m_quark = make_shared<Double>((double)value);
+            m_quark = Double((float)value);
             return *this;
         }
         
@@ -479,7 +641,7 @@ namespace Kiwi
          */
         inline Atom& operator=(const double value) noexcept
         {
-            m_quark = make_shared<Double>(value);
+            m_quark = Double(value);
             return *this;
         }
         
@@ -488,35 +650,99 @@ namespace Kiwi
          @param tag   The string.
          @return An atom.
          */
-        Atom& operator=(char const* tag) noexcept;
+        inline Atom& operator=(char const* tag) noexcept
+        {
+            m_quark = QuarkTag(Tag::create(tag));
+            return *this;
+        }
         
         //! Set up the atom with a string.
         /** The function sets up the atom with string.
          @param tag   The string.
          @return An atom.
          */
-        Atom& operator=(string const& tag) noexcept;
+        inline Atom& operator=(string const& tag) noexcept
+        {
+            m_quark = QuarkTag(Tag::create(tag));
+            return *this;
+        }
         
         //! Set up the atom with a tag.
         /** The function sets up the atom with a tag.
          @param tag   The tag.
          @return An atom.
          */
-        Atom& operator=(sTag tag) noexcept;
+        inline Atom& operator=(sTag tag) noexcept
+        {
+            m_quark = QuarkTag(tag);
+            return *this;
+        }
         
-        //! Set up the atom with a object.
-        /** The function sets up the atom with a object.
-         @param object   The object.
+        //! Set up the atom with a vector of atoms.
+        /** The function sets up the atom with a vector of atoms.
+         @param atoms   The vector of atoms.
          @return An atom.
          */
-        Atom& operator=(sObject object) noexcept;
+        inline Atom& operator=(vector<Atom> const& atoms) noexcept
+        {
+            m_quark = Vector(atoms);
+            return *this;
+        }
         
-        //! Set up the atom with a dico.
-        /** The function sets up the atom with a dico.
-         @param dico   The dico.
+        //! Set up the atom with a vector of atoms.
+        /** The function sets up the atom with a vector of atoms.
+         @param atoms   The vector of atoms.
          @return An atom.
          */
-        Atom& operator=(sDico dico) noexcept;
+        inline Atom& operator=(vector<Atom>&& atoms) noexcept
+        {
+            m_quark = Vector(atoms);
+            return *this;
+        }
+        
+        //! Set up the atom with a vector of atoms.
+        /** The function sets up the atom with a vector of atoms.
+         @param atoms   The vector of atoms.
+         @return An atom.
+         */
+        inline Atom& operator=(initializer_list<Atom> il) noexcept
+        {
+            m_quark = Vector(il);
+            return *this;
+        }
+        
+        //! Set up the atom with a vector of atoms.
+        /** The function sets up the atom with a vector of atoms.
+         @param atoms   The vector of atoms.
+         @return An atom.
+         */
+        inline Atom& operator=(map<sTag, Atom> const& atoms) noexcept
+        {
+            m_quark = Map(atoms);
+            return *this;
+        }
+        
+        //! Set up the atom with a vector of atoms.
+        /** The function sets up the atom with a vector of atoms.
+         @param atoms   The vector of atoms.
+         @return An atom.
+         */
+        inline Atom& operator=(map<sTag, Atom>&& atoms) noexcept
+        {
+            m_quark = Map(atoms);
+            return *this;
+        }
+        
+        //! Set up the atom with a vector of atoms.
+        /** The function sets up the atom with a vector of atoms.
+         @param atoms   The vector of atoms.
+         @return An atom.
+         */
+        inline Atom& operator=(initializer_list<pair<const sTag, Atom>> il) noexcept
+        {
+            m_quark = Map(il);
+            return *this;
+        }
         
         //! Compare the atom with another.
         /** The function compares the atom with another.
@@ -525,15 +751,8 @@ namespace Kiwi
          */
         inline bool operator==(Atom const& other) const noexcept
         {
-            size_t type = m_quark->getType();
-            if(type == Atom::Quark::LongCode || type == Atom::Quark::DoubleCode)
-            {
-                return other == m_quark->getDouble();
-            }
-            else
-            {
-                return other.m_quark == m_quark;
-            }
+            int todo;
+            return false;
         }
         
         //! Compare the atom with a boolean value.
@@ -545,24 +764,7 @@ namespace Kiwi
         {
             if(isNumber())
             {
-                return m_quark->getDouble() == (double)value;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        
-        //! Compare the atom with an int value.
-        /** The function compares the atom with an int value.
-         @param value   The int value.
-         @return true if the atom hold the int value otherwise false.
-         */
-        inline bool operator==(const int value) const noexcept
-        {
-            if(isNumber())
-            {
-                return m_quark->getDouble() == (double)value;
+                return m_quark.getDouble() == (double)value;
             }
             else
             {
@@ -579,41 +781,7 @@ namespace Kiwi
         {
             if(isNumber())
             {
-                return m_quark->getDouble() == (double)value;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        
-        //! Compare the atom with an ulong value.
-        /** The function compares the atom with an unsigned  long.
-         @param value   The ulong value.
-         @return true if the atom hold the ulong value otherwise false.
-         */
-        inline bool operator==(const ulong value) const noexcept
-        {
-            if(isNumber())
-            {
-                return m_quark->getDouble() == (double)value;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        
-        //! Compare the atom with a float value.
-        /** The function compares the atom with a float value.
-         @param value   The float value.
-         @return true if the atom hold the float value otherwise false.
-         */
-        inline bool operator==(const float value) const noexcept
-        {
-            if(isNumber())
-            {
-                return m_quark->getDouble() == (double)value;
+                return m_quark.getDouble() == (double)value;
             }
             else
             {
@@ -630,7 +798,7 @@ namespace Kiwi
         {
             if(isNumber())
             {
-                return m_quark->getDouble() == value;
+                return m_quark.getDouble() == value;
             }
             else
             {
@@ -659,20 +827,6 @@ namespace Kiwi
          */
         bool operator==(sTag tag) const noexcept;
         
-        //! Compare the atom with a object.
-        /** The function compares the atom with a object.
-         @param object   The object.
-         @return true if the atom hold the object otherwise false.
-         */
-        bool operator==(scObject object) const noexcept;
-        
-        //! Compare the atom with a dico.
-        /** The function compares the atom with a dico.
-         @param dico   The dico.
-         @return true if the atom hold the dico otherwise false.
-         */
-        bool operator==(scDico dico) const noexcept;
-        
         //! Compare the atom with another.
         /** The function compares the atom with another.
          @param other The other atom.
@@ -693,32 +847,12 @@ namespace Kiwi
             return !(*this == value);
         }
         
-        //! Compare the atom with an int value.
-        /** The function compares the atom with an int value.
-         @param value   The int value.
-         @return true if the atom differ from the int value otherwise false.
-         */
-        inline bool operator!=(const int value) const noexcept
-        {
-            return !(*this == value);
-        }
-        
         //! Compare the atom with a long value.
         /** The function compares the atom with a long.
          @param value   The long value.
          @return true if the atom differ from the long value otherwise false.
          */
         inline bool operator!=(const long value) const noexcept
-        {
-            return !(*this == value);
-        }
-        
-        //! Compare the atom with a float value.
-        /** The function compares the atom with a float value.
-         @param value   The float value.
-         @return true if the atom differ from the float value otherwise false.
-         */
-        inline bool operator!=(const float value) const noexcept
         {
             return !(*this == value);
         }
@@ -763,31 +897,8 @@ namespace Kiwi
             return !(*this == tag);
         }
         
-        //! Compare the atom with a object.
-        /** The function compares the atom with a object.
-         @param object   The object.
-         @return true if the atom differ from the object otherwise false.
-         */
-        inline bool operator!=(scObject object) const noexcept
-        {
-            return !(*this == object);
-        }
-        
-        //! Compare the atom with a dico.
-        /** The function compares the atom with a dico.
-         @param dico   The dico.
-         @return true if the atom differ from the dico otherwise false.
-         */
-        bool operator!=(scDico dico) const noexcept
-        {
-            return !(*this == dico);
-        }
-        
-        static vector<Atom>& evaluate(string const& _text);
+        static Atom evaluate(string const& _text);
     };
-    
-    string toString(Atom const& __val);
-    string toString(vector<Atom> const& __val);
 }
 
 

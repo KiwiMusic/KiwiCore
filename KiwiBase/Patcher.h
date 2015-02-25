@@ -77,8 +77,8 @@ namespace Kiwi
         void send(sLink link, Notification type);
         
         //! @internal Object and link creation.
-        void createObject(scDico dico);
-        void createLink(scDico dico);
+        void createObject(map<sTag, Atom> const& dico);
+        void createLink(map<sTag, Atom> const& dico);
     public:
         
         //! Constructor.
@@ -97,7 +97,7 @@ namespace Kiwi
          @param dico The dico that will initialize the patcher.
          @return The patcher.
          */
-        static sPatcher create(sInstance instance, sDico dico = nullptr);
+        static sPatcher create(sInstance instance, map<sTag, Atom>& dico);
 		
         //! Retrieve the instance that manages the patcher.
         /** The function retrieves the instance that manages the patcher.
@@ -176,7 +176,7 @@ namespace Kiwi
         /** The function reads a dico and add the objects and links to the patcher.
          @param dico The dico.
          */
-        void add(scDico dico);
+        void add(map<sTag, Atom> const& dico);
         
         //! Free a object.
         /** The function removes a object from the patcher.
@@ -206,7 +206,7 @@ namespace Kiwi
         /** The function writes the patcherin a dico.
          @param dico The dico.
          */
-        void write(sDico dico) const;
+        void write(map<sTag, Atom>& dico) const;
 		
 		//! Add a listener to the object.
 		/** The function adds a listener to the object.

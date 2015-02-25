@@ -24,16 +24,10 @@
 #ifndef __DEF_KIWI_CONSOLE__
 #define __DEF_KIWI_CONSOLE__
 
-#include "Defs.h"
+#include "Instance.h"
 
-// TODO
-// - Clean and make it thread safe
 namespace Kiwi
 {
-    class Object;
-    class Patcher;
-    class Instance;
-    
     // ================================================================================ //
     //                                      CONSOLE                                     //
     // ================================================================================ //
@@ -48,6 +42,11 @@ namespace Kiwi
     class Console : public enable_shared_from_this<Console>
     {
     public:
+        friend sInstance Instance::create(sDspDeviceManager device, string const& name);
+        static map<sTag, sInstance> m_instances;
+        
+        static sDspDeviceManager            device;
+        
         class Listener;
         typedef shared_ptr<Listener>        sListener;
         typedef weak_ptr<Listener>          wListener;
@@ -58,14 +57,16 @@ namespace Kiwi
             
     private:
         
+        
         static set<wListener,
         owner_less<wListener>> m_listeners;
         static mutex           m_mutex;
     public:
         
-        // ================================================================================ //
-        //                                      CONSOLE                                     //
-        // ================================================================================ //
+        //! ...
+        /** ...
+         */
+        static bool receive(string const& message);
         
         //! Add an console listener in the binding list of the console.
         /** The function adds an console listener in the binding list of the console. If the console listener is already in the binding list, the function doesn't do anything.
@@ -119,97 +120,97 @@ namespace Kiwi
          @param message The error in the string format.
          */
         static void error(const scObject object, string const& message) noexcept;
-        
-        // ================================================================================ //
-        //                                  INSTANCE LISTENER                               //
-        // ================================================================================ //
-        
-        //! The console listener is a virtual class that can bind itself to a console and be notified of the sevreal messages.
-        /**
-         The console listener is a very light class with three methods that can receive the post, warning and error messages notifications from consoles.
-         @see Console
-         @see Console::Message
-         @see Console::History
-         */
-        class Listener
-        {
-        public:
-            
-            //! The constructor.
-            /** The constructor does nothing.
-             */
-            Listener()
-            {
-                ;
-            }
-            
-            //! The destructor.
-            /** The destructor does nothing.
-             */
-            virtual ~Listener()
-            {
-                ;
-            }
-            
-            //! Receive the messages.
-            /** The function is called by the console when a message has been received.
-             @param console The console that received the message.
-             @param message The message.
-             */
-            virtual void receive(shared_ptr<const Message> message)
-            {
-                ;
-            }
-        };
-    
-        // ================================================================================ //
-        //                                  CONSOLE MESSAGE                                 //
-        // ================================================================================ //
-        
-        //! The console message owns all the informations of a message posted via a console.
-        /**
-         The console message is used to send the content, the type and the sender of a message posted via a console to the console listeners.
-         @see Console
-         @see Console::Listener
-         @see Console::History
-         */
-        class Message
-        {
-        public:
-            enum Kind
-            {
-                Empty   = 0,
-                Post    = 1,
-                Error   = 2,
-                Warning = 3
-            };
-            
-            const string        content;
-            const Kind          kind;
-            const wcObject      object;
-            const wcPatcher     patcher;
-            const wcInstance    instance;
-            
-            //! The constructor.
-            /** The constructor initialize the members.
-             */
-            Message(scInstance instance, scPatcher patcher, scObject object, Kind kind, string const& content) noexcept :
-            content(content), kind(kind), object(object), patcher(patcher), instance(instance)
-            {
-                ;
-            }
-            
-            //! The destructor.
-            /** The destructor free the members.
-             */
-            ~Message()
-            {
-                ;
-            }
-        };
     };
     
-    typedef shared_ptr<const Console::Message> sConsoleMessage;
+    // ================================================================================ //
+    //                                  INSTANCE LISTENER                               //
+    // ================================================================================ //
+    
+    //! The console listener is a virtual class that can bind itself to a console and be notified of the sevreal messages.
+    /**
+     The console listener is a very light class with three methods that can receive the post, warning and error messages notifications from consoles.
+     @see Console
+     @see Console::Message
+     @see Console::History
+     */
+    class Console::Listener
+    {
+    public:
+        
+        //! The constructor.
+        /** The constructor does nothing.
+         */
+        Listener()
+        {
+            ;
+        }
+        
+        //! The destructor.
+        /** The destructor does nothing.
+         */
+        virtual ~Listener()
+        {
+            ;
+        }
+        
+        //! Receive the messages.
+        /** The function is called by the console when a message has been received.
+         @param console The console that received the message.
+         @param message The message.
+         */
+        virtual void receive(shared_ptr<const Message> message)
+        {
+            ;
+        }
+    };
+    
+    // ================================================================================ //
+    //                                  CONSOLE MESSAGE                                 //
+    // ================================================================================ //
+    
+    //! The console message owns all the informations of a message posted via a console.
+    /**
+     The console message is used to send the content, the type and the sender of a message posted via a console to the console listeners.
+     @see Console
+     @see Console::Listener
+     @see Console::History
+     */
+    class Console::Message
+    {
+    public:
+        enum Kind
+        {
+            Empty   = 0,
+            Post    = 1,
+            Error   = 2,
+            Warning = 3
+        };
+        
+        const string        content;
+        const Kind          kind;
+        const wcObject      object;
+        const wcPatcher     patcher;
+        const wcInstance    instance;
+        
+        //! The constructor.
+        /** The constructor initialize the members.
+         */
+        Message(scInstance instance, scPatcher patcher, scObject object, Kind kind, string const& content) noexcept :
+        content(content), kind(kind), object(object), patcher(patcher), instance(instance)
+        {
+            ;
+        }
+        
+        //! The destructor.
+        /** The destructor free the members.
+         */
+        ~Message()
+        {
+            ;
+        }
+    };
+    
+        typedef shared_ptr<const Console::Message> scConsoleMessage;
 
 };
 

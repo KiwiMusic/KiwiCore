@@ -24,6 +24,7 @@
 #include "Dico.h"
 #include "Object.h"
 #include "Patcher.h"
+#include "Console.h"
 
 namespace Kiwi
 {    
@@ -358,7 +359,9 @@ namespace Kiwi
             }
         }
         else
-            return Atom::NOTHING;
+        {
+            return Atom::UNDEFINED;
+        }
     }
     
     Atom Dico::get(sTag key) const noexcept
@@ -371,7 +374,7 @@ namespace Kiwi
                 return  it->second[0];
             }
         }
-        return 0;
+        return Atom();
     }    
     
     void Dico::get(sTag key, vector<Atom>& atoms) const noexcept
@@ -550,7 +553,7 @@ namespace Kiwi
             }
             case Atom::OBJECT:
             {
-                scObject obj = atom;
+                scObject obj = sObject(atom);
                 if(obj)
                     text.append(toString(obj->getName()));
                 else
@@ -559,7 +562,7 @@ namespace Kiwi
             }
             case Atom::DICO:
             {
-                scDico dico = atom;
+                scDico dico = sDico(atom);
                 if(dico)
                     toJson(dico, text, line + "    ");
                 else
@@ -688,7 +691,7 @@ namespace Kiwi
         }
         else
         {
-            return Atom::NOTHING;
+            return Atom::UNDEFINED;
         }
     }
     

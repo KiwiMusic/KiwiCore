@@ -24,6 +24,7 @@
 #include "Link.h"
 #include "Object.h"
 #include "Patcher.h"
+#include "Console.h"
 
 namespace Kiwi
 {
@@ -61,19 +62,20 @@ namespace Kiwi
         }
     }
     
-    void Link::write(sDico dico) const noexcept
+    void Link::write(map<sTag, Atom>& dico) const noexcept
     {
         sObject     from    = getObjectFrom();
         sObject     to      = getObjectTo();
+        
         if(from && to)
         {
-            dico->set(Tag::List::from, {from->getId(), getOutletIndex()});
-            dico->set(Tag::List::to, {to->getId(), getInletIndex()});
+            dico[Tag::List::from] = {(long)from->getId(), (long)getOutletIndex()};
+            dico[Tag::List::to] = {(long)to->getId(), (long)getInletIndex()};
         }
         else
         {
-            dico->clear(Tag::List::from);
-            dico->clear(Tag::List::to);
+            dico.erase(Tag::List::from);
+            dico.erase(Tag::List::to);
         }
     }
     

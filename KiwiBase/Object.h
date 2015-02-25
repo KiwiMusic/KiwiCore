@@ -24,7 +24,6 @@
 #ifndef __DEF_KIWI_OBJECT__
 #define __DEF_KIWI_OBJECT__
 
-#include "Dico.h"
 #include "Beacon.h"
 #include "Clock.h"
 
@@ -34,21 +33,21 @@ namespace Kiwi
 {
     struct Detail
     {
-        const sInstance     instance;
-        const sPatcher      patcher;
-        const ulong         lid;
-        const sTag          name;
-        const string        text;
-        const scDico        dico;
-        const vector<Atom>  args;
+        const sInstance         instance;
+        const sPatcher          patcher;
+        const ulong             lid;
+        const sTag              name;
+        const string            text;
+        const map<sTag, Atom>   dico;
+        const vector<Atom>      args;
         
         Detail() :
-        instance(nullptr), patcher(nullptr), lid(0), name(Tag::create("")), text(""), dico(nullptr), args({})
+        instance(nullptr), patcher(nullptr), lid(0), name(Tag::create("")), text(""), dico(), args({})
         {
             ;
         }
         
-        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, scDico _dico, vector<Atom> const& _args) :
+        Detail(sInstance _instance, sPatcher _patcher, const ulong _id, sTag _name, const string _text, map<sTag, Atom> const& _dico, vector<Atom> const& _args) :
         instance(_instance), patcher(_patcher), lid(_id), name(_name), text(_text), dico(_dico), args(_args)
         {
             ;
@@ -63,7 +62,7 @@ namespace Kiwi
     /**
      The object is a graphical class that aims to be instantiate in a patcher.
      */
-    class Object : virtual public Sketcher, public Atom::Quark
+    class Object : virtual public Sketcher
     {
     public:
         
@@ -272,11 +271,11 @@ namespace Kiwi
          */
         virtual void receive(ulong index, vector<Atom> const& atoms) = 0;
         
-        //! Write the object in a dico.
+        //! Write the object in a map.
         /** The function writes the object in a dico.
          @param dico The dico.
          */
-        void write(sDico dico) const;
+        void write(map<sTag, Atom>& dico) const;
         
         //! Retrieves if the object should be hidden when the patcher is locked.
         /** The function retrieves if the object should be hidden when the patcher is locked.
@@ -364,13 +363,13 @@ namespace Kiwi
         /** The function writes the object in a dico.
          @param dico The dico.
          */
-		virtual void save(sDico dico) const {};
+		virtual void save(map<sTag, Atom>& dico) const {};
 		
         //! The read method that should be override.
         /** The function reads a dico to initalize the objecte.
          @param dico The dico.
          */
-		virtual void load(scDico dico) {};
+		virtual void load(map<sTag, Atom> const& dico) {};
     };
     
     //! The outlet owns a set of links.
@@ -577,11 +576,6 @@ namespace Kiwi
          */
         void send(vector<Atom> const& atoms) const noexcept;
     };
-    
-    inline string toString(scObject object)
-    {
-        return toString(object->getName());
-    }
 }
 
 

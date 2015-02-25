@@ -24,18 +24,18 @@
 		8F19E7691A973070003CE222 /* DspPortAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E7661A973070003CE222 /* DspPortAudio.cpp */; };
 		8F19E7701A97350A003CE222 /* ObjectsDspGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E76D1A97350A003CE222 /* ObjectsDspGenerator.cpp */; };
 		8F19E7751A97380C003CE222 /* ObjectsDspIo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E7731A97380C003CE222 /* ObjectsDspIo.cpp */; };
+		8F19E77E1A9B02D8003CE222 /* NewBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E7771A9B02D8003CE222 /* NewBox.cpp */; };
+		8F19E77F1A9B02D8003CE222 /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E77B1A9B02D8003CE222 /* Gui.cpp */; };
+		8F19E7821A9B2035003CE222 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F19E7811A9B2035003CE222 /* main.cpp */; };
 		8F21B4711A8238BD00670F15 /* Classic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F21B45A1A8238BD00670F15 /* Classic.cpp */; };
-		8F41B4651A7E3C640067E122 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4641A7E3C640067E122 /* main.cpp */; };
 		8F41B4D91A7E3C890067E122 /* Beacon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B46E1A7E3C890067E122 /* Beacon.cpp */; };
 		8F41B4DA1A7E3C890067E122 /* Clock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4701A7E3C890067E122 /* Clock.cpp */; };
 		8F41B4DB1A7E3C890067E122 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4721A7E3C890067E122 /* Console.cpp */; };
-		8F41B4DC1A7E3C890067E122 /* Dico.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4761A7E3C890067E122 /* Dico.cpp */; };
 		8F41B4DE1A7E3C890067E122 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B47A1A7E3C890067E122 /* Instance.cpp */; };
 		8F41B4DF1A7E3C890067E122 /* Link.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B47C1A7E3C890067E122 /* Link.cpp */; };
 		8F41B4E01A7E3C890067E122 /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B47E1A7E3C890067E122 /* Object.cpp */; };
 		8F41B4E11A7E3C890067E122 /* Patcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4801A7E3C890067E122 /* Patcher.cpp */; };
 		8F41B4E21A7E3C890067E122 /* Tag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B4821A7E3C890067E122 /* Tag.cpp */; };
-		8F41B4E71A7E3C890067E122 /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F41B48E1A7E3C890067E122 /* Gui.cpp */; };
 		8F41B50C1A7E3C990067E122 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F41B50B1A7E3C990067E122 /* Accelerate.framework */; };
 		8F67F6191A8B40A800DB2C2D /* Atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F67F6171A8B40A700DB2C2D /* Atom.cpp */; };
 		8FFC25441A8BCC8200B49898 /* Major.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FFC25421A8BCC8200B49898 /* Major.cpp */; };
@@ -101,12 +101,18 @@
 		8F19E7721A97380C003CE222 /* ObjectsDsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectsDsp.h; sourceTree = "<group>"; };
 		8F19E7731A97380C003CE222 /* ObjectsDspIo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectsDspIo.cpp; sourceTree = "<group>"; };
 		8F19E7741A97380C003CE222 /* ObjectsDspIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectsDspIo.h; sourceTree = "<group>"; };
+		8F19E7771A9B02D8003CE222 /* NewBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NewBox.cpp; sourceTree = "<group>"; };
+		8F19E7781A9B02D8003CE222 /* NewBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewBox.h; sourceTree = "<group>"; };
+		8F19E7791A9B02D8003CE222 /* ObjectsBasics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectsBasics.h; sourceTree = "<group>"; };
+		8F19E77B1A9B02D8003CE222 /* Gui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Gui.cpp; sourceTree = "<group>"; };
+		8F19E77C1A9B02D8003CE222 /* Gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gui.h; sourceTree = "<group>"; };
+		8F19E77D1A9B02D8003CE222 /* ObjectsGui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectsGui.h; sourceTree = "<group>"; };
+		8F19E7811A9B2035003CE222 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		8F21B4561A8238BD00670F15 /* Gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gui.h; sourceTree = "<group>"; };
 		8F21B45A1A8238BD00670F15 /* Classic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Classic.cpp; sourceTree = "<group>"; };
 		8F21B45B1A8238BD00670F15 /* Classic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Classic.h; sourceTree = "<group>"; };
 		8F21B45C1A8238BD00670F15 /* Modules.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Modules.h; sourceTree = "<group>"; };
-		8F41B4611A7E3C640067E122 /* example */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = example; sourceTree = BUILT_PRODUCTS_DIR; };
-		8F41B4641A7E3C640067E122 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		8F41B4611A7E3C640067E122 /* KiwiCoreExample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KiwiCoreExample; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F41B46C1A7E3C890067E122 /* Kiwi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Kiwi.h; path = ../Kiwi.h; sourceTree = "<group>"; };
 		8F41B46E1A7E3C890067E122 /* Beacon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Beacon.cpp; sourceTree = "<group>"; };
 		8F41B46F1A7E3C890067E122 /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
@@ -116,8 +122,6 @@
 		8F41B4731A7E3C890067E122 /* Console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Console.h; sourceTree = "<group>"; };
 		8F41B4741A7E3C890067E122 /* Core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
 		8F41B4751A7E3C890067E122 /* Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Defs.h; sourceTree = "<group>"; };
-		8F41B4761A7E3C890067E122 /* Dico.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dico.cpp; sourceTree = "<group>"; };
-		8F41B4771A7E3C890067E122 /* Dico.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dico.h; sourceTree = "<group>"; };
 		8F41B47A1A7E3C890067E122 /* Instance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Instance.cpp; sourceTree = "<group>"; };
 		8F41B47B1A7E3C890067E122 /* Instance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Instance.h; sourceTree = "<group>"; };
 		8F41B47C1A7E3C890067E122 /* Link.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Link.cpp; sourceTree = "<group>"; };
@@ -128,8 +132,6 @@
 		8F41B4811A7E3C890067E122 /* Patcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Patcher.h; sourceTree = "<group>"; };
 		8F41B4821A7E3C890067E122 /* Tag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Tag.cpp; sourceTree = "<group>"; };
 		8F41B4831A7E3C890067E122 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
-		8F41B48E1A7E3C890067E122 /* Gui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Gui.cpp; sourceTree = "<group>"; };
-		8F41B48F1A7E3C890067E122 /* Gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gui.h; sourceTree = "<group>"; };
 		8F41B50B1A7E3C990067E122 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		8F67F6131A8933DE00DB2C2D /* GuiTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiTools.h; sourceTree = "<group>"; };
 		8F67F6171A8B40A700DB2C2D /* Atom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Atom.cpp; sourceTree = "<group>"; };
@@ -246,6 +248,8 @@
 			children = (
 				8F19E76B1A97350A003CE222 /* Objects.h */,
 				8F19E76C1A97350A003CE222 /* ObjectsDsp */,
+				8F19E7761A9B02D8003CE222 /* ObjectsBasics */,
+				8F19E77A1A9B02D8003CE222 /* ObjectsGui */,
 			);
 			name = KiwiObjects;
 			path = ../KiwiObjects;
@@ -261,6 +265,35 @@
 				8F19E76E1A97350A003CE222 /* ObjectsDspGenerator.h */,
 			);
 			path = ObjectsDsp;
+			sourceTree = "<group>";
+		};
+		8F19E7761A9B02D8003CE222 /* ObjectsBasics */ = {
+			isa = PBXGroup;
+			children = (
+				8F19E7771A9B02D8003CE222 /* NewBox.cpp */,
+				8F19E7781A9B02D8003CE222 /* NewBox.h */,
+				8F19E7791A9B02D8003CE222 /* ObjectsBasics.h */,
+			);
+			path = ObjectsBasics;
+			sourceTree = "<group>";
+		};
+		8F19E77A1A9B02D8003CE222 /* ObjectsGui */ = {
+			isa = PBXGroup;
+			children = (
+				8F19E77B1A9B02D8003CE222 /* Gui.cpp */,
+				8F19E77C1A9B02D8003CE222 /* Gui.h */,
+				8F19E77D1A9B02D8003CE222 /* ObjectsGui.h */,
+			);
+			path = ObjectsGui;
+			sourceTree = "<group>";
+		};
+		8F19E7801A9B2035003CE222 /* KiwiCoreExample */ = {
+			isa = PBXGroup;
+			children = (
+				8F19E7811A9B2035003CE222 /* main.cpp */,
+			);
+			name = KiwiCoreExample;
+			path = ../Example/KiwiCoreExample;
 			sourceTree = "<group>";
 		};
 		8F21B4591A8238BD00670F15 /* Modules */ = {
@@ -285,7 +318,7 @@
 				8F19E75B1A973003003CE222 /* CoreAudio.framework */,
 				8F19E7571A972FF8003CE222 /* Carbon.framework */,
 				8F41B50B1A7E3C990067E122 /* Accelerate.framework */,
-				8F41B4631A7E3C640067E122 /* example */,
+				8F19E7801A9B2035003CE222 /* KiwiCoreExample */,
 				8F41B46B1A7E3C770067E122 /* Sources */,
 				8F41B4621A7E3C640067E122 /* Products */,
 			);
@@ -294,17 +327,9 @@
 		8F41B4621A7E3C640067E122 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8F41B4611A7E3C640067E122 /* example */,
+				8F41B4611A7E3C640067E122 /* KiwiCoreExample */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		8F41B4631A7E3C640067E122 /* example */ = {
-			isa = PBXGroup;
-			children = (
-				8F41B4641A7E3C640067E122 /* main.cpp */,
-			);
-			path = example;
 			sourceTree = "<group>";
 		};
 		8F41B46B1A7E3C770067E122 /* Sources */ = {
@@ -313,9 +338,8 @@
 				8F41B46C1A7E3C890067E122 /* Kiwi.h */,
 				8F19E7381A97270B003CE222 /* KiwiDsp */,
 				8F41B4B41A7E3C890067E122 /* KiwiGui */,
-				8F41B46D1A7E3C890067E122 /* KiwiBase */,
 				8F19E76A1A97350A003CE222 /* KiwiObjects */,
-				8F41B4851A7E3C890067E122 /* KiwiBoxes */,
+				8F41B46D1A7E3C890067E122 /* KiwiBase */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -325,18 +349,14 @@
 			children = (
 				8F41B4741A7E3C890067E122 /* Core.h */,
 				8F41B4751A7E3C890067E122 /* Defs.h */,
-				8F67F6171A8B40A700DB2C2D /* Atom.cpp */,
-				8F67F6181A8B40A800DB2C2D /* Atom.h */,
 				8F41B4821A7E3C890067E122 /* Tag.cpp */,
 				8F41B4831A7E3C890067E122 /* Tag.h */,
+				8F67F6171A8B40A700DB2C2D /* Atom.cpp */,
+				8F67F6181A8B40A800DB2C2D /* Atom.h */,
 				8F41B46E1A7E3C890067E122 /* Beacon.cpp */,
 				8F41B46F1A7E3C890067E122 /* Beacon.h */,
 				8F41B4701A7E3C890067E122 /* Clock.cpp */,
 				8F41B4711A7E3C890067E122 /* Clock.h */,
-				8F41B4721A7E3C890067E122 /* Console.cpp */,
-				8F41B4731A7E3C890067E122 /* Console.h */,
-				8F41B4761A7E3C890067E122 /* Dico.cpp */,
-				8F41B4771A7E3C890067E122 /* Dico.h */,
 				8F41B47E1A7E3C890067E122 /* Object.cpp */,
 				8F41B47F1A7E3C890067E122 /* Object.h */,
 				8F41B47C1A7E3C890067E122 /* Link.cpp */,
@@ -345,19 +365,11 @@
 				8F41B4811A7E3C890067E122 /* Patcher.h */,
 				8F41B47A1A7E3C890067E122 /* Instance.cpp */,
 				8F41B47B1A7E3C890067E122 /* Instance.h */,
+				8F41B4721A7E3C890067E122 /* Console.cpp */,
+				8F41B4731A7E3C890067E122 /* Console.h */,
 			);
 			name = KiwiBase;
 			path = ../KiwiBase;
-			sourceTree = "<group>";
-		};
-		8F41B4851A7E3C890067E122 /* KiwiBoxes */ = {
-			isa = PBXGroup;
-			children = (
-				8F41B48E1A7E3C890067E122 /* Gui.cpp */,
-				8F41B48F1A7E3C890067E122 /* Gui.h */,
-			);
-			name = KiwiBoxes;
-			path = ../KiwiBoxes;
 			sourceTree = "<group>";
 		};
 		8F41B4B41A7E3C890067E122 /* KiwiGui */ = {
@@ -427,9 +439,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8F41B4601A7E3C640067E122 /* example */ = {
+		8F41B4601A7E3C640067E122 /* KiwiCoreExample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8F41B4681A7E3C640067E122 /* Build configuration list for PBXNativeTarget "example" */;
+			buildConfigurationList = 8F41B4681A7E3C640067E122 /* Build configuration list for PBXNativeTarget "KiwiCoreExample" */;
 			buildPhases = (
 				8F41B45D1A7E3C640067E122 /* Sources */,
 				8F41B45E1A7E3C640067E122 /* Frameworks */,
@@ -439,9 +451,9 @@
 			);
 			dependencies = (
 			);
-			name = example;
+			name = KiwiCoreExample;
 			productName = example;
-			productReference = 8F41B4611A7E3C640067E122 /* example */;
+			productReference = 8F41B4611A7E3C640067E122 /* KiwiCoreExample */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -458,7 +470,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 8F41B45C1A7E3C640067E122 /* Build configuration list for PBXProject "example" */;
+			buildConfigurationList = 8F41B45C1A7E3C640067E122 /* Build configuration list for PBXProject "KiwiCoreExample" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -470,7 +482,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8F41B4601A7E3C640067E122 /* example */,
+				8F41B4601A7E3C640067E122 /* KiwiCoreExample */,
 			);
 		};
 /* End PBXProject section */
@@ -480,13 +492,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F41B4E21A7E3C890067E122 /* Tag.cpp in Sources */,
+				8F41B4DE1A7E3C890067E122 /* Instance.cpp in Sources */,
 				8FFC25771A8CB9DB00B49898 /* Mouser.cpp in Sources */,
 				8FFC256A1A8CB7CE00B49898 /* Attribute.cpp in Sources */,
-				8F41B4DE1A7E3C890067E122 /* Instance.cpp in Sources */,
+				8F19E77E1A9B02D8003CE222 /* NewBox.cpp in Sources */,
 				8F19E74F1A972724003CE222 /* DspChain.cpp in Sources */,
 				8FFC25611A8CB75700B49898 /* Point.cpp in Sources */,
-				8F41B4E21A7E3C890067E122 /* Tag.cpp in Sources */,
-				8F41B4651A7E3C640067E122 /* main.cpp in Sources */,
 				8F19E7541A972724003CE222 /* DspGenerator.cpp in Sources */,
 				8F41B4DA1A7E3C890067E122 /* Clock.cpp in Sources */,
 				8FFC25761A8CB9DB00B49898 /* Keyboarder.cpp in Sources */,
@@ -509,14 +521,14 @@
 				8FFC25441A8BCC8200B49898 /* Major.cpp in Sources */,
 				8F41B4DB1A7E3C890067E122 /* Console.cpp in Sources */,
 				8FFC256B1A8CB7CE00B49898 /* Default.cpp in Sources */,
+				8F19E77F1A9B02D8003CE222 /* Gui.cpp in Sources */,
 				8F19E7701A97350A003CE222 /* ObjectsDspGenerator.cpp in Sources */,
-				8F41B4DC1A7E3C890067E122 /* Dico.cpp in Sources */,
-				8F41B4E71A7E3C890067E122 /* Gui.cpp in Sources */,
 				8F19E7551A972724003CE222 /* DspIo.cpp in Sources */,
 				8F19E7561A972724003CE222 /* DspMath.cpp in Sources */,
 				8F41B4DF1A7E3C890067E122 /* Link.cpp in Sources */,
 				8F21B4711A8238BD00670F15 /* Classic.cpp in Sources */,
 				8FFC25621A8CB75700B49898 /* Rectangle.cpp in Sources */,
+				8F19E7821A9B2035003CE222 /* main.cpp in Sources */,
 				8F41B4E01A7E3C890067E122 /* Object.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -601,39 +613,50 @@
 		8F41B4691A7E3C640067E122 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEPLOYMENT_LOCATION = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"__KIWI_VERBOSE__=1",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					../KiwiDsp/ThirdParty/PortAudio/include/,
 				);
+				INSTALL_PATH = ./KiwiCoreExample/Build/Debug/;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/Pierre/GitHub/KiwiJuce/KiwiCore/KiwiDsp/ThirdParty/PortAudio/lib/.libs,
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = KiwiCoreExample;
+				SYMROOT = ./KiwiCoreExample/Build/Debug/;
 			};
 			name = Debug;
 		};
 		8F41B46A1A7E3C640067E122 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEPLOYMENT_LOCATION = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					../KiwiDsp/ThirdParty/PortAudio/include/,
 				);
+				INSTALL_PATH = ./KiwiCoreExample/Build/Release/;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/Pierre/GitHub/KiwiJuce/KiwiCore/KiwiDsp/ThirdParty/PortAudio/lib/.libs,
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = KiwiCoreExample;
+				SYMROOT = ./KiwiCoreExample/Build/Release/;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8F41B45C1A7E3C640067E122 /* Build configuration list for PBXProject "example" */ = {
+		8F41B45C1A7E3C640067E122 /* Build configuration list for PBXProject "KiwiCoreExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8F41B4661A7E3C640067E122 /* Debug */,
@@ -642,7 +665,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8F41B4681A7E3C640067E122 /* Build configuration list for PBXNativeTarget "example" */ = {
+		8F41B4681A7E3C640067E122 /* Build configuration list for PBXNativeTarget "KiwiCoreExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8F41B4691A7E3C640067E122 /* Debug */,

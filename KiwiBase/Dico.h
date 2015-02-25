@@ -148,26 +148,6 @@ namespace Kiwi
             return type(key) == Atom::TAG;
         }
         
-        //! Check if an entry is of type object.
-        /** The function checks if an entry is of type object.
-         @param key The name of the entry.
-         @return    True if the entry is an object.
-         */
-        inline bool isObject(sTag key) const noexcept
-        {
-            return type(key) == Atom::OBJECT;
-        }
-        
-        //! Check if an entry is of type object.
-        /** The function checks if an entry is of type dico.
-         @param key The name of the entry.
-         @return    True if the entry is a dico.
-         */
-        inline bool isDico(sTag key) const noexcept
-        {
-            return type(key) == Atom::DICO;
-        }
-        
         //! Check if an entry is of type atoms.
         /** The function checks if an entry is of type atoms.
          @param key The name of the entry.

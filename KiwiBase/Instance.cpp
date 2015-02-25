@@ -22,16 +22,9 @@
 */
 
 #include "Instance.h"
+#include "Console.h"
 #include "../KiwiObjects/Objects.h"
-#include "../KiwiBoxes/Gui.h"
-/*
-#include "../KiwiObjectes/Wireless.h"
-#include "../KiwiObjectes/Time.h"
-#include "../KiwiObjectes/DspGenerator.h"
-#include "../KiwiObjectes/NewObject.h"
-#include "../KiwiObjectes/Arithmetic.h"
-#include "../KiwiObjectes/ArithmeticTilde.h"
-*/
+
 namespace Kiwi
 {
     bool libraries_loaded = false;
@@ -40,8 +33,9 @@ namespace Kiwi
     //                                      INSTANCE                                    //
     // ================================================================================ //
     
-    Instance::Instance(sDspDeviceManager device) noexcept :
-    DspContext(device)
+    Instance::Instance(sDspDeviceManager device, string const& name) noexcept :
+    DspContext(device),
+    m_name(name)
     {
 		;
     }
@@ -50,26 +44,51 @@ namespace Kiwi
     {
         m_patchers.clear();
         m_lists.clear();
+#ifdef __KIWI_VERBOSE__
+        Console::post("The instance \"" + m_name + "\" has been deleted.");
+#endif
     }
     
-    sInstance Instance::create(sDspDeviceManager device)
+    sInstance Instance::create(sDspDeviceManager device, string const& name)
     {
-        if(!libraries_loaded)
+        sInstance instance;
+        if(!name.empty())
         {
-            ObjectsInitialize();
-            /*
-			standardObjectes();
-            arithmetic();
-            wireless();
-			timing();
-            GeneratorTildeInit();
-             */
-            libraries_loaded = true;
+            sTag tname = Tag::create(name);
+            if(!libraries_loaded)
+            {
+                libraries_loaded = ObjectsInitialize();
+            }
+            if(Console::m_instances.find(tname) == Console::m_instances.end())
+            {
+                instance = make_shared<Instance>(device, name);
+                if(instance)
+                {
+                    Console::m_instances[tname] = instance;
+#ifdef __KIWI_VERBOSE__
+                    Console::post("The instance \"" + name + "\" has been created.");
+#endif
+                }
+            }
+            else
+            {
+                Console::error("The instance's name \"" + instance->getName() + "\" already exists.");
+            }
         }
-        return make_shared<Instance>(device);
+        else
+        {
+            Console::error("The instance needs a name to be created.");
+        }
+        return instance;
+    }
+    
+    sPatcher Instance::createPatcher()
+    {
+        map<sTag, Atom> dico;
+        return createPatcher(dico);
     }
 
-    sPatcher Instance::createPatcher(sDico dico)
+    sPatcher Instance::createPatcher(map<sTag, Atom>& dico)
     {
         sPatcher patcher = Patcher::create(getShared(), dico);
         if(patcher)
@@ -156,6 +175,59 @@ namespace Kiwi
         }
     }
     
+    void Instance::create(vector<Atom> const& inputs, vector<Atom> outputs)
+    {
+        
+    }
+    
+    void Instance::remove(vector<Atom> const& inputs)
+    {
+        
+    }
+    
+    void Instance::get(vector<Atom> const& inputs, vector<Atom> outputs) const
+    {
+        if(!inputs.empty())
+        {
+            if(inputs[0].isTag() && sTag(inputs[0]) == Tag::List::dsp)
+            {
+                if(inputs.size() > 1)
+                {
+                    if(inputs[0].isTag())
+                    {
+                        if(sTag(inputs[0]) == Tag::List::dsp)
+                        {
+                            
+                        }
+                    }
+                }
+                else
+                {
+                    Console::error("The dsp gettings method needs arguments.");
+                }
+            }
+        }
+        else
+        {
+            Console::error("The gettings method needs arguments.");
+        }
+    }
+    
+    void Instance::set(vector<Atom> const& inputs)
+    {
+        if(!inputs.empty())
+        {
+            if(inputs[0].isTag() && sTag(inputs[0]) == Tag::List::dsp)
+            {
+                
+            }
+        }
+        else
+        {
+            Console::error("The setting method needs arguments.");
+        }
+    }
+    
     // ================================================================================ //
     //                                      OBJECT FACTORY                              //
     // ================================================================================ //
@@ -172,23 +244,26 @@ namespace Kiwi
             if(obj)
             {
                 obj->initialize();
-                scDico dico = detail.dico;
+                //scDico dico = detail.dico;
                 vector<sAttr> attrs;
                 obj->getAttrs(attrs);
                 for(vector<sAttr>::size_type i = 0; i < attrs.size(); i++)
                 {
                     sTag name = Tag::create(attrs[i]->getName());
+                    int todo;
+                    /*
                     if(dico->has(name))
                     {
                          attrs[i]->setValueString(dico->getAsString(name));
                     }
+                     */
                 }
             }
             return obj;
         }
         else
         {
-            Console::error("The factory doesn't know the object " + toString(name));
+            Console::error("The factory doesn't know the object " + name->getName());
             return nullptr;
         }
     }

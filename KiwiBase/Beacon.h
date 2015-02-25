@@ -25,7 +25,6 @@
 #define __DEF_KIWI_BEACON__
 
 #include "Defs.h"
-#include "Console.h"
 
 namespace Kiwi
 {
@@ -49,12 +48,12 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except.
          */
-        Beacon(string const& name);
+        Beacon(string const& name) noexcept;
         
         //! The destructor.
         /** You should never use this method except.
          */
-        ~Beacon();
+        ~Beacon() noexcept;
         
         //! Retrieve the name of the beacon.
         /** The function retrieves the unique name of the beacon.
@@ -90,6 +89,23 @@ namespace Kiwi
             else
             {
                 return nullptr;
+            }
+        }
+        
+        //! Retrieve all the objects from the binding list of the beacon.
+        /** The function retrieves all the objects from the binding list of the beacon at a defined position.
+         @param objects A vector of objects.
+         */
+        inline void getObject(vector<sObject> objects) const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            for(vector<wObject>::size_type i = 0; i < m_objects.size(); i++)
+            {
+                sObject object = m_objects[i].lock();
+                if(object)
+                {
+                    objects.push_back(object);
+                }
             }
         }
         
@@ -140,7 +156,7 @@ namespace Kiwi
             //! The constructor.
             /** You should never use this method except if you really know what you do.
              */
-            Factory();
+            Factory() noexcept;
             
             //! The destructor.
             /** You should never use this method except if you really know what you do.
@@ -154,13 +170,8 @@ namespace Kiwi
          @param name    The name of the beacon.
          @return The beacon.
          */
-        static sBeacon create(sObject object, string const& name);
+        static sBeacon create(scObject object, string const& name);
     };
-    
-    inline string toString(sBeacon __val)
-    {
-        return __val->getName();
-    }
 };
 
 

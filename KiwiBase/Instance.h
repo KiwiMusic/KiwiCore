@@ -38,7 +38,7 @@ namespace Kiwi
     
     //! The instance manages patchers.
     /**
-     The instance manages a set a top-level patchers. You can use the listener to receive the notifications of the creation, the deletion of patchers and the changes of the dsp state. All the methods should be threadsafe but you should, of course, call the dsp tick from one thread. The instance is also a beacon factory that can be used to bind and retrieve objects with a specific name.
+     The instance manages a set a top-level patchers. You can use the listener to receive the notifications of the creation, the deletion of patchers and the changes of the dsp state. The instance is also a beacon factory that can be used to bind and retrieve objects with a specific name.
      @see Patcher
      @see Beacon
      */
@@ -51,7 +51,8 @@ namespace Kiwi
         typedef shared_ptr<const Listener>  scListener;
         typedef weak_ptr<const Listener>    wcListener;
         
-    private:
+    private:        
+        const string            m_name;
         set<sPatcher>           m_patchers;
         mutex                   m_patchers_mutex;
         set<wListener,
@@ -64,7 +65,7 @@ namespace Kiwi
         /** You should never use this method.
 		 @param device The device manager.
          */
-        Instance(sDspDeviceManager device) noexcept;
+        Instance(sDspDeviceManager device, string const& name) noexcept;
         
         //! The destructor.
         /** You should never use this method.
@@ -76,7 +77,7 @@ namespace Kiwi
          @param device The device manager.
          @return The instance.
          */
-        static sInstance create(sDspDeviceManager device);
+        static sInstance create(sDspDeviceManager device, string const& name);
         
         //! Retrieve the shared pointer of the instance.
         /** The function retrieves the shared pointer of the instance.
@@ -96,13 +97,30 @@ namespace Kiwi
             return static_pointer_cast<Instance>(DspContext::shared_from_this());
         }
         
-        //! Create a patcher.
-        /** The function creates a patcher with a dico or creates an empty one if the dico is empty.
+        //! Retrieve the name of the instance.
+        /** The function retrieves the name of the instance.
+         @return The name of the instance.
+         */
+        inline string getName() const noexcept
+        {
+            return m_name;
+        }
+        
+        //! Create a patcher with a dict.
+        /** The function creates a patcher with a dict.
          @param dico The dico that defines of the patcher.
          @return The patcher.
          @see removePatcher, getPatchers
          */
-        sPatcher createPatcher(sDico dico = nullptr);
+        sPatcher createPatcher();
+        
+        //! Create a patcher with a dict.
+        /** The function creates a patcher with a dict.
+         @param dico The dico that defines of the patcher.
+         @return The patcher.
+         @see removePatcher, getPatchers
+         */
+        sPatcher createPatcher(map<sTag, Atom>& dico);
         
         //! Close a patcher.
         /** The function closes patcher.
@@ -117,6 +135,32 @@ namespace Kiwi
          @see createPatcher, removePatcher
          */
         void getPatchers(vector<sPatcher>& patchers);
+        
+        //! Creation method of the instance.
+        /** The function evaluates the inputs for the creation and returns the result in the outputs.
+         @param inputs The vector of atoms to evaluate.
+         @param outputs The vector of atoms to return the creation.
+         */
+        void create(vector<Atom> const& inputs, vector<Atom> outputs);
+        
+        //! Remove method of the instance.
+        /** The function evaluates the inputs for the deletion.
+         @param inputs The vector of atoms to evaluate.
+         */
+        void remove(vector<Atom> const& inputs);
+        
+        //! Get method of the instance.
+        /** The function evaluates the inputs for the getting and returns the result in the outputs.
+         @param inputs The vector of atoms to evaluate.
+         @param outputs The vector of atoms to return the getting.
+         */
+        void get(vector<Atom> const& inputs, vector<Atom> outputs) const;
+        
+        //! Set method of the instance.
+        /** The function evaluates the inputs for the setting.
+         @param inputs The vector of atoms to evaluate.
+         */
+        void set(vector<Atom> const& inputs);
         
         //! Add an instance listener in the binding list of the instance.
         /** The function adds an instance listener in the binding list of the instance. 
@@ -241,7 +285,8 @@ namespace Kiwi
                 lock_guard<mutex> guard(m_mutex);
                 if(m_creators.find(rname) != m_creators.end())
                 {
-                    Console::error("The object " + toString(rname) + " already exist !");
+                    int todo;
+                    //Console::error("The object " + toString(rname) + " already exist !");
                 }
                 else
                 {
@@ -250,7 +295,8 @@ namespace Kiwi
             }
             else
             {
-                Console::error("The prototype of an object has a wrong constructor !");
+                int todo;
+                //Console::error("The prototype of an object has a wrong constructor !");
             }
         }
         

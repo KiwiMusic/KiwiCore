@@ -32,34 +32,29 @@ namespace Kiwi
     using namespace Gui;
     
     class Clock;
-    typedef shared_ptr<Clock>       sClock;
-    typedef weak_ptr<Clock>         wClock;
+    typedef shared_ptr<Clock>           sClock;
+    typedef weak_ptr<Clock>             wClock;
     
     class Tag;
-    typedef shared_ptr<const Tag>   sTag;
-    typedef weak_ptr<const Tag>     wTag;
+    typedef shared_ptr<const Tag>       sTag;
     
     class Beacon;
-    typedef shared_ptr<Beacon>      sBeacon;
-    typedef weak_ptr<Beacon>        wBeacon;
-    
-    class Dico;
-    typedef shared_ptr<Dico>        sDico;
-    typedef shared_ptr<const Dico>  scDico;
-    typedef weak_ptr<Dico>          wDico;
-    typedef weak_ptr<const Dico>    wcDico;
+    typedef shared_ptr<Beacon>          sBeacon;
+    typedef weak_ptr<Beacon>            wBeacon;
+    typedef shared_ptr<const Beacon>    scBeacon;
+    typedef weak_ptr<const Beacon>      wcBeacon;
     
     class Link;
-    typedef shared_ptr<Link>        sLink;
-    typedef shared_ptr<const Link>  scLink;
-    typedef weak_ptr<Link>          wLink;
-    typedef weak_ptr<const Link>    wcLink;
+    typedef shared_ptr<Link>            sLink;
+    typedef shared_ptr<const Link>      scLink;
+    typedef weak_ptr<Link>              wLink;
+    typedef weak_ptr<const Link>        wcLink;
     
     class Object;
-    typedef shared_ptr<Object>      sObject;
-    typedef weak_ptr<Object>        wObject;
-    typedef shared_ptr<const Object>scObject;
-    typedef weak_ptr<const Object>  wcObject;
+    typedef shared_ptr<Object>          sObject;
+    typedef weak_ptr<Object>            wObject;
+    typedef shared_ptr<const Object>    scObject;
+    typedef weak_ptr<const Object>      wcObject;
     
     class Patcher;
     typedef shared_ptr<Patcher>        sPatcher;
@@ -72,6 +67,41 @@ namespace Kiwi
     typedef weak_ptr<Instance>          wInstance;
     typedef shared_ptr<const Instance>  scInstance;
     typedef weak_ptr<const Instance>    wcInstance;
+    
+    static inline string jsonUnescape(string const& text)
+    {
+        bool state = false;
+        ostringstream ss;
+        for(auto iter = text.cbegin(); iter != text.cend(); iter++)
+        {
+            if(state)
+            {
+                switch(*iter)
+                {
+                    case '"': ss << '\"'; break;
+                    case '/': ss << '/'; break;
+                    case 'b': ss << '\b'; break;
+                    case 'f': ss << '\f'; break;
+                    case 'n': ss << '\n'; break;
+                    case 'r': ss << '\r'; break;
+                    case 't': ss << '\t'; break;
+                    case '\\': ss << '\\'; break;
+                    default: ss << *iter; break;
+                }
+                state = false;
+            }
+            else
+            {
+                switch(*iter)
+                {
+                    case '"': return ss.str();
+                    case '\\': state = true; break;
+                    default: ss << *iter; break;
+                }
+            }
+        }
+        return ss.str();
+    }
     
 };
 

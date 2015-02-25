@@ -24,6 +24,7 @@
 #include "Object.h"
 #include "Patcher.h"
 #include "Instance.h"
+#include "Console.h"
 
 namespace Kiwi
 {
@@ -163,21 +164,21 @@ namespace Kiwi
         m_inlets.clear();
     }
     
-    void Object::write(sDico dico) const
+    void Object::write(map<sTag, Atom>& dico) const
     {
         this->save(dico);
-        dico->set(Tag::List::name, getName());
-        dico->set(Tag::List::text, getText());
-        dico->set(Tag::List::id, getId());
-        dico->set(Tag::List::ninlets, getNumberOfInlets());
-        dico->set(Tag::List::noutlets, getNumberOfOutlets());
+        dico[Tag::List::name]       = getName();
+        dico[Tag::List::text]       = getText();
+        dico[Tag::List::id]         = (long)getId();
+        dico[Tag::List::ninlets]    = (long)getNumberOfInlets();
+        dico[Tag::List::noutlets]   = (long)getNumberOfOutlets();
         vector<sAttr> attrs;
         getAttrs(attrs);
         for(vector<sAttr>::size_type i = 0; i < attrs.size(); i++)
         {
             string text;
             attrs[i]->getValueString(text);
-            dico->set(Tag::create(attrs[i]->getName()), Tag::create(text));
+            dico[Tag::create(attrs[i]->getName())] = Tag::create(text);
         }
     }
     

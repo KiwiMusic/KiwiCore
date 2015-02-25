@@ -115,7 +115,7 @@ namespace Kiwi
         /** The function writes the link in a dico.
          @param dico The dico.
          */
-        void write(sDico dico) const noexcept;
+        void write(map<sTag, Atom>& dico) const noexcept;
         
         class SignalLink;
     };

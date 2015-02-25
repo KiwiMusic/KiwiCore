@@ -23,6 +23,7 @@
 
 #include "Patcher.h"
 #include "Instance.h"
+#include "Console.h"
 
 namespace Kiwi
 {    
@@ -49,58 +50,70 @@ namespace Kiwi
         m_lists.clear();
     }
     
-    sPatcher Patcher::create(sInstance instance, sDico dico)
+    sPatcher Patcher::create(sInstance instance, map<sTag, Atom>& dico)
     {
         sPatcher patcher = make_shared<Patcher>(instance);
-        if(patcher && dico)
+        if(patcher)
         {
             instance->DspContext::add(patcher);
 			patcher->initialize();
 			
-            sDico patcherDico = Dico::create();
-            if(patcherDico)
+            auto it = dico.find(Tag::List::patcher);
+            if(it != dico.end())
             {
-                if(dico->has(Tag::List::patcher))
-                {
-                    patcherDico = dico->get(Tag::List::patcher);
-                    patcher->add(patcherDico);
-                }
+                patcher->add(it->second);
             }
         }
         return patcher;
     }
     
-    void Patcher::createObject(scDico dico)
+    void Patcher::createObject(map<sTag, Atom> const& dico)
     {
         sObject object;
-        if(dico)
+        sTag name, text;
+        vector<Atom> args;
+        ulong _id;
+        int toclean;
+        auto it = dico.find(Tag::List::name);
+        if(it != dico.end())
         {
-            int toclean;
-            sTag name = dico->get(Tag::List::name);
-            sTag text = dico->get(Tag::List::text);
-            ulong _id = dico->get(Tag::List::id);
-            vector<Atom> args;
-            dico->get(Tag::List::arguments, args);
-            sObject object = Factory::create(name, Detail(getInstance(), getShared(), _id, name, text->getName(), dico, args));
-            
-            if(object)
-            {
-                sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
-                if(dspnode)
-                {
-                    DspChain::add(dspnode);
-                }
-                m_objects.push_back(object);
-            }
-            send(object, Notification::Added);
+            name = it->second;
         }
+        it = dico.find(Tag::List::text);
+        if(it != dico.end())
+        {
+            text = it->second;
+        }
+        it = dico.find(Tag::List::id);
+        if(it != dico.end())
+        {
+            _id = it->second;
+        }
+        it = dico.find(Tag::List::arguments);
+        if(it != dico.end())
+        {
+            args = it->second;
+        }
+        object = Factory::create(name, Detail(getInstance(), getShared(), _id, name, text->getName(), dico, args));
+        
+        if(object)
+        {
+            sDspNode dspnode = dynamic_pointer_cast<DspNode>(object);
+            if(dspnode)
+            {
+                DspChain::add(dspnode);
+            }
+            m_objects.push_back(object);
+        }
+        send(object, Notification::Added);
     }
     
-    void Patcher::createLink(scDico dico)
+    void Patcher::createLink(map<sTag, Atom> const& dico)
     {
         sLink link;
-        if(dico)
+        if(1)
         {
+            /*
             ulong indexo, indexi, ido, idi;
             vector<Atom> atoms;
             dico->get(Tag::List::from, atoms);
@@ -219,6 +232,7 @@ namespace Kiwi
                     }
                 }
             }
+             */
         }
         
         if(link)
@@ -233,9 +247,10 @@ namespace Kiwi
         send(link, Notification::Added);
     }
     
-    void Patcher::add(scDico dico)
+    void Patcher::add(map<sTag, Atom> const& dico)
     {
-        sDico rdico = Dico::create(dico);
+        /*
+        map<sTag, Atom>& rdico = Dico::create(dico);
         if(rdico)
         {
             vector<Atom> objects, links;
@@ -245,7 +260,7 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             for(vector<sObject>::size_type i = 0; i < objects.size(); i++)
             {
-                sDico objdico = objects[i];
+                map<sTag, Atom>& objdico = objects[i];
                 if(objdico)
                 {
                     const ulong r_id = objdico->get(Tag::List::id);
@@ -254,19 +269,19 @@ namespace Kiwi
                     {
                         m_free_ids.erase(m_free_ids.begin());
                     }
-                    objdico->set(Tag::List::id, n_id);
+                    objdico->set(Tag::List::id, (long)n_id);
                     vector<Atom> atoms;
                     for(vector<sLink>::size_type i = 0; i < links.size(); i++)
                     {
                         objdico->get(Tag::List::from, atoms);
                         if(atoms.size() > 1 && r_id == (ulong)atoms[0])
                         {
-                            objdico->set(Tag::List::from, {n_id, atoms[1]});
+                            objdico->set(Tag::List::from, {(long)n_id, atoms[1]});
                         }
                         objdico->get(Tag::List::to, atoms);
                         if(atoms.size() > 1 && r_id == (ulong)atoms[0])
                         {
-                            objdico->set(Tag::List::from, {n_id, atoms[1]});
+                            objdico->set(Tag::List::from, {(long)n_id, atoms[1]});
                         }
                     }
                     createObject(objdico);
@@ -275,13 +290,14 @@ namespace Kiwi
             
             for(vector<sLink>::size_type i = 0; i < links.size(); i++)
             {
-                sDico linkdico = links[i];
+                map<sTag, Atom>& linkdico = links[i];
                 if(linkdico)
                 {
                     createLink(linkdico);
                 }
             }
         }
+         */
     }
     
     void Patcher::remove(sObject object)
@@ -368,11 +384,12 @@ namespace Kiwi
         }
     }
 	
-    void Patcher::write(sDico dico) const
+    void Patcher::write(map<sTag, Atom>& dico) const
     {
-        if(dico)
+        if(1)
         {
-			sDico subpatcher = Dico::create();
+            /*
+			map<sTag, Atom>& subpatcher = Dico::create();
 			if(subpatcher)
 			{
                 vector<Atom> atoms;
@@ -380,7 +397,7 @@ namespace Kiwi
                 
 				for(vector<sObject>::size_type i = 0; i < m_objects.size(); i++)
 				{
-					sDico object = Dico::create();
+					map<sTag, Atom>& object = Dico::create();
 					if(object)
 					{
 						m_objects[i]->write(object);
@@ -393,7 +410,7 @@ namespace Kiwi
 				
 				for(vector<sLink>::size_type i = 0; i < m_links.size(); i++)
 				{
-                    sDico link = Dico::create();
+                    map<sTag, Atom>& link = Dico::create();
 					if(link)
 					{
 						m_links[i]->write(link);
@@ -402,7 +419,7 @@ namespace Kiwi
 				}
 				subpatcher->set(Tag::List::links, atoms);
 				dico->set(Tag::List::patcher, subpatcher);
-			}
+			}*/
         }
     }
     
@@ -486,6 +503,7 @@ namespace Kiwi
     {
         if(!inputs.empty())
         {
+            /*
             if(inputs[0].getType() == Atom::TAG)
             {
                 if(inputs[0] == Tag::List::object)
@@ -504,7 +522,7 @@ namespace Kiwi
             else
             {
                 Console::error("Creation command needs a tag as first argument.");
-            }
+            }*/
         }
         else
         {

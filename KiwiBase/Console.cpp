@@ -23,10 +23,13 @@
 
 
 #include "Console.h"
-#include "Object.h"
+#include "Instance.h"
 
 namespace Kiwi
 {
+    sDspDeviceManager Console::device;
+    map<sTag, sInstance> Console::m_instances;
+    
     set<Console::wListener,
     owner_less<Console::wListener>> Console::m_listeners;
     mutex Console::m_mutex;
@@ -51,6 +54,79 @@ namespace Kiwi
             lock_guard<mutex> guard(m_mutex);
             m_listeners.erase(listener);
         }
+    }
+
+    bool Console::receive(string const& message)
+    {
+        sInstance instance;
+        vector<Atom> args;//(Atom::createVector(message));
+        if(!args.empty())
+        {
+            
+        }
+        string target;
+        string command;
+        string word;
+        //vector<string> args;
+        istringstream iss(message);
+        iss >> command;
+        iss >> target;
+        
+        if(command == "exit")
+        {
+            return false;
+        }
+        if(target == "instance")
+        {
+            if(command == "create")
+            {
+                string name;
+                iss >> name;
+                Instance::create(device, name);
+            }
+            else if(command == "delete")
+            {
+                
+            }
+        }
+        else
+        {
+            auto it = m_instances.find(Tag::create(target));
+            if(it != m_instances.end())
+            {
+                instance = it->second;
+            }
+            else
+            {
+                error("The target \"" + target + "\" doesn't exist.");
+            }
+        }
+        if(instance)
+        {
+            if(command == "create")
+            {
+                
+            }
+            else if(command == "delete")
+            {
+                
+            }
+            else if(command == "set")
+            {
+                vector<Atom> inputs;
+                instance->set(inputs);
+            }
+            else if(command == "get")
+            {
+                
+            }
+            else
+            {
+                error("The console accepts only the commands \"create\", \"delete\", \"set\", \"get\" and \"exit\".");
+            }
+        }
+        
+        return true;
     }
     
     void Console::post(string const& message) noexcept
@@ -81,12 +157,12 @@ namespace Kiwi
 #if defined(DEBUG) || defined(NO_GUI)
         cerr << object->getText() << " : " << message << endl;
 #endif
-        shared_ptr<const Kiwi::Instance> instance = nullptr;
-        shared_ptr<const Kiwi::Patcher> patcher = nullptr;
+        scInstance instance = nullptr;
+        scPatcher  patcher  = nullptr;
         if(object)
         {
-            instance    = object->getInstance();
-            patcher        = object->getPatcher();
+            instance= object->getInstance();
+            patcher = object->getPatcher();
         }
         shared_ptr<const Message> mess = make_shared<Message>(instance, patcher, object, Message::Post, message);
         lock_guard<mutex> guard(m_mutex);
@@ -138,7 +214,7 @@ namespace Kiwi
         if(object)
         {
             instance    = object->getInstance();
-            patcher        = object->getPatcher();
+            patcher     = object->getPatcher();
         }
         shared_ptr<const Message> mess = make_shared<Message>(instance, patcher, object, Message::Warning, message);
         lock_guard<mutex> guard(m_mutex);

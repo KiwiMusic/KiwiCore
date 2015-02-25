@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_TAG__
 #define __DEF_KIWI_TAG__
 
-#include "Atom.h"
+#include "Defs.h"
 
 namespace Kiwi
 {
@@ -37,7 +37,7 @@ namespace Kiwi
      The tag are uniques and matchs to a string. If you create a tag with a string that already matchs to a tag, the creation function will return this tag, otherwise it will create a new tag.
      @see TagFactory
      */
-    class Tag : public Atom::Quark
+    class Tag
     {
     private:
         const string m_name;
@@ -48,7 +48,15 @@ namespace Kiwi
          */
         Tag(string const& name) noexcept : m_name(name)
         {
-            ;
+            cout << "zézé" << endl;
+        }
+        
+        //! The constructor.
+        /** You should never use this method except if you really know what you do.
+         */
+        Tag(string const&& name) noexcept : m_name(name)
+        {
+            cout << "zozo" << endl;
         }
         
         //! The destructor.
@@ -99,22 +107,6 @@ namespace Kiwi
         class List;
     };
     
-    //! Tag comparaison by alphabetic order.
-    /** This function compares the strings of the tags.
-     @param  tag1  The first tag.
-     @param  tag2  The second tag.
-     @return true if the the first tag before the sedond one in the alphabetic order.
-     */
-    static inline bool operator<(const sTag tag1, const sTag tag2)
-    {
-        return tag1->getName() < tag2->getName();
-    }
-	
-    inline string toString(sTag __val)
-    {
-        return __val->getName();
-    }
-    
     class Tag::List
     {
     public:
@@ -129,6 +121,8 @@ namespace Kiwi
         static const sTag color;
         static const sTag Color;
         static const sTag command;
+        
+        static const sTag dsp;
         
         static const sTag focus;
         static const sTag Font;

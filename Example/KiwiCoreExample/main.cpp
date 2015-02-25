@@ -9,20 +9,72 @@
 #include <iostream>
 
 #include "../../KiwiBase/Core.h"
-#include "../../KiwiBoxes/Gui.h"
 #include "../../KiwiDsp/Implementation/DspPortAudio.h"
 
 using namespace Kiwi;
 
 int main(int argc, const char * argv[])
 {
-    shared_ptr<PortAudioDeviceManager> manager = make_shared<PortAudioDeviceManager>();
+    sDspDeviceManager manager = make_shared<PortAudioDeviceManager>();
+    
+    //Atom zaza = 1;
+    Atom zizi = Atom::evaluate("[1, 2, [1, 2, 5]], {\"zaza\" : 12}");
+    Atom zozo({1.2, 6l, "é", 12l});
+    
+    
+    pair<const sTag, Atom> myp1(Tag::create("zozo"), 56.8);
+    pair<const sTag, Atom> myp2(Tag::create("zizi"), 56.8);
+    Atom hsdj({myp1, myp2});
+    Atom zouzou({pair<const sTag, Atom>(Tag::create("zozo"), 1.8), pair<const sTag, Atom>(Tag::create("zizi"), 56.8)});
+    
+    if(zouzou.getType() == Atom::MAP)
+    {
+        cout << "Map" << endl;
+    }
+    else
+    {
+        cout << zouzou.getType() << endl;
+    }
+    
+    Atom etienne = {12, "Zozou", 56.7, 90.f, 14l, "francis"};
+    
+    if(etienne.getType() == Atom::VECTOR)
+    {
+        cout << "Vector" << endl;
+    }
+    else
+    {
+        cout << etienne.getType() << endl;
+    }
+    
     if(manager)
     {
+        Console::device = manager;
         manager->setSampleRate(44100);
         manager->setVectorSize(64);
         cout << "Port Audio Device : Sample Rate (" << manager->getSampleRate() << ") Vector Size (" << manager->getVectorSize() << ")" << endl;
-        sInstance instance = Instance::create(manager);
+        
+        while(1)
+        {
+            string input;
+            cout << "Command : ";
+            getline(cin, input);
+            cout << input << endl;
+            try
+            {
+                if(!Console::receive(input))
+                {
+                    return 0;
+                }
+            }
+            catch(exception& e)
+            {
+                cout << "Error " << e.what() << endl;
+            }
+        }
+        
+        return 0;
+        sInstance instance = Instance::create(manager, "Instance");
         if(instance)
         {
             try
@@ -34,7 +86,8 @@ int main(int argc, const char * argv[])
                 cout << e.what() << endl;
             }
             
-            sPatcher page = instance->createPatcher(Dico::create());
+            map<sTag, Atom> args;
+            sPatcher page = instance->createPatcher(args);
             if(page)
             {
                 try
@@ -92,7 +145,8 @@ int main(int argc, const char * argv[])
                     catch(exception& e)
                     {
                         cout << "Error " << e.what() << endl;
-                    }                }
+                    }
+                }
             }
         }
     }

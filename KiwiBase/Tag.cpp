@@ -23,6 +23,7 @@
 
 
 #include "Tag.h"
+#include "Console.h"
 
 namespace Kiwi
 {    
@@ -40,6 +41,8 @@ namespace Kiwi
     const sTag Tag::List::color                 = Tag::create("color");
     const sTag Tag::List::Color                 = Tag::create("Color");
     const sTag Tag::List::command               = Tag::create("command");
+    
+    const sTag Tag::List::dsp                   = Tag::create("dsp");
     
     const sTag Tag::List::from                  = Tag::create("from");
     const sTag Tag::List::focus                 = Tag::create("focus");

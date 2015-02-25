@@ -24,6 +24,7 @@
 
 #include "Beacon.h"
 #include "Instance.h"
+#include "Console.h"
 
 namespace Kiwi
 {
@@ -31,12 +32,12 @@ namespace Kiwi
     //                                      BEACON                                      //
     // ================================================================================ //
     
-    Beacon::Beacon(string const& name) : m_name(name)
+    Beacon::Beacon(string const& name) noexcept : m_name(name)
     {
         
     }
     
-    Beacon::~Beacon()
+    Beacon::~Beacon() noexcept
     {
         m_objects.clear();
     }
@@ -109,23 +110,26 @@ namespace Kiwi
         }
         else
         {
-            sBeacon newBeacon = make_shared<Beacon>(name);
-            m_beacons[name] = newBeacon;
-            return newBeacon;
+            sBeacon beacon = make_shared<Beacon>(name);
+            if(beacon)
+            {
+                m_beacons[name] = beacon;
+            }
+            return beacon;
         }
     }
     
-    sBeacon Beacon::create(sObject object, string const& name)
+    sBeacon Beacon::create(scObject object, string const& name)
     {
-        sInstance instance = object->getInstance();
-        if(instance)
+        if(object)
         {
-            return instance->createBeacon(name);
+            sInstance instance = object->getInstance();
+            if(instance)
+            {
+                return instance->createBeacon(name);
+            }
         }
-        else
-        {
-            return nullptr;
-        }
+        return nullptr;
     }
 }
 

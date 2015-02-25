@@ -22,29 +22,55 @@
 */
 
 #include "Atom.h"
-#include "Tag.h"
-#include "Dico.h"
-#include "Object.h"
+#include "Console.h"
 
 namespace Kiwi
 {
-    const size_t Atom::Quark::NothingCode  = typeid(Kiwi::Atom).hash_code();
-    const size_t Atom::Quark::LongCode     = typeid(Kiwi::Atom::Long).hash_code();
-    const size_t Atom::Quark::DoubleCode   = typeid(Kiwi::Atom::Double).hash_code();
-    const size_t Atom::Quark::TagCode      = typeid(Kiwi::Tag).hash_code();
-    const size_t Atom::Quark::ObjectCode   = typeid(Kiwi::Object).hash_code();
-    const size_t Atom::Quark::DicoCode     = typeid(Kiwi::Dico).hash_code();
+    Atom::Quark::Quark() noexcept
+    {
+        ;
+    }
+    
+    Atom::Quark::~Quark() noexcept
+    {
+        ;
+    }
+    
+    bool Atom::Quark::getBool() const noexcept
+    {
+        const size_t type = getType();
+        if(type == BOOLEAN)
+        {
+            return (reinterpret_cast<const Kiwi::Atom::Bool*>(this))->val;
+        }
+        else if(type == LONG)
+        {
+            return bool((reinterpret_cast<const Kiwi::Atom::Long*>(this))->val);
+        }
+        else if(type == DOUBLE)
+        {
+            return bool((reinterpret_cast<const Kiwi::Atom::Double*>(this))->val);
+        }
+        else
+        {
+            return false;
+        }
+    }
     
     long Atom::Quark::getLong() const noexcept
     {
         const size_t type = getType();
-        if(type == Atom::Quark::LongCode)
+        if(type == LONG)
         {
             return (reinterpret_cast<const Kiwi::Atom::Long*>(this))->val;
         }
-        else if(type == Atom::Quark::DoubleCode)
+        else if(type == DOUBLE)
         {
-            return (reinterpret_cast<const Kiwi::Atom::Double*>(this))->val;
+            return long((reinterpret_cast<const Kiwi::Atom::Double*>(this))->val);
+        }
+        else if(type == DOUBLE)
+        {
+            return long((reinterpret_cast<const Kiwi::Atom::Bool*>(this))->val);
         }
         else
         {
@@ -55,13 +81,17 @@ namespace Kiwi
     double Atom::Quark::getDouble() const noexcept
     {
         const size_t type = getType();
-        if(type == Atom::Quark::DoubleCode)
+        if(type == DOUBLE)
         {
             return (reinterpret_cast<const Kiwi::Atom::Double*>(this))->val;
         }
-        else if(type == Atom::Quark::LongCode)
+        else if(type == LONG)
         {
-            return (reinterpret_cast<const Kiwi::Atom::Long*>(this))->val;
+            return double((reinterpret_cast<const Kiwi::Atom::Long*>(this))->val);
+        }
+        else if(type == DOUBLE)
+        {
+            return double((reinterpret_cast<const Kiwi::Atom::Bool*>(this))->val);
         }
         else
         {
@@ -69,64 +99,50 @@ namespace Kiwi
         }
     }
     
+    sTag Atom::Quark::getTag() const noexcept
+    {
+        if(isTag())
+        {
+            return (reinterpret_cast<const Kiwi::Atom::QuarkTag*>(this))->val;
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    
+    vector<Atom> Atom::Quark::getVector() const noexcept
+    {
+        if(getType() == VECTOR)
+        {
+            return (reinterpret_cast<const Kiwi::Atom::Vector*>(this))->val;
+        }
+        else
+        {
+            vector<Atom>* zaza= new vector<Atom>(0);
+            return *zaza;
+        }
+    }
+    
+    map<sTag, Atom> Atom::Quark::getMap() const noexcept
+    {
+        if(getType() == MAP)
+        {
+            return (reinterpret_cast<const Kiwi::Atom::Map*>(this))->val;
+        }
+        else
+        {
+            return map<sTag, Atom>();
+        }
+    }
+    
+    // ================================================================================ //
+    //                                      ATOM                                        //
+    // ================================================================================ //
+    
     Atom::Atom() noexcept
     {
-        m_quark = make_shared<Long>((long)0);
-    }
-    
-    Atom::Atom(const bool value) noexcept
-    {
-        m_quark = make_shared<Long>((long)value);
-    }
-    
-    Atom::Atom(const int value) noexcept
-    {
-        m_quark = make_shared<Long>((long)value);
-    }
-    
-    Atom::Atom(const long value) noexcept
-    {
-        m_quark = make_shared<Long>(value);
-    }
-    
-    Atom::Atom(const ulong value) noexcept
-    {
-        m_quark = make_shared<Long>((long)value);
-    }
-    
-    Atom::Atom(const float value) noexcept
-    {
-        m_quark = make_shared<Double>((double)value);
-    }
-    
-    Atom::Atom(const double value) noexcept
-    {
-        m_quark = make_shared<Double>(value);
-    }
-    
-    Atom::Atom(const char* tag) noexcept
-    {
-        m_quark = const_pointer_cast<Tag>(Tag::create(tag));
-    }
-    
-    Atom::Atom(string const& tag) noexcept
-    {
-        m_quark = const_pointer_cast<Tag>(Tag::create(tag));
-    }
-    
-    Atom::Atom(sTag tag) noexcept
-    {
-        m_quark = const_pointer_cast<Tag>(tag);
-    }
-    
-    Atom::Atom(sObject object) noexcept
-    {
-        m_quark = object;
-    }
-    
-    Atom::Atom(sDico dico) noexcept
-    {
-        m_quark = dico;
+        m_quark = Quark();
     }
     
     Atom::Atom(Atom::Atom const& other) noexcept
@@ -134,157 +150,119 @@ namespace Kiwi
         m_quark = other.m_quark;
     }
     
+    Atom::Atom(const bool value) noexcept
+    {
+        m_quark = Bool(value);
+    }
+    
+    Atom::Atom(const int value) noexcept
+    {
+         m_quark = Long((long)value);
+    }
+    
+    Atom::Atom(const long value) noexcept
+    {
+        m_quark = Long(value);
+    }
+    
+    Atom::Atom(const float value) noexcept
+    {
+        m_quark = Double((double)value);
+    }
+    
+    Atom::Atom(const double value) noexcept
+    {
+        m_quark = Double(value);
+    }
+    
+    Atom::Atom(const char* tag) noexcept
+    {
+        m_quark = QuarkTag(Tag::create(tag));
+    }
+    
+    Atom::Atom(string const& tag) noexcept
+    {
+        m_quark = QuarkTag(Tag::create(tag));
+    }
+    
+    Atom::Atom(sTag tag) noexcept
+    {
+        m_quark = QuarkTag(tag);
+    }
+    
+    Atom::Atom(vector<Atom> const& atoms) noexcept
+    {
+        m_quark = Vector(atoms);
+    }
+    
+    Atom::Atom(vector<Atom>::iterator first, vector<Atom>::iterator last) noexcept
+    {
+        m_quark = Vector(first, last);
+    }
+        
+    Atom::Atom(vector<Atom>&& atoms) noexcept
+    {
+        m_quark = Vector(atoms);
+    }
+    
+    Atom::Atom(initializer_list<Atom> il) noexcept
+    {
+        m_quark = Vector(il);
+    }
+    
+    Atom::Atom(map<sTag, Atom> const& atoms) noexcept
+    {
+        m_quark = Map(atoms);
+    }
+    
+    Atom::Atom(map<sTag, Atom>::iterator first, map<sTag, Atom>::iterator last) noexcept
+    {
+        m_quark = Map(first, last);
+    }
+    
+    Atom::Atom(map<sTag, Atom>&& atoms) noexcept
+    {
+        m_quark = Map(atoms);
+    }
+    
+    Atom::Atom(initializer_list<pair<const sTag, Atom>> il) noexcept
+    {
+        m_quark = Map(il);
+    }
+    
     Atom::~Atom() noexcept
     {
         ;
     }
     
-    Atom::operator sTag() const noexcept
+    Atom Atom::evaluate(string const& _text)
     {
-        return dynamic_pointer_cast<Tag>(m_quark);
-    }
-    
-    //! Cast the atom to a object.
-    /** The function casts the atom to a object.
-     @return An object if the atom is a object otherwise a nullptr.
-     */
-    Atom::operator scObject() const noexcept
-    {
-        return dynamic_pointer_cast<Object>(m_quark);
-    }
-    
-    //! Cast the atom to a object.
-    /** The function casts the atom to a object.
-     @return An object if the atom is a object otherwise a nullptr.
-     */
-    Atom::operator sObject() noexcept
-    {
-        return dynamic_pointer_cast<Object>(m_quark);
-    }
-    
-    //! Cast the atom to a dico.
-    /** The function casts the atom to a dico.
-     @return An dico if the atom is a dico otherwise a nullptr.
-     */
-    Atom::operator scDico() const noexcept
-    {
-        return dynamic_pointer_cast<Dico>(m_quark);
-    }
-    
-    //! Cast the atom to a dico.
-    /** The function casts the atom to a dico.
-     @return An dico if the atom is a dico otherwise a nullptr.
-     */
-    Atom::operator sDico() noexcept
-    {
-        return dynamic_pointer_cast<Dico>(m_quark);
-    }
-    
-    Atom& Atom::operator=(char const* tag) noexcept
-    {
-        m_quark = const_pointer_cast<Tag>(Tag::create(tag));
-        return *this;
-    }
-    
-    Atom& Atom::operator=(string const& tag) noexcept
-    {
-        m_quark = const_pointer_cast<Tag>(Tag::create(tag));
-        return *this;
-    }
-    
-    Atom& Atom::operator=(sTag tag) noexcept
-    {
-        m_quark = const_pointer_cast<Tag>(tag);
-        return *this;
-    }
-    
-    Atom& Atom::operator=(sObject object) noexcept
-    {
-        m_quark = object;
-        return *this;
-    }
-    
-    Atom& Atom::operator=(sDico dico) noexcept
-    {
-        m_quark = dico;
-        return *this;
-    }
-    
-    bool Atom::operator==(char const* tag) const noexcept
-    {
-        return m_quark == Tag::create(tag);
-    }
-    
-    bool Atom::operator==(string const& tag) const noexcept
-    {
-        return m_quark == Tag::create(tag);
-    }
-    
-    bool Atom::operator==(sTag tag) const noexcept
-    {
-        return m_quark == tag;
-    }
-
-    bool Atom::operator==(scObject object) const noexcept
-    {
-        return m_quark == object;
-    }
-    
-    bool Atom::operator==(scDico dico) const noexcept
-    {
-        return m_quark == dico;
-    }
-    
-    vector<Atom>& Atom::evaluate(string const& _text)
-    {
+        vector<Atom> atoms;
         string word;
         istringstream iss(_text);
-        vector<Atom> atoms;
         while(iss >> word)
         {
-            ;
-        }
-        return atoms;
-    }
-    
-    string toString(Atom const& __val)
-    {
-        switch(__val.getType())
-        {
-            case Atom::LONG:
-                return toString((long)__val);
-                break;
-            case Atom::DOUBLE:
-                return toString((double)__val);
-                break;
-            case Atom::TAG:
-                return toString((sTag)__val);
-                break;
-            case Atom::OBJECT:
-                return toString((scObject)__val);
-                break;
-            case Atom::DICO:
-                return toString((scDico)__val);
-                break;
-            default:
-                return "";
-                break;
-        }
-    }
-    
-    string toString(vector<Atom> const& __val)
-    {
-        if(!__val.empty())
-        {
-            string desc("[");
-            for(size_t i = 0; i < __val.size() - 1; i++)
+            if(isdigit(_text[0]))
             {
-                desc += toString(__val[i]) + ", ";
+                string::size_type pos = _text.find_first_not_of("-0123456789.");
+                if(pos != string::npos)
+                {
+                    if(_text.find('.') == string::npos)
+                    {
+                        atoms.push_back(Atom(stol(_text.c_str())));
+                    }
+                    else
+                    {
+                        atoms.push_back(Atom(stod(_text.c_str())));
+                    }
+                }
             }
-            desc += toString(__val[__val.size() - 1]);
-            return desc + "]";
+            else
+            {
+                atoms.push_back(Atom(Tag::create(jsonUnescape(_text))));
+            }
         }
-        return "";
+        return Atom();
     }
 }
 
