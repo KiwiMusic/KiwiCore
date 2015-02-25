@@ -207,7 +207,7 @@ namespace Kiwi
     void Console::warning(scObject object, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << "warning : " << toString(object) << " : " << message << endl;
+        cerr << "warning : " << object->getName()->getName() << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
         shared_ptr<const Kiwi::Patcher> patcher = nullptr;
@@ -259,7 +259,7 @@ namespace Kiwi
     void Console::error(scObject object, string const& message) noexcept
     {
 #if defined(DEBUG) || defined(NO_GUI)
-        cerr << "error : " << toString(object) << " : " << message << endl;
+        cerr << "error : " << object->getName()->getName() << " : " << message << endl;
 #endif
         shared_ptr<const Kiwi::Instance> instance = nullptr;
         shared_ptr<const Kiwi::Patcher> patcher = nullptr;
