@@ -22,7 +22,7 @@
 */
 
 
-#include "Beacon.h"
+#include "KiwiBeacon.h"
 
 namespace Kiwi
 {

@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_CLOCK__
 #define __DEF_KIWI_CLOCK__
 
-#include "Atom.h"
+#include "KiwiAtom.h"
 
 namespace Kiwi
 {

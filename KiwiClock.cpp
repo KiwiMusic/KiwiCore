@@ -22,7 +22,7 @@
 */
 
 
-#include "Clock.h"
+#include "KiwiClock.h"
 
 namespace Kiwi
 {

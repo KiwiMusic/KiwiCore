@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_BEACON__
 #define __DEF_KIWI_BEACON__
 
-#include "Tools.h"
+#include "KiwiTools.h"
 
 namespace Kiwi
 {

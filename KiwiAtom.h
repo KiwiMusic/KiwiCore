@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_CORE_ATOM__
 #define __DEF_KIWI_CORE_ATOM__
 
-#include "Tag.h"
+#include "KiwiTag.h"
 
 namespace Kiwi
 {

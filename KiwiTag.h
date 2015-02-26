@@ -24,7 +24,7 @@
 #ifndef __DEF_KIWI_TAG__
 #define __DEF_KIWI_TAG__
 
-#include "Tools.h"
+#include "KiwiTools.h"
 
 namespace Kiwi
 {
