@@ -23,8 +23,6 @@
 
 
 #include "Clock.h"
-#include "Object.h"
-#include "Console.h"
 
 namespace Kiwi
 {

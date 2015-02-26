@@ -24,7 +24,10 @@
 #ifndef __DEF_KIWI_CORE__
 #define __DEF_KIWI_CORE__
 
-#include "Console.h"
+#include "Tag.h"
+#include "Atom.h"
+#include "Beacon.h"
+#include "Clock.h"
 
 #endif
 

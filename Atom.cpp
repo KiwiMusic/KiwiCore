@@ -22,7 +22,6 @@
 */
 
 #include "Atom.h"
-#include "Console.h"
 
 namespace Kiwi
 {

@@ -23,7 +23,6 @@
 
 
 #include "Tag.h"
-#include "Console.h"
 
 namespace Kiwi
 {    
