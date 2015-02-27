@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <memory>
 #include <cmath>
+#include <array>
 #include <vector>
 #include <map>
 #include <list>
