@@ -299,12 +299,12 @@ namespace Kiwi
         }
         else if(atom.isTag())
         {
-            output << ((sTag)atom)->getName();
+            output << jsonEscape(((sTag)atom)->getName());
         }
         else if(atom.isVector())
         {
             Vector const& vec = atom;
-            output << "[";
+            output << '[';
             for(Vector::size_type i = 0; i < vec.size();)
             {
                 toJson(output, vec[i], indent);
@@ -313,12 +313,12 @@ namespace Kiwi
                     output << ", ";
                 }
             }
-            output << "]";
+            output << ']';
         }
         else if(atom.isDico())
         {
             Dico const& dico = atom;
-            output << "{" << endl;
+            output << '{' << endl;
             ++indent;
             for(auto it = dico.begin(); it != dico.end();)
             {
@@ -326,11 +326,11 @@ namespace Kiwi
                 {
                     output << '\t';
                 }
-                output << it->first->getName() << " : ";
+                output << jsonEscape(it->first->getName()) << " : ";
                 toJson(output, it->second, indent);
                 if(++it != dico.end())
                 {
-                    output << "," << endl;
+                    output << ',' << endl;
                 }
                 else
                 {
@@ -342,7 +342,7 @@ namespace Kiwi
             {
                 output << '\t';
             }
-            output << "}";
+            output << '}';
         }
         return output;
     }

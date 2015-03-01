@@ -333,6 +333,27 @@ namespace Kiwi
         }
     }
     
+    static inline string jsonEscape(string const& text)
+    {
+        ostringstream ss;
+        for(auto iter = text.cbegin(); iter != text.cend(); iter++)
+        {
+            switch (*iter)
+            {
+                case '\\': ss << "\\\\"; break;
+                case '"': ss << "\\\""; break;
+                case '/': ss << "\\/"; break;
+                case '\b': ss << "\\b"; break;
+                case '\f': ss << "\\f"; break;
+                case '\n': ss << "\\n"; break;
+                case '\r': ss << "\\r"; break;
+                case '\t': ss << "\\t"; break;
+                default: ss << *iter; break;
+            }
+        }
+        return '\"' + ss.str() + '\"';
+    }
+    
     static inline string jsonUnescape(string const& text)
     {
         bool state = false;
