@@ -1099,8 +1099,12 @@ namespace Kiwi
             return !(*this == dico);
         }
         
+        static ostream& toJson(ostream &output, const Atom &atom, ulong& indent);
+        
         static Atom evaluate(string const& _text);
     };
+    
+    ostream& operator<<(ostream &output, const Atom &atom);
 }
 
 

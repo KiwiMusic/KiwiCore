@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <cwchar>
+#include <locale>
 #include <iostream>
 #include <iomanip>
 #include <fstream>

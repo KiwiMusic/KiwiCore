@@ -283,6 +283,86 @@ namespace Kiwi
         return *this;
     }
     
+    ostream& Atom::toJson(ostream &output, const Atom &atom, ulong& indent)
+    {
+        if(atom.isBool())
+        {
+            output << (bool)atom;
+        }
+        else if(atom.isLong())
+        {
+            output << (long)atom;
+        }
+        else if(atom.isDouble())
+        {
+            output << (double)atom;
+        }
+        else if(atom.isTag())
+        {
+            output << ((sTag)atom)->getName();
+        }
+        else if(atom.isVector())
+        {
+            Vector const& vec = atom;
+            output << "[";
+            for(Vector::size_type i = 0; i < vec.size();)
+            {
+                toJson(output, vec[i], indent);
+                if(++i != vec.size())
+                {
+                    output << ", ";
+                }
+            }
+            output << "]";
+        }
+        else if(atom.isDico())
+        {
+            Dico const& dico = atom;
+            output << "{" << endl;
+            ++indent;
+            for(auto it = dico.begin(); it != dico.end();)
+            {
+                for(ulong i = 0; i < indent; i++)
+                {
+                    output << '\t';
+                }
+                output << it->first->getName() << " : ";
+                toJson(output, it->second, indent);
+                if(++it != dico.end())
+                {
+                    output << "," << endl;
+                }
+                else
+                {
+                    output << endl;
+                }
+            }
+            --indent;
+            for(ulong i = 0; i < indent; i++)
+            {
+                output << '\t';
+            }
+            output << "}";
+        }
+        return output;
+    }
+    
+    ostream& operator<<(ostream &output, const Atom &atom)
+    {
+        const bool boolalpha = output.flags() & ios::boolalpha;
+        if(!boolalpha)
+        {
+            output << std::boolalpha;
+        }
+        ulong indent = 0;
+        Atom::toJson(output, atom, indent);
+        if(!boolalpha)
+        {
+            output << std::noboolalpha;
+        }
+        return output;
+    }
+    
     Atom Atom::evaluate(string const& _text)
     {
         Vector atoms;
