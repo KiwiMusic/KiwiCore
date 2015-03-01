@@ -67,7 +67,7 @@ namespace Kiwi
         {
             return long((reinterpret_cast<const QuarkDouble*>(this))->val);
         }
-        else if(type == DOUBLE)
+        else if(type == BOOLEAN)
         {
             return long((reinterpret_cast<const QuarkBool*>(this))->val);
         }
@@ -88,7 +88,7 @@ namespace Kiwi
         {
             return double((reinterpret_cast<const QuarkLong*>(this))->val);
         }
-        else if(type == DOUBLE)
+        else if(type == BOOLEAN)
         {
             return double((reinterpret_cast<const QuarkBool*>(this))->val);
         }
