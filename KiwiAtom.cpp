@@ -98,41 +98,29 @@ namespace Kiwi
         }
     }
     
-    sTag Atom::Quark::getTag() const noexcept
+    sTag Atom::Quark::getTag() const
     {
-        if(isTag())
-        {
-            return (reinterpret_cast<const Kiwi::Atom::QuarkTag*>(this))->val;
-        }
-        else
-        {
-            return nullptr;
-        }
+        return (reinterpret_cast<const Kiwi::Atom::QuarkTag*>(this))->val;
     }
     
-    Vector Atom::Quark::getVector() const noexcept
+    Vector& Atom::Quark::getVector()
     {
-        if(getType() == VECTOR)
-        {
-            return (reinterpret_cast<const QuarkVector*>(this))->val;
-        }
-        else
-        {
-            Vector* zaza= new Vector(0);
-            return *zaza;
-        }
+        return (reinterpret_cast<QuarkVector*>(this))->val;
     }
     
-    Dico Atom::Quark::getDico() const noexcept
+    Vector const& Atom::Quark::getVector() const
     {
-        if(getType() == DICO)
-        {
-            return (reinterpret_cast<const QuarkDico*>(this))->val;
-        }
-        else
-        {
-            return Dico();
-        }
+        return (reinterpret_cast<const QuarkVector*>(this))->val;
+    }
+    
+    Dico& Atom::Quark::getDico()
+    {
+        return (reinterpret_cast<QuarkDico*>(this))->val;
+    }
+    
+    Dico const& Atom::Quark::getDico() const
+    {
+        return (reinterpret_cast<const QuarkDico*>(this))->val;
     }
     
     // ================================================================================ //
@@ -146,7 +134,34 @@ namespace Kiwi
     
     Atom::Atom(Atom::Atom const& other) noexcept
     {
-        m_quark = other.m_quark;
+        if(other.isBool())
+        {
+            m_quark = new QuarkBool((bool)other);
+        }
+        else if(other.isLong())
+        {
+            m_quark = new QuarkLong((long)other);
+        }
+        else if(other.isDouble())
+        {
+            m_quark = new QuarkDouble((double)other);
+        }
+        else if(other.isTag())
+        {
+            m_quark = new QuarkTag((sTag)other);
+        }
+        else if(other.isVector())
+        {
+            m_quark = new QuarkVector((Vector const&)other);
+        }
+        else if(other.isDico())
+        {
+            m_quark = new QuarkDico((Dico const&)other);
+        }
+        else
+        {
+            m_quark = new Quark();
+        }
     }
     
     Atom::Atom(const bool value) noexcept
@@ -232,6 +247,40 @@ namespace Kiwi
     Atom::~Atom() noexcept
     {
         delete m_quark;
+    }
+    
+    Atom& Atom::operator=(Atom const& other) noexcept
+    {
+        delete m_quark;
+        if(other.isBool())
+        {
+            m_quark = new QuarkBool((bool)other);
+        }
+        else if(other.isLong())
+        {
+            m_quark = new QuarkLong((long)other);
+        }
+        else if(other.isDouble())
+        {
+            m_quark = new QuarkDouble((double)other);
+        }
+        else if(other.isTag())
+        {
+            m_quark = new QuarkTag((sTag)other);
+        }
+        else if(other.isVector())
+        {
+            m_quark = new QuarkVector((Vector const&)other);
+        }
+        else if(other.isDico())
+        {
+            m_quark = new QuarkDico((Dico const&)other);
+        }
+        else
+        {
+            m_quark = new Quark();
+        }
+        return *this;
     }
     
     Atom Atom::evaluate(string const& _text)
