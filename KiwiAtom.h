@@ -1101,7 +1101,7 @@ namespace Kiwi
         
         static ostream& toJson(ostream &output, const Atom &atom, ulong& indent);
         
-        static Atom evaluate(string const& _text);
+        static Vector parse(string const& text);
     };
     
     ostream& operator<<(ostream &output, const Atom &atom);

@@ -67,7 +67,7 @@ namespace Kiwi
         {
             return long((reinterpret_cast<const QuarkDouble*>(this))->val);
         }
-        else if(type == BOOLEAN)
+        else if(type == DOUBLE)
         {
             return long((reinterpret_cast<const QuarkBool*>(this))->val);
         }
@@ -88,7 +88,7 @@ namespace Kiwi
         {
             return double((reinterpret_cast<const QuarkLong*>(this))->val);
         }
-        else if(type == BOOLEAN)
+        else if(type == DOUBLE)
         {
             return double((reinterpret_cast<const QuarkBool*>(this))->val);
         }
@@ -363,34 +363,211 @@ namespace Kiwi
         return output;
     }
     
-    Atom Atom::evaluate(string const& _text)
+    /*
+    Vector Atom::parse(string const& text)
     {
         Vector atoms;
-        string word;
-        istringstream iss(_text);
-        while(iss >> word)
+        if (text.empty())
+            return atoms;
+        
+        const ulong textlen = text.length();
+        string::size_type pos = text.find_first_not_of(" ", 0);
+        
+        for(;;)
         {
-            if(isdigit(_text[0]))
+            const char c = text[pos];
+            //cout << "current char : \"" << c << "\"" << endl;
+            
+            if(c == '\"')
             {
-                string::size_type pos = _text.find_first_not_of("-0123456789.");
-                if(pos != string::npos)
+                string::size_type nextpos = pos++;
+                nextpos = text.find_first_of('\"', pos);
+                
+                if (string::npos != nextpos && nextpos > pos)
                 {
-                    if(_text.find('.') == string::npos)
-                    {
-                        atoms.push_back(Atom(stol(_text.c_str())));
-                    }
-                    else
-                    {
-                        atoms.push_back(Atom(stod(_text.c_str())));
-                    }
+                    string txt = text.substr(pos, nextpos - pos);
+                    cout << "word quote : " << txt << endl;
+                    atoms.push_back(Atom(Tag::create(jsonUnescape(txt))));
+                    pos = nextpos + 2;
                 }
             }
             else
             {
-                atoms.push_back(Atom(Tag::create(jsonUnescape(_text))));
+                string::size_type nextpos = pos;
+                string::size_type nextquotepos = pos;
+                nextquotepos = text.find_first_of('\"', pos);
+                nextpos = text.find_first_of(' ', pos);
+                
+                cout << "pos : " << pos << " nextpos : " << nextpos << endl;
+                
+                if (nextquotepos < nextpos)
+                {
+                    pos = nextquotepos;
+                    continue;
+                }
+                
+                if (string::npos != nextpos)
+                {
+                    string word = text.substr(pos, nextpos - pos);
+                    cout << "word : " << word << endl;
+                    
+                    if (!word.empty())
+                    {
+                        if(word.find_first_not_of("-0123456789.") == string::npos)
+                        {
+                            bool isNeg = word[0] == '-';
+                            bool isFloat = word[0] == '.';
+                            
+                            cout << "word : \"" << word <<  "\" -------- probably a number " << endl;
+                        }
+                        else
+                        {
+                            atoms.push_back(Atom(Tag::create(jsonUnescape(word))));
+                        }
+                    }
+                    
+                    pos = nextpos + 1;
+                }
+                else
+                {
+                    cout << " ------------------------- this is a break " << endl;
+                    break;
+                }
             }
         }
-        return Atom();
+        
+        return atoms;
+    }
+    */
+    
+    Vector Atom::parse(string const& text)
+    {
+        Vector atoms;
+        if (text.empty())
+            return atoms;
+        
+        const ulong textlen = text.length();
+        string::size_type pos = text.find_first_not_of(" ", 0);
+        
+        for(;;)
+        {
+            string word;
+            bool isTag      = false;
+            bool isNumber   = false;
+            bool isFloat    = false;
+            bool isNegative = false;
+            bool isQuoted   = false;
+            
+            while(pos < textlen)
+            {
+                const char c = text[pos];
+                
+                if(c == ' ')
+                {
+                    if(!isQuoted && word.empty()) // delete all first white spaces
+                    {
+                        pos++;
+                        continue;
+                    }
+                    else
+                    {
+                        if(isQuoted) // leave white space in quoted tags
+                        {
+                            word += c;
+                            pos++;
+                            continue;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+                
+                if(c == '\"')
+                {
+                    if (isQuoted)
+                    {
+                        pos++;
+                        break;
+                    }
+                    
+                    if(word.empty())
+                    {
+                        isQuoted = true;
+                        pos++;
+                        continue;
+                    }
+                }
+                
+                if (word.empty() && c == '-')
+                {
+                    isNegative = true;
+                    word += c;
+                    pos++;
+                    continue;
+                }
+                
+                if (!isTag && c == '.')
+                {
+                    if (!isFloat && (word.empty() || isNumber || isNegative))
+                    {
+                        isFloat = true;
+                        word += c;
+                        pos++;
+                        continue;
+                    }
+                }
+                
+                if(!isTag && !isQuoted && isdigit(c))
+                {
+                    if(word.empty() || isNegative || isFloat)
+                    {
+                        isNumber = true;
+                    }
+                    
+                    if (isNumber)
+                    {
+                        word += c;
+                        pos++;
+                        continue;
+                    }
+                }
+                
+                isTag = true;
+                isNumber = false;
+                isNegative = false;
+                isFloat = false;
+                word += c;
+                pos++;
+            }
+            
+            if(!word.empty())
+            {
+                if(isNumber)
+                {
+                    if(isFloat)
+                    {
+                        atoms.push_back(Atom(stod(word.c_str())));
+                    }
+                    else
+                    {
+                        atoms.push_back(Atom(stol(word.c_str())));
+                    }
+                }
+                else
+                {
+                    atoms.push_back(Atom(Tag::create(jsonUnescape(word))));
+                }
+            }
+            
+            if (pos >= textlen)
+            {
+                break;
+            }
+        }
+        
+        return atoms;
     }
 }
 
