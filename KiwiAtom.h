@@ -1101,6 +1101,13 @@ namespace Kiwi
         
         static ostream& toJson(ostream &output, const Atom &atom, ulong& indent);
         
+        //! Parse a string into a vector of atoms.
+        /** Parse a string into a vector of atoms.
+         @param     text	The string to parse.
+         @return    The vector of atoms.
+         @remark    For example, the string : "foo \"bar 42\" 1 2 3.14" will parsed into a vector of 5 atoms.
+         The atom types will be determined automatically as 2 #Atom::Type::TAG atoms, 2 #Atom::Type::LONG atoms, and 1 #Atom::Type::DOUBLE atom.
+         */
         static Vector parse(string const& text);
     };
     

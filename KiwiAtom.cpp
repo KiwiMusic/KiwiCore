@@ -363,95 +363,16 @@ namespace Kiwi
         return output;
     }
     
-    /*
     Vector Atom::parse(string const& text)
     {
         Vector atoms;
-        if (text.empty())
-            return atoms;
-        
         const ulong textlen = text.length();
-        string::size_type pos = text.find_first_not_of(" ", 0);
+        string::size_type pos = text.find_first_not_of(' ', 0);
         
-        for(;;)
-        {
-            const char c = text[pos];
-            //cout << "current char : \"" << c << "\"" << endl;
-            
-            if(c == '\"')
-            {
-                string::size_type nextpos = pos++;
-                nextpos = text.find_first_of('\"', pos);
-                
-                if (string::npos != nextpos && nextpos > pos)
-                {
-                    string txt = text.substr(pos, nextpos - pos);
-                    cout << "word quote : " << txt << endl;
-                    atoms.push_back(Atom(Tag::create(jsonUnescape(txt))));
-                    pos = nextpos + 2;
-                }
-            }
-            else
-            {
-                string::size_type nextpos = pos;
-                string::size_type nextquotepos = pos;
-                nextquotepos = text.find_first_of('\"', pos);
-                nextpos = text.find_first_of(' ', pos);
-                
-                cout << "pos : " << pos << " nextpos : " << nextpos << endl;
-                
-                if (nextquotepos < nextpos)
-                {
-                    pos = nextquotepos;
-                    continue;
-                }
-                
-                if (string::npos != nextpos)
-                {
-                    string word = text.substr(pos, nextpos - pos);
-                    cout << "word : " << word << endl;
-                    
-                    if (!word.empty())
-                    {
-                        if(word.find_first_not_of("-0123456789.") == string::npos)
-                        {
-                            bool isNeg = word[0] == '-';
-                            bool isFloat = word[0] == '.';
-                            
-                            cout << "word : \"" << word <<  "\" -------- probably a number " << endl;
-                        }
-                        else
-                        {
-                            atoms.push_back(Atom(Tag::create(jsonUnescape(word))));
-                        }
-                    }
-                    
-                    pos = nextpos + 1;
-                }
-                else
-                {
-                    cout << " ------------------------- this is a break " << endl;
-                    break;
-                }
-            }
-        }
-        
-        return atoms;
-    }
-    */
-    
-    Vector Atom::parse(string const& text)
-    {
-        Vector atoms;
-        if (text.empty())
-            return atoms;
-        
-        const ulong textlen = text.length();
-        string::size_type pos = text.find_first_not_of(" ", 0);
-        
-        for(;;)
+        while(pos < textlen)
         {
             string word;
+            word.reserve(20); // does it more efficient ?
             bool isTag      = false;
             bool isNumber   = false;
             bool isFloat    = false;
@@ -464,80 +385,59 @@ namespace Kiwi
                 
                 if(c == ' ')
                 {
-                    if(!isQuoted && word.empty()) // delete all first white spaces
+                    if(!isQuoted)
                     {
-                        pos++;
-                        continue;
-                    }
-                    else
-                    {
-                        if(isQuoted) // leave white space in quoted tags
+                        if(word.empty()) // delete useless white spaces
                         {
-                            word += c;
                             pos++;
                             continue;
                         }
-                        else
+                        else // preserve white space in quoted tags, otherwise break word
                         {
                             break;
                         }
                     }
                 }
-                
-                if(c == '\"')
+                else if(c == '\"')
                 {
-                    if (isQuoted)
+                    if(isQuoted) // closing quote
                     {
                         pos++;
                         break;
                     }
                     
-                    if(word.empty())
+                    if(word.empty()) // begin quote
                     {
-                        isQuoted = true;
                         pos++;
+                        
+                        // ignore if it can not be closed
+                        if(text.find_first_of('\"', pos) != string::npos)
+                            isQuoted = isTag = true;
+                        
                         continue;
                     }
                 }
-                
-                if (word.empty() && c == '-')
+                else if(!isTag)
                 {
-                    isNegative = true;
-                    word += c;
-                    pos++;
-                    continue;
-                }
-                
-                if (!isTag && c == '.')
-                {
-                    if (!isFloat && (word.empty() || isNumber || isNegative))
+                    if(word.empty() && c == '-')
+                    {
+                        isNegative = true;
+                    }
+                    else if(!isFloat && (word.empty() || isNumber || isNegative) && c == '.')
                     {
                         isFloat = true;
-                        word += c;
-                        pos++;
-                        continue;
                     }
-                }
-                
-                if(!isTag && !isQuoted && isdigit(c))
-                {
-                    if(word.empty() || isNegative || isFloat)
+                    else if(isdigit(c) && (isNumber || (word.empty() || isNegative || isFloat)))
                     {
                         isNumber = true;
                     }
-                    
-                    if (isNumber)
+                    else
                     {
-                        word += c;
-                        pos++;
-                        continue;
+                        isTag = true;
+                        isNumber = isNegative = isFloat = false;
                     }
                 }
                 
-                isTag = true;
-                isNumber = false;
-                isNegative = false;
-                isFloat = false;
                 word += c;
                 pos++;
             }
@@ -560,29 +460,11 @@ namespace Kiwi
                     atoms.push_back(Atom(Tag::create(jsonUnescape(word))));
                 }
             }
-            
-            if (pos >= textlen)
-            {
-                break;
-            }
         }
         
         return atoms;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
