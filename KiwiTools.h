@@ -90,6 +90,27 @@ namespace Kiwi
     typedef vector<Atom>                Vector;
     typedef map<sTag, Atom>             Dico;
     
+    class Error : public exception
+    {
+        const string m_message;
+    public:
+        Error(string const& message) noexcept :
+        m_message(message)
+        {
+            ;
+        }
+        
+        virtual ~Error() noexcept
+        {
+            ;
+        }
+        
+        virtual const char* what() const noexcept
+        {
+            return m_message.c_str();
+        }
+    };
+    
     class multiinheritable_enable_shared_from_this: public enable_shared_from_this<multiinheritable_enable_shared_from_this>
     {
     public:
@@ -113,6 +134,21 @@ namespace Kiwi
     template <typename Type> Type clip(const Type& n, const Type& lower, const Type& upper)
     {
         return max(lower, min(n, upper));
+    }
+    
+    template <typename Type> Type wrap(const Type& n, const Type& lower, const Type& upper)
+    {
+        const Type increment = upper - lower;
+        Type new_value = n;
+        while(new_value < lower)
+        {
+            new_value += increment;
+        }
+        while(new_value > upper)
+        {
+            new_value -= increment;
+        }
+        return new_value;
     }
     
     inline string trimDecimal(string& text)
