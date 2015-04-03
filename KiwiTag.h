@@ -158,6 +158,7 @@ namespace Kiwi
         static const sTag objects;
         
         static const sTag patcher;
+        static const sTag position;
         
         static const sTag removelink;
         static const sTag removeobject;
