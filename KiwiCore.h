@@ -28,6 +28,7 @@
 #include "KiwiAtom.h"
 #include "KiwiBeacon.h"
 #include "KiwiClock.h"
+#include "KiwiAttr.h"
 
 #endif
 
