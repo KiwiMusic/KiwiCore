@@ -59,9 +59,15 @@ namespace Kiwi
         class Quark
         {
         public:
-            Quark() noexcept;
+            inline Quark() noexcept
+            {
+                ;
+            }
             
-            virtual ~Quark() noexcept;
+            virtual inline ~Quark() noexcept
+            {
+                ;
+            }
             
             virtual inline Type getType() const noexcept
             {
@@ -148,10 +154,6 @@ namespace Kiwi
                 ;
             }
             
-            //! Retrieve the type of the quark.
-            /** The function retrieves the type of the quark.
-             @return The type of the quark;
-             */
             inline Type getType() const noexcept override
             {
                 return BOOLEAN;

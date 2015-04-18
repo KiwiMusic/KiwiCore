@@ -46,7 +46,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        Tag(string const& name) noexcept : m_name(name)
+        inline Tag(string const& name) noexcept : m_name(name)
         {
             ;
         }
@@ -54,7 +54,7 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        Tag(string const&& name) noexcept : m_name(name)
+        inline Tag(string const&& name) noexcept : m_name(name)
         {
             ;
         }
@@ -62,7 +62,7 @@ namespace Kiwi
         //! The destructor.
         /** You should never use this method except if you really know what you do.
          */
-        ~Tag() noexcept
+        inline ~Tag() noexcept
         {
             ;
         }

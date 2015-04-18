@@ -25,16 +25,6 @@
 
 namespace Kiwi
 {
-    Atom::Quark::Quark() noexcept
-    {
-        ;
-    }
-    
-    Atom::Quark::~Quark() noexcept
-    {
-        ;
-    }
-    
     bool Atom::Quark::getBool() const noexcept
     {
         const size_t type = getType();
