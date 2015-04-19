@@ -26,7 +26,7 @@
 
 namespace Kiwi
 {
-    void Clock::clock_tick(wClock clock, ulong ms)
+    void Clock::clock_tick(const wClock clock, const ulong ms)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -48,7 +48,7 @@ namespace Kiwi
         }
     }
     
-    void Clock::clock_tick_atoms(wClock clock, ulong ms, Vector const& atoms)
+    void Clock::clock_tick_atoms(const wClock clock, const ulong ms, Vector const& atoms)
     {
         sClock nclock = clock.lock();
         if(nclock)
@@ -68,17 +68,6 @@ namespace Kiwi
                 }
             }
         }
-    }
-    
-    void Clock::delay(const ulong ms)
-    {
-        thread(clock_tick, shared_from_this(), ms).detach();
-    }
-    
-
-    void Clock::delay(Vector const& atoms, const ulong ms)
-    {
-        thread(clock_tick_atoms, shared_from_this(), ms, atoms).detach();
     }
 }
 

@@ -59,7 +59,7 @@ namespace Kiwi
         class Quark
         {
         public:
-            inline Quark() noexcept
+            constexpr inline Quark() noexcept
             {
                 ;
             }
@@ -376,7 +376,15 @@ namespace Kiwi
         //! Constructor.
         /** The function allocates an undefined atom.
          */
-        Atom() noexcept;
+        inline Atom() noexcept : m_quark(new Quark()) {}
+        
+        //! Constructor.
+        /** The function allocates an undefined atom.
+         */
+        inline Atom(Atom&& other) noexcept
+        {
+            swap(m_quark, other.m_quark);
+        }
         
         //! Constructor with another atom.
         /** The function allocates the atom with an atom.

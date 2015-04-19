@@ -38,70 +38,59 @@ namespace Kiwi
      */
     class Clock : public inheritable_enable_shared_from_this<Clock>
     {
-    public:
-        class Maker;
-        typedef shared_ptr<Maker> sMaker;
-        typedef weak_ptr<Maker>   wMaker;
     private:
         atomic_ulong m_used;
      
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void clock_tick(wClock clock, ulong ms);
+        static void clock_tick(const wClock clock, const ulong ms);
         
         //! The function that will be call be the thread.
         /** You should never use this method except if you really know what you do.
          */
-        static void clock_tick_atoms(wClock clock, ulong ms, Vector const& atoms);
+        static void clock_tick_atoms(const wClock clock, const ulong ms, Vector const& atoms);
         
     public:
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        Clock() : m_used(0ul)
-        {
-            ;
-        }
+        inline Clock() noexcept : m_used(0ul) {}
         
         //! The destructor.
         /** You should never use this method except if you really know what you do.
          */
-        ~Clock()
-        {
-            ;
-        }
+        inline ~Clock() noexcept {}
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(const ulong ms);
+        inline void delay(const ulong ms)
+        {
+            thread(clock_tick, shared_from_this(), ms).detach();
+        }
         
         //! Delay the call of the tick function of a clock maker.
         /** This function delay the call of the tick function of a clock maker.
          @param  atoms   The atoms that will be send to the function.
          @param  ms         The delay time in milliseconds.
          */
-        void delay(Vector const& atoms, const ulong ms);
+        inline void delay(Vector const& atoms, const ulong ms)
+        {
+            thread(clock_tick_atoms, shared_from_this(), ms, atoms).detach();
+        }
         
         //! The tick function that must be override.
         /** The tick function is called by a clock after a delay.
          */
-        virtual void tick()
-        {
-            ;
-        }
+        virtual void tick() {}
         
         //! The tick function that must be override.
         /** The tick function is called by a clock after a delay.
          @param  atoms   The atoms that sent by the clock.
          */
-        virtual void tick(Vector const& atoms)
-        {
-            ;
-        }
-        
+        virtual void tick(Vector const& atoms) {}
     };
 };
 

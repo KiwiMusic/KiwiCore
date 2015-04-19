@@ -54,21 +54,27 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except.
          */
-        Beacon(string const& name) noexcept;
+        inline Beacon(string const& name) noexcept : m_name(name) {}
+        
+        //! The constructor.
+        /** You should never use this method except.
+         */
+        inline Beacon(string&& name) noexcept : m_name(name){}
         
         //! The destructor.
         /** You should never use this method except.
          */
-        ~Beacon() noexcept;
+        inline ~Beacon() noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            m_castaways.clear();
+        }
         
         //! Retrieve the name of the beacon.
         /** The function retrieves the unique name of the beacon.
          @return The name of the beacon in the string format.
          */
-        inline string name() const noexcept
-        {
-            return m_name;
-        }
+        inline string name() const noexcept { return m_name; }
         
         //! Retrieve the number of castaways in the binding list of the beacon.
         /** The function retrieves the number of castaways in the binding list of the beacon.
@@ -94,7 +100,7 @@ namespace Kiwi
             }
             else
             {
-                return nullptr;
+                return sCastaway();
             }
         }
         
@@ -113,14 +119,14 @@ namespace Kiwi
          @param castaway  The pointer of the castaway.
          @see        unbind()
          */
-        void bind(sCastaway castaway);
+        void bind(const sCastaway castaway);
         
         //! Remove an castaways from the binding list of the beacon.
         /** The function removes an castaway from the binding list of the beacon. If the castaway isn't in the binding list, the function doesn't do anything.
          @param castaway  The pointer of the castaway.
          @see        bind()
          */
-        void unbind(sCastaway castaway);
+        void unbind(const sCastaway castaway);
         
         // ================================================================================ //
         //                                  BEACON CASTAWAY                                 //
@@ -162,19 +168,30 @@ namespace Kiwi
              @param     The name of the beacon to retrieve.
              @return    The beacon that match with the name.
              */
-            sBeacon createBeacon(string const& name);
+            sBeacon createBeacon(string const& name) noexcept;
+            
+            //! Beacon creator.
+            /** This function checks if a beacon with this name has already been created and returns it, otherwise it creates a new beacon with this name.
+             @param     The name of the beacon to retrieve.
+             @return    The beacon that match with the name.
+             */
+            sBeacon createBeacon(string&& name) noexcept;
             
         public:
             
             //! The constructor.
             /** You should never use this method except if you really know what you do.
              */
-            Factory() noexcept;
+            inline Factory() noexcept{ }
             
             //! The destructor.
             /** You should never use this method except if you really know what you do.
              */
-            ~Factory() noexcept;
+            inline ~Factory() noexcept
+            {
+                lock_guard<mutex> guard(m_factory_mutex);
+                m_beacons.clear();
+            }
         };
     };
 };

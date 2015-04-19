@@ -30,17 +30,7 @@ namespace Kiwi
     //                                      BEACON                                      //
     // ================================================================================ //
     
-    Beacon::Beacon(string const& name) noexcept : m_name(name)
-    {
-        
-    }
-    
-    Beacon::~Beacon() noexcept
-    {
-        m_castaways.clear();
-    }
-    
-    void Beacon::bind(sCastaway castaway)
+    void Beacon::bind(const sCastaway castaway)
     {
         if(castaway)
         {
@@ -64,7 +54,7 @@ namespace Kiwi
         }
     }
     
-    void Beacon::unbind(sCastaway castaway)
+    void Beacon::unbind(const sCastaway castaway)
     {
         if(castaway)
         {
@@ -88,17 +78,26 @@ namespace Kiwi
     //                                  BEACON FACTORY                                  //
     // ================================================================================ //
     
-    Beacon::Factory::Factory() noexcept
+    sBeacon Beacon::Factory::createBeacon(string const& name) noexcept
     {
-        
+        lock_guard<mutex> guard(m_factory_mutex);
+        auto it = m_beacons.find(name);
+        if(it != m_beacons.end())
+        {
+            return it->second;
+        }
+        else
+        {
+            sBeacon beacon = make_shared<Beacon>(name);
+            if(beacon)
+            {
+                m_beacons[name] = beacon;
+            }
+            return beacon;
+        }
     }
     
-    Beacon::Factory::~Factory() noexcept
-    {
-        m_beacons.clear();
-    }
-    
-    sBeacon Beacon::Factory::createBeacon(string const& name)
+    sBeacon Beacon::Factory::createBeacon(string&& name) noexcept
     {
         lock_guard<mutex> guard(m_factory_mutex);
         auto it = m_beacons.find(name);

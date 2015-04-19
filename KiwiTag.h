@@ -46,35 +46,23 @@ namespace Kiwi
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        inline Tag(string const& name) noexcept : m_name(name)
-        {
-            ;
-        }
+        inline Tag(string const& name) noexcept : m_name(name) {}
         
         //! The constructor.
         /** You should never use this method except if you really know what you do.
          */
-        inline Tag(string const&& name) noexcept : m_name(name)
-        {
-            ;
-        }
+        inline Tag(string&& name) noexcept : m_name(name) {}
         
         //! The destructor.
         /** You should never use this method except if you really know what you do.
          */
-        inline ~Tag() noexcept
-        {
-            ;
-        }
+        inline ~Tag() noexcept {}
         
         //! Retrieve the string of the tag.
         /** The function retrieves the unique string of the tag.
          @return The string of the tag.
          */
-        inline string getName() const noexcept
-        {
-            return m_name;
-        }
+        inline string getName() const noexcept { return m_name; }
     
     private:
         
@@ -89,6 +77,27 @@ namespace Kiwi
          @return    The tag that match with the name.
          */
         static inline sTag create(string const& name) noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = m_tags.find(name);
+            if(it != m_tags.end())
+            {
+                return it->second;
+            }
+            else
+            {
+                sTag tag = make_shared<Tag>(name);
+                m_tags[name] = tag;
+                return tag;
+            }
+        }
+        
+        //! Tag creator.
+        /** This function checks if a tag with this name has already been created and returns it, otherwise it creates a new tag with this name.
+         @param  name   The name of the tag to retrieve.
+         @return    The tag that match with the name.
+         */
+        static inline sTag create(string&& name) noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             auto it = m_tags.find(name);

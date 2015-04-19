@@ -117,11 +117,6 @@ namespace Kiwi
     //                                      ATOM                                        //
     // ================================================================================ //
     
-    Atom::Atom() noexcept
-    {
-        m_quark = new Quark();
-    }
-    
     Atom::Atom(Atom::Atom const& other) noexcept
     {
         if(other.isBool())
