@@ -44,6 +44,7 @@
 #include <thread>
 #include <typeinfo>
 #include <typeindex>
+#include <codecvt>
 
 #ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
