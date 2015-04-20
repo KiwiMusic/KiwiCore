@@ -52,317 +52,91 @@ namespace Kiwi
         };
         
     private:
-        // ================================================================================ //
-        //                                      QUARK                                       //
-        // ================================================================================ //
-        
+
         class Quark
         {
         public:
-            constexpr inline Quark() noexcept
-            {
-                ;
-            }
-            
-            virtual inline ~Quark() noexcept
-            {
-                ;
-            }
-            
-            virtual inline Type getType() const noexcept
-            {
-                return UNDEFINED;
-            }
-            
-            inline bool isUndefined() const noexcept
-            {
-                return getType() == UNDEFINED;
-            }
-            
-            inline bool isBool() const noexcept
-            {
-                return getType() == BOOLEAN;
-            }
-            
-            inline bool isLong() const noexcept
-            {
-                return getType() == LONG;
-            }
-            
-            inline bool isDouble() const noexcept
-            {
-                return getType() == DOUBLE;
-            }
-            
-            inline bool isNumber() const noexcept
-            {
-                return isLong() || isDouble() || isBool();
-            }
-            
-            inline bool isTag() const noexcept
-            {
-                return getType() == TAG;
-            }
-            
-            inline bool isDico() const noexcept
-            {
-                return getType() == DICO;
-            }
-            
-            inline bool isVector() const noexcept
-            {
-                return getType() == VECTOR;
-            }
-            
+            constexpr inline Quark() noexcept {}
+            virtual inline ~Quark() noexcept {}
+            virtual inline Type getType() const noexcept {return UNDEFINED;}
+            inline bool isUndefined() const noexcept {return getType() == UNDEFINED;}
+            inline bool isBool() const noexcept {return getType() == BOOLEAN;}
+            inline bool isLong() const noexcept {return getType() == LONG;}
+            inline bool isDouble() const noexcept {return getType() == DOUBLE;}
+            inline bool isNumber() const noexcept {return isLong() || isDouble() || isBool();}
+            inline bool isTag() const noexcept {return getType() == TAG;}
+            inline bool isDico() const noexcept{return getType() == DICO;}
+            inline bool isVector() const noexcept{return getType() == VECTOR;}
             bool getBool() const noexcept;
-            
             long getLong() const noexcept;
-            
             double getDouble() const noexcept;
-            
             sTag getTag() const;
-            
             Vector& getVector();
-            
             Vector const& getVector() const;
-            
             Dico& getDico();
-            
             Dico const& getDico() const;
         };
         
-        // ================================================================================ //
-        //                                     ATOM BOOL                                    //
-        // ================================================================================ //
-        
-        //! The bool
-        /**
-         ...
-         */
         class QuarkBool : public Quark
         {
         public:
             const bool val;
-            
-            QuarkBool(QuarkBool const& _val) noexcept : val(_val.val)
-            {
-                ;
-            }
-            
-            QuarkBool(bool const& _val) noexcept : val(_val)
-            {
-                ;
-            }
-            
-            inline Type getType() const noexcept override
-            {
-                return BOOLEAN;
-            }
+            inline QuarkBool(QuarkBool const& _val) noexcept : val(_val.val) {}
+            inline QuarkBool(bool const& _val) noexcept : val(_val) {}
+            inline Type getType() const noexcept override {return BOOLEAN;}
         };
         
-        // ================================================================================ //
-        //                                     ATOM LONG                                    //
-        // ================================================================================ //
-        
-        //! The long
-        /**
-         ...
-         */
         class QuarkLong : public Quark
         {
         public:
             const long val;
-            
-            QuarkLong(QuarkLong const& _val) noexcept : val(_val.val)
-            {
-                ;
-            }
-            
-            QuarkLong(long const& _val) noexcept : val(_val)
-            {
-                ;
-            }
-            
-            //! Retrieve the type of the quark.
-            /** The function retrieves the type of the quark.
-             @return The type of the quark;
-             */
-            inline Type getType() const noexcept override
-            {
-                return LONG;
-            }
+            inline QuarkLong(QuarkLong const& _val) noexcept : val(_val.val) {}
+            inline  QuarkLong(long const& _val) noexcept : val(_val) {}
+            inline Type getType() const noexcept override {return LONG;}
         };
         
-        // ================================================================================ //
-        //                                     ATOM DOUBLE                                  //
-        // ================================================================================ //
-        
-        //! The double
-        /**
-         ...
-         */
         class QuarkDouble : public Quark
         {
         public:
             const double val;
-            
-            QuarkDouble(QuarkDouble const& _val) noexcept : val(_val.val)
-            {
-                ;
-            }
-            
-            QuarkDouble(double const& _val) noexcept : val(_val)
-            {
-                ;
-            }
-            
-            //! Retrieve the type of the quark.
-            /** The function retrieves the type of the quark.
-             @return The type of the quark;
-             */
-            inline Type getType() const noexcept override
-            {
-                return DOUBLE;
-            }
+            inline QuarkDouble(QuarkDouble const& _val) noexcept : val(_val.val) {}
+            inline QuarkDouble(double const& _val) noexcept : val(_val) {}
+            inline Type getType() const noexcept override {return DOUBLE;}
         };
         
-        // ================================================================================ //
-        //                                     ATOM TAG                                     //
-        // ================================================================================ //
-        
-        //! The tag
-        /**
-         ...
-         */
         class QuarkTag : public Quark
         {
         public:
             const sTag val;
-            
-            QuarkTag(QuarkTag const& _val) noexcept : val(_val.val)
-            {
-                ;
-            }
-            
-            QuarkTag(sTag _val) noexcept : val(_val)
-            {
-                ;
-            }
-            
-            //! Retrieve the type of the quark.
-            /** The function retrieves the type of the quark.
-             @return The type of the quark;
-             */
-            inline Type getType() const noexcept override
-            {
-                return TAG;
-            }
+            inline QuarkTag(QuarkTag const& _val) noexcept : val(_val.val) {}
+            inline QuarkTag(sTag _val) noexcept : val(_val) {}
+            inline Type getType() const noexcept override {return TAG;}
         };
         
-        // ================================================================================ //
-        //                                     ATOM VECTOR                                  //
-        // ================================================================================ //
-        
-        //! The vector
-        /**
-         ...
-         */
         class QuarkVector : public Quark
         {
         public:
             Vector val;
-            
-            QuarkVector(QuarkVector const& _val) noexcept : val(_val.val)
-            {
-                ;
-            }
-            
-            QuarkVector(Vector const& _val) noexcept : val(_val)
-            {
-                ;
-            }
-            
-            QuarkVector(Vector::iterator first, Vector::iterator last) noexcept : val(first, last)
-            {
-                ;
-            }
-            
-            QuarkVector(Vector&& atoms) noexcept : val(atoms)
-            {
-                ;
-            }
-            
-            QuarkVector(initializer_list<Atom> il) noexcept : val(il)
-            {
-                ;
-            }
-            
-            ~QuarkVector() noexcept
-            {
-                val.clear();
-            }
-            
-            //! Retrieve the type of the quark.
-            /** The function retrieves the type of the quark.
-             @return The type of the quark;
-             */
-            inline Type getType() const noexcept override
-            {
-                return VECTOR;
-            }
+            inline QuarkVector(QuarkVector const& _val) noexcept : val(_val.val) {}
+            inline QuarkVector(Vector const& _val) noexcept : val(_val) {}
+            inline QuarkVector(Vector::iterator first, Vector::iterator last) noexcept : val(first, last) {}
+            inline QuarkVector(Vector&& _val) noexcept {swap(val, _val);}
+            inline QuarkVector(initializer_list<Atom> il) noexcept : val(il) {}
+            inline ~QuarkVector() noexcept {val.clear();}
+            inline Type getType() const noexcept override{return VECTOR;}
         };
         
-        // ================================================================================ //
-        //                                     ATOM DICO                                     //
-        // ================================================================================ //
-        
-        //! The map
-        /**
-         ...
-         */
         class QuarkDico : public Quark
         {
         public:
             Dico val;
-            
-            QuarkDico(QuarkDico const& _val) noexcept : val(_val.val)
-            {
-                ;
-            }
-            
-            QuarkDico(Dico const& _val) noexcept : val(_val)
-            {
-                ;
-            }
-            
-            QuarkDico(Dico::iterator first, Dico::iterator last) noexcept : val(first, last)
-            {
-                ;
-            }
-            
-            QuarkDico(Dico&& atoms) noexcept : val(atoms)
-            {
-                ;
-            }
-            
-            QuarkDico(initializer_list<pair<const sTag, Atom>> il) noexcept : val(il)
-            {
-                ;
-            }
-            
-            ~QuarkDico() noexcept
-            {
-                val.clear();
-            }
-            
-            //! Retrieve the type of the quark.
-            /** The function retrieves the type of the quark.
-             @return The type of the quark;
-             */
-            inline Type getType() const noexcept override
-            {
-                return DICO;
-            }
+            inline QuarkDico(QuarkDico const& _val) noexcept : val(_val.val) {}
+            inline QuarkDico(Dico const& _val) noexcept : val(_val) {}
+            inline QuarkDico(Dico::iterator first, Dico::iterator last) noexcept : val(first, last) {}
+            inline QuarkDico(Dico&& _val) noexcept {swap(val, _val);}
+            inline QuarkDico(initializer_list<pair<const sTag, Atom>> il) noexcept : val(il) {}
+            inline ~QuarkDico() noexcept {val.clear();}
+            inline Type getType() const noexcept override {return DICO;}
         };
         
         Quark* m_quark;
@@ -378,13 +152,10 @@ namespace Kiwi
          */
         inline Atom() noexcept : m_quark(new Quark()) {}
         
-        //! Constructor.
-        /** The function allocates an undefined atom.
+        //! Constructor with another atom.
+        /** The function allocates the atom with an atom.
          */
-        inline Atom(Atom&& other) noexcept
-        {
-            swap(m_quark, other.m_quark);
-        }
+        inline Atom(Atom&& other) noexcept {swap(m_quark, other.m_quark);}
         
         //! Constructor with another atom.
         /** The function allocates the atom with an atom.
@@ -481,25 +252,19 @@ namespace Kiwi
         //! Destructor.
         /** Doesn't perform anything.
          */
-        ~Atom() noexcept;
+        inline ~Atom() noexcept {delete m_quark;}
         
         //! Retrieve the type of the atom.
         /** The function retrieves the type of the atom.
          @return The type of the atom as a type.
          */
-        inline Type getType() const noexcept
-        {
-            return m_quark->getType();
-        }
+        inline Type getType() const noexcept {return m_quark->getType();}
         
         //! Check if the atom is undefined.
         /** The function checks if the atom is undefined.
          @return    true if the atom is undefined.
          */
-        inline bool isUndefined() const noexcept
-        {
-            return m_quark->isLong();
-        }
+        inline bool isUndefined() const noexcept {return m_quark->isUndefined();}
         
         //! Check if the atom is of type bool.
         /** The function checks if the atom is of type bool.
@@ -990,7 +755,7 @@ namespace Kiwi
          @param vector   The vector.
          @return true if the atom hold the same vector otherwise false.
          */
-        inline bool operator==(Vector& vector) const noexcept
+        inline bool operator==(Vector const& vector) const noexcept
         {
             if(isVector())
             {
@@ -1007,7 +772,7 @@ namespace Kiwi
          @param dico   The dico.
          @return true if the atom hold the same dico otherwise false.
          */
-        inline bool operator==(Dico& dico) const noexcept
+        inline bool operator==(Dico const& dico) const noexcept
         {
             if(isDico())
             {
@@ -1084,7 +849,7 @@ namespace Kiwi
          @param value   The tag.
          @return true if the atom differ from the tag otherwise false.
          */
-        inline bool operator!=(sTag tag) const noexcept
+        inline bool operator!=(const sTag tag) const noexcept
         {
             return !(*this == tag);
         }
@@ -1104,7 +869,7 @@ namespace Kiwi
          @param dico   The dico.
          @return true if the atom differ from the dico otherwise false.
          */
-        inline bool operator!=(Dico dico) const noexcept
+        inline bool operator!=(Dico const& dico) const noexcept
         {
             return !(*this == dico);
         }

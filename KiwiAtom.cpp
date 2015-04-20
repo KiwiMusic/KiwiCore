@@ -229,11 +229,6 @@ namespace Kiwi
         m_quark = new QuarkDico(il);
     }
     
-    Atom::~Atom() noexcept
-    {
-        delete m_quark;
-    }
-    
     Atom& Atom::operator=(Atom const& other) noexcept
     {
         delete m_quark;
