@@ -119,6 +119,7 @@ namespace Kiwi
     class Tag::List
     {
     public:
+        static const sTag _empty;
         static const sTag arguments;
         static const sTag Arial;
         

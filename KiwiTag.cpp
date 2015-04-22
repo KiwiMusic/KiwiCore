@@ -29,6 +29,7 @@ namespace Kiwi
     map<string, sTag> Tag::m_tags;
     mutex Tag::m_mutex;
     
+    const sTag Tag::List::_empty                = Tag::create("");
     const sTag Tag::List::arguments             = Tag::create("arguments");
     const sTag Tag::List::Arial                 = Tag::create("Arial");
     
