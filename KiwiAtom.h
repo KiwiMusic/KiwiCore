@@ -385,6 +385,17 @@ namespace Kiwi
          */
         Atom& operator=(Atom const& other) noexcept;
         
+        //! Set up the atom with another atom.
+        /** The function sets up the atom with another atom.
+         @param other   The other atom.
+         @return An atom.
+         */
+        Atom& operator=(Atom&& other) noexcept
+        {
+            swap(m_quark, other.m_quark);
+            return *this;
+        }
+        
         //! Set up the atom with a boolean value.
         /** The function sets up the atom with a long value created with aboolean value.
          @param value   The boolean value.
@@ -469,6 +480,18 @@ namespace Kiwi
             return *this;
         }
         
+        //! Set up the atom with a string.
+        /** The function sets up the atom with string.
+         @param tag   The string.
+         @return An atom.
+         */
+        inline Atom& operator=(string&& tag) noexcept
+        {
+            delete m_quark;
+            m_quark = new QuarkTag(Tag::create(forward<string>(tag)));
+            return *this;
+        }
+        
         //! Set up the atom with a tag.
         /** The function sets up the atom with a tag.
          @param tag   The tag.
@@ -501,7 +524,7 @@ namespace Kiwi
         inline Atom& operator=(Vector&& atoms) noexcept
         {
             delete m_quark;
-            m_quark = new QuarkVector(atoms);
+            m_quark = new QuarkVector(forward<Vector>(atoms));
             return *this;
         }
         
@@ -537,7 +560,7 @@ namespace Kiwi
         inline Atom& operator=(Dico&& atoms) noexcept
         {
             delete m_quark;
-            m_quark = new QuarkDico(atoms);
+            m_quark = new QuarkDico(forward<Dico>(atoms));
             return *this;
         }
         
