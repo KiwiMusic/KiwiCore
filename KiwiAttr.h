@@ -56,14 +56,7 @@ namespace Kiwi
         typedef shared_ptr<const Listener>  scListener;
         typedef weak_ptr<const Listener>    wcListener;
         
-        class Value;
-        template <class T,
-        typename = typename enable_if<
-        is_default_constructible<T>::value &&
-        is_copy_constructible<T>::value &&
-        is_copy_assignable<T>::value
-        >::type>
-        class Typed;
+        template <class T> class Typed;
         
         /** Flags describing the behavior of the attribute.
          @see setInvisible, setDisabled, setSaveable, setNotifyChanges
@@ -305,37 +298,11 @@ namespace Kiwi
         void removeListener(sListener listener);
     };
     
-    //! The value is a pure virtual class that your class should inherite from to be used as a template in attribute typed.
-    /** The function removes an instance listener from the binding list of the attribute.
-     @param listener  The listener.
-     */
-    class Attr::Value
-    {
-    public:
-        
-        virtual ~Value() noexcept
-        {
-            ;
-        }
-        
-        //! Retrieve the attribute value as a vector of atoms.
-        /** The function retrieves the attribute value as a vector of atoms.
-         @return The vector of atoms.
-         */
-        virtual Vector get() const noexcept = 0;
-        
-        //! Set the attribute value with a vector of atoms.
-        /** The function sets the attribute value with a vector of atoms.
-         @param vector The vector of atoms.
-         */
-        virtual void set(Vector const& vector) = 0;
-    };
-    
     // ================================================================================ //
     //                                  ATTRIBUTE TYPED                                 //
     // ================================================================================ //
     
-    template <class T, typename> class Attr::Typed : public Attr
+    template <class T> class Attr::Typed : public Attr
     {
     private:
         T       m_value;
@@ -347,7 +314,7 @@ namespace Kiwi
         //! Constructor.
         /** You should never have to use the function.
          */
-        Typed(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0) : Attr(name, label, category, behavior, order), m_value(value), m_default(value)
+        inline Typed(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0) : Attr(name, label, category, behavior, order), m_value(value), m_default(value)
         {
             ;
         }
@@ -355,7 +322,7 @@ namespace Kiwi
         //! Destructor.
         /** You should never have to use the function.
          */
-        ~Typed()
+        inline ~Typed()
         {
             ;
         }
@@ -495,7 +462,7 @@ namespace Kiwi
          @param attr An attribute.
          @return pass true to notify changes to listeners, false if you don't want them to be notified
          */
-        virtual bool notify(sAttr attr) = 0;
+        virtual bool notify(sAttr attr) {return true;};
         
         //! Retrieve a set of attributes.
         /** The function retrieves the attributes.
@@ -510,6 +477,23 @@ namespace Kiwi
          @return the attributes.
          */
         sAttr getAttr(string const& name) const noexcept;
+        
+        //! Constructor.
+        /** Allocate and initialize the member values.
+         @param name			The name of the attribute.
+         @param label			A short description of the attribute in a human readable style.
+         @param category		A named category that the attribute fits into.
+         @param order			The attribute order.
+         @param behavior		A combination of the flags which define the attribute's behavior.
+         */
+        template<class T> inline void createAttr(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)
+        {
+            sAttr attr;// = make_shared<Typed<T>>(name, label, category, value, behavior, order);
+            if(attr)
+            {
+                m_attrs[attr->getName()] = attr;
+            }
+        }
         
         //! Retrieve an attribute.
         /** The function retrieves an attribute.
@@ -535,7 +519,7 @@ namespace Kiwi
 		 @param value The attribute value to fill.
 		 @return True if success, false otherwise.
 		 */
-		template<class T> inline bool getAttrValue(string const& name, T* value) const noexcept
+		template<class T> inline bool getAttrValue(string const& name, T& value) const noexcept
 		{
 			sAttr attr = getAttr(name);
 			if(attr)
@@ -544,7 +528,7 @@ namespace Kiwi
 				
 				if(typedAttr && (typedAttr->getTypeIndex() == typeid(T)))
 				{
-					*value = typedAttr->getValue();
+					value = typedAttr->getValue();
 					return true;
 				}
 				else
@@ -562,8 +546,7 @@ namespace Kiwi
 		 @param value The new attribute value.
 		 @return True if success, false otherwise.
 		 */
-		template<class T, typename = typename enable_if<is_base_of<Attr::Value, T>::value>::type>
-		inline bool setAttrValue(string const& name, T const& value) const noexcept
+		template<class T> inline bool setAttrValue(string const& name, T const& value) const noexcept
 		{
 			sAttr attr = getAttr(name);
 			if(attr)
@@ -589,6 +572,20 @@ namespace Kiwi
          @param dico The dico.
          */
         void write(Dico& dico) const;
+        
+        //! Add an attribute listener in the binding list of the attribute manager.
+        /** The function adds an attribute listener in the binding list of the attribute manager. The attribute listener can specifies the names of the attributes, an empty vector means it will be attached to all the attributes.
+         @param listener  The listener.
+         @param names     The names of the attibutes.
+         */
+        void addListener(sListener listener, vector<sTag> const& names = vector<sTag>());
+        
+        //! Remove an instance listener from the binding list of the attribute.
+        /** The function removes an instance listener from the binding list of the attribute. The attribute listener can specifies the names of the attributes, an empty vector means it will be detached from all the attributes.
+         @param listener  The listener.
+         @param names     The names of the attibutes.
+         */
+        void removeListener(sListener listener, vector<sTag> const& names = vector<sTag>());
 		
     protected:
 		
@@ -647,61 +644,57 @@ namespace Kiwi
     // ================================================================================ //
     //                                      ONOFF                                       //
     // ================================================================================ //
-
-    class BoolValue : public Attr::Value
+    /*
+    template <class T> class TypedValue
     {
     private:
-        bool m_state;
-        
+        T m_value;
     public:
         
-        BoolValue() noexcept : m_state(false)
+        constexpr inline TypedValue(const T val) noexcept : m_value(val) {}
+        constexpr inline TypedValue(TypedValue const& other) noexcept : m_value(other.m_value) {}
+        inline ~TypedValue() noexcept {}
+        inline Vector get() const noexcept {return Vector({m_state});}
+        inline void set(Vector const& vector) {if(!vector.empty() && vector[0].isNumber()) {m_state = (bool)vector[0];}}
+        inline BoolValue& operator=(BoolValue const& other) noexcept
         {
-            ;
+            m_state = other.m_state;
+            return *this;
         }
         
-        BoolValue(const bool state) noexcept : m_state(state)
+        inline BoolValue& operator=(const bool state) noexcept
         {
-            ;
+            m_state = state;
+            return *this;
         }
         
-        BoolValue(BoolValue const& other) noexcept : m_state(other.m_state)
-        {
-            ;
-        }
-        
-        ~BoolValue() noexcept
-        {
-            ;
-        }
-        
-        //! Retrieve the attribute value as a vector of atoms.
-        /** The function retrieves the attribute value as a vector of atoms.
-         @return The vector of atoms.
-         */
-        Vector get() const noexcept override;
-        
-        //! Set the attribute value with a vector of atoms.
-        /** The function sets the attribute value with a vector of atoms.
-         @param vector The vector of atoms.
-         */
-        void set(Vector const& vector) override;
-        
-        inline bool state() const noexcept
+        inline operator bool() const noexcept
         {
             return m_state;
         }
         
-        inline void state(const bool state) noexcept
+        inline bool operator!=(BoolValue const& other) const noexcept
         {
-            m_state = state;
+            return m_state != other.m_state;
         }
         
-        inline void toggle() noexcept
+        inline bool operator==(BoolValue const& other) const noexcept
         {
-            m_state = !m_state;
+            return m_state == other.m_state;
         }
-        
+    };*/
+    
+    class BoolValue
+    {
+    private:
+        bool m_state;
+    public:
+        constexpr inline BoolValue() noexcept : m_state(false) {}
+        constexpr inline BoolValue(const bool state) noexcept : m_state(state) {}
+        constexpr inline BoolValue(BoolValue const& other) noexcept : m_state(other.m_state) {}
+        inline ~BoolValue() noexcept {}
+        inline Vector get() const noexcept {return Vector({m_state});}
+        inline void set(Vector const& vector) {if(!vector.empty() && vector[0].isNumber()) {m_state = (bool)vector[0];}}
         inline BoolValue& operator=(BoolValue const& other) noexcept
         {
             m_state = other.m_state;
@@ -734,7 +727,7 @@ namespace Kiwi
     //                                      LONG                                        //
     // ================================================================================ //
 
-    class LongValue : public Attr::Value
+    class LongValue
     {
     private:
         long m_value;
@@ -765,13 +758,13 @@ namespace Kiwi
         /** The function retrieves the attribute value as a vector of atoms.
          @return The vector of atoms.
          */
-        Vector get() const noexcept override;
+        Vector get() const noexcept;
         
         //! Set the attribute value with a vector of atoms.
         /** The function sets the attribute value with a vector of atoms.
          @param vector The vector of atoms.
          */
-        void set(Vector const& vector) override;
+        void set(Vector const& vector);
         
         inline long value() const noexcept
         {
@@ -815,7 +808,7 @@ namespace Kiwi
     //                                      DOUBLE                                      //
     // ================================================================================ //
 
-    class DoubleValue : public Attr::Value
+    class DoubleValue
     {
     private:
         double m_value;
@@ -846,13 +839,13 @@ namespace Kiwi
         /** The function retrieves the attribute value as a vector of atoms.
          @return The vector of atoms.
          */
-        Vector get() const noexcept override;
+        Vector get() const noexcept;
         
         //! Set the attribute value with a vector of atoms.
         /** The function sets the attribute value with a vector of atoms.
          @param vector The vector of atoms.
          */
-        void set(Vector const& vector) override;
+        void set(Vector const& vector);
         
         inline double value() const noexcept
         {
@@ -896,7 +889,7 @@ namespace Kiwi
     //                                      STRING										//
     // ================================================================================ //
 
-    class StringValue : public Attr::Value
+    class StringValue
     {
     private:
         string m_value;
@@ -926,13 +919,13 @@ namespace Kiwi
         /** The function retrieves the attribute value as a vector of atoms.
          @return The vector of atoms.
          */
-        Vector get() const noexcept override;
+        Vector get() const noexcept;
         
         //! Set the attribute value with a vector of atoms.
         /** The function sets the attribute value with a vector of atoms.
          @param vector The vector of atoms.
          */
-        void set(Vector const& vector) override;
+        void set(Vector const& vector);
         
         inline string value() const noexcept
         {

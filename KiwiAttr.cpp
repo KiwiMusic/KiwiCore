@@ -219,22 +219,19 @@ namespace Kiwi
         }
     }
     
+    void Attr::Manager::addListener(sListener listener, vector<sTag> const& names)
+    {
+        
+    }
+    
+    void Attr::Manager::removeListener(sListener listener, vector<sTag> const& names)
+    {
+        
+    }
+    
     // ================================================================================ //
     //                                      DEFAULTS                                    //
     // ================================================================================ //    
-    
-    void BoolValue::set(Vector const& vector)
-    {
-        if(!vector.empty() && vector[0].isNumber())
-        {
-            m_state = (bool)vector[0];
-        }
-    }
-    
-    Vector BoolValue::get() const noexcept
-    {
-        return {m_state};
-    }
     
     void LongValue::set(Vector const& vector)
     {
