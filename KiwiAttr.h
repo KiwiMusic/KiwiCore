@@ -110,7 +110,7 @@ namespace Kiwi
          @param order			The attribute order.
          @param behavior		A combination of the flags which define the attribute's behavior.
          */
-        inline Attr(sTag name, string const& label, string const& category, const ulong behavior = 0, const ulong order = 0) noexcept :
+        inline Attr(sTag name, string const& label, string const& category, const ulong behavior, const ulong order) noexcept :
         m_name(name), m_label(label), m_category(category), m_order(order), m_behavior(behavior), m_frozen(false) {}
         
         
@@ -244,7 +244,7 @@ namespace Kiwi
         //! Constructor.
         /** You should never have to use the function.
          */
-        inline Typed(sTag name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)  noexcept :
+        inline Typed(sTag name, string const& label, string const& category, T const& value, const ulong behavior, const ulong order)  noexcept :
         Attr(name, label, category, behavior, order), m_default(value), m_value(value) {}
         
         //! Destructor.
@@ -364,9 +364,70 @@ namespace Kiwi
         };
         
         map<sTag, sAttr>                m_attrs;
-        mutable mutex                   m_mutex;
+        mutable mutex                   m_attrs_mutex;
         set<SpecListener>               m_list;
         mutex                           m_list_mutex;
+        
+        //! Retrieves an attribute.
+        /** The function retrieves an attribute.
+         @param name the name of the attribute.
+         @return The attribute.
+         */
+        inline sAttr getAttr(const sTag name) const noexcept
+        {
+            lock_guard<mutex> guard(m_attrs_mutex);
+            const auto it = m_attrs.find(name);
+            if(it != m_attrs.end())
+            {
+                return it->second;
+            }
+            return sAttr();
+        }
+        
+        //! Retrieves an attribute.
+        /** The function retrieves an attribute.
+         @param name the name of the attribute.
+         @return The attribute.
+         */
+        template <class T> inline shared_ptr<Typed<T>> getAttr(const sTag name) const noexcept
+        {
+            lock_guard<mutex> guard(m_attrs_mutex);
+            const auto it = m_attrs.find(name);
+            if(it != m_attrs.end())
+            {
+                return dynamic_pointer_cast<Typed<T>>(it->second);
+            }
+            return shared_ptr<Typed<T>>();
+        }
+        
+        //! Retrieves the listeners of an attribute.
+        /** The function retrieves the listeners an attribute.
+         @param name the name of the attribute.
+         @return The listeners.
+         */
+        inline vector<sListener> getListeners(const sTag name) noexcept
+        {
+            vector<sListener> listerners;
+            lock_guard<mutex> guard(m_list_mutex);
+            auto it2 = m_list.begin();
+            while(it2 != m_list.end())
+            {
+                sListener listener = (*it2).listener.lock();
+                if(listener)
+                {
+                    if((*it2).attrs.empty() || find((*it2).attrs.begin(), (*it2).attrs.end(), name) != (*it2).attrs.end())
+                    {
+                        listerners.push_back(listener);
+                    }
+                    ++it2;
+                }
+                else
+                {
+                    it2 = m_list.erase(it2);
+                }
+            }
+            return listerners;
+        }
     public:
         
         //! Constructor.
@@ -380,7 +441,7 @@ namespace Kiwi
         virtual inline ~Manager() noexcept
         {
             {
-                lock_guard<mutex> guard(mutex);
+                lock_guard<mutex> guard(m_attrs_mutex);
                 m_attrs.clear();
             }
             {
@@ -396,11 +457,10 @@ namespace Kiwi
          */
         inline Atom getAttrValue(const sTag name) const noexcept
         {
-            lock_guard<mutex> guard(m_mutex);
-            auto it = m_attrs.find(name);
-            if(it != m_attrs.end())
+            const sAttr attr = getAttr(name);
+            if(attr)
             {
-                return it->second->getValue();
+                return attr->getValue();
             }
             return Atom();
         }
@@ -412,15 +472,10 @@ namespace Kiwi
          */
         template<class T> inline T getAttrValue(const sTag name) const noexcept
         {
-            lock_guard<mutex> guard(m_mutex);
-            auto it = m_attrs.find(name);
-            if(it != m_attrs.end())
+            const shared_ptr<Typed<T>> attr = getAttr<T>(name);
+            if(attr)
             {
-                shared_ptr<Typed<T>> attr = dynamic_pointer_cast<Typed<T>>(it->second);
-                if(attr)
-                {
-                    return attr->get();
-                }
+                return attr->get();
             }
             return T();
         }
@@ -432,36 +487,18 @@ namespace Kiwi
          */
         inline void setAttrValue(const sTag name, Atom const& atom) noexcept
         {
-            sAttr attr;
+            sAttr attr = getAttr(name);
+            if(attr)
             {
-                lock_guard<mutex> guard(m_mutex);
-                auto it = m_attrs.find(name);
-                if(it != m_attrs.end() && atom != it->second->getValue())
+                if(attr->getValue() != atom)
                 {
-                    attr = it->second;
                     attr->setValue(atom);
                     this->notify(attr);
                 }
-            }
-            if(attr)
-            {
-                lock_guard<mutex> guard(m_list_mutex);
-                auto it2 = m_list.begin();
-                while(it2 != m_list.end())
+                vector<sListener> listeners(getListeners(name));
+                for(vector<sListener>::size_type i = 0; i < listeners.size(); i++)
                 {
-                    sListener listener = (*it2).listener.lock();
-                    if(listener)
-                    {
-                        if((*it2).attrs.empty() || find((*it2).attrs.begin(), (*it2).attrs.end(), name) != (*it2).attrs.end())
-                        {
-                            listener->attrChanged(shared_from_this(), attr);
-                        }
-                        ++it2;
-                    }
-                    else
-                    {
-                        it2 = m_list.erase(it2);
-                    }
+                    listeners[i]->attrChanged(shared_from_this(), attr);
                 }
             }
         }
@@ -473,44 +510,18 @@ namespace Kiwi
 		 */
 		template<class T> inline void setAttrValue(const sTag name, T const& value) noexcept
 		{
-            shared_ptr<Typed<T>> attr;
-            {
-                lock_guard<mutex> guard(m_mutex);
-                auto it = m_attrs.find(name);
-                if(it != m_attrs.end())
-                {
-                    attr = dynamic_pointer_cast<Typed<T>>(it->second);
-                    if(attr && attr->get() != value)
-                    {
-                        attr->set(value);
-                        this->notify(attr);
-                    }
-                    else
-                    {
-                        attr = nullptr;
-                    }
-                }
-            }
+            shared_ptr<Typed<T>> attr = getAttr<T>(name);
             if(attr)
             {
-                lock_guard<mutex> guard(m_list_mutex);
-                auto it2 = m_list.begin();
-                while(it2 != m_list.end())
+                if(attr->get() != value)
                 {
-                    sListener listener = (*it2).listener.lock();
-                    if(listener)
-                    {
-                        if((*it2).attrs.empty() || find((*it2).attrs.begin(), (*it2).attrs.end(), name) != (*it2).attrs.end())
-                        {
-                            
-                            listener->attrChanged(shared_from_this(), attr);
-                        }
-                        ++it2;
-                    }
-                    else
-                    {
-                        it2 = m_list.erase(it2);
-                    }
+                    attr->set(value);
+                    this->notify(attr);
+                }
+                vector<sListener> listeners(getListeners(name));
+                for(vector<sListener>::size_type i = 0; i < listeners.size(); i++)
+                {
+                    listeners[i]->attrChanged(shared_from_this(), attr);
                 }
             }
 		}
@@ -565,11 +576,16 @@ namespace Kiwi
          @param order			The attribute order.
          @param behavior		A combination of the flags which define the attribute's behavior.
          */
-        template<class T> inline void createAttr(sTag name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)
+        template<class T> inline void createAttr(sTag name, string const& label,
+                                                 string const& category,
+                                                 T const& value,
+                                                 const ulong behavior = 0ul,
+                                                 const ulong order = 0ul)
         {
             sAttr attr = make_shared<Typed<T>>(name, label, category, value, behavior, order);
             if(attr)
             {
+                lock_guard<mutex> guard(m_attrs_mutex);
                 m_attrs[name] = attr;
             }
         }
