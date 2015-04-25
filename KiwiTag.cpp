@@ -29,67 +29,82 @@ namespace Kiwi
     map<string, sTag> Tag::m_tags;
     mutex Tag::m_mutex;
     
-    const sTag Tag::List::_empty                = Tag::create("");
-    const sTag Tag::List::arguments             = Tag::create("arguments");
-    const sTag Tag::List::Arial                 = Tag::create("Arial");
+    const sTag Tags::_empty                = Tag::create("");
+    const sTag Tags::arguments             = Tag::create("arguments");
+    const sTag Tags::Arial                 = Tag::create("Arial");
     
-    const sTag Tag::List::bang                  = Tag::create("bang");
-    const sTag Tag::List::bold                  = Tag::create("bold");
-    const sTag Tag::List::bold_italic           = Tag::create("bold italic");
+    const sTag Tags::bang                  = Tag::create("bang");
+    const sTag Tags::bdcolor               = Tag::create("bdcolor");
+    const sTag Tags::bgcolor               = Tag::create("bgcolor");
+    const sTag Tags::bold                  = Tag::create("bold");
+    const sTag Tags::bold_italic           = Tag::create("bold italic");
     
-    const sTag Tag::List::center                = Tag::create("center");
-    const sTag Tag::List::color                 = Tag::create("color");
-    const sTag Tag::List::Color                 = Tag::create("Color");
-    const sTag Tag::List::command               = Tag::create("command");
+    const sTag Tags::center                = Tag::create("center");
+    const sTag Tags::color                 = Tag::create("color");
+    const sTag Tags::Color                 = Tag::create("Color");
+    const sTag Tags::command               = Tag::create("command");
+    const sTag Tags::circlecolor           = Tag::create("circlecolor");
     
-    const sTag Tag::List::dsp                   = Tag::create("dsp");
+    const sTag Tags::dsp                   = Tag::create("dsp");
     
-    const sTag Tag::List::from                  = Tag::create("from");
-    const sTag Tag::List::focus                 = Tag::create("focus");
-    const sTag Tag::List::Font                  = Tag::create("Font");
-    const sTag Tag::List::Font_Face             = Tag::create("Font Face");
-    const sTag Tag::List::Font_Justification    = Tag::create("Font Justification");
-    const sTag Tag::List::Font_Name             = Tag::create("Font Name");
-    const sTag Tag::List::Font_Size             = Tag::create("Font Size");
-    const sTag Tag::List::fontface              = Tag::create("fontface");
-    const sTag Tag::List::fontjustification     = Tag::create("fontjustification");
-    const sTag Tag::List::fontname              = Tag::create("fontname");
-    const sTag Tag::List::fontsize              = Tag::create("fontsize");
+    const sTag Tags::from                  = Tag::create("from");
+    const sTag Tags::focus                 = Tag::create("focus");
+    const sTag Tags::Font                  = Tag::create("Font");
+    const sTag Tags::Font_Face             = Tag::create("Font Face");
+    const sTag Tags::Font_Justification    = Tag::create("Font Justification");
+    const sTag Tags::Font_Name             = Tag::create("Font Name");
+    const sTag Tags::Font_Size             = Tag::create("Font Size");
+    const sTag Tags::fontface              = Tag::create("fontface");
+    const sTag Tags::fontjustification     = Tag::create("fontjustification");
+    const sTag Tags::fontname              = Tag::create("fontname");
+    const sTag Tags::fontsize              = Tag::create("fontsize");
     
-    const sTag Tag::List::id                    = Tag::create("id");
-    const sTag Tag::List::italic                = Tag::create("italic");
+    const sTag Tags::gridsize              = Tag::create("gridsize");
+    const sTag Tags::hidden                = Tag::create("hidden");
     
-    const sTag Tag::List::left                  = Tag::create("left");
-    const sTag Tag::List::link                  = Tag::create("link");
-    const sTag Tag::List::links                 = Tag::create("links");
+    const sTag Tags::id                    = Tag::create("id");
+    const sTag Tags::ignoreclick           = Tag::create("ignoreclick");
+    const sTag Tags::italic                = Tag::create("italic");
     
-    const sTag Tag::List::Menelo                = Tag::create("Menelo");
-    const sTag Tag::List::mescolor              = Tag::create("mescolor");
-    const sTag Tag::List::Message_Color         = Tag::create("Message Color");
+    const sTag Tags::ledcolor              = Tag::create("ledcolor");
+    const sTag Tags::left                  = Tag::create("left");
+    const sTag Tags::link                  = Tag::create("link");
+    const sTag Tags::links                 = Tag::create("links");
+    const sTag Tags::locked_bgcolor        = Tag::create("locked_bgcolor");
     
-    const sTag Tag::List::name                  = Tag::create("name");
-    const sTag Tag::List::newlink               = Tag::create("newlink");
-    const sTag Tag::List::newobject             = Tag::create("newobject");
-    const sTag Tag::List::ninlets               = Tag::create("ninlets");
-    const sTag Tag::List::normal                = Tag::create("normal");
-    const sTag Tag::List::noutlets              = Tag::create("noutlets");
+    const sTag Tags::Menelo                = Tag::create("Menelo");
+    const sTag Tags::mescolor              = Tag::create("mescolor");
+    const sTag Tags::Message_Color         = Tag::create("Message Color");
     
-    const sTag Tag::List::object                = Tag::create("object");
-    const sTag Tag::List::objects               = Tag::create("objects");
+    const sTag Tags::name                  = Tag::create("name");
+    const sTag Tags::newlink               = Tag::create("newlink");
+    const sTag Tags::newobject             = Tag::create("newobject");
+    const sTag Tags::ninlets               = Tag::create("ninlets");
+    const sTag Tags::normal                = Tag::create("normal");
+    const sTag Tags::noutlets              = Tag::create("noutlets");
     
-    const sTag Tag::List::patcher               = Tag::create("patcher");
-    const sTag Tag::List::position              = Tag::create("position");
+    const sTag Tags::object                = Tag::create("object");
+    const sTag Tags::objects               = Tag::create("objects");
     
-    const sTag Tag::List::removelink            = Tag::create("removelink");
-    const sTag Tag::List::removeobject          = Tag::create("removeobject");
-    const sTag Tag::List::right                 = Tag::create("right");
+    const sTag Tags::patcher               = Tag::create("patcher");
+    const sTag Tags::position              = Tag::create("position");
+    const sTag Tags::presentation          = Tag::create("presentation");
+    const sTag Tags::presentation_position = Tag::create("presentation_position");
+    const sTag Tags::presentation_size     = Tag::create("presentation_size");
     
-    const sTag Tag::List::set                   = Tag::create("set");
-    const sTag Tag::List::sigcolor              = Tag::create("sigcolor");
-    const sTag Tag::List::Signal_Color          = Tag::create("Signal Color");
+    const sTag Tags::removelink            = Tag::create("removelink");
+    const sTag Tags::removeobject          = Tag::create("removeobject");
+    const sTag Tags::right                 = Tag::create("right");
     
-    const sTag Tag::List::text                  = Tag::create("text");
-    const sTag Tag::List::to                    = Tag::create("to");
+    const sTag Tags::set                   = Tag::create("set");
+    const sTag Tags::sigcolor              = Tag::create("sigcolor");
+    const sTag Tags::Signal_Color          = Tag::create("Signal Color");
+    const sTag Tags::size                  = Tag::create("size");
+    
+    const sTag Tags::text                  = Tag::create("text");
+    const sTag Tags::to                    = Tag::create("to");
+    
+    const sTag Tags::unlocked_bgcolor      = Tag::create("unlocked_bgcolor");
 }
 
 

@@ -70,7 +70,7 @@ namespace Kiwi
             virtual inline bool getBool() const noexcept {return false;}
             virtual inline long getLong() const noexcept {return 0ul;}
             virtual inline double getDouble() const noexcept {return 0.;}
-            virtual inline sTag getTag() const noexcept {return Tag::List::_empty;}
+            virtual inline sTag getTag() const noexcept {return Tags::_empty;}
             virtual inline Vector getVector() const noexcept {return Vector();}
             virtual inline Dico getDico() const noexcept {return Dico();}
         };
