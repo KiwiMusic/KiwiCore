@@ -440,6 +440,7 @@ namespace Kiwi
     {
         friend Attr;
         map<string, sAttr> m_attrs;
+        mutable mutex      m_mutex;
     public:
         
         //! Constructor.
@@ -457,114 +458,74 @@ namespace Kiwi
          */
         void initialize() noexcept;
         
-        //! Notify the manager that the values of an attribute has changed.
-        /** The function notifies the manager that the values of an attribute has changed.
-         @param attr An attribute.
-         @return pass true to notify changes to listeners, false if you don't want them to be notified
-         */
-        virtual bool notify(sAttr attr) {return true;};
-        
-        //! Retrieve a set of attributes.
-        /** The function retrieves the attributes.
-         @param attrs the attributes.
-         @param names the names of the attributes.
-         */
-        vector<sAttr> getAttrs(vector<string> const& names = {}) const noexcept;
-        
-        //! Retrieve an attribute.
-        /** The function retrieves an attribute.
+        //! Retrieve an attribute value.
+        /** The function retrieves an attribute value.
          @param name the name of the attribute.
-         @return the attributes.
+         @return The value of the attribute as a vector or an empty vector if the attribute doesn't exist.
          */
-        sAttr getAttr(string const& name) const noexcept;
-        
-        //! Constructor.
-        /** Allocate and initialize the member values.
-         @param name			The name of the attribute.
-         @param label			A short description of the attribute in a human readable style.
-         @param category		A named category that the attribute fits into.
-         @param order			The attribute order.
-         @param behavior		A combination of the flags which define the attribute's behavior.
-         */
-        template<class T> inline void createAttr(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)
+        inline Vector getAttrValue(string const& name) const noexcept
         {
-            sAttr attr;// = make_shared<Typed<T>>(name, label, category, value, behavior, order);
-            if(attr)
+            lock_guard<mutex> guard(m_mutex);
+            auto it = m_attrs.find(name);
+            if(it != m_attrs.end())
             {
-                m_attrs[attr->getName()] = attr;
+                return it->second->get();
+            }
+            return Vector();
+        }
+        
+        //! Retrieve an attribute value.
+        /** The function retrieves an attribute value.
+         @param name the name of the attribute.
+         @return The value of the attribute or a default value if the attribute doesn't exist.
+         */
+        template<class T> inline T getAttrValue(string const& name) const noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = m_attrs.find(name);
+            if(it != m_attrs.end())
+            {
+                shared_ptr<Typed<T>> attr = dynamic_pointer_cast<Typed<T>>(it->second);
+                if(attr)
+                {
+                    return attr->getValue();
+                }
+            }
+            return T();
+        }
+		
+        //! Set an attribute value.
+        /** The function sets an attribute value.
+         @param name the name of the attribute.
+         @param value The new attribute value.
+         */
+        inline void setAttrValue(string const& name, Vector const& value) noexcept
+        {
+            lock_guard<mutex> guard(m_mutex);
+            auto it = m_attrs.find(name);
+            if(it != m_attrs.end())
+            {
+                it->second->set(value);
             }
         }
         
-        //! Retrieve an attribute.
-        /** The function retrieves an attribute.
-         @param name the name of the attribute.
-         @return the attribute.
-         */
-        template<class T> inline shared_ptr<Typed<T>> getAttrTyped(string const& name) const noexcept
-        {
-            sAttr attr = getAttr(name);
-            if(attr)
-            {
-                return attr->getShared<T>();
-            }
-            else
-            {
-                return nullptr;
-            }
-        }
-		
-		//! Retrieve an attribute value.
-		/** The function retrieves an attribute value.
-		 @param name the name of the attribute.
-		 @param value The attribute value to fill.
-		 @return True if success, false otherwise.
-		 */
-		template<class T> inline bool getAttrValue(string const& name, T& value) const noexcept
-		{
-			sAttr attr = getAttr(name);
-			if(attr)
-			{
-				shared_ptr<Typed<T>> typedAttr = attr->getShared<T>();
-				
-				if(typedAttr && (typedAttr->getTypeIndex() == typeid(T)))
-				{
-					value = typedAttr->getValue();
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			
-			return false;
-		}
-		
 		//! Set an attribute value.
 		/** The function sets an attribute value.
 		 @param name the name of the attribute.
 		 @param value The new attribute value.
-		 @return True if success, false otherwise.
 		 */
-		template<class T> inline bool setAttrValue(string const& name, T const& value) const noexcept
+		template<class T> inline void setAttrValue(string const& name, T const& value) noexcept
 		{
-			sAttr attr = getAttr(name);
-			if(attr)
-			{
-				shared_ptr<Typed<T>> typedAttr = attr->getShared<T>();
-				
-				if(typedAttr && (typedAttr->getTypeIndex() == typeid(T)))
-				{
-					typedAttr->setValue(value);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			
-			return false;
+            lock_guard<mutex> guard(m_mutex);
+            auto it = m_attrs.find(name);
+            if(it != m_attrs.end())
+            {
+                shared_ptr<Typed<T>> attr = dynamic_pointer_cast<Typed<T>>(it->second);
+                if(attr)
+                {
+                    return attr->setValue(value);
+                }
+            }
 		}
         
         //! Write the attributes in a dico.
@@ -586,15 +547,32 @@ namespace Kiwi
          @param names     The names of the attibutes.
          */
         void removeListener(sListener listener, vector<sTag> const& names = vector<sTag>());
-		
     protected:
-		
-        //! Add an attribute to the manager.
-        /** The function adds an attribute to the manager.
-         @param attr The attribute to add.
+        
+        //! Notify the manager that the values of an attribute has changed.
+        /** The function notifies the manager that the values of an attribute has changed.
+         @param attr An attribute.
+         @return pass true to notify changes to listeners, false if you don't want them to be notified
          */
-        void addAttr(sAttr attr);
-    
+        virtual bool notify(sAttr attr) {return true;};
+        
+        //! Constructor.
+        /** Allocate and initialize the member values.
+         @param name			The name of the attribute.
+         @param label			A short description of the attribute in a human readable style.
+         @param category		A named category that the attribute fits into.
+         @param order			The attribute order.
+         @param behavior		A combination of the flags which define the attribute's behavior.
+         */
+        template<class T> inline void createAttr(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)
+        {
+            sAttr attr = make_shared<Typed<T>>(name, label, category, value, behavior, order);
+            if(attr)
+            {
+                m_attrs[name] = attr;
+            }
+        }
+        
     private:
         
         //! Retrieve the shared pointer of the manager.

@@ -165,52 +165,6 @@ namespace Kiwi
         }
     }
     
-    vector<sAttr> Attr::Manager::getAttrs(vector<string> const& names) const noexcept
-    {
-        vector<sAttr> attrs;
-        if(!names.empty())
-        {
-            for(vector<string>::size_type i = 0; i < names.size(); i++)
-            {
-                sAttr attr = getAttr(names[i]);
-                if(attr)
-                {
-                    attrs.push_back(attr);
-                }
-            }
-            
-        }
-        else
-        {
-            for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
-            {
-                attrs.push_back(it->second);
-            }
-        }
-        return attrs;
-    }
-    
-    sAttr Attr::Manager::getAttr(string const& name) const noexcept
-    {
-        auto it = m_attrs.find(name);
-        if(it != m_attrs.end())
-        {
-            return it->second;
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
-    
-    void Attr::Manager::addAttr(sAttr attr)
-    {
-        if(attr)
-        {
-            m_attrs[attr->getName()] = attr;
-        }
-    }
-    
     void Attr::Manager::write(Dico& dico) const
     {
         for(auto it = m_attrs.begin(); it != m_attrs.end(); ++it)
