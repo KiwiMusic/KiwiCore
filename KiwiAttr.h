@@ -66,29 +66,39 @@ namespace Kiwi
             Invisible			= 1<<0,///< Indicates that the attribute is invisible.
             Disabled			= 1<<1,///< Indicates that the attribute can't be changed.
             Unsaved             = 1<<2,///< Indicates that the attribute is not saved.
-            Notifier            = 1<<3,///< Indicates that the attribute should not notify its changes.
-            All                 = Invisible | Disabled | Unsaved | Notifier
+            Silent              = 1<<3,///< Indicates that the attribute should not notify its changes.
+            All                 = Invisible | Disabled | Unsaved | Silent
         };
         
     protected:
-        const string    m_name;				///< The name of the attribute.
+        const sTag      m_name;				///< The name of the attribute.
         const string    m_label;			///< The label of the attribute.
         const string    m_category;			///< The category of the attribute.
         const ulong		m_order;			///< The order of the attribute.
         ulong           m_behavior;			///< The behavior of the attribute.
         bool            m_frozen;           ///< The frozen state of the attribute.
-        wManager        m_manager;          ///< The manager of the attribute.
-    private:
-        set<wListener,
-        owner_less<wListener>> m_lists;
-        mutex                  m_lists_mutex;
         
-    protected:
-        
-        //! Notify the manager and the listener that the attribute has changed.
-        /** The function notifies the manager and the listener that the attribute has changed.
+        //! Set the attribute value with an atom.
+        /** The function sets the attribute value with an atom.
+         @param atom The atom.
          */
-        void notify() noexcept;
+        virtual inline void setValue(Atom const& atom) = 0;
+        
+        //! Freezes or unfreezes the current value.
+        /** Freezes or unfreezes the current value.
+         @param frozen If true the attribute will be frozen, if false it will be unfrozen.
+         */
+        virtual inline void freeze(const bool frozen) = 0;
+        
+        //! Resets the value to its default state.
+        /** Resets the value to its default state.
+         */
+        virtual inline void resetDefault()  = 0;
+        
+        //! Resets the attribute values to frozen values.
+        /** Resets the attribute values to its frozen values.
+         */
+        virtual inline void resetFrozen() = 0;
         
     public:
         
@@ -100,34 +110,14 @@ namespace Kiwi
          @param order			The attribute order.
          @param behavior		A combination of the flags which define the attribute's behavior.
          */
-        Attr(string const& name, string const& label, string const& category, const ulong behavior = 0, const ulong order = 0) noexcept;
+        inline Attr(sTag name, string const& label, string const& category, const ulong behavior = 0, const ulong order = 0) noexcept :
+        m_name(name), m_label(label), m_category(category), m_order(order), m_behavior(behavior), m_frozen(false) {}
+        
         
         //! Destructor.
         /** Clear the attribute.
          */
-        virtual ~Attr() noexcept;
-        
-        //! Constructor.
-        /** Allocate and initialize the member values.
-         @param name			The name of the attribute (usually only letters and undescore characters).
-         @param label			A short description of the attribute in a human readable style.
-         @param category		A named category that the attribute fits into.
-         @param order			The attribute order.
-         @param behavior		A combination of the flags which define the attribute's behavior.
-         */
-        template<class T> inline static shared_ptr<Typed<T>> create(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)
-        {
-            return make_shared<Typed<T>>(name, label, category, value, behavior, order);
-        }
-        
-        //! Retrieve the manager of the attribute.
-        /** The function retrieves themanager of the attribute.
-         @return The manager of the attribute.
-         */
-        inline sManager getManager() const noexcept
-        {
-            return m_manager.lock();
-        }
+        virtual inline ~Attr() noexcept {};
         
         //! Retrieve the type index of the attribute.
         /** The function retrieves the type index of the attribute.
@@ -135,167 +125,107 @@ namespace Kiwi
          */
         virtual type_index getTypeIndex() const noexcept = 0;
         
-        //! Retrieve the attribute value as a vector of atoms.
-        /** The function retrieves the attribute value as a vector of atoms.
-         @return The vector of atoms.
+        //! Retrieve the attribute value an atom.
+        /** The function retrieves the attribute value as  an atom.
+         @return The atom.
          */
-        virtual Vector get() const noexcept = 0;
-        
-        //! Set the attribute value with a vector of atoms.
-        /** The function sets the attribute value with a vector of atoms.
-         @param vector The vector of atoms.
-         */
-        virtual void set(Vector const& vector) = 0;
+        virtual inline Atom getValue() const noexcept = 0;
         
         //! Retrieve if the attribute is from a specific template.
         /** The function retrieves if the attribute is from a specific template.
          @return true if the attribute is from a specific template.
          */
-        template<class T> inline bool isType() const noexcept
-        {
-            return (type_index)typeid(T) == getTypeIndex();
-        }
-        
-        //! Retrieve if the attribute is from a specific template.
-        /** The function retrieves if the attribute is from a specific template.
-         @return true if the attribute is from a specific template.
-         */
-        template<class T> inline shared_ptr<Typed<T>> getShared() noexcept
-        {
-            return dynamic_pointer_cast<Typed<T>>(shared_from_this());
-        }
+        template<class T> inline bool isType() const noexcept {return (type_index)typeid(T) == getTypeIndex();}
         
         //! Retrieve the name of the attribute.
         /** The function retrieves the name of the attribute.
          @return The name of the attribute.
          */
-        inline string getName() const noexcept
-        {
-            return m_name;
-        }
+        inline sTag getName() const noexcept {return m_name;}
         
         //! Retrieve the attribute label.
         /** The function retrieves the attribute label.
          @return The attribute label.
          */
-        inline string getLabel() const noexcept
-        {
-            return m_label;
-        }
+        inline string getLabel() const noexcept {return m_label;}
         
         //! Retrieve the attribute category.
         /** The function retrieves the attribute category.
          @return The attribute category.
          */
-        inline string getCategory() const noexcept
-        {
-            return m_category;
-        }
+        inline string getCategory() const noexcept {return m_category;}
         
         //! Retrieve the attribute order.
         /** The function retrieves the attribute order.
          @return The attribute order.
          */
-        inline ulong getOrder() const noexcept
-        {
-            return m_order;
-        }
+        inline ulong getOrder() const noexcept {return m_order;}
         
         //! Retrieves the whole behavior flags field of the attribute.
         /** The function retrieves the whole behavior flags field of the attribute.
          @return behavior	A combination of the flags which define the attribute's behaviors.
          */
-        inline ulong getBehavior() const noexcept
-        {
-            return m_behavior;
-        }
+        inline ulong getBehavior() const noexcept{return m_behavior;}
         
         //! Retrieve if the attribute is invisible.
         /** The function retrieves if the attribute is invisible.
          @return True if the attribute is invisible otherwise false.
          */
-        inline bool isInvisible() const noexcept
-        {
-            return m_behavior & Invisible;
-        }
+        inline bool isInvisible() const noexcept {return m_behavior & Invisible;}
         
         //! Retrieve if the attribute is disable.
         /** The function retrieves if the attribute is disable.
          @return True if the attribute is disabled otherwise false.
          */
-        inline bool isDisabled() const noexcept
-        {
-            return m_behavior & Disabled;
-        }
+        inline bool isDisabled() const noexcept {return m_behavior & Disabled;}
         
         //! Retrieve if the attribute is saved.
         /** The function retrieves if the attribute is saved.
          @return True if the attribute is saveable otherwise false.
          */
-        inline bool isSaved() const noexcept
-        {
-            return !(m_behavior & Unsaved);
-        }
+        inline bool isUnsaved() const noexcept {return m_behavior & Unsaved;}
         
         //! Retrieve if the attribute should notify changes.
         /** The function retrieves if the attribute should notify changes.
          @return True if the attribute should notify changes otherwise false.
          */
-        inline bool isNotifier() const noexcept
-        {
-            return !(m_behavior & Notifier);
-        }
+        inline bool isSilent() const noexcept {return m_behavior & Silent;}
         
         //! Retrieve if the attribute is frozen.
         /** The function retrieves if the attribute is frozen.
          @return True if the attribute is frozen, false otherwise.
          */
-        inline bool isFrozen() const noexcept
-        {
-            return m_frozen;
-        }
+        inline bool isFrozen() const noexcept {return m_frozen;}
         
         //! Set the whole behavior flags field of the attribute.
         /** The function sets the whole behavior flags field of the attribute.
          @param behavior	A combination of the flags which define the attribute's behaviors.
          */
-        void setBehavior(const ulong behavior) noexcept;
+        inline void setBehavior(const ulong behavior) noexcept {if(m_behavior != behavior) {m_behavior = behavior;}}
         
         //! Set if the attribute is visible or not.
         /** The function sets if the attribute is visible or not.
-         @param invisible If true, the attribute will be invisible, if false it will be visible.
+         @param state If true, the attribute will be invisible, otherwise it will be visible.
          */
-        void setInvisible(const bool invisible) noexcept;
+        inline void setInvisible(const bool state) noexcept {state ? m_behavior |= Invisible : m_behavior &= ~Invisible;}
         
         //! Set if the attribute is disabled or not.
         /** The function sets if the attribute is disabled or not.
-         @param disable If true, the attribute will be disabled, if false it will be enabled.
+         @param state If true, the attribute will be disabled, otherwise it will be enabled.
          */
-        void setDisabled(const bool disable) noexcept;
+        inline void setDisabled(const bool state) noexcept {state ? m_behavior |= Disabled : m_behavior &= ~Disabled;}
         
         //! Set if the attribute is saved or not.
         /** The function sets if the attribute is saved or not.
-         @param disable If true, the attribute will be saved, if false it won't be saved.
+         @param state If true, the attribute will be saved, otherwise it won't be saved.
          */
-        void setSaved(const bool saved) noexcept;
+        inline void setUnsaved(const bool state) noexcept {state ? m_behavior |= Unsaved : m_behavior &= ~Unsaved;}
         
         //! Set if the attribute is notifier or not.
         /** The function sets if the attribute is notifier or not.
-         @param disable If true, the attribute will be notify changes, if false it won't notify changes.
+         @param state If true, the attribute will notify changes, otherwise it won't notify changes.
          */
-        void setNotifier(const bool notifier) noexcept;
-        
-        //! Add an instance listener in the binding list of the attribute.
-        /** The function adds an instance listener in the binding list of the attribute.
-         @param listener  The listener.
-         */
-        void addListener(sListener listener);
-        
-        //! Remove an instance listener from the binding list of the attribute.
-        /** The function removes an instance listener from the binding list of the attribute.
-         @param listener  The listener.
-         */
-        void removeListener(sListener listener);
+        inline void setSilent(const bool state) noexcept {state ? m_behavior |= Silent : m_behavior &= ~Silent;};
     };
     
     // ================================================================================ //
@@ -305,127 +235,103 @@ namespace Kiwi
     template <class T> class Attr::Typed : public Attr
     {
     private:
+        friend class Attr::Manager;
+        const T m_default;
         T       m_value;
-        T       m_default;
         T       m_freezed;
-        
     public:
         
         //! Constructor.
         /** You should never have to use the function.
          */
-        inline Typed(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0) : Attr(name, label, category, behavior, order), m_value(value), m_default(value)
-        {
-            ;
-        }
+        inline Typed(sTag name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)  noexcept :
+        Attr(name, label, category, behavior, order), m_default(value), m_value(value) {}
         
         //! Destructor.
         /** You should never have to use the function.
          */
-        inline ~Typed()
-        {
-            ;
-        }
+        inline ~Typed() noexcept {}
         
         //! Retrieve the type index of the attribute.
         /** The function retrieves the type index of the attribute.
          @return The type index of the attribute.
          */
-        inline type_index getTypeIndex() const noexcept override
-        {
-            return typeid(T);
-        }
-        
-        //! Retrieve the attribute value as a vector of atoms.
-        /** The function retrieves the attribute value as a vector of atoms.
-         @return The vector of atoms.
-         */
-        Vector get() const noexcept override
-        {
-            return m_value.get();
-        }
-        
-        //! Set the attribute value with a vector of atoms.
-        /** The function sets the attribute value with a vector of atoms.
-         @param vector The vector of atoms.
-         */
-        void set(Vector const& vector) override
-        {
-            T val = m_value;
-            val.set(vector);
-            setValue(val);
-        }
+        inline type_index getTypeIndex() const noexcept override {return typeid(T);}
     
         //! Retrieves the values.
         /** The current values.
          @return The current values.
          */
-        inline T getValue() const
-        {
-            return m_value;
-        }
+        inline T get() const {return m_value;}
         
         //! Retrieves the default value.
         /** Retrieve the default value.
          @return The the default value.
          */
-        inline T getDefaultValue() const
-        {
-            return m_default;
-        }
+        inline T getDefault() const {return m_default;}
         
         //! Retrieve the frozen value.
         /** Retrieve the frozen value.
          @return The the frozen value.
          */
-        inline T getFrozenValue() const
-        {
-            return m_freezed;
-        }
+        inline T getFrozen() const {return m_freezed;}
+        
+        //! Retrieve the attribute value as a vector of atoms.
+        /** The function retrieves the attribute value as a vector of atoms.
+         @return The vector of atoms.
+         */
+        Atom getValue() const noexcept override {return Atom(m_value);}
+        
+    private:
         
         //! Sets the values.
         /** The function sets the current value.
          @param elements The vector of elements.
          @see get
          */
-        inline void setValue(T const& value)
-        {
-            if(m_value != value)
-            {
-                m_value = value;
-                notify();
-            }
-        }
+        inline void set(T const& value){m_value = value;}
+        
+        //! Set the attribute value with an atom.
+        /** The function sets the attribute value with an atom.
+         @param atom The atom.
+         */
+        void setValue(Atom const& atom) override {m_value = atom;}
         
         //! Freezes or unfreezes the current value.
         /** Freezes or unfreezes the current value.
          @param frozen If true the attribute will be frozen, if false it will be unfrozen.
          */
-        inline void freeze(const bool frozen)
-        {
-            if(frozen != m_frozen)
-            {
-                m_frozen = frozen;
-                m_freezed = m_value;
-            }
-            notify();
-        }
+        inline void freeze(const bool frozen) override {m_frozen = frozen; m_freezed = m_value;}
         
         //! Resets the value to its default state.
         /** Resets the value to its default state.
          */
-        void resetDefaultValue()
-        {
-            setValue(m_default);
-        }
+        inline void resetDefault() override  {setValue(m_default);}
         
         //! Resets the attribute values to frozen values.
         /** Resets the attribute values to its frozen values.
          */
-        void resetFrozenValue()
-        {
-            setValue(m_freezed);
-        }
+        inline void resetFrozen() override  {setValue(m_freezed);}
+    };
+    
+    // ================================================================================ //
+    //                                  ATTRIBUTE LISTENER                              //
+    // ================================================================================ //
+    
+    //! The attribute manager listener is a virtual class that can be binded to an attribute manager to be notified of various changes.
+    /** The attribute manager listener is a very light class that allows to be notified of the attributes modification.
+     */
+    class Attr::Listener
+    {
+    public:
+        virtual ~Listener() {}
+        
+        //! Receive the notification that an attribute has changed.
+        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
+         @param manager     The attribute manager.
+         @param attr		The attribute that has been modified.
+         */
+        virtual void attrChanged(Attr::sManager manager, sAttr attr) = 0;
     };
     
     // ================================================================================ //
@@ -438,40 +344,65 @@ namespace Kiwi
      */
     class Attr::Manager : public inheritable_enable_shared_from_this<Manager>
     {
-        friend Attr;
-        map<string, sAttr> m_attrs;
-        mutable mutex      m_mutex;
+    private:
+        struct SpecListener
+        {
+            wListener       listener;
+            vector<sTag>    attrs;
+            
+            inline bool operator==(sListener list) const noexcept
+            {
+                sListener that = listener.lock();
+                return list && that && list == that;
+            }
+            
+            inline operator bool() const noexcept
+            {
+                sListener that = listener.lock();
+                return bool(that);
+            }
+        };
+        
+        map<sTag, sAttr>                m_attrs;
+        mutable mutex                   m_mutex;
+        set<SpecListener>               m_list;
+        mutex                           m_list_mutex;
     public:
         
         //! Constructor.
         /** Creates a new attribute manager.
          */
-        Manager() noexcept;
+        inline Manager() noexcept {};
         
         //! Destructor.
         /** Free the attributes.
          */
-        virtual ~Manager();
-        
-        //! Initialize the attribute manager.
-        /** The function add the pointer of the manager to the attributes.
-         */
-        void initialize() noexcept;
+        virtual inline ~Manager() noexcept
+        {
+            {
+                lock_guard<mutex> guard(mutex);
+                m_attrs.clear();
+            }
+            {
+                lock_guard<mutex> guard(m_list_mutex);
+                m_list.clear();
+            }
+        }
         
         //! Retrieve an attribute value.
         /** The function retrieves an attribute value.
          @param name the name of the attribute.
          @return The value of the attribute as a vector or an empty vector if the attribute doesn't exist.
          */
-        inline Vector getAttrValue(string const& name) const noexcept
+        inline Atom getAttrValue(const sTag name) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             auto it = m_attrs.find(name);
             if(it != m_attrs.end())
             {
-                return it->second->get();
+                return it->second->getValue();
             }
-            return Vector();
+            return Atom();
         }
         
         //! Retrieve an attribute value.
@@ -479,7 +410,7 @@ namespace Kiwi
          @param name the name of the attribute.
          @return The value of the attribute or a default value if the attribute doesn't exist.
          */
-        template<class T> inline T getAttrValue(string const& name) const noexcept
+        template<class T> inline T getAttrValue(const sTag name) const noexcept
         {
             lock_guard<mutex> guard(m_mutex);
             auto it = m_attrs.find(name);
@@ -488,7 +419,7 @@ namespace Kiwi
                 shared_ptr<Typed<T>> attr = dynamic_pointer_cast<Typed<T>>(it->second);
                 if(attr)
                 {
-                    return attr->getValue();
+                    return attr->get();
                 }
             }
             return T();
@@ -499,13 +430,39 @@ namespace Kiwi
          @param name the name of the attribute.
          @param value The new attribute value.
          */
-        inline void setAttrValue(string const& name, Vector const& value) noexcept
+        inline void setAttrValue(const sTag name, Atom const& atom) noexcept
         {
-            lock_guard<mutex> guard(m_mutex);
-            auto it = m_attrs.find(name);
-            if(it != m_attrs.end())
+            sAttr attr;
             {
-                it->second->set(value);
+                lock_guard<mutex> guard(m_mutex);
+                auto it = m_attrs.find(name);
+                if(it != m_attrs.end() && atom != it->second->getValue())
+                {
+                    attr = it->second;
+                    attr->setValue(atom);
+                    this->notify(attr);
+                }
+            }
+            if(attr)
+            {
+                lock_guard<mutex> guard(m_list_mutex);
+                auto it2 = m_list.begin();
+                while(it2 != m_list.end())
+                {
+                    sListener listener = (*it2).listener.lock();
+                    if(listener)
+                    {
+                        if((*it2).attrs.empty() || find((*it2).attrs.begin(), (*it2).attrs.end(), name) != (*it2).attrs.end())
+                        {
+                            listener->attrChanged(shared_from_this(), attr);
+                        }
+                        ++it2;
+                    }
+                    else
+                    {
+                        it2 = m_list.erase(it2);
+                    }
+                }
             }
         }
         
@@ -514,16 +471,46 @@ namespace Kiwi
 		 @param name the name of the attribute.
 		 @param value The new attribute value.
 		 */
-		template<class T> inline void setAttrValue(string const& name, T const& value) noexcept
+		template<class T> inline void setAttrValue(const sTag name, T const& value) noexcept
 		{
-            lock_guard<mutex> guard(m_mutex);
-            auto it = m_attrs.find(name);
-            if(it != m_attrs.end())
+            shared_ptr<Typed<T>> attr;
             {
-                shared_ptr<Typed<T>> attr = dynamic_pointer_cast<Typed<T>>(it->second);
-                if(attr)
+                lock_guard<mutex> guard(m_mutex);
+                auto it = m_attrs.find(name);
+                if(it != m_attrs.end())
                 {
-                    return attr->setValue(value);
+                    attr = dynamic_pointer_cast<Typed<T>>(it->second);
+                    if(attr && attr->get() != value)
+                    {
+                        attr->set(value);
+                        this->notify(attr);
+                    }
+                    else
+                    {
+                        attr = nullptr;
+                    }
+                }
+            }
+            if(attr)
+            {
+                lock_guard<mutex> guard(m_list_mutex);
+                auto it2 = m_list.begin();
+                while(it2 != m_list.end())
+                {
+                    sListener listener = (*it2).listener.lock();
+                    if(listener)
+                    {
+                        if((*it2).attrs.empty() || find((*it2).attrs.begin(), (*it2).attrs.end(), name) != (*it2).attrs.end())
+                        {
+                            
+                            listener->attrChanged(shared_from_this(), attr);
+                        }
+                        ++it2;
+                    }
+                    else
+                    {
+                        it2 = m_list.erase(it2);
+                    }
                 }
             }
 		}
@@ -533,6 +520,19 @@ namespace Kiwi
          @param dico The dico.
          */
         void write(Dico& dico) const;
+        
+        //! Write the attributes in a dico.
+        /** The function writes the attributes in a dico.
+         @param dico The dico.
+         */
+        void read(Dico const& dico);
+        
+        //! Add an attribute listener in the binding list of the attribute manager.
+        /** The function adds an attribute listener in the binding list of the attribute manager. The attribute listener can specifies the names of the attributes, an empty vector means it will be attached to all the attributes.
+         @param listener  The listener.
+         @param names     The names of the attibutes.
+         */
+        void addListener(sListener listener, sTag name);
         
         //! Add an attribute listener in the binding list of the attribute manager.
         /** The function adds an attribute listener in the binding list of the attribute manager. The attribute listener can specifies the names of the attributes, an empty vector means it will be attached to all the attributes.
@@ -547,6 +547,7 @@ namespace Kiwi
          @param names     The names of the attibutes.
          */
         void removeListener(sListener listener, vector<sTag> const& names = vector<sTag>());
+        
     protected:
         
         //! Notify the manager that the values of an attribute has changed.
@@ -564,7 +565,7 @@ namespace Kiwi
          @param order			The attribute order.
          @param behavior		A combination of the flags which define the attribute's behavior.
          */
-        template<class T> inline void createAttr(string const& name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)
+        template<class T> inline void createAttr(sTag name, string const& label, string const& category, T const& value, const ulong behavior = 0, const ulong order = 0)
         {
             sAttr attr = make_shared<Typed<T>>(name, label, category, value, behavior, order);
             if(attr)
@@ -572,397 +573,12 @@ namespace Kiwi
                 m_attrs[name] = attr;
             }
         }
-        
-    private:
-        
-        //! Retrieve the shared pointer of the manager.
-        /** The function retrieves the shared pointer of the manager.
-         @return The shared pointer of the manager.
-         */
-        inline scManager getShared() const noexcept
-        {
-            return shared_from_this();
-        }
-        
-        //! Retrieve the shared pointer of the manager.
-        /** The function retrieves the shared pointer of the manager.
-         @return The shared pointer of the manager.
-         */
-        inline sManager getShared() noexcept
-        {
-            return shared_from_this();
-        }
-        
-    };
-    
-    // ================================================================================ //
-    //                                  ATTRIBUTE LISTENER                              //
-    // ================================================================================ //
-    
-    //! The attribute manager listener is a virtual class that can be binded to an attribute manager to be notified of various changes.
-    /** The attribute manager listener is a very light class that allows to be notified of the attributes modification.
-     */
-    class Attr::Listener
-    {
-    public:
-        virtual ~Listener() {}
-        
-        //! Receive the notification that an attribute has changed.
-        /** The function must be implement to receive notifications when an attribute is added or removed, or when its value, appearance or behavior changes.
-         @param attr		The attribute that has been modified.
-         */
-        virtual void notify(sAttr attr) = 0;
     };
 
-
-    // ================================================================================ //
-    //                                      DEFAULTS                                    //
-    // ================================================================================ //
-
-    // ================================================================================ //
-    //                                      ONOFF                                       //
-    // ================================================================================ //
-    /*
-    template <class T> class TypedValue
-    {
-    private:
-        T m_value;
-    public:
-        
-        constexpr inline TypedValue(const T val) noexcept : m_value(val) {}
-        constexpr inline TypedValue(TypedValue const& other) noexcept : m_value(other.m_value) {}
-        inline ~TypedValue() noexcept {}
-        inline Vector get() const noexcept {return Vector({m_state});}
-        inline void set(Vector const& vector) {if(!vector.empty() && vector[0].isNumber()) {m_state = (bool)vector[0];}}
-        inline BoolValue& operator=(BoolValue const& other) noexcept
-        {
-            m_state = other.m_state;
-            return *this;
-        }
-        
-        inline BoolValue& operator=(const bool state) noexcept
-        {
-            m_state = state;
-            return *this;
-        }
-        
-        inline operator bool() const noexcept
-        {
-            return m_state;
-        }
-        
-        inline bool operator!=(BoolValue const& other) const noexcept
-        {
-            return m_state != other.m_state;
-        }
-        
-        inline bool operator==(BoolValue const& other) const noexcept
-        {
-            return m_state == other.m_state;
-        }
-    };*/
-    
-    class BoolValue
-    {
-    private:
-        bool m_state;
-    public:
-        constexpr inline BoolValue() noexcept : m_state(false) {}
-        constexpr inline BoolValue(const bool state) noexcept : m_state(state) {}
-        constexpr inline BoolValue(BoolValue const& other) noexcept : m_state(other.m_state) {}
-        inline ~BoolValue() noexcept {}
-        inline Vector get() const noexcept {return Vector({m_state});}
-        inline void set(Vector const& vector) {if(!vector.empty() && vector[0].isNumber()) {m_state = (bool)vector[0];}}
-        inline BoolValue& operator=(BoolValue const& other) noexcept
-        {
-            m_state = other.m_state;
-            return *this;
-        }
-        
-        inline BoolValue& operator=(const bool state) noexcept
-        {
-            m_state = state;
-            return *this;
-        }
-        
-        inline operator bool() const noexcept
-        {
-            return m_state;
-        }
-        
-        inline bool operator!=(BoolValue const& other) const noexcept
-        {
-            return m_state != other.m_state;
-        }
-        
-        inline bool operator==(BoolValue const& other) const noexcept
-        {
-            return m_state == other.m_state;
-        }
-    };
-
-    // ================================================================================ //
-    //                                      LONG                                        //
-    // ================================================================================ //
-
-    class LongValue
-    {
-    private:
-        long m_value;
-        
-    public:
-        
-        LongValue() noexcept : m_value(0)
-        {
-            ;
-        }
-        
-        LongValue(const long value) noexcept : m_value(value)
-        {
-            ;
-        }
-        
-        LongValue(LongValue const& other) noexcept : m_value(other.m_value)
-        {
-            ;
-        }
-        
-        ~LongValue() noexcept
-        {
-            ;
-        }
-        
-        //! Retrieve the attribute value as a vector of atoms.
-        /** The function retrieves the attribute value as a vector of atoms.
-         @return The vector of atoms.
-         */
-        Vector get() const noexcept;
-        
-        //! Set the attribute value with a vector of atoms.
-        /** The function sets the attribute value with a vector of atoms.
-         @param vector The vector of atoms.
-         */
-        void set(Vector const& vector);
-        
-        inline long value() const noexcept
-        {
-            return m_value;
-        }
-        
-        inline void value(const long value) noexcept
-        {
-            m_value = value;
-        }
-        
-        inline LongValue& operator=(LongValue const& other) noexcept
-        {
-            m_value = other.m_value;
-            return *this;
-        }
-        
-        inline LongValue& operator=(const long value) noexcept
-        {
-            m_value = value;
-            return *this;
-        }
-        
-        inline operator long() const noexcept
-        {
-            return m_value;
-        }
-        
-        inline bool operator!=(LongValue const& other) const noexcept
-        {
-            return m_value != other.m_value;
-        }
-        
-        inline bool operator==(LongValue const& other) const noexcept
-        {
-            return m_value == other.m_value;
-        }
-    };
-
-    // ================================================================================ //
-    //                                      DOUBLE                                      //
-    // ================================================================================ //
-
-    class DoubleValue
-    {
-    private:
-        double m_value;
-        
-    public:
-        
-        DoubleValue() noexcept : m_value(0)
-        {
-            ;
-        }
-        
-        DoubleValue(const long value) noexcept : m_value(value)
-        {
-            ;
-        }
-        
-        DoubleValue(DoubleValue const& other) noexcept : m_value(other.m_value)
-        {
-            ;
-        }
-        
-        ~DoubleValue() noexcept
-        {
-            ;
-        }
-        
-        //! Retrieve the attribute value as a vector of atoms.
-        /** The function retrieves the attribute value as a vector of atoms.
-         @return The vector of atoms.
-         */
-        Vector get() const noexcept;
-        
-        //! Set the attribute value with a vector of atoms.
-        /** The function sets the attribute value with a vector of atoms.
-         @param vector The vector of atoms.
-         */
-        void set(Vector const& vector);
-        
-        inline double value() const noexcept
-        {
-            return m_value;
-        }
-        
-        inline void value(const double value) noexcept
-        {
-            m_value = value;
-        }
-        
-        inline DoubleValue& operator=(DoubleValue const& other) noexcept
-        {
-            m_value = other.m_value;
-            return *this;
-        }
-        
-        inline DoubleValue& operator=(const double value) noexcept
-        {
-            m_value = value;
-            return *this;
-        }
-        
-        inline operator double() const noexcept
-        {
-            return m_value;
-        }
-        
-        inline bool operator!=(DoubleValue const& other) const noexcept
-        {
-            return m_value != other.m_value;
-        }
-        
-        inline bool operator==(DoubleValue const& other) const noexcept
-        {
-            return m_value == other.m_value;
-        }
-    };
-
-    // ================================================================================ //
-    //                                      STRING										//
-    // ================================================================================ //
-
-    class StringValue
-    {
-    private:
-        string m_value;
-    public:
-        
-        StringValue() noexcept
-        {
-            ;
-        }
-        
-        StringValue(string const& str) noexcept : m_value(str)
-        {
-            ;
-        }
-        
-        StringValue(StringValue const& other) noexcept : m_value(other.m_value)
-        {
-            ;
-        }
-        
-        ~StringValue() noexcept
-        {
-            ;
-        }
-        
-        //! Retrieve the attribute value as a vector of atoms.
-        /** The function retrieves the attribute value as a vector of atoms.
-         @return The vector of atoms.
-         */
-        Vector get() const noexcept;
-        
-        //! Set the attribute value with a vector of atoms.
-        /** The function sets the attribute value with a vector of atoms.
-         @param vector The vector of atoms.
-         */
-        void set(Vector const& vector);
-        
-        inline string value() const noexcept
-        {
-            return m_value;
-        }
-        
-        inline void value(string const& value) noexcept
-        {
-            m_value = value;
-        }
-        
-        inline StringValue& operator=(StringValue const& other) noexcept
-        {
-            m_value = other.m_value;
-            return *this;
-        }
-        
-        inline StringValue& operator=(string const& value) noexcept
-        {
-            m_value = value;
-            return *this;
-        }
-        
-        inline StringValue& operator=(char const& value) noexcept
-        {
-            m_value = value;
-            return *this;
-        }
-        
-        inline operator string() const noexcept
-        {
-            return m_value;
-        }
-        
-        inline bool operator!=(StringValue const& other) const noexcept
-        {
-            return m_value != other.m_value;
-        }
-        
-        inline bool operator!=(string const& other) const noexcept
-        {
-            return m_value != other;
-        }
-        
-        inline bool operator==(StringValue const& other) const noexcept
-        {
-            return m_value == other.m_value;
-        }
-        
-        inline bool operator==(string const& other) const noexcept
-        {
-            return m_value == other;
-        }
-    };
-
-    typedef shared_ptr<Attr::Typed<BoolValue>>		sAttrBool;
-    typedef shared_ptr<Attr::Typed<LongValue>>		sAttrLong;
-    typedef shared_ptr<Attr::Typed<DoubleValue>>	sAttrDouble;
-    typedef shared_ptr<Attr::Typed<StringValue>>	sAttrString;
+    typedef shared_ptr<Attr::Typed<bool>>		sAttrBool;
+    typedef shared_ptr<Attr::Typed<long>>		sAttrLong;
+    typedef shared_ptr<Attr::Typed<double>>     sAttrDouble;
+    typedef shared_ptr<Attr::Typed<sTag>>       sAttrTag;
 }
 
 #endif
