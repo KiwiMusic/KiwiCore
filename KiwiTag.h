@@ -116,7 +116,7 @@ namespace Kiwi
         class List;
     };
     
-    class Tag::List
+    class Tags
     {
     public:
         static const sTag _empty;
@@ -124,6 +124,8 @@ namespace Kiwi
         static const sTag Arial;
         
         static const sTag bang;
+        static const sTag bdcolor;
+        static const sTag bgcolor;
         static const sTag bold;
         static const sTag bold_italic;
         
@@ -131,6 +133,7 @@ namespace Kiwi
         static const sTag color;
         static const sTag Color;
         static const sTag command;
+        static const sTag circlecolor;
         
         static const sTag dsp;
         
@@ -146,12 +149,19 @@ namespace Kiwi
         static const sTag fontsize;
         static const sTag from;
         
+        static const sTag gridsize;
+        
+        static const sTag hidden;
+        
         static const sTag id;
+        static const sTag ignoreclick;
         static const sTag italic;
         
+        static const sTag ledcolor;
         static const sTag left;
         static const sTag link;
         static const sTag links;
+        static const sTag locked_bgcolor;
         
         static const sTag Menelo;
         static const sTag mescolor;
@@ -169,6 +179,9 @@ namespace Kiwi
         
         static const sTag patcher;
         static const sTag position;
+        static const sTag presentation;
+        static const sTag presentation_position;
+        static const sTag presentation_size;
         
         static const sTag removelink;
         static const sTag removeobject;
@@ -177,9 +190,12 @@ namespace Kiwi
         static const sTag set;
         static const sTag sigcolor;
         static const sTag Signal_Color;
+        static const sTag size;
         
         static const sTag text;
         static const sTag to;
+        
+        static const sTag unlocked_bgcolor;
         
     };
 };
