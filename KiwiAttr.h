@@ -77,8 +77,10 @@ namespace Kiwi
         const ulong		m_order;			///< The order of the attribute.
         ulong           m_behavior;			///< The behavior of the attribute.
         bool            m_frozen;           ///< The frozen state of the attribute.
+        set<wListener,
+        owner_less<wListener>> m_lists;     ///< The listener.
         
-        //! Set the attribute value with an atom.
+        //! Sets the attribute value with an atom.
         /** The function sets the attribute value with an atom.
          @param atom The atom.
          */
@@ -100,6 +102,70 @@ namespace Kiwi
          */
         virtual inline void resetFrozen() = 0;
         
+        //! Sets the whole behavior flags field of the attribute.
+        /** The function sets the whole behavior flags field of the attribute.
+         @param behavior	A combination of the flags which define the attribute's behaviors.
+         */
+        inline void setBehavior(const ulong behavior) noexcept {if(m_behavior != behavior) {m_behavior = behavior;}}
+        
+        //! Sets if the attribute is visible or not.
+        /** The function sets if the attribute is visible or not.
+         @param state If true, the attribute will be invisible, otherwise it will be visible.
+         */
+        inline void setInvisible(const bool state) noexcept {state ? m_behavior |= Invisible : m_behavior &= ~Invisible;}
+        
+        //! Sets if the attribute is disabled or not.
+        /** The function sets if the attribute is disabled or not.
+         @param state If true, the attribute will be disabled, otherwise it will be enabled.
+         */
+        inline void setDisabled(const bool state) noexcept {state ? m_behavior |= Disabled : m_behavior &= ~Disabled;}
+        
+        //! Sets if the attribute is saved or not.
+        /** The function sets if the attribute is saved or not.
+         @param state If true, the attribute will be saved, otherwise it won't be saved.
+         */
+        inline void setUnsaved(const bool state) noexcept {state ? m_behavior |= Unsaved : m_behavior &= ~Unsaved;}
+        
+        //! Sets if the attribute is notifier or not.
+        /** The function sets if the attribute is notifier or not.
+         @param state If true, the attribute will notify changes, otherwise it won't notify changes.
+         */
+        inline void setSilent(const bool state) noexcept {state ? m_behavior |= Silent : m_behavior &= ~Silent;};
+        
+        //! Adds a listener.
+        /** The adds a listener to the attribute.
+         @param listener The listener.
+         */
+        inline void addListener(sListener listener) noexcept {m_lists.insert(listener);}
+        
+        //! Removes a listener.
+        /** The removes a listener from the attribute.
+         @param listener The listener.
+         */
+        inline void removeListener(sListener listener) noexcept {m_lists.erase(listener);}
+        
+        //! Gets the listeners.
+        /** The removes the liteners from the attribute.
+         @return The listeners.
+         */
+        inline vector<sListener> getListeners() noexcept
+        {
+            vector<sListener> lists;
+            for(auto it = m_lists.begin(); it != m_lists.end();)
+            {
+                sListener l = (*it).lock();
+                if(l)
+                {
+                    lists.push_back(l); ++it;
+                }
+                else
+                {
+                    it = m_lists.erase(it);
+                }
+            }
+            return lists;
+        }
+        
     public:
         
         //! Constructor.
@@ -117,7 +183,7 @@ namespace Kiwi
         //! Destructor.
         /** Clear the attribute.
          */
-        virtual inline ~Attr() noexcept {};
+        virtual inline ~Attr() noexcept {m_lists.clear();};
         
         //! Retrieve the type index of the attribute.
         /** The function retrieves the type index of the attribute.
@@ -196,36 +262,6 @@ namespace Kiwi
          @return True if the attribute is frozen, false otherwise.
          */
         inline bool isFrozen() const noexcept {return m_frozen;}
-        
-        //! Set the whole behavior flags field of the attribute.
-        /** The function sets the whole behavior flags field of the attribute.
-         @param behavior	A combination of the flags which define the attribute's behaviors.
-         */
-        inline void setBehavior(const ulong behavior) noexcept {if(m_behavior != behavior) {m_behavior = behavior;}}
-        
-        //! Set if the attribute is visible or not.
-        /** The function sets if the attribute is visible or not.
-         @param state If true, the attribute will be invisible, otherwise it will be visible.
-         */
-        inline void setInvisible(const bool state) noexcept {state ? m_behavior |= Invisible : m_behavior &= ~Invisible;}
-        
-        //! Set if the attribute is disabled or not.
-        /** The function sets if the attribute is disabled or not.
-         @param state If true, the attribute will be disabled, otherwise it will be enabled.
-         */
-        inline void setDisabled(const bool state) noexcept {state ? m_behavior |= Disabled : m_behavior &= ~Disabled;}
-        
-        //! Set if the attribute is saved or not.
-        /** The function sets if the attribute is saved or not.
-         @param state If true, the attribute will be saved, otherwise it won't be saved.
-         */
-        inline void setUnsaved(const bool state) noexcept {state ? m_behavior |= Unsaved : m_behavior &= ~Unsaved;}
-        
-        //! Set if the attribute is notifier or not.
-        /** The function sets if the attribute is notifier or not.
-         @param state If true, the attribute will notify changes, otherwise it won't notify changes.
-         */
-        inline void setSilent(const bool state) noexcept {state ? m_behavior |= Silent : m_behavior &= ~Silent;};
     };
     
     // ================================================================================ //
@@ -345,28 +381,8 @@ namespace Kiwi
     class Attr::Manager : public inheritable_enable_shared_from_this<Manager>
     {
     private:
-        struct SpecListener
-        {
-            wListener       listener;
-            vector<sTag>    attrs;
-            
-            inline bool operator==(sListener list) const noexcept
-            {
-                sListener that = listener.lock();
-                return list && that && list == that;
-            }
-            
-            inline operator bool() const noexcept
-            {
-                sListener that = listener.lock();
-                return bool(that);
-            }
-        };
-        
         map<sTag, sAttr>                m_attrs;
         mutable mutex                   m_attrs_mutex;
-        set<SpecListener>               m_list;
-        mutex                           m_list_mutex;
         
         //! Retrieves an attribute.
         /** The function retrieves an attribute.
@@ -400,34 +416,6 @@ namespace Kiwi
             return shared_ptr<Typed<T>>();
         }
         
-        //! Retrieves the listeners of an attribute.
-        /** The function retrieves the listeners an attribute.
-         @param name the name of the attribute.
-         @return The listeners.
-         */
-        inline vector<sListener> getListeners(const sTag name) noexcept
-        {
-            vector<sListener> listerners;
-            lock_guard<mutex> guard(m_list_mutex);
-            auto it2 = m_list.begin();
-            while(it2 != m_list.end())
-            {
-                sListener listener = (*it2).listener.lock();
-                if(listener)
-                {
-                    if((*it2).attrs.empty() || find((*it2).attrs.begin(), (*it2).attrs.end(), name) != (*it2).attrs.end())
-                    {
-                        listerners.push_back(listener);
-                    }
-                    ++it2;
-                }
-                else
-                {
-                    it2 = m_list.erase(it2);
-                }
-            }
-            return listerners;
-        }
     public:
         
         //! Constructor.
@@ -440,14 +428,8 @@ namespace Kiwi
          */
         virtual inline ~Manager() noexcept
         {
-            {
-                lock_guard<mutex> guard(m_attrs_mutex);
-                m_attrs.clear();
-            }
-            {
-                lock_guard<mutex> guard(m_list_mutex);
-                m_list.clear();
-            }
+            lock_guard<mutex> guard(m_attrs_mutex);
+            m_attrs.clear();
         }
         
         //! Retrieve an attribute value.
@@ -493,12 +475,14 @@ namespace Kiwi
                 if(attr->getValue() != atom)
                 {
                     attr->setValue(atom);
-                    this->notify(attr);
-                }
-                vector<sListener> listeners(getListeners(name));
-                for(vector<sListener>::size_type i = 0; i < listeners.size(); i++)
-                {
-                    listeners[i]->attrChanged(shared_from_this(), attr);
+                    if(this->notify(attr))
+                    {
+                        vector<sListener> listeners(attr->getListeners());
+                        for(auto it : listeners)
+                        {
+                            it->attrChanged(shared_from_this(), attr);
+                        }
+                    }
                 }
             }
         }
@@ -516,12 +500,14 @@ namespace Kiwi
                 if(attr->get() != value)
                 {
                     attr->set(value);
-                    this->notify(attr);
-                }
-                vector<sListener> listeners(getListeners(name));
-                for(vector<sListener>::size_type i = 0; i < listeners.size(); i++)
-                {
-                    listeners[i]->attrChanged(shared_from_this(), attr);
+                    if(this->notify(attr))
+                    {
+                        vector<sListener> listeners(attr->getListeners());
+                        for(auto it : listeners)
+                        {
+                            it->attrChanged(shared_from_this(), attr);
+                        }
+                    }
                 }
             }
 		}

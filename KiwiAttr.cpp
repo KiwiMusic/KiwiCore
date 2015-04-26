@@ -44,30 +44,54 @@ namespace Kiwi
     
     void Attr::Manager::addListener(sListener listener, vector<sTag> const& names)
     {
-        lock_guard<mutex> guard(m_list_mutex);
-        auto it = m_list.begin();
-        while(it != m_list.end())
+        if(listener)
         {
-            if((*it))
+            if(names.empty())
             {
-                if((*it) == listener)
+                lock_guard<mutex> guard(m_attrs_mutex);
+                for(auto it : m_attrs)
                 {
-                    //(*it).attrs = names;
-                    return;
+                    it.second->addListener(listener);
                 }
-                ++it;
             }
             else
             {
-                it = m_list.erase(it);
+                for(auto name : names)
+                {
+                    sAttr attr = getAttr(name);
+                    if(attr)
+                    {
+                        attr->addListener(listener);
+                    }
+                }
             }
         }
-        m_list.insert(SpecListener{listener, names});
     }
     
     void Attr::Manager::removeListener(sListener listener, vector<sTag> const& names)
     {
-        
+        if(listener)
+        {
+            if(names.empty())
+            {
+                lock_guard<mutex> guard(m_attrs_mutex);
+                for(auto it : m_attrs)
+                {
+                    it.second->removeListener(listener);
+                }
+            }
+            else
+            {
+                for(auto name : names)
+                {
+                    sAttr attr = getAttr(name);
+                    if(attr)
+                    {
+                        attr->removeListener(listener);
+                    }
+                }
+            }
+        }
     }
 }
 
