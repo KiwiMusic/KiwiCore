@@ -137,6 +137,11 @@ namespace Kiwi
         return max(lower, min(n, upper));
     }
     
+    template <typename Type, typename numericType> Type lerp(const Type& startval, const Type& endval, const numericType& factor)
+    {
+        return (startval + factor * (endval - startval));
+    }
+    
     template <typename Type> Type wrap(const Type& n, const Type& lower, const Type& upper)
     {
         const Type increment = upper - lower;
