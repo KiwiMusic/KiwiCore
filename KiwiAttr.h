@@ -176,8 +176,19 @@ namespace Kiwi
          @param order			The attribute order.
          @param behavior		A combination of the flags which define the attribute's behavior.
          */
-        inline Attr(sTag name, string const& label, string const& category, const ulong behavior, const ulong order) noexcept :
+        inline Attr(const sTag name, string const& label, string const& category, const ulong behavior, const ulong order) noexcept :
         m_name(name), m_label(label), m_category(category), m_order(order), m_behavior(behavior), m_frozen(false) {}
+        
+        //! Constructor.
+        /** Allocate and initialize the member values.
+         @param name			The name of the attribute (usually only letters and undescore characters).
+         @param label			A short description of the attribute in a human readable style.
+         @param category		A named category that the attribute fits into.
+         @param order			The attribute order.
+         @param behavior		A combination of the flags which define the attribute's behavior.
+         */
+        inline Attr(sTag&& name, string&& label, string&& category, const ulong behavior, const ulong order) noexcept :
+        m_name(forward<sTag>(name)), m_label(forward<string>(label)), m_category(forward<string>(category)), m_order(order), m_behavior(behavior), m_frozen(false) {}
         
         
         //! Destructor.
@@ -280,8 +291,14 @@ namespace Kiwi
         //! Constructor.
         /** You should never have to use the function.
          */
-        inline Typed(sTag name, string const& label, string const& category, T const& value, const ulong behavior, const ulong order)  noexcept :
+        inline Typed(const sTag name, string const& label, string const& category, T const& value, const ulong behavior, const ulong order)  noexcept :
         Attr(name, label, category, behavior, order), m_default(value), m_value(value) {}
+        
+        //! Constructor.
+        /** You should never have to use the function.
+         */
+        inline Typed(sTag&& name, string&& label, string&& category, T&& value, const ulong behavior, const ulong order)  noexcept :
+        Attr(forward<sTag>(name), forward<string>(label), forward<string>(category), behavior, order), m_default(forward<T>(value)) {resetDefault();}
         
         //! Destructor.
         /** You should never have to use the function.
@@ -326,6 +343,13 @@ namespace Kiwi
          @see get
          */
         inline void set(T const& value){m_value = value;}
+        
+        //! Sets the values.
+        /** The function sets the current value.
+         @param elements The vector of elements.
+         @see get
+         */
+        inline void set(T&& value){m_value = forward<T>(value);}
         
         //! Set the attribute value with an atom.
         /** The function sets the attribute value with an atom.
@@ -562,13 +586,35 @@ namespace Kiwi
          @param order			The attribute order.
          @param behavior		A combination of the flags which define the attribute's behavior.
          */
-        template<class T> inline void createAttr(sTag name, string const& label,
+        template<class T> inline void createAttr(const sTag name, string const& label,
                                                  string const& category,
                                                  T const& value,
                                                  const ulong behavior = 0ul,
                                                  const ulong order = 0ul)
         {
             sAttr attr = make_shared<Typed<T>>(name, label, category, value, behavior, order);
+            if(attr)
+            {
+                lock_guard<mutex> guard(m_attrs_mutex);
+                m_attrs[name] = attr;
+            }
+        }
+        
+        //! Constructor.
+        /** Allocate and initialize the member values.
+         @param name			The name of the attribute.
+         @param label			A short description of the attribute in a human readable style.
+         @param category		A named category that the attribute fits into.
+         @param order			The attribute order.
+         @param behavior		A combination of the flags which define the attribute's behavior.
+         */
+        template<class T> inline void createAttr(const sTag name, string&& label,
+                                                 string&& category,
+                                                 T&& value,
+                                                 const ulong behavior = 0ul,
+                                                 const ulong order = 0ul)
+        {
+            sAttr attr = make_shared<Typed<T>>(sTag(name), forward<string>(label), forward<string>(category), forward<T>(value), behavior, order);
             if(attr)
             {
                 lock_guard<mutex> guard(m_attrs_mutex);
