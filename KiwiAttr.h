@@ -133,19 +133,19 @@ namespace Kiwi
         inline void setSilent(const bool state) noexcept {state ? m_behavior |= Silent : m_behavior &= ~Silent;};
         
         //! Adds a listener.
-        /** The adds a listener to the attribute.
+        /** The functions adds a listener to the attribute.
          @param listener The listener.
          */
         inline void addListener(sListener listener) noexcept {m_lists.insert(listener);}
         
         //! Removes a listener.
-        /** The removes a listener from the attribute.
+        /** The functions removes a listener from the attribute.
          @param listener The listener.
          */
         inline void removeListener(sListener listener) noexcept {m_lists.erase(listener);}
         
         //! Gets the listeners.
-        /** The removes the liteners from the attribute.
+        /** The functions gets the liteners from the attribute and removes the deprecated listeners.
          @return The listeners.
          */
         inline vector<sListener> getListeners() noexcept
