@@ -562,8 +562,8 @@ namespace Kiwi
          */
         void addListener(sListener listener, vector<sTag> const& names = vector<sTag>());
         
-        //! Remove an instance listener from the binding list of the attribute.
-        /** The function removes an instance listener from the binding list of the attribute. The attribute listener can specifies the names of the attributes, an empty vector means it will be detached from all the attributes.
+        //! Remove a listener from the binding list of the attribute.
+        /** The function removes a listener from the binding list of the attribute. The attribute listener can specifies the names of the attributes, an empty vector means it will be detached from all the attributes.
          @param listener  The listener.
          @param names     The names of the attibutes.
          */
