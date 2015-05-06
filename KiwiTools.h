@@ -95,6 +95,8 @@ namespace Kiwi
     {
         const string m_message;
     public:
+        inline Error() noexcept : m_message() {};
+        
         Error(string const& message) noexcept :
         m_message(message)
         {

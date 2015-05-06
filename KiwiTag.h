@@ -138,6 +138,7 @@ namespace Kiwi
         static const sTag dsp;
         
         static const sTag focus;
+        static const sTag font;
         static const sTag Font;
         static const sTag Font_Face;
         static const sTag Font_Justification;
@@ -193,6 +194,7 @@ namespace Kiwi
         static const sTag size;
         
         static const sTag text;
+        static const sTag textcolor;
         static const sTag to;
         
         static const sTag unlocked_bgcolor;

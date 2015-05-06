@@ -49,6 +49,7 @@ namespace Kiwi
     
     const sTag Tags::from                  = Tag::create("from");
     const sTag Tags::focus                 = Tag::create("focus");
+    const sTag Tags::font                  = Tag::create("font");
     const sTag Tags::Font                  = Tag::create("Font");
     const sTag Tags::Font_Face             = Tag::create("Font Face");
     const sTag Tags::Font_Justification    = Tag::create("Font Justification");
@@ -102,6 +103,7 @@ namespace Kiwi
     const sTag Tags::size                  = Tag::create("size");
     
     const sTag Tags::text                  = Tag::create("text");
+    const sTag Tags::textcolor             = Tag::create("textcolor");
     const sTag Tags::to                    = Tag::create("to");
     
     const sTag Tags::unlocked_bgcolor      = Tag::create("unlocked_bgcolor");
