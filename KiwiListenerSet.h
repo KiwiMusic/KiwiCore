@@ -96,14 +96,20 @@ namespace Kiwi
             return false;
         }
         
-        //! Returns the number of registered listeners.
-        /** The function return the number of registered listeners.
-         @return The number of registered listeners.
+        //! Returns the number of registered and valid listeners.
+        /** The function return the number of registered and valid listeners.
+         @return The number of listeners.
          */
         ulong size() const noexcept
         {
+            ulong count = 0;
             lock_guard<mutex> guard(m_listeners_mutex);
-            return m_listeners.size();
+            for(auto listener : m_listeners)
+            {
+                if(listener.lock())
+                    count++;
+            }
+            return count;
         }
         
         //! Returns true if any listeners are registered.
@@ -135,21 +141,58 @@ namespace Kiwi
             return m_listeners.find(listener) != m_listeners.end();
         }
         
+        //! Retrieve the listeners.
+        /** The functions retrieves the listeners, removing all invalid listeners.
+         @return The listeners.
+         */
+        inline vector<sListener> getListeners() noexcept
+        {
+            lock_guard<mutex> guard(m_listeners_mutex);
+            vector<sListener> lists;
+            for(auto it = m_listeners.begin(); it != m_listeners.end();)
+            {
+                sListener l = (*it).lock();
+                if(l)
+                {
+                    lists.push_back(l); ++it;
+                }
+                else
+                {
+                    it = m_listeners.erase(it);
+                }
+            }
+            return lists;
+        }
+        
+        //! Retrieve the listeners.
+        /** The functions retrieves the listeners
+         @return The listeners.
+         */
+        inline vector<sListener> getListeners() const noexcept
+        {
+            lock_guard<mutex> guard(m_listeners_mutex);
+            vector<sListener> listeners;
+            for(auto elem : m_listeners)
+            {
+                sListener l = elem.lock();
+                if(l)
+                {
+                    listeners.push_back(l);
+                }
+            }
+            return listeners;
+        }
+        
         //! Calls a given method for each listener of the set.
         /** The function calls a given method for each listener of the set.
          @param fun The listener's method to call.
          @param arguments optional arguments.
          */
-        template<class T, class ...Args> void call(T fun, Args&& ...arguments) const
+        template<class T, class ...Args> void call(T fun, Args&& ...arguments)
         {
-            lock_guard<mutex> guard(m_listeners_mutex);
-            for (auto l : m_listeners)
+            for (auto listener : getListeners())
             {
-                sListener listener = l.lock();
-                if(listener)
-                {
-                    (listener.get()->*(fun))(forward<Args>(arguments)...);
-                }
+                (listener.get()->*(fun))(forward<Args>(arguments)...);
             }
         }
         
@@ -158,22 +201,11 @@ namespace Kiwi
          @param fun The listener's method to call.
          @param arguments optional arguments.
          */
-        template<class T, class ...Args> void call(T fun, Args&& ...arguments)
+        template<class T, class ...Args> void call(T fun, Args&& ...arguments) const
         {
-            lock_guard<mutex> guard(m_listeners_mutex);
-            auto it = m_listeners.begin();
-            while(it != m_listeners.end())
+            for (auto listener : getListeners())
             {
-                sListener listener = (*it).lock();
-                if(listener)
-                {
-                    (listener.get()->*(fun))(forward<Args>(arguments)...);
-                    ++it;
-                }
-                else
-                {
-                    it = m_listeners.erase(it);
-                }
+                (listener.get()->*(fun))(forward<Args>(arguments)...);
             }
         }
     };
