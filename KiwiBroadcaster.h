@@ -21,19 +21,19 @@
  ==============================================================================
 */
 
-#ifndef __DEF_KIWI_BROADCADTER__
-#define __DEF_KIWI_BROADCADTER__
+#ifndef __DEF_KIWI_BROADCASTER__
+#define __DEF_KIWI_BROADCASTER__
 
 #include "KiwiAtom.h"
 
 namespace Kiwi
 {
     // ================================================================================ //
-    //                                      BROADCADTER                                 //
+    //                                  BROADCASTER                                     //
     // ================================================================================ //
     
-    //! The broadcaster is a class that manager of list if listeners.
-    /** The broadcaster manages of list if listeners and allows to retrieves the listeners easily and threadsafely.
+    //! The broadcaster is a class that manages a list of listeners.
+    /** The broadcaster manages a list of listeners and allows to retrieves them easily and threadsafely.
      */
     template<class T> class Broadcaster
     {
