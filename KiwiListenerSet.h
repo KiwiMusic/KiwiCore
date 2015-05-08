@@ -40,8 +40,6 @@ namespace Kiwi
     private:
         typedef shared_ptr<ListenerClass>		sListener;
         typedef weak_ptr<ListenerClass>			wListener;
-        typedef shared_ptr<const ListenerClass>	scListener;
-        typedef weak_ptr<const ListenerClass>	wcListener;
         
         set<wListener,
         owner_less<wListener>>  m_listeners;
@@ -69,7 +67,7 @@ namespace Kiwi
             if(listener)
             {
                 lock_guard<mutex> guard(m_listeners_mutex);
-                if(m_listeners.insert(listener))
+                if(m_listeners.insert(listener).second)
                 {
                     return true;
                 }
@@ -148,20 +146,21 @@ namespace Kiwi
         inline vector<sListener> getListeners() noexcept
         {
             lock_guard<mutex> guard(m_listeners_mutex);
-            vector<sListener> lists;
+            vector<sListener> listeners;
             for(auto it = m_listeners.begin(); it != m_listeners.end();)
             {
                 sListener l = (*it).lock();
                 if(l)
                 {
-                    lists.push_back(l); ++it;
+                    listeners.push_back(l);
+                    ++it;
                 }
                 else
                 {
                     it = m_listeners.erase(it);
                 }
             }
-            return lists;
+            return listeners;
         }
         
         //! Retrieve the listeners.
@@ -190,7 +189,7 @@ namespace Kiwi
          */
         template<class T, class ...Args> void call(T fun, Args&& ...arguments)
         {
-            for (auto listener : getListeners())
+            for(auto listener : getListeners())
             {
                 (listener.get()->*(fun))(forward<Args>(arguments)...);
             }
@@ -203,7 +202,7 @@ namespace Kiwi
          */
         template<class T, class ...Args> void call(T fun, Args&& ...arguments) const
         {
-            for (auto listener : getListeners())
+            for(auto listener : getListeners())
             {
                 (listener.get()->*(fun))(forward<Args>(arguments)...);
             }
