@@ -191,7 +191,7 @@ namespace Kiwi
         {
             for(auto listener : getListeners())
             {
-                (listener.get()->*(fun))(forward<Args>(arguments)...);
+                (listener.get()->*(fun))(arguments...);
             }
         }
         
@@ -204,7 +204,7 @@ namespace Kiwi
         {
             for(auto listener : getListeners())
             {
-                (listener.get()->*(fun))(forward<Args>(arguments)...);
+                (listener.get()->*(fun))(arguments...);
             }
         }
     };
