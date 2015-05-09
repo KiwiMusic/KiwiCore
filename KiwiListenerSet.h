@@ -94,24 +94,31 @@ namespace Kiwi
             return false;
         }
         
-        //! Returns the number of registered and valid listeners.
-        /** The function return the number of registered and valid listeners.
+        //! Remove all invalid listeners from the set.
+        /** The function removes all invalid listeners from the set.
+         */
+        void clean() noexcept
+        {
+            lock_guard<mutex> guard(m_listeners_mutex);
+            for(auto it = m_listeners.begin(); it != m_listeners.end();)
+            {
+                if((*it).lock()) ++it;
+                else it = m_listeners.erase(it);
+            }
+        }
+        
+        //! Returns the number of listeners (including invalid ones).
+        /** The function return the number of listeners (including invalid ones).
          @return The number of listeners.
          */
         ulong size() const noexcept
         {
-            ulong count = 0;
             lock_guard<mutex> guard(m_listeners_mutex);
-            for(auto listener : m_listeners)
-            {
-                if(listener.lock())
-                    count++;
-            }
-            return count;
+            return m_listeners.size();
         }
         
-        //! Returns true if any listeners are registered.
-        /** The function returns true if any listeners are registered.
+        //! Returns true if any listeners are registered (including invalid ones).
+        /** The function returns true if any listeners are registered (including invalid ones).
          @return True if any listeners are registered.
          */
         bool empty() const noexcept
@@ -123,7 +130,7 @@ namespace Kiwi
         //! Remove all listener from the set.
         /** The function removes all listener from the set.
          */
-        void clear()
+        void clear() noexcept
         {
             lock_guard<mutex> guard(m_listeners_mutex);
             m_listeners.clear();
