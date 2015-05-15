@@ -48,13 +48,10 @@ namespace Kiwi
     public:
         
         //! Creates an empty listener set.
-        ListenerSet() noexcept {}
+        inline ListenerSet() noexcept {}
         
         //! Destructor.
-        ~ListenerSet()
-        {
-            m_listeners.clear();
-        }
+        inline ~ListenerSet() noexcept {m_listeners.clear();}
         
         //! Add a listener to the set.
         /** The function adds a new listener to the set.
@@ -62,7 +59,7 @@ namespace Kiwi
          @param listener The new listener to be added.
          @return True if success, false otherwise.
          */
-        bool add(sListener listener)
+        bool add(sListener listener) noexcept
         {
             if(listener)
             {
@@ -81,7 +78,7 @@ namespace Kiwi
          @param listener The listener to be removed.
          @return True if success, false otherwise.
          */
-        bool remove(sListener listener)
+        bool remove(sListener listener) noexcept
         {
             if(listener)
             {
