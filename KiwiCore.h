@@ -29,7 +29,6 @@
 #include "KiwiBeacon.h"
 #include "KiwiClock.h"
 #include "KiwiAttr.h"
-#include "KiwiBroadcaster.h"
 #include "KiwiListenerSet.h"
 
 #endif
