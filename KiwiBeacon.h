@@ -52,17 +52,17 @@ namespace Kiwi
     public:
         
         //! The constructor.
-        /** You should never use this method except.
+        /** You should never use this method.
          */
         inline Beacon(string const& name) noexcept : m_name(name) {}
         
         //! The constructor.
-        /** You should never use this method except.
+        /** You should never use this method.
          */
         inline Beacon(string&& name) noexcept : m_name(name){}
         
         //! The destructor.
-        /** You should never use this method except.
+        /** You should never use this method.
          */
         inline ~Beacon() noexcept
         {

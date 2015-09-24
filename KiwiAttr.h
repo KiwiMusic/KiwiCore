@@ -25,6 +25,7 @@
 #define __DEF_KIWI_ATTR__
 
 #include "KiwiAtom.h"
+#include "KiwiListenerSet.h"
 
 namespace Kiwi
 {
@@ -77,8 +78,8 @@ namespace Kiwi
         const ulong		m_order;			///< The order of the attribute.
         ulong           m_behavior;			///< The behavior of the attribute.
         bool            m_frozen;           ///< The frozen state of the attribute.
-        set<wListener,
-        owner_less<wListener>> m_lists;     ///< The listener.
+        ListenerSet<Listener>
+                        m_listeners;        ///< The listeners.
         
         //! Sets the attribute value with an atom.
         /** The function sets the attribute value with an atom.
@@ -136,35 +137,19 @@ namespace Kiwi
         /** The functions adds a listener to the attribute.
          @param listener The listener.
          */
-        inline void addListener(sListener listener) noexcept {m_lists.insert(listener);}
+        inline void addListener(sListener listener) noexcept {m_listeners.add(listener);}
         
         //! Removes a listener.
         /** The functions removes a listener from the attribute.
          @param listener The listener.
          */
-        inline void removeListener(sListener listener) noexcept {m_lists.erase(listener);}
+        inline void removeListener(sListener listener) noexcept {m_listeners.remove(listener);}
         
         //! Gets the listeners.
         /** The functions gets the liteners from the attribute and removes the deprecated listeners.
          @return The listeners.
          */
-        inline vector<sListener> getListeners() noexcept
-        {
-            vector<sListener> lists;
-            for(auto it = m_lists.begin(); it != m_lists.end();)
-            {
-                sListener l = (*it).lock();
-                if(l)
-                {
-                    lists.push_back(l); ++it;
-                }
-                else
-                {
-                    it = m_lists.erase(it);
-                }
-            }
-            return lists;
-        }
+        inline vector<sListener> getListeners() noexcept { return m_listeners.getListeners(); }
         
     public:
         
@@ -194,7 +179,7 @@ namespace Kiwi
         //! Destructor.
         /** Clear the attribute.
          */
-        virtual inline ~Attr() noexcept {m_lists.clear();};
+        virtual inline ~Attr() noexcept {m_listeners.clear();};
         
         //! Retrieve the type index of the attribute.
         /** The function retrieves the type index of the attribute.
@@ -279,7 +264,8 @@ namespace Kiwi
     //                                  ATTRIBUTE TYPED                                 //
     // ================================================================================ //
     
-    template <class T> class Attr::Typed : public Attr
+    template <class T>
+    class Attr::Typed : public Attr
     {
     private:
         friend class Attr::Manager;
@@ -291,14 +277,38 @@ namespace Kiwi
         //! Constructor.
         /** You should never have to use the function.
          */
-        inline Typed(const sTag name, string const& label, string const& category, T const& value, const ulong behavior, const ulong order)  noexcept :
-        Attr(name, label, category, behavior, order), m_default(value), m_value(value) {}
+        inline Typed(const sTag name,
+                     string const& label,
+                     string const& category,
+                     T const& value,
+                     const ulong behavior,
+                     const ulong order)  noexcept
+        
+            : Attr(name, label, category, behavior, order),
+              m_default(value),
+              m_value(value)
+        {
+            ;
+        }
         
         //! Constructor.
         /** You should never have to use the function.
          */
-        inline Typed(sTag&& name, string&& label, string&& category, T&& value, const ulong behavior, const ulong order)  noexcept :
-        Attr(forward<sTag>(name), forward<string>(label), forward<string>(category), behavior, order), m_default(forward<T>(value)) {resetDefault();}
+        inline Typed(sTag&& name,
+                     string&& label,
+                     string&& category,
+                     T&& value,
+                     const ulong behavior,
+                     const ulong order)  noexcept
+        
+            : Attr(forward<sTag>(name),
+                   forward<string>(label),
+                   forward<string>(category),
+                   behavior, order),
+              m_default(forward<T>(value))
+        {
+            resetDefault();
+        }
         
         //! Destructor.
         /** You should never have to use the function.

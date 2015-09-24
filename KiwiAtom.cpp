@@ -185,7 +185,7 @@ namespace Kiwi
         while(pos < textlen)
         {
             string word;
-            word.reserve(20); // does it more efficient ?
+            word.reserve(20); // is it more efficient ?
             bool isTag      = false;
             bool isNumber   = false;
             bool isFloat    = false;

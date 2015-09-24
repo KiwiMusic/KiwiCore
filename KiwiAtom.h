@@ -34,7 +34,7 @@ namespace Kiwi
     
     //! The atom class
     /**
-     The atom is a base class that you should inherite from if you want to able to pass you class in an atom vector or in a dico. The default atoms are the long, the double, the tag, the dico and the object.
+     The atom is a base class that you should inherite from if you want to be able to pass your class in an atom vector or in a dico. The default atoms are the long, the double, the tag, the dico and the object.
      */
     class Atom
     {
@@ -149,7 +149,7 @@ namespace Kiwi
             inline Dico getDico() const noexcept override {return val;}
         };
         
-        Quark* m_quark;
+        Quark* m_quark; // use an unique_ptr<> instead ?
         
     public:
         
@@ -854,7 +854,8 @@ namespace Kiwi
          @param     text	The string to parse.
          @return    The vector of atoms.
          @remark    For example, the string : "foo \"bar 42\" 1 2 3.14" will parsed into a vector of 5 atoms.
-         The atom types will be determined automatically as 2 #Atom::Type::TAG atoms, 2 #Atom::Type::LONG atoms, and 1 #Atom::Type::DOUBLE atom.
+         The atom types will be determined automatically as 2 #Atom::Type::TAG atoms, 2 #Atom::Type::LONG atoms,
+         and 1 #Atom::Type::DOUBLE atom.
          */
         static Vector parse(string const& text);
     };

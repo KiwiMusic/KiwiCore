@@ -134,17 +134,17 @@ namespace Kiwi
         }
     };
     
-    template <typename Type> Type clip(const Type& n, const Type& lower, const Type& upper)
+    template <class Type> constexpr Type clip(const Type& n, const Type& lower, const Type& upper)
     {
         return max(lower, min(n, upper));
     }
     
-    template <typename Type, typename numericType> Type lerp(const Type& startval, const Type& endval, const numericType& factor)
+    template <class Type, typename numericType> constexpr Type lerp(const Type& startval, const Type& endval, const numericType& factor)
     {
         return (startval + factor * (endval - startval));
     }
     
-    template <typename Type> Type wrap(const Type& n, const Type& lower, const Type& upper)
+    template <class Type> Type wrap(const Type& n, const Type& lower, const Type& upper)
     {
         const Type increment = upper - lower;
         Type new_value = n;
